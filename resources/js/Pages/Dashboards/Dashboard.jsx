@@ -1,14 +1,14 @@
 import React from 'react';
-import AdminLTELayout from '../Layouts/AdminLayout';
 import { Head } from '@inertiajs/react';
 import Breadcrumb from '@/Components/Breadcrumb';
+import AdminLayout from '@/Layouts/AdminLayout';
 
 
 const Dashboard = () => {
     const headWeb = 'Dashboard'
     const linksBreadcrumb = [{ title: 'Home', url: '/' }, { title: headWeb, url: '' }];
     return (
-        <AdminLTELayout breadcrumb={<Breadcrumb header={headWeb} links={linksBreadcrumb} />}>
+        <AdminLayout breadcrumb={<Breadcrumb header={headWeb} links={linksBreadcrumb} />}>
             <Head title={headWeb} />
             <section className="content">
                 <div className="row">
@@ -74,7 +74,7 @@ const Dashboard = () => {
                     </div>
                 </div>
             </section>
-        </AdminLTELayout>
+        </AdminLayout>
     );
 };
 

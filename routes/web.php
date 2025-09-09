@@ -18,7 +18,7 @@ use Laravel\Fortify\Http\Controllers\TwoFactorQrCodeController;
 use Laravel\Fortify\Http\Controllers\TwoFactorSecretKeyController;
 
 Route::get('/', function () {
-    return Inertia::render('Welcome', [
+    return Inertia::render('HomePages/Home', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
         'laravelVersion' => Application::VERSION,
@@ -26,15 +26,13 @@ Route::get('/', function () {
     ]);
 });
 
-// Route::middleware(['auth', 'verified'])->group(function () {
-//     Route::get('/dashboard', function () {
-//         return Inertia::render('Dashboard');
-//     })->name('dashboard');
-// });
+Route::inertia('/checktext', 'CheckTexts/CheckText');
+Route::inertia('/quiz', 'Quizzes/Quiz');
+Route::inertia('/home', 'HomePages/Home');
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', function () {
-        return Inertia::render('Dashboard');
+        return Inertia::render('Dashboards/Dashboard');
     })->name('dashboard');
 });
 
@@ -51,32 +49,6 @@ Route::get('/two-factor-challenge', [AuthenticatedSessionController::class, 'cre
 Route::middleware('auth')->group(function () {
     Route::prefix('user')->group(function () {
         Route::post('/two-factor-authentication', [TwoFactorAuthenticationController::class, 'store'])
-            ->name('two-factor.enable');
-
-        Route::post('/confirmed-two-factor-authentication', [ConfirmedTwoFactorAuthenticationController::class, 'store'])
-            ->name('two-factor.confirm');
-
-        Route::delete('/two-factor-authentication', [TwoFactorAuthenticationController::class, 'destroy'])
-            ->name('two-factor.disable');
-
-        Route::get('/two-factor-qr-code', [TwoFactorQrCodeController::class, 'show'])
-            ->name('two-factor.qr-code')
-            ->middleware('password.confirm');
-
-        Route::get('/two-factor-secret-key', [TwoFactorSecretKeyController::class, 'show'])
-            ->name('two-factor.secret-key')
-            ->middleware('password.confirm');
-
-        Route::get('/two-factor-recovery-codes', [RecoveryCodeController::class, 'index'])
-            ->name('two-factor.recovery-codes');
-
-
-        Route::post('/two-factor-recovery-codes', [RecoveryCodeController::class, 'store'])
-            ->name('two-factor.regenerate-recovery-codes')
-            ->middleware('password.confirm');
-    });
-
-    Route::post('/two-factor-authentication', [TwoFactorAuthenticationController::class, 'store'])
         ->name('two-factor.enable');
 
     Route::post('/confirmed-two-factor-authentication', [ConfirmedTwoFactorAuthenticationController::class, 'store'])
@@ -100,9 +72,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/two-factor-recovery-codes', [RecoveryCodeController::class, 'store'])
         ->name('two-factor.regenerate-recovery-codes')
         ->middleware('password.confirm');
-});
+    });
 
-Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
