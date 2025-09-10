@@ -29,8 +29,10 @@ Route::get('/', function () {
 Route::inertia('/checktext', 'CheckTexts/CheckText');
 Route::inertia('/quiz', 'Quizzes/Quiz');
 Route::inertia('/home', 'HomePages/Home');
+Route::inertia('/library', 'Libraries/Library');
+Route::inertia('/subscribe', 'Subscribes/SubscribePage');
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'check.user.role'])->group(function () {
     Route::get('/dashboard', function () {
         return Inertia::render('Dashboards/Dashboard');
     })->name('dashboard');

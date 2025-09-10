@@ -21,6 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
             'ensureFrontendRequestsAreStateful' => \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
             'jwt' => \App\Http\Middleware\jwtMiddleware::class,
+            'check.user.role' => \App\Http\Middleware\CheckUserRole::class,
         ]);
         
         $middleware->web(append: [
