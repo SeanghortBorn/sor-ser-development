@@ -29,7 +29,7 @@ export default function HeaderNavbar() {
 
     return (
         <header className="top-0 left-0 w-full bg-white shadow-sm z-50 sticky">
-            <nav className="flex items-center justify-between px-24 py-3">
+            <nav className="flex items-center justify-between px-28 py-3">
                 <div className="flex items-center gap-4">
                     <Link href="/">
                         <span className="flex items-center gap-2">
@@ -78,7 +78,7 @@ export default function HeaderNavbar() {
                         href="/checktext"
                         className="text-blue-900 font-medium px-3 hover:text-secondary"
                     >
-                        Check Text
+                        Grammar Check
                     </Link>
                     <Link
                         href="/quiz"
@@ -169,7 +169,7 @@ export default function HeaderNavbar() {
 
                                 {/* Dropdown Menu */}
                                 {dropdownOpen && (
-                                    <div className="absolute right-0 mt-2 bg-white border border-gray-100 rounded-xl shadow-lg z-50">
+                                    <div className="absolute right-0 mt-2 bg-white border w-48 border-gray-100 rounded-xl shadow-lg z-50">
                                         {/* User Info */}
                                         <div className="px-4 py-3 border-b border-gray-200">
                                             <div className="flex flex-col">
@@ -192,7 +192,7 @@ export default function HeaderNavbar() {
                                                 className="flex items-center px-4 py-2 text-sm text-blue-900 hover:bg-gray-100 rounded-lg transition"
                                             >
                                                 <i className="fas fa-user-circle w-4 mr-3 text-gray-500 "></i>
-                                                Edit Profile
+                                                My Account
                                             </Link>
                                             <hr className="my-1 border-gray-200" />
                                             <Link
