@@ -75,7 +75,7 @@ export default function HeaderNavbar() {
                         </>
                     )}
                     <Link
-                        href="/checktext"
+                        href="/grammar-check"
                         className="text-blue-900 font-medium px-3 hover:text-secondary"
                     >
                         Grammar Check

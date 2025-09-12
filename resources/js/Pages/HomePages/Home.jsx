@@ -21,7 +21,7 @@ export default function Home() {
                     </h2>
 
                     <div className="flex gap-6">
-                        <Link href="/checktext">
+                        <Link href="/grammar-check">
                             <button className="relative z-10 font-sans text-white font-semibold border-2 border-white rounded-full px-8 py-2 text-[18px] transition duration-300 ease-in-out hover:bg-white group">
                                 <span className="transition duration-300 group-hover:text-gray-700">
                                     Grammar Check
@@ -64,7 +64,7 @@ export default function Home() {
                             Sor Ser tools that help you efficiently improve your
                             writing.
                         </p>
-                        <Link href="/checktext">
+                        <Link href="/grammar-check">
                             <button className="bg-blue-600 font-sans text-white font-semibold rounded-xl px-9 py-3 text-[18px] transition duration-300 hover:bg-blue-700">
                                 Get Started
                             </button>

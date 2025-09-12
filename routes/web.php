@@ -26,10 +26,9 @@ Route::get('/', function () {
     ]);
 });
 
-Route::inertia('/checktext', 'CheckTexts/CheckText');
+Route::inertia('/grammar-check', 'GrammarChecks/GrammarCheck');
 Route::inertia('/quiz', 'Quizzes/Quiz');
 Route::inertia('/home', 'HomePages/Home');
-Route::inertia('/library', 'Libraries/Library');
 Route::inertia('/subscribe', 'Subscribes/SubscribePage');
 
 Route::middleware(['auth', 'check.user.role'])->group(function () {
@@ -75,6 +74,8 @@ Route::middleware('auth')->group(function () {
         ->name('two-factor.regenerate-recovery-codes')
         ->middleware('password.confirm');
     });
+
+    Route::inertia('/library', 'Libraries/Library');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
