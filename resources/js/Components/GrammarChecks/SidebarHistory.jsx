@@ -18,7 +18,7 @@ const previousDocuments = [
 
 export default function SidebarHistory() {
     return (
-        <div className="w-80 h-[100vh] bg-white border-r flex flex-col p-3">
+        <div className="w-68 h-[100vh] bg-white border-r flex flex-col p-3">
             {/* Top bar */}
             <div className="flex items-center justify-between mb-3">
                 <button className="text-2xl text-gray-500 hover:text-gray-700">

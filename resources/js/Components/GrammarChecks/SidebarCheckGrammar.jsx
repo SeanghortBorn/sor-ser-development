@@ -23,7 +23,7 @@ export default function SidebarCheckGrammar() {
     };
 
     return (
-        <div className="p-8 mt-4 w-4/12 mb-4 rounded-xl border bg-white h-[85vh] flex flex-col mr-3">
+        <div className="p-8 mt-4 w-86 mb-4 rounded-xl border bg-white h-[85vh] flex flex-col mr-3">
             {/* Header Message */}
             <div className="text-gray-700 text-lg font-medium mb-3">
                 Enter at least 25 words to see score.
