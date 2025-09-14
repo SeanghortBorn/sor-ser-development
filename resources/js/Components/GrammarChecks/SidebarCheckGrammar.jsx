@@ -4,26 +4,57 @@ import { Check, Trash } from "lucide-react";
 export default function SidebarCheckGrammar() {
     const [suggestions, setSuggestions] = useState([
         { original: "heello", suggestion: "Hello,", rest: "my name is John" },
-        { original: "we want", suggestion: "wanted to", rest: "buy some fruits" },
-        { original: "I goed", suggestion: "went", rest: "to the market yesterday" },
-        { original: "She dont", suggestion: "doesn't", rest: "like spicy food" },
-        { original: "They was", suggestion: "were", rest: "playing football in the park" },
-        { original: "its raining", suggestion: "it's raining", rest: "heavily today" },
+        {
+            original: "we want",
+            suggestion: "wanted to",
+            rest: "buy some fruits",
+        },
+        {
+            original: "I goed",
+            suggestion: "went",
+            rest: "to the market yesterday",
+        },
+        {
+            original: "She dont",
+            suggestion: "doesn't",
+            rest: "like spicy food",
+        },
+        {
+            original: "They was",
+            suggestion: "were",
+            rest: "playing football in the park",
+        },
+        {
+            original: "its raining",
+            suggestion: "it's raining",
+            rest: "heavily today",
+        },
         { original: "I has", suggestion: "have", rest: "a new phone now" },
-        { original: "writting", suggestion: "writing", rest: "an essay for school" },
-        { original: "he runned", suggestion: "ran", rest: "fast to catch the bus" },
+        {
+            original: "writting",
+            suggestion: "writing",
+            rest: "an essay for school",
+        },
+        {
+            original: "he runned",
+            suggestion: "ran",
+            rest: "fast to catch the bus",
+        },
     ]);
 
     // Swap clicked card to the top
     const handleCardClick = (idx) => {
         if (idx === 0) return; // Do nothing if the first card is clicked
         const newSuggestions = [...suggestions];
-        [newSuggestions[0], newSuggestions[idx]] = [newSuggestions[idx], newSuggestions[0]];
+        [newSuggestions[0], newSuggestions[idx]] = [
+            newSuggestions[idx],
+            newSuggestions[0],
+        ];
         setSuggestions(newSuggestions);
     };
 
     return (
-        <div className="p-8 mt-4 w-86 mb-4 rounded-xl border bg-white h-[85vh] flex flex-col mr-3">
+        <div className="p-6 mt-16 w-86 mb-4 rounded-xl border bg-white h-[85vh] flex flex-col mr-3">
             {/* Header Message */}
             <div className="text-gray-700 text-lg font-medium mb-3">
                 Enter at least 25 words to see score.
@@ -76,28 +107,40 @@ export default function SidebarCheckGrammar() {
                             key={idx}
                             onClick={() => handleCardClick(idx)}
                             className={`bg-white rounded-xl p-3 border shadow-sm cursor-pointer transition 
-                                ${isFirst ? "border-blue-600 border-2" : "border-gray-200"}`}
+                                ${
+                                    isFirst
+                                        ? "border-blue-600 border-2"
+                                        : "border-gray-200"
+                                }`}
                         >
                             {/* Section Title */}
-                            <p className="text-sm text-gray-500 mb-2">Replace with</p>
+                            <p className="text-sm text-gray-500 mb-2">
+                                Replace with
+                            </p>
 
                             {/* Main Suggestion Text */}
                             <div className="mb-3">
                                 <span
                                     className={`line-through mr-2 ${
-                                        isFirst ? "text-red-500" : "text-gray-500"
+                                        isFirst
+                                            ? "text-red-500"
+                                            : "text-gray-500"
                                     }`}
                                 >
                                     {item.original}
                                 </span>
                                 <span
                                     className={`ml-2 font-bold mr-2 ${
-                                        isFirst ? "text-green-600" : "text-green-700"
+                                        isFirst
+                                            ? "text-green-600"
+                                            : "text-green-700"
                                     }`}
                                 >
                                     {item.suggestion}
                                 </span>
-                                <span className="text-gray-800">{item.rest}</span>
+                                <span className="text-gray-800">
+                                    {item.rest}
+                                </span>
                             </div>
 
                             {/* Action Buttons */}

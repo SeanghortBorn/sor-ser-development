@@ -57,6 +57,12 @@ export default function HeaderNavbar() {
                             </span>
                         </span>
                     </Link>
+                    <Link
+                        href="/home"
+                        className="text-blue-900 font-medium px-3 hover:text-secondary"
+                    >
+                        Home
+                    </Link>
                     {auth.user ? (
                         <Link
                             href="/library"
@@ -65,14 +71,7 @@ export default function HeaderNavbar() {
                             Your Library
                         </Link>
                     ) : (
-                        <>
-                            <Link
-                                href="/home"
-                                className="text-blue-900 font-medium px-3 hover:text-secondary"
-                            >
-                                Home
-                            </Link>
-                        </>
+                        <></>
                     )}
                     <Link
                         href="/grammar-check"
