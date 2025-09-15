@@ -80,10 +80,10 @@ export default function HeaderNavbar() {
                         Grammar Check
                     </Link>
                     <Link
-                        href="/quiz"
+                        href="/about"
                         className="text-blue-900 font-medium px-3 hover:text-secondary"
                     >
-                        Quiz Practice
+                        About
                     </Link>
                     <div className="relative" ref={dropdownRef}>
                         <button
@@ -104,13 +104,13 @@ export default function HeaderNavbar() {
                             </svg>
                         </button>
                         {moreDropdownOpen && (
-                            <div className="absolute left-0 mt-2 bg-white rounded-xl shadow-lg z-10 border border-gray-100 flex flex-col py-2 px-2">
+                            <div className="absolute left-0 w-40 mt-2 bg-white rounded-xl shadow-lg z-10 border border-gray-100 flex flex-col py-2 px-2">
                                 <Link
-                                    href="/about"
+                                    href="/privacy"
                                     onClick={() => setMoreDropdownOpen(false)}
                                     className="px-4 py-2 text-base text-blue-900 rounded-lg hover:bg-gray-100 font-medium transition text-center"
                                 >
-                                    About
+                                    Privacy
                                 </Link>
                                 <Link
                                     href="/contact"
