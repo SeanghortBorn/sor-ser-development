@@ -29,6 +29,7 @@ Route::get('/', function () {
 
 Route::inertia('/grammar-check', 'GrammarChecks/GrammarCheck');
 Route::inertia('/home', 'HomePages/Home');
+Route::inertia('/quiz', 'Quizzes/Quiz');
 Route::inertia('/subscribe', 'Subscribes/SubscribePage');
 Route::inertia('/about', 'Abouts/index')->name('about');
 
@@ -77,8 +78,6 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::inertia('/library', 'Libraries/index');
-    Route::inertia('/quiz', 'Quizzes/Quiz');
-
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

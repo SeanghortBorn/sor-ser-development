@@ -80,12 +80,19 @@ export default function HeaderNavbar() {
                         Grammar Check
                     </Link>
                     <Link
+                        href="/quiz"
+                        className="text-blue-900 font-medium px-3 hover:text-secondary"
+                    >
+                        Quiz 
+                    </Link>
+                    <Link
                         href="/about"
                         className="text-blue-900 font-medium px-3 hover:text-secondary"
                     >
                         About
                     </Link>
-                    <div className="relative" ref={dropdownRef}>
+                    
+                    {/* <div className="relative" ref={dropdownRef}>
                         <button
                             className="text-blue-900 font-medium px-3 flex items-center gap-1 focus:outline-none hover:text-secondary"
                             onClick={() =>
@@ -121,7 +128,7 @@ export default function HeaderNavbar() {
                                 </Link>
                             </div>
                         )}
-                    </div>
+                    </div> */}
                 </div>
 
                 {/* Auth Section */}
