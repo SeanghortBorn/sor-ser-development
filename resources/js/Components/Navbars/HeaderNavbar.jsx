@@ -5,8 +5,8 @@ export default function HeaderNavbar() {
     const { auth } = usePage().props;
     const dropdownRef = useRef(null);
     const [dropdownOpen, setDropdownOpen] = useState(false);
-    const [moreDropdownOpen, setMoreDropdownOpen] = useState(false);
 
+    // Detect outside clicks for dropdown
     useEffect(() => {
         function handleClickOutside(event) {
             if (
@@ -14,10 +14,9 @@ export default function HeaderNavbar() {
                 !dropdownRef.current.contains(event.target)
             ) {
                 setDropdownOpen(false);
-                setMoreDropdownOpen(false);
             }
         }
-        if (dropdownOpen || moreDropdownOpen) {
+        if (dropdownOpen) {
             document.addEventListener("mousedown", handleClickOutside);
         } else {
             document.removeEventListener("mousedown", handleClickOutside);
@@ -25,7 +24,12 @@ export default function HeaderNavbar() {
         return () => {
             document.removeEventListener("mousedown", handleClickOutside);
         };
-    }, [dropdownOpen, moreDropdownOpen]);
+    }, [dropdownOpen]);
+
+    // Get current URL from Inertia
+    const currentUrl = usePage().url;
+    // Utility to check active route
+    const isActive = (path) => currentUrl.startsWith(path);
 
     return (
         <header className="top-0 left-0 w-full bg-white shadow-sm z-50 sticky">
@@ -33,7 +37,6 @@ export default function HeaderNavbar() {
                 <div className="flex items-center gap-4">
                     <Link href="/">
                         <span className="flex items-center gap-2">
-                            {/* Logo icon */}
                             <svg
                                 width="32"
                                 height="32"
@@ -57,78 +60,64 @@ export default function HeaderNavbar() {
                             </span>
                         </span>
                     </Link>
+
+                    {/* Nav Links with active highlight */}
                     <Link
                         href="/home"
-                        className="text-blue-900 font-medium px-3 hover:text-secondary"
+                        className={`font-medium px-3 transition ${
+                            isActive("/home")
+                                ? "text-orange-500 border-b-2 border-orange-500"
+                                : "text-blue-900 hover:text-orange-500"
+                        }`}
                     >
                         Home
                     </Link>
-                    {auth.user ? (
+
+                    {auth.user && (
                         <Link
                             href="/library"
-                            className="text-blue-900 font-medium px-3 hover:text-secondary"
+                            className={`font-medium px-3 transition ${
+                                isActive("/library")
+                                    ? "text-orange-500 border-b-2 border-orange-500"
+                                    : "text-blue-900 hover:text-orange-500"
+                            }`}
                         >
                             Your Library
                         </Link>
-                    ) : (
-                        <></>
                     )}
+
                     <Link
                         href="/grammar-check"
-                        className="text-blue-900 font-medium px-3 hover:text-secondary"
+                        className={`font-medium px-3 transition ${
+                            isActive("/grammar-check")
+                                ? "text-orange-500 border-b-2 border-orange-500"
+                                : "text-blue-900 hover:text-orange-500"
+                        }`}
                     >
                         Grammar Check
                     </Link>
+
                     <Link
                         href="/quiz"
-                        className="text-blue-900 font-medium px-3 hover:text-secondary"
+                        className={`font-medium px-3 transition ${
+                            isActive("/quiz")
+                                ? "text-orange-500 border-b-2 border-orange-500"
+                                : "text-blue-900 hover:text-orange-500"
+                        }`}
                     >
-                        Quiz 
+                        Quiz
                     </Link>
+
                     <Link
                         href="/about"
-                        className="text-blue-900 font-medium px-3 hover:text-secondary"
+                        className={`font-medium px-3 transition ${
+                            isActive("/about")
+                                ? "text-orange-500 border-b-2 border-orange-500"
+                                : "text-blue-900 hover:text-orange-500"
+                        }`}
                     >
                         About
                     </Link>
-                    
-                    {/* <div className="relative" ref={dropdownRef}>
-                        <button
-                            className="text-blue-900 font-medium px-3 flex items-center gap-1 focus:outline-none hover:text-secondary"
-                            onClick={() =>
-                                setMoreDropdownOpen(!moreDropdownOpen)
-                            }
-                        >
-                            More
-                            <svg
-                                className={`ml-1 w-4 h-4 transition-transform ${
-                                    moreDropdownOpen ? "rotate-180" : ""
-                                }`}
-                                fill="currentColor"
-                                viewBox="0 0 20 20"
-                            >
-                                <path d="M5.23 7.21a.75.75 0 011.06.02L10 11.293l3.71-4.063a.75.75 0 111.08 1.04l-4.25 4.667a.75.75 0 01-1.08 0l-4.25-4.667a.75.75 0 01.02-1.06z" />
-                            </svg>
-                        </button>
-                        {moreDropdownOpen && (
-                            <div className="absolute left-0 w-40 mt-2 bg-white rounded-xl shadow-lg z-10 border border-gray-100 flex flex-col py-2 px-2">
-                                <Link
-                                    href="/privacy"
-                                    onClick={() => setMoreDropdownOpen(false)}
-                                    className="px-4 py-2 text-base text-blue-900 rounded-lg hover:bg-gray-100 font-medium transition text-center"
-                                >
-                                    Privacy
-                                </Link>
-                                <Link
-                                    href="/contact"
-                                    onClick={() => setMoreDropdownOpen(false)}
-                                    className="px-4 py-2 text-base text-blue-900 rounded-lg hover:bg-gray-100 font-medium transition text-center"
-                                >
-                                    Contact
-                                </Link>
-                            </div>
-                        )}
-                    </div> */}
                 </div>
 
                 {/* Auth Section */}
@@ -141,14 +130,14 @@ export default function HeaderNavbar() {
                                 auth.user.roles_list.length > 0) ? (
                                 <Link
                                     href={route("dashboard")}
-                                    className="bg-orange-500 hover:bg-orange-400 text-white font-bold py-2 px-6 rounded-full flex items-center gap-2"
+                                    className="bg-orange-500 hover:bg-orange-400 text-white font-bold py-2 px-6 rounded-full"
                                 >
                                     Dashboard
                                 </Link>
                             ) : (
                                 <Link
                                     href="/subscribe"
-                                    className="bg-orange-500 hover:bg-orange-400 text-white font-bold py-2 px-6 rounded-full flex items-center gap-2"
+                                    className="bg-orange-500 hover:bg-orange-400 text-white font-bold py-2 px-6 rounded-full"
                                 >
                                     Upgrade
                                 </Link>
@@ -156,39 +145,31 @@ export default function HeaderNavbar() {
 
                             {/* User Dropdown */}
                             <div className="relative" ref={dropdownRef}>
-                                {/* Dropdown Toggle */}
                                 <button
                                     onClick={() =>
                                         setDropdownOpen(!dropdownOpen)
                                     }
-                                    className="flex items-center gap-2 text-blue-900 font-medium focus:outline-none hover:text-orange-500 transition"
+                                    className="flex items-center gap-2 text-blue-900 font-medium hover:text-orange-500 transition"
                                 >
                                     <img
                                         src={"/images/person-icon.svg"}
-                                        className="h-8 w-8 overflow-hidden rounded-full"
+                                        className="h-8 w-8 rounded-full"
                                         alt="User avatar"
                                     />
-                                    <span className="text-blue-900 font-medium hover:text-secondary">
-                                        {auth?.user?.name}
-                                    </span>
+                                    <span>{auth?.user?.name}</span>
                                 </button>
 
-                                {/* Dropdown Menu */}
                                 {dropdownOpen && (
                                     <div className="absolute right-0 mt-2 bg-white border w-48 border-gray-100 rounded-xl shadow-lg z-50">
-                                        {/* User Info */}
-                                        <div className="px-4 py-3 border-b border-gray-200">
-                                            <div className="flex flex-col">
-                                                <span className="text-sm font-medium text-gray-800">
-                                                    {auth?.user?.name}
-                                                </span>
-                                                <span className="text-sm text-gray-500">
-                                                    {auth?.user?.email}
-                                                </span>
-                                            </div>
-                                        </div>
+                                        {/* <div className="px-4 py-3 border-b border-gray-200">
+                                            <span className="text-sm font-medium text-gray-800">
+                                                {auth?.user?.name}
+                                            </span>
+                                            <span className="text-sm text-gray-500">
+                                                {auth?.user?.email}
+                                            </span>
+                                        </div> */}
 
-                                        {/* Menu Items */}
                                         <div className="flex flex-col py-2 px-2">
                                             <Link
                                                 href={route("profile.edit")}
@@ -197,7 +178,7 @@ export default function HeaderNavbar() {
                                                 }
                                                 className="flex items-center px-4 py-2 text-sm text-blue-900 hover:bg-gray-100 rounded-lg transition"
                                             >
-                                                <i className="fas fa-user-circle w-4 mr-3 text-gray-500 "></i>
+                                                <i className="fas fa-user-circle w-4 mr-3 text-gray-500"></i>
                                                 My Account
                                             </Link>
                                             <hr className="my-1 border-gray-200" />
@@ -222,13 +203,17 @@ export default function HeaderNavbar() {
                         <>
                             <Link
                                 href={route("login")}
-                                className="text-blue-900 font-medium px-3 hover:text-secondary"
+                                className={`px-3 font-medium ${
+                                    isActive("/login")
+                                        ? "text-orange-500 border-b-2 border-orange-500"
+                                        : "text-blue-900 hover:text-orange-500"
+                                }`}
                             >
                                 Sign In
                             </Link>
                             <Link
                                 href={route("register")}
-                                className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-6 rounded-full flex items-center gap-2"
+                                className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-6 rounded-full"
                             >
                                 Get Started
                             </Link>
