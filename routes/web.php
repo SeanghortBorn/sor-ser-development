@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\TwoFactorLoginController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\GoogleController;
+use App\Http\Controllers\QuizController;
 use App\Http\Controllers\RolesController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\GrammarCheckerController;
@@ -82,6 +83,14 @@ Route::middleware('auth')->group(function () {
     Route::patch('/categories/{id}', [CategoryController::class, 'update'])->name('categories.update');
     Route::get('/categories/{id}', [CategoryController::class, 'edit'])->name('categories.edit');
     Route::delete('/categories/{id}', [CategoryController::class, 'destroy'])->name('categories.destroy');
+
+    Route::get('/quizzes', [QuizController::class, 'index'])->name('quizzes.index')->middleware(['check:quiz-list']);
+    Route::get('/quizzes/create', [QuizController::class, 'create'])->name('quizzes.create')->middleware(['check:quiz-create']);
+    Route::post('/quizzes', [QuizController::class, 'store'])->name('quizzes.store');
+    Route::patch('/quizzes/{id}', [QuizController::class, 'update'])->name('quizzes.update');
+    Route::get('/quizzes/{id}', [QuizController::class, 'edit'])->name('quizzes.edit');
+    Route::delete('/quizzes/{id}', [QuizController::class, 'destroy'])->name('quizzes.destroy');
+
 
     Route::prefix('roles')->group(function () {
         Route::get('/', [RolesController::class, 'index'])->name('roles.index')->middleware(['check:role-list']);

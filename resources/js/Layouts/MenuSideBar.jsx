@@ -29,7 +29,7 @@ export default function MenuSideBar({ }) {
                 <div className="sidebar">
                     <div className="user-panel mt-3 pb-3 mb-3 d-flex">
                         <div className="image">
-                            <img src={'/images/avatar.png'} className="img-circle elevation-2" alt="User Image" />
+                            <img src={'/images/person-icon.svg'} className="img-circle elevation-2" alt="User Image" />
                         </div>
                         <div className="info">
                             <Link href="#" className="d-block"><span> {auth?.user?.name} </span></Link>
@@ -64,7 +64,7 @@ export default function MenuSideBar({ }) {
                                     </p>
                                 </Link>
                             </li> */}
-                            {can['category-list'] && (
+                            {/* {can['category-list'] && (
                                 <li className="nav-header">SETTING</li>
                             )}
                             {can['category-list'] && (
@@ -93,7 +93,39 @@ export default function MenuSideBar({ }) {
                                     </ul>
                                 </li>
                                 </>
+                            )} */}
+
+                            {can['quiz-list'] && (
+                                <li className="nav-header">SETTING</li>
                             )}
+                            {can['quiz-list'] && (
+                                <>
+
+                                <li className={`nav-item ${(route().current('quizzes.index') || route().current('quizzes.create')) && 'menu-is-opening menu-open'}`}>
+                                    <a href="#" className={`nav-link ${(route().current('quizzes.index') || route().current('quizzes.create')) && 'active'}`}>
+                                        <i className="nav-icon far fa-plus-square"></i>
+                                        <p> QUIZ
+                                            <i className="fas fa-angle-left right"></i>
+                                        </p>
+                                    </a>
+                                    <ul className="nav nav-treeview">
+                                        <li className="nav-item">
+                                            <Link href={route('quizzes.index')} className={`nav-link ${route().current('quizzes.index') && 'active'}`}>
+                                                <i className="fa-solid fa-list-ul nav-icon text-warning"></i>
+                                                <p>LIST</p>
+                                            </Link>
+                                        </li>
+                                        <li className="nav-item">
+                                            <Link href={route('quizzes.create')} className={`nav-link ${route().current('quizzes.create') && 'active'}`}>
+                                                <i className="fa-regular fa-square-plus nav-icon text-info"></i>
+                                                <p>CREATE</p>
+                                            </Link>
+                                        </li>
+                                    </ul>
+                                </li>
+                                </>
+                            )}
+
                             {can['role-list' || 'user-list'] && (
                                 <li className="nav-header">AUTHENTICATION</li>
                             )}
