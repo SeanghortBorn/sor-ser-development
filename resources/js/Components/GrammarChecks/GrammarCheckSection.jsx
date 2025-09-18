@@ -5,10 +5,10 @@ import { usePage } from "@inertiajs/react";
 export default function GrammarCheckSection() {
     const { auth } = usePage().props;
     return (
-        <div className="max-w-7xl mx-auto px-4 py-12">
+        <div className="max-w-7xl mx-auto px-4 py-6">
             {auth.user ? (
                 <>
-                    <div className="text-center mb-9">
+                    <div className="text-center ">
                         <h1 className="text-2xl md:text-3xl font-semibold text-gray-600">
                             Triple your productivity with the{" "}
                             <span className="text-blue-500 font-semibold">

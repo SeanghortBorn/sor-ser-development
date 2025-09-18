@@ -1,163 +1,142 @@
-import React, { useState } from "react";
-import { Check, Trash } from "lucide-react";
+// import React from "react";
+// import {
+//   Check,
+//   X,
+//   AlertCircle,
+//   CheckCircle2,
+//   RotateCcw,
+// } from "lucide-react";
 
-export default function SidebarCheckGrammar() {
-    const [suggestions, setSuggestions] = useState([
-        { original: "heello", suggestion: "Hello,", rest: "my name is John" },
-        {
-            original: "we want",
-            suggestion: "wanted to",
-            rest: "buy some fruits",
-        },
-        {
-            original: "I goed",
-            suggestion: "went",
-            rest: "to the market yesterday",
-        },
-        {
-            original: "She dont",
-            suggestion: "doesn't",
-            rest: "like spicy food",
-        },
-        {
-            original: "They was",
-            suggestion: "were",
-            rest: "playing football in the park",
-        },
-        {
-            original: "its raining",
-            suggestion: "it's raining",
-            rest: "heavily today",
-        },
-        { original: "I has", suggestion: "have", rest: "a new phone now" },
-        {
-            original: "writting",
-            suggestion: "writing",
-            rest: "an essay for school",
-        },
-        {
-            original: "he runned",
-            suggestion: "ran",
-            rest: "fast to catch the bus",
-        },
-    ]);
+// export default function SidebarCheckGrammar({ text = "", onReplace }) {
+//   const corrections = [
+//     { error: "helo", suggestion: "hello" },
+//     { error: "wld", suggestion: "world" },
+//     { error: "teh", suggestion: "the" },
+//     { error: "recieve", suggestion: "receive" },
+//     { error: "adress", suggestion: "address" },
+//     { error: "definately", suggestion: "definitely" },
+//     { error: "occured", suggestion: "occurred" },
+//     { error: "seperate", suggestion: "separate" },
+//     { error: "untill", suggestion: "until" },
+//     { error: "wich", suggestion: "which" },
+//     { error: "becuase", suggestion: "because" },
+//     { error: "thier", suggestion: "their" },
+//   ];
 
-    // Swap clicked card to the top
-    const handleCardClick = (idx) => {
-        if (idx === 0) return; // Do nothing if the first card is clicked
-        const newSuggestions = [...suggestions];
-        [newSuggestions[0], newSuggestions[idx]] = [
-            newSuggestions[idx],
-            newSuggestions[0],
-        ];
-        setSuggestions(newSuggestions);
-    };
+//   const foundCorrections = corrections.filter((c) =>
+//     text.toLowerCase().includes(c.error)
+//   );
 
-    return (
-        <div className="p-6 mt-16 w-86 mb-4 rounded-xl border bg-white h-[85vh] flex flex-col mr-3">
-            {/* Header Message */}
-            <div className="text-gray-700 text-lg font-medium mb-3">
-                Enter at least 25 words to see score.
-            </div>
+//   return (
+//     <div className="w-80 flex flex-col">
+//       {/* Sidebar Container */}
+//       <div className="bg-white/90 backdrop-blur-md border border-slate-200 rounded-2xl shadow-lg transition-all duration-300 h-[75vh] flex flex-col overflow-hidden">
+//         {/* Header */}
+//         <div className="px-6 py-4 border-b border-slate-100 bg-gradient-to-r from-indigo-50 to-blue-50">
+//           <h3 className="text-lg font-bold text-slate-800 mb-2">Grammar Check</h3>
+//           <div className="flex items-center gap-2">
+//             {foundCorrections.length > 0 ? (
+//               <>
+//                 <AlertCircle className="w-4 h-4 text-amber-500" />
+//                 <span className="text-sm text-slate-600 font-medium">
+//                   {foundCorrections.length} issue
+//                   {foundCorrections.length > 1 ? "s" : ""} found
+//                 </span>
+//               </>
+//             ) : (
+//               <>
+//                 <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+//                 <span className="text-sm text-slate-600 font-medium">
+//                   No issues detected
+//                 </span>
+//               </>
+//             )}
+//           </div>
+//         </div>
 
-            {/* Filter Buttons */}
-            <div className="flex items-center space-x-0 mb-2">
-                <button
-                    type="button"
-                    className="text-blue-900 px-3 py-2 font-semibold border-gray-400 flex items-center hover:bg-gray-100 rounded"
-                >
-                    All
-                    <span className="text-xs bg-gray-200 rounded-full px-2 py-0.5 ml-2">
-                        {suggestions.length}
-                    </span>
-                </button>
-                <button
-                    type="button"
-                    className="text-green-600 px-3 py-2 font-semibold border-green-500 flex items-center hover:bg-gray-100 rounded"
-                >
-                    Grammar
-                    <span className="text-xs bg-gray-200 rounded-full px-2 py-0.5 ml-2">
-                        {suggestions.length}
-                    </span>
-                </button>
-            </div>
+//         {/* Corrections List */}
+//         <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4 hide-scrollbar">
+//           {foundCorrections.length > 0 ? (
+//             foundCorrections.map((c) => (
+//               <div
+//                 key={c.error}
+//                 className="group border border-slate-200 rounded-xl p-4 bg-white hover:bg-slate-50 transition-all duration-200 shadow-sm"
+//               >
+//                 {/* Error Display */}
+//                 <div className="mb-3">
+//                   <div className="flex items-center gap-2 mb-1">
+//                     <AlertCircle className="w-4 h-4 text-red-500" />
+//                     <span className="text-xs font-semibold text-red-600 uppercase tracking-wide">
+//                       Spelling Error
+//                     </span>
+//                   </div>
+//                   <p className="text-sm text-slate-700">
+//                     <span className="px-2 py-0.5 bg-red-100 text-red-700 rounded-md font-mono font-medium">
+//                       {c.error}
+//                     </span>
+//                     <span className="mx-2 text-slate-400">→</span>
+//                     <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-md font-mono font-medium">
+//                       {c.suggestion}
+//                     </span>
+//                   </p>
+//                 </div>
 
-            <div className="border-b mb-2" />
+//                 {/* Action Buttons */}
+//                 <div className="flex gap-2">
+//                   <button
+//                     className="flex items-center gap-1 flex-1 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium transition-all duration-200 shadow-sm"
+//                     onClick={() => {
+//                       if (onReplace) {
+//                         const newText = text.replace(
+//                           new RegExp(c.error, "gi"),
+//                           c.suggestion
+//                         );
+//                         onReplace(newText);
+//                       }
+//                     }}
+//                   >
+//                     <Check size={16} /> Accept
+//                   </button>
+//                   <button className="flex items-center gap-1 px-3 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg text-sm font-medium transition-all duration-200 shadow-sm">
+//                     <X size={16} /> Dismiss
+//                   </button>
+//                 </div>
+//               </div>
+//             ))
+//           ) : (
+//             <div className="flex flex-col items-center justify-center h-full text-center py-8">
+//               <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mb-4">
+//                 <CheckCircle2 className="w-8 h-8 text-emerald-600" />
+//               </div>
+//               <h4 className="text-lg font-semibold text-slate-800 mb-1">
+//                 Great job!
+//               </h4>
+//               <p className="text-sm text-slate-500 leading-relaxed max-w-xs mb-4">
+//                 No grammar or spelling issues detected in your text.
+//               </p>
+//               <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm shadow-md">
+//                 <RotateCcw size={16} /> Re-check Text
+//               </button>
+//             </div>
+//           )}
+//         </div>
 
-            {/* Scrollable List */}
-            <div className="space-y-2 p-2 flex-1 overflow-y-auto hide-scrollbar">
-                {/* Summary Card */}
-                <div className="flex justify-between items-center border border-gray-200 rounded-xl px-6 py-2 bg-white max-w-xl mx-auto">
-                    <span className="flex items-center font-semibold">
-                        <span className="text-red-500 text-[16px]">
-                            {suggestions.length} grammar
-                        </span>
-                        <span className="text-gray-700 ml-1">suggestions</span>
-                    </span>
-                    <button className="border border-green-500 text-green-600 px-4 py-1 rounded-full text-[16px] hover:bg-green-50 transition">
-                        Accept all
-                    </button>
-                </div>
-
-                {/* Suggestion Cards */}
-                {suggestions.map((item, idx) => {
-                    const isFirst = idx === 0;
-                    return (
-                        <div
-                            key={idx}
-                            onClick={() => handleCardClick(idx)}
-                            className={`bg-white rounded-xl p-3 border shadow-sm cursor-pointer transition 
-                                ${
-                                    isFirst
-                                        ? "border-blue-600 border-2"
-                                        : "border-gray-200"
-                                }`}
-                        >
-                            {/* Section Title */}
-                            <p className="text-sm text-gray-500 mb-2">
-                                Replace with
-                            </p>
-
-                            {/* Main Suggestion Text */}
-                            <div className="mb-3">
-                                <span
-                                    className={`line-through mr-2 ${
-                                        isFirst
-                                            ? "text-red-500"
-                                            : "text-gray-500"
-                                    }`}
-                                >
-                                    {item.original}
-                                </span>
-                                <span
-                                    className={`ml-2 font-bold mr-2 ${
-                                        isFirst
-                                            ? "text-green-600"
-                                            : "text-green-700"
-                                    }`}
-                                >
-                                    {item.suggestion}
-                                </span>
-                                <span className="text-gray-800">
-                                    {item.rest}
-                                </span>
-                            </div>
-
-                            {/* Action Buttons */}
-                            <div className="flex space-x-3">
-                                <button className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-full flex items-center">
-                                    <Check className="w-4 h-4 mr-1" />
-                                    Accept
-                                </button>
-                                <button className="flex items-center text-gray-800 hover:text-red-600">
-                                    <Trash className="w-4 h-4 mr-1" />
-                                    Ignore
-                                </button>
-                            </div>
-                        </div>
-                    );
-                })}
-            </div>
-        </div>
-    );
-}
+//         {/* Footer Stats */}
+//         {foundCorrections.length > 0 && (
+//           <div className="px-6 py-3 border-t border-slate-100 bg-slate-50">
+//             <div className="flex items-center justify-between text-xs text-slate-500">
+//               <span>
+//                 {foundCorrections.length} correction
+//                 {foundCorrections.length > 1 ? "s" : ""} available
+//               </span>
+//               <span className="flex items-center gap-1 text-emerald-600 font-medium">
+//                 <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+//                 Ready to fix
+//               </span>
+//             </div>
+//           </div>
+//         )}
+//       </div>
+//     </div>
+//   );
+// }
