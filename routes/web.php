@@ -18,14 +18,7 @@ use Laravel\Fortify\Http\Controllers\TwoFactorAuthenticationController;
 use Laravel\Fortify\Http\Controllers\TwoFactorQrCodeController;
 use Laravel\Fortify\Http\Controllers\TwoFactorSecretKeyController;
 
-Route::get('/', function () {
-    return Inertia::render('HomePages/Home', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
-});
+Route::redirect('/', '/home');
 
 Route::inertia('/grammar-check', 'GrammarChecks/GrammarCheck');
 Route::inertia('/home', 'HomePages/Home');
