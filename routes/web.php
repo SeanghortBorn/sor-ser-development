@@ -26,6 +26,14 @@ Route::get('/', function () {
     ]);
 });
 
+Route::get('/quizzes/create', function () {
+    return Inertia::render('Quizzes/CreateQuiz');
+})->name('quizzes.create');
+Route::get('/quizzes', function () {
+    return Inertia::render('Quizzes/QuizList');
+})->name('quizzes.index');
+
+
 Route::inertia('/grammar-check', 'GrammarChecks/GrammarCheck');
 Route::inertia('/quiz', 'Quizzes/Quiz');
 Route::inertia('/home', 'HomePages/Home');
