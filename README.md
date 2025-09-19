@@ -47,3 +47,7 @@ php artisan make:model YourModelName -mcr
 # *********ERORR 500*********
 mkdir -p storage/framework/views
 mkdir -p storage/framework/cache/data
+
+# Install Quill React
+
+npm install react-quill

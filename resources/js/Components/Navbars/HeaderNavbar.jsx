@@ -93,12 +93,12 @@ export default function HeaderNavbar() {
                     </Link>
 
                     <Link
-                        href="/quiz"
+                        href="/quiz-practice"
                         className={`px-3 py-[1.2rem] font-medium transition ${isActive(
-                            "/quiz"
+                            "/quiz-practice"
                         )}`}
                     >
-                        Quiz
+                        Quiz & Practice
                     </Link>
 
                     <Link

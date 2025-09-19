@@ -20,12 +20,11 @@ use Laravel\Fortify\Http\Controllers\TwoFactorQrCodeController;
 use Laravel\Fortify\Http\Controllers\TwoFactorSecretKeyController;
 
 Route::redirect('/', '/home');
-
 Route::inertia('/grammar-check', 'GrammarChecks/GrammarCheck');
 Route::inertia('/home', 'HomePages/Home');
-Route::inertia('/quiz', 'Quizzes/Quiz');
 Route::inertia('/subscribe', 'Subscribes/SubscribePage');
 Route::inertia('/about', 'Abouts/index')->name('about');
+Route::inertia('/quiz-practice', 'Quizzes/DoQuiz');
 
 Route::middleware(['auth', 'check.user.role'])->group(function () {
     Route::get('/dashboard', function () {
