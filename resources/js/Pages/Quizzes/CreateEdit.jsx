@@ -1,268 +1,219 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { Head, usePage } from "@inertiajs/react";
 import AdminLayout from "@/Layouts/AdminLayout";
-import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css";
-
-const subjects = ["Math", "Science", "History"]; // Example subjects
-const groups = ["Group A", "Group B", "Group C"]; // Example student groups
-const QUESTION_TYPES = ["Multiple Choice", "True/False", "Fill in the Blank"];
+import Breadcrumb from "@/Components/Breadcrumb";
+import { Trash2 } from "lucide-react";
 
 export default function QuizzesCreateEdit() {
-    const [title, setTitle] = useState("");
-    const [subject, setSubject] = useState("");
-    const [description, setDescription] = useState("");
-    const [selectedGroups, setSelectedGroups] = useState([]);
-    const [status, setStatus] = useState("Draft");
-    const [questions, setQuestions] = useState([]);
+    const { datas } = usePage().props;
+    const isEdit = datas && datas.id;
+    const title = isEdit ? "Edit Quiz" : "New Quiz";
 
-    // Handle multi-select groups
-    const handleGroupChange = (e) => {
-        const options = Array.from(e.target.options);
-        setSelectedGroups(options.filter((o) => o.selected).map((o) => o.value));
-    };
+    const [questionType, setQuestionType] = useState("Multiple Choice");
+    const [options, setOptions] = useState(["A", "B", "C", "D"]);
+    const [dropdownOpen, setDropdownOpen] = useState(false);
 
-    // Add a new question
-    const handleAddQuestion = () => {
-        setQuestions((prev) => [
-            ...prev,
-            {
-                id: Date.now(),
-                type: "Multiple Choice",
-                text: "",
-                options: [{ text: "", correct: false }],
-            },
-        ]);
-    };
+    const dropdownRef = useRef(null);
 
-    // Update question text/type
-    const handleQuestionChange = (id, field, value) => {
-        setQuestions((prev) =>
-            prev.map((q) => (q.id === id ? { ...q, [field]: value } : q))
-        );
-    };
-
-    // Add option to multiple choice
-    const handleAddOption = (id) => {
-        setQuestions((prev) =>
-            prev.map((q) =>
-                q.id === id
-                    ? { ...q, options: [...q.options, { text: "", correct: false }] }
-                    : q
-            )
-        );
-    };
-
-    // Update option text/correct
-    const handleOptionChange = (qid, idx, field, value) => {
-        setQuestions((prev) =>
-            prev.map((q) =>
-                q.id === qid
-                    ? {
-                          ...q,
-                          options: q.options.map((o, i) =>
-                              i === idx ? { ...o, [field]: value } : o
-                          ),
-                      }
-                    : q
-            )
-        );
-    };
-
-    // Submit form
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        const quizData = {
-            title,
-            subject,
-            description,
-            groups: selectedGroups,
-            status,
-            questions,
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+                setDropdownOpen(false);
+            }
         };
-        console.log("Submitting Quiz:", quizData);
-        // 🚀 send to Laravel controller using Inertia.post('/admin/quizzes', quizData)
-    };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
+    const breadcrumbLinks = [
+        { title: "Home", url: "/" },
+        { title: "Quiz", url: route("quizzes.index") },
+        { title, url: "" },
+    ];
 
     return (
-        <AdminLayout>
-            <div className="p-6 space-y-6">
-                <h2 className="text-2xl font-bold">Create / Edit Quiz</h2>
+        <AdminLayout breadcrumb={<Breadcrumb header={title} links={breadcrumbLinks} />}>
+            <Head title={title} />
 
-                <form onSubmit={handleSubmit} className="space-y-6">
-                    {/* Quiz Information */}
-                    <div>
-                        <label className="block font-medium">Title</label>
-                        <input
-                            type="text"
-                            className="border p-2 w-full rounded"
-                            value={title}
-                            onChange={(e) => setTitle(e.target.value)}
-                            required
-                        />
-                    </div>
+            <div className="min-h-screen w-full mx-auto space-y-4 mb-12">
+                {/* Top Section */}
+                <div className="bg-white rounded-2xl shadow-sm px-8 py-6 sticky top-0 z-10">
+                    <div className="flex items-center justify-between gap-6">
+                        {/* Quiz Name */}
+                        <div className="w-1/3">
+                            <label className="block text-gray-700 mb-2 font-medium">
+                                Quiz Name
+                            </label>
+                            <input
+                                type="text"
+                                placeholder="Enter name"
+                                className="w-full py-2 px-3 rounded-[10px] border border-gray-200 bg-gray-50 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                            />
+                        </div>
 
-                    <div>
-                        <label className="block font-medium">Subject / Category</label>
-                        <select
-                            className="border p-2 w-full rounded"
-                            value={subject}
-                            onChange={(e) => setSubject(e.target.value)}
-                            required
-                        >
-                            <option value="">Select Subject</option>
-                            {subjects.map((subj) => (
-                                <option key={subj} value={subj}>
-                                    {subj}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
-                    <div>
-                        <label className="block font-medium">Description</label>
-                        <ReactQuill
-                            theme="snow"
-                            value={description}
-                            onChange={setDescription}
-                        />
-                    </div>
-
-                    <div>
-                        <label className="block font-medium">Assign to Student Group(s)</label>
-                        <select
-                            multiple
-                            className="border p-2 w-full rounded"
-                            value={selectedGroups}
-                            onChange={handleGroupChange}
-                        >
-                            {groups.map((group) => (
-                                <option key={group} value={group}>
-                                    {group}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
-                    <div>
-                        <label className="block font-medium">Status</label>
-                        <select
-                            className="border p-2 w-full rounded"
-                            value={status}
-                            onChange={(e) => setStatus(e.target.value)}
-                        >
-                            <option value="Draft">Draft</option>
-                            <option value="Published">Published</option>
-                        </select>
-                    </div>
-
-                    {/* Question Builder */}
-                    <div className="space-y-4">
-                        <h3 className="text-xl font-semibold">Question Builder</h3>
-
-                        {questions.map((q, idx) => (
-                            <div key={q.id} className="border rounded p-4 space-y-3">
-                                <div>
-                                    <label className="block font-medium">
-                                        Question {idx + 1}
-                                    </label>
+                        {/* Visibility */}
+                        <div className="w-1/2">
+                            <label className="block text-gray-700 mb-2 font-medium">
+                                Visibility
+                            </label>
+                            <div className="flex gap-6">
+                                <label className="flex items-center gap-2 cursor-pointer">
                                     <input
-                                        type="text"
-                                        className="border p-2 w-full rounded"
-                                        placeholder="Enter question..."
-                                        value={q.text}
-                                        onChange={(e) =>
-                                            handleQuestionChange(q.id, "text", e.target.value)
-                                        }
+                                        type="radio"
+                                        name="visibility_status"
+                                        value="1"
+                                        className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500 accent-blue-600"
                                     />
-                                </div>
+                                    <span className="text-sm font-medium text-blue-700 bg-blue-100 px-3 py-1.5 rounded-full">
+                                        Publish
+                                    </span>
+                                </label>
 
-                                <div>
-                                    <label className="block font-medium">Type</label>
-                                    <select
-                                        className="border p-2 w-full rounded"
-                                        value={q.type}
-                                        onChange={(e) =>
-                                            handleQuestionChange(q.id, "type", e.target.value)
-                                        }
-                                    >
-                                        {QUESTION_TYPES.map((t) => (
-                                            <option key={t} value={t}>
-                                                {t}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <input
+                                        type="radio"
+                                        name="visibility_status"
+                                        value="2"
+                                        className="h-4 w-4 text-red-500 border-gray-300 focus:ring-red-400 accent-red-500"
+                                    />
+                                    <span className="text-sm font-medium text-red-600 bg-gray-100 px-3 py-1.5 rounded-full">
+                                        Draft
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
 
-                                {q.type === "Multiple Choice" && (
-                                    <div className="space-y-2">
-                                        {q.options.map((opt, i) => (
-                                            <div key={i} className="flex items-center gap-2">
-                                                <input
-                                                    type="text"
-                                                    className="border p-2 flex-1 rounded"
-                                                    placeholder={`Option ${i + 1}`}
-                                                    value={opt.text}
-                                                    onChange={(e) =>
-                                                        handleOptionChange(
-                                                            q.id,
-                                                            i,
-                                                            "text",
-                                                            e.target.value
-                                                        )
-                                                    }
-                                                />
-                                                <input
-                                                    type="checkbox"
-                                                    checked={opt.correct}
-                                                    onChange={(e) =>
-                                                        handleOptionChange(
-                                                            q.id,
-                                                            i,
-                                                            "correct",
-                                                            e.target.checked
-                                                        )
-                                                    }
-                                                />
-                                                <span className="text-sm">Correct</span>
-                                            </div>
-                                        ))}
+                        {/* Create Button */}
+                        <div className="flex items-end">
+                            <button className="px-6 w-36 py-2 text-blue-700 border-2 border-blue-500 rounded-2xl hover:bg-blue-100 transition">
+                                Create
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Question Section */}
+                <div className="bg-white rounded-2xl shadow-md px-8 py-6">
+                    {/* Header */}
+                    <div className="flex justify-between items-center mb-6">
+                        <h2 className="text-lg font-bold text-gray-800">Question 1</h2>
+                        <button
+                            className="flex items-center justify-center w-10 h-10 text-red-500 border-2 border-red-400 rounded-xl hover:bg-red-100 transition"
+                            aria-label="Delete"
+                        >
+                            <Trash2 className="w-5 h-5" />
+                        </button>
+                    </div>
+
+                    {/* Question Type Dropdown */}
+                    <div className="relative w-1/3 mb-6">
+                        <label className="block text-gray-700 mb-2 font-medium">
+                            Question Type
+                        </label>
+
+                        <button
+                            type="button"
+                            onClick={() => setDropdownOpen(!dropdownOpen)}
+                            className="w-full flex justify-between items-center px-3 py-2 rounded-[10px] border border-gray-200 bg-gray-50 text-gray-700 focus:ring-1 focus:ring-blue-400 focus:outline-none transition"
+                        >
+                            {questionType}
+                            <i
+                                className={`fas fa-chevron-down ml-1 transition-transform ${
+                                    dropdownOpen ? "rotate-180" : ""
+                                }`}
+                            />
+                        </button>
+
+                        {dropdownOpen && (
+                            <div
+                                ref={dropdownRef}
+                                className="absolute left-0 mt-2 w-full bg-white border border-gray-200 rounded-xl shadow-lg z-50"
+                            >
+                                <div className="py-2 px-2 space-y-1">
+                                    {[
+                                        "Multiple Choice",
+                                        "Checkboxes",
+                                        "True/False",
+                                        "Open Ended",
+                                        "Matching",
+                                    ].map((type) => (
                                         <button
-                                            type="button"
-                                            className="px-3 py-1 border rounded bg-gray-100"
-                                            onClick={() => handleAddOption(q.id)}
+                                            key={type}
+                                            onClick={() => {
+                                                setQuestionType(type);
+                                                setDropdownOpen(false);
+                                            }}
+                                            className={`w-full text-left px-4 py-2 text-sm rounded-lg transition ${
+                                                questionType === type
+                                                    ? "bg-blue-100 text-blue-700 font-semibold"
+                                                    : "hover:bg-gray-100 text-gray-700"
+                                            }`}
                                         >
-                                            + Add Option
+                                            {type}
                                         </button>
-                                    </div>
-                                )}
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Question Textarea */}
+                    <div className="w-full mb-4">
+                        <label className="block text-gray-700 mb-2 font-medium">
+                            Question
+                        </label>
+                        <textarea
+                            placeholder="Enter your question"
+                            className="flex-1 px-3 py-2 rounded-[10px] bg-gray-50 border w-full border-gray-200 focus:ring-1 focus:ring-blue-400 focus:outline-none resize-none overflow-hidden transition-all duration-150 ease-in-out"
+                            rows="3"
+                            onInput={(e) => {
+                                e.target.style.height = "auto";
+                                e.target.style.height = `${e.target.scrollHeight}px`;
+                            }}
+                        />
+                    </div>
+
+                    {/* Options */}
+                    <div>
+                        <h3 className="text-lg font-medium text-gray-700 mb-2">
+                            Options
+                        </h3>
+                        {options.map((option, index) => (
+                            <div key={index} className="flex items-center gap-2 mb-3">
+                                <input
+                                    type="radio"
+                                    name="correctOption"
+                                    className="text-blue-500 focus:ring-blue-400"
+                                />
+                                <input
+                                    type="text"
+                                    // value={option}
+                                    placeholder={`Option ${index + 1}`}
+                                    onChange={(e) => {
+                                        const updated = [...options];
+                                        updated[index] = e.target.value;
+                                        setOptions(updated);
+                                    }}
+                                    className="flex-1 px-3 py-2 rounded-[10px] border border-gray-200 bg-gray-50 focus:ring-1 focus:ring-blue-400 focus:outline-none"
+                                />
+                                <button
+                                    onClick={() => setOptions(options.filter((_, i) => i !== index))}
+                                    className="text-red-400 hover:text-red-500 transition"
+                                >
+                                    <Trash2 className="w-5 h-5" />
+                                </button>
                             </div>
                         ))}
 
                         <button
-                            type="button"
-                            className="px-3 py-2 border rounded bg-blue-100"
-                            onClick={handleAddQuestion}
+                            onClick={() => setOptions([...options, ""])}
+                            className="mt-3 text-blue-600 hover:underline"
                         >
-                            + Add New Question
+                            + Add Option
                         </button>
                     </div>
-
-                    {/* Controls */}
-                    <div className="flex gap-4">
-                        <button
-                            type="button"
-                            className="px-4 py-2 border rounded bg-gray-200"
-                        >
-                            Save as Draft
-                        </button>
-                        <button
-                            type="submit"
-                            className="px-4 py-2 border rounded bg-blue-500 text-white"
-                        >
-                            Publish Quiz
-                        </button>
-                    </div>
-                </form>
+                </div>
             </div>
         </AdminLayout>
     );

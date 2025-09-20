@@ -38,7 +38,7 @@ export default function LanguageSwitcher({ lang, setLang }) {
     };
 
     return (
-        <div className="nav-item dropdown position-relative border rounded-lg hover:shadow-md" ref={dropdownRef}>
+        <div className="nav-item dropdown position-relative border rounded-[10px] hover:shadow-md" ref={dropdownRef}>
             <button
                 className="nav-link btn btn-link d-flex align-items-center p-2 bg-transparent"
                 onClick={() => setDropdownOpen((open) => !open)}
