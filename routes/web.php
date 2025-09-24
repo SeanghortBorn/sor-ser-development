@@ -7,6 +7,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\GoogleController;
 use App\Http\Controllers\QuizController;
 use App\Http\Controllers\RolesController;
+use App\Http\Controllers\TagController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\GrammarCheckerController;
 use Illuminate\Foundation\Application;
@@ -90,6 +91,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/quizzes/{id}', [QuizController::class, 'edit'])->name('quizzes.edit');
     Route::delete('/quizzes/{id}', [QuizController::class, 'destroy'])->name('quizzes.destroy');
 
+    // Tags
+    Route::resource('tags', TagController::class);
 
     Route::prefix('roles')->group(function () {
         Route::get('/', [RolesController::class, 'index'])->name('roles.index')->middleware(['check:role-list']);
