@@ -7,7 +7,6 @@ import TagsSection from "@/Components/Tags/TagsSection";
 import axios from "axios";
 
 export default function Library() {
-    // Fetch grammar checker documents from backend
     const [documentsData, setDocumentsData] = useState([]);
     const [loading, setLoading] = useState(true);
     const { auth } = usePage().props;
@@ -21,13 +20,32 @@ export default function Library() {
     const [editingDocTitle, setEditingDocTitle] = useState("");
     const [savingEdit, setSavingEdit] = useState(false);
     const editNameInputRef = useRef(null);
-
-    // Tag modal state
     const [showEditTagsModal, setShowEditTagsModal] = useState(false);
     const [editingTagsDoc, setEditingTagsDoc] = useState(null);
     const [allTags, setAllTags] = useState([]);
     const [selectedTagIds, setSelectedTagIds] = useState([]);
     const [savingTags, setSavingTags] = useState(false);
+    const [filteredTagId, setFilteredTagId] = useState(null);
+    // Add a separate loading state for tags
+    const [tagsLoading, setTagsLoading] = useState(true);
+
+    // Fetch all tags once on mount or when user changes
+    const fetchAllTags = () => {
+        if (!currentUserId) {
+            setAllTags([]);
+            setTagsLoading(false);
+            return;
+        }
+        setTagsLoading(true);
+        axios
+            .get("/tags", { headers: { Accept: "application/json" } })
+            .then((res) => {
+                const all = res.data.data || [];
+                setAllTags(all.filter((tag) => tag.user_id === currentUserId));
+            })
+            .catch(() => setAllTags([]))
+            .finally(() => setTagsLoading(false));
+    };
 
     useEffect(() => {
         setLoading(true);
@@ -50,18 +68,9 @@ export default function Library() {
             .finally(() => setLoading(false));
     }, [currentUserId]);
 
-    // Fetch all tags for the user (privacy: only show tags created by current user)
-    const fetchAllTags = async () => {
-        const res = await axios.get("/tags", {
-            headers: { Accept: "application/json" },
-        });
-        const all = res.data.data || [];
-        setAllTags(
-            currentUserId
-                ? all.filter((tag) => tag.user_id === currentUserId)
-                : []
-        );
-    };
+    useEffect(() => {
+        fetchAllTags();
+    }, [currentUserId]);
 
     // Open delete confirmation modal
     const openDeleteModal = (doc) => {
@@ -150,7 +159,6 @@ export default function Library() {
         setEditingTagsDoc(doc);
         setShowEditTagsModal(true);
         setOpenDropdownId(null);
-        fetchAllTags();
         // Allow no tag: if no tags, empty array
         setSelectedTagIds(
             doc.tags && doc.tags.length > 0 ? [doc.tags[0].id] : []
@@ -198,19 +206,34 @@ export default function Library() {
                 ...doc,
                 tags: doc.tags
                     ? doc.tags
-                        .filter((tag) =>
-                            action.type === "delete"
-                                ? tag.id !== action.tagId
-                                : true
-                        )
-                        .map((tag) =>
-                            action.type === "edit" && tag.id === action.tag.id
-                                ? { ...tag, ...action.tag }
-                                : tag
-                        )
+                          .filter((tag) =>
+                              action.type === "delete"
+                                  ? tag.id !== action.tagId
+                                  : true
+                          )
+                          .map((tag) =>
+                              action.type === "edit" && tag.id === action.tag.id
+                                  ? { ...tag, ...action.tag }
+                                  : tag
+                          )
                     : [],
             }))
         );
+        // Refresh allTags after tag create/edit/delete
+        fetchAllTags();
+    };
+
+    // Filter documents by selected tag
+    const filteredDocuments = filteredTagId
+        ? documentsData.filter(
+              (doc) =>
+                  doc.tags && doc.tags.some((tag) => tag.id === filteredTagId)
+          )
+        : documentsData;
+
+    // Callback for tag click from TagsSection
+    const handleTagClick = (tag) => {
+        setFilteredTagId(tag.id === filteredTagId ? null : tag.id);
     };
 
     // Helper to format date
@@ -237,7 +260,215 @@ export default function Library() {
             <HeaderNavbar />
             <div className="min-h-screen w-full max-w-7xl mx-auto py-8">
                 {/* Tags Section */}
-                <TagsSection onTagUpdate={handleTagUpdate} />
+                <TagsSection
+                    onTagUpdate={handleTagUpdate}
+                    onTagClick={handleTagClick}
+                    allTags={allTags}
+                    fetchAllTags={fetchAllTags}
+                    loading={tagsLoading}
+                />
+
+                {/* Documents Section */}
+                <section className="space-y-6">
+                    {/* Header */}
+                    <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-[25px] text-blue-900 font-semibold">
+                            Grammar Check
+                        </h2>
+                        <button className="flex items-center gap-2 px-3 py-1 bg-orange-500 text-white rounded-[10px] hover:bg-orange-600 transition">
+                            <Plus size={16} />
+                            Start New
+                        </button>
+                    </div>
+                    {/* document List */}
+                    {!loading && filteredDocuments.length > 0 && (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                            {filteredDocuments.map((doc) => (
+                                <div
+                                    key={doc.id}
+                                    className="border-2 border-gray-200 rounded-xl px-4 py-3 shadow hover:shadow-xl relative"
+                                >
+                                    <div className="flex justify-between items-center">
+                                        <h3 className="font-bold text-lg">
+                                            {doc.title || "Untitled document"}
+                                        </h3>
+                                        <div
+                                            className="relative"
+                                            ref={(el) =>
+                                                (dropdownRefs.current[doc.id] =
+                                                    el)
+                                            }
+                                        >
+                                            <button
+                                                className="text-gray-400 text-xl cursor-pointer flex items-center hover:bg-gray-100 p-1 rounded-full"
+                                                onClick={() =>
+                                                    setOpenDropdownId(
+                                                        openDropdownId ===
+                                                            doc.id
+                                                            ? null
+                                                            : doc.id
+                                                    )
+                                                }
+                                            >
+                                                <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    width="19"
+                                                    height="19"
+                                                    viewBox="0 0 24 24"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    strokeWidth="2"
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    className="lucide lucide-ellipsis-vertical-icon lucide-ellipsis-vertical"
+                                                >
+                                                    <circle
+                                                        cx="12"
+                                                        cy="12"
+                                                        r="1"
+                                                    />
+                                                    <circle
+                                                        cx="12"
+                                                        cy="5"
+                                                        r="1"
+                                                    />
+                                                    <circle
+                                                        cx="12"
+                                                        cy="19"
+                                                        r="1"
+                                                    />
+                                                </svg>
+                                            </button>
+                                            {openDropdownId === doc.id && (
+                                                <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-xl shadow-lg z-50">
+                                                    <div className="px-2 py-2 space-y-1">
+                                                        <button
+                                                            className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-gray-700 rounded-lg transition"
+                                                            onClick={() =>
+                                                                openEditNameModal(
+                                                                    doc
+                                                                )
+                                                            }
+                                                            type="button"
+                                                        >
+                                                            <Pencil
+                                                                size={16}
+                                                                className="text-blue-500"
+                                                            />
+                                                            Edit Name
+                                                        </button>
+                                                        <button
+                                                            className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-gray-700 rounded-lg transition"
+                                                            onClick={() =>
+                                                                openEditTagsModal(
+                                                                    doc
+                                                                )
+                                                            }
+                                                            type="button"
+                                                        >
+                                                            <Tags
+                                                                size={16}
+                                                                className="text-green-500"
+                                                            />
+                                                            Edit Tags
+                                                        </button>
+                                                        <button
+                                                            className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-red-600 rounded-lg transition"
+                                                            onClick={() =>
+                                                                openDeleteModal(
+                                                                    doc
+                                                                )
+                                                            }
+                                                            type="button"
+                                                        >
+                                                            <Trash2
+                                                                size={16}
+                                                                className="text-red-500"
+                                                            />
+                                                            Delete
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <p
+                                        className="text-gray-600 text-sm mt-1 break-words w-11/12 overflow-hidden"
+                                        style={{
+                                            wordBreak: "break-word",
+                                            display: "-webkit-box",
+                                            WebkitLineClamp: 1,
+                                            WebkitBoxOrient: "vertical",
+                                            overflow: "hidden",
+                                        }}
+                                    >
+                                        {doc.paragraph}
+                                    </p>
+                                    <div className="flex justify-between items-center text-sm">
+                                        <p className="text-gray-600 text-sm">
+                                            <span className="text-[14px] font-semibold">
+                                                Words:{" "}
+                                            </span>
+                                            {doc.word_count}
+                                        </p>
+                                        {/* Show tags on card */}
+                                        {doc.tags && doc.tags.length > 0 && (
+                                            <div className="flex flex-wrap">
+                                                {doc.tags.map((tag) => (
+                                                    <span
+                                                        key={tag.id}
+                                                        className="inline-flex items-center px-3 py-1 rounded text-xs font-semibold"
+                                                        style={{
+                                                            backgroundColor:
+                                                                tag.color,
+                                                            color: "#fff",
+                                                        }}
+                                                    >
+                                                        {tag.name}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="mt-2 flex justify-between items-center text-sm">
+                                        <span className="text-gray-500 text-sm">
+                                            Created on:{" "}
+                                            {formatDate(doc.created_at)}
+                                        </span>
+                                        <button className="text-blue-700 text-md hover:underline">
+                                            Open
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    {/* Empty State */}
+                    {!loading && filteredDocuments.length === 0 && (
+                        <div className="p-6 text-center border rounded-xl">
+                            <FileText
+                                size={32}
+                                className="text-orange-500 mb-2 hover:text-orange-600 mx-auto"
+                            />
+
+                            <h3 className="text-[22px] font-semibold mb-2">
+                                No document yet
+                            </h3>
+                            <p className="text-gray-600">
+                                Create your first documents to test your
+                                knowledge
+                            </p>
+
+                            <div className="flex justify-center gap-4">
+                                <button className="flex items-center gap-2 px-3 py-1 bg-orange-500 text-white rounded-lg hover:bg-orange-400 transition">
+                                    <Plus size={16} />
+                                    Create First Tag
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </section>
 
                 {/* Edit Name Modal (render at top level, not inside section/grid) */}
                 {showEditNameModal && (
@@ -423,208 +654,6 @@ export default function Library() {
                         </form>
                     </div>
                 )}
-
-                {/* Documents Section */}
-                <section className="space-y-6">
-                    {/* Header */}
-                    <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-[25px] text-blue-900 font-semibold">
-                            Grammar Check
-                        </h2>
-                        <button className="flex items-center gap-2 px-3 py-1 bg-orange-500 text-white rounded-[10px] hover:bg-orange-600 transition">
-                            <Plus size={16} />
-                            Start New
-                        </button>
-                    </div>
-                    {/* document List */}
-                    {!loading && documentsData.length > 0 && (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                            {documentsData.map((doc) => (
-                                <div
-                                    key={doc.id}
-                                    className="border-2 border-gray-200 rounded-xl px-4 py-3 shadow hover:shadow-xl relative"
-                                >
-                                    <div className="flex justify-between items-center">
-                                        <h3 className="font-bold text-lg">
-                                            {doc.title || "Untitled document"}
-                                        </h3>
-                                        <div
-                                            className="relative"
-                                            ref={(el) =>
-                                                (dropdownRefs.current[doc.id] =
-                                                    el)
-                                            }
-                                        >
-                                            <button
-                                                className="text-gray-400 text-xl cursor-pointer flex items-center hover:bg-gray-100 p-1 rounded-full"
-                                                onClick={() =>
-                                                    setOpenDropdownId(
-                                                        openDropdownId ===
-                                                            doc.id
-                                                            ? null
-                                                            : doc.id
-                                                    )
-                                                }
-                                            >
-                                                <svg
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    width="19"
-                                                    height="19"
-                                                    viewBox="0 0 24 24"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    strokeWidth="2"
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    className="lucide lucide-ellipsis-vertical-icon lucide-ellipsis-vertical"
-                                                >
-                                                    <circle
-                                                        cx="12"
-                                                        cy="12"
-                                                        r="1"
-                                                    />
-                                                    <circle
-                                                        cx="12"
-                                                        cy="5"
-                                                        r="1"
-                                                    />
-                                                    <circle
-                                                        cx="12"
-                                                        cy="19"
-                                                        r="1"
-                                                    />
-                                                </svg>
-                                            </button>
-                                            {openDropdownId === doc.id && (
-                                                <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-xl shadow-lg z-50">
-                                                    <div className="px-2 py-2 space-y-1">
-                                                        <button
-                                                            className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-gray-700 rounded-lg transition"
-                                                            onClick={() =>
-                                                                openEditNameModal(
-                                                                    doc
-                                                                )
-                                                            }
-                                                            type="button"
-                                                        >
-                                                            <Pencil
-                                                                size={16}
-                                                                className="text-blue-500"
-                                                            />
-                                                            Edit Name
-                                                        </button>
-                                                        <button
-                                                            className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-gray-700 rounded-lg transition"
-                                                            onClick={() =>
-                                                                openEditTagsModal(
-                                                                    doc
-                                                                )
-                                                            }
-                                                            type="button"
-                                                        >
-                                                            <Tags
-                                                                size={16}
-                                                                className="text-green-500"
-                                                            />
-                                                            Edit Tags
-                                                        </button>
-                                                        <button
-                                                            className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-red-600 rounded-lg transition"
-                                                            onClick={() =>
-                                                                openDeleteModal(
-                                                                    doc
-                                                                )
-                                                            }
-                                                            type="button"
-                                                        >
-                                                            <Trash2
-                                                                size={16}
-                                                                className="text-red-500"
-                                                            />
-                                                            Delete
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                    <p
-                                        className="text-gray-600 text-sm mt-1 break-words w-11/12 overflow-hidden"
-                                        style={{
-                                            wordBreak: "break-word",
-                                            display: "-webkit-box",
-                                            WebkitLineClamp: 1,
-                                            WebkitBoxOrient: "vertical",
-                                            overflow: "hidden",
-                                        }}
-                                    >
-                                        {doc.paragraph}
-                                    </p>
-                                    <div className="flex justify-between items-center text-sm">
-                                        <p className="text-gray-600 text-sm">
-                                            <span className="text-[14px] font-semibold">
-                                                Words:{" "}
-                                            </span>
-                                            {doc.word_count}
-                                        </p>
-                                        {/* Show tags on card */}
-                                        {doc.tags && doc.tags.length > 0 && (
-                                            <div className="flex flex-wrap">
-                                                {doc.tags.map((tag) => (
-                                                    <span
-                                                        key={tag.id}
-                                                        className="inline-flex items-center px-3 py-1 rounded text-xs font-semibold"
-                                                        style={{
-                                                            backgroundColor:
-                                                                tag.color,
-                                                            color: "#fff",
-                                                        }}
-                                                    >
-                                                        {tag.name}
-                                                    </span>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div className="mt-2 flex justify-between items-center text-sm">
-                                        <span className="text-gray-500 text-sm">
-                                            Created on:{" "}
-                                            {formatDate(doc.created_at)}
-                                        </span>
-                                        <button className="text-blue-700 text-md hover:underline">
-                                            Open
-                                        </button>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-
-                    {/* Empty State */}
-                    {!loading && documentsData.length === 0 && (
-                        <div className="p-6 text-center border rounded-xl">
-                            <FileText
-                                size={32}
-                                className="text-orange-500 mb-2 hover:text-orange-600 mx-auto"
-                            />
-
-                            <h3 className="text-[22px] font-semibold mb-2">
-                                No document yet
-                            </h3>
-                            <p className="text-gray-600">
-                                Create your first documents to test your
-                                knowledge
-                            </p>
-
-                            <div className="flex justify-center gap-4">
-                                <button className="flex items-center gap-2 px-3 py-1 bg-orange-500 text-white rounded-lg hover:bg-orange-400 transition">
-                                    <Plus size={16} />
-                                    Create First Tag
-                                </button>
-                            </div>
-                        </div>
-                    )}
-                </section>
             </div>
 
             {/* Footer Section */}

@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { usePage } from "@inertiajs/react";
 import { Pencil, Trash2, Plus, Tags } from "lucide-react";
 import TagModal from "./TagModal";
 import axios from "axios";
 
-export default function  TagsSection({ onTagUpdate })  { 
+export default function TagsSection({ onTagUpdate, onTagClick, allTags, fetchAllTags }) {
     const { auth } = usePage().props;
     const userId = auth?.user?.id;
 
@@ -23,34 +23,16 @@ export default function  TagsSection({ onTagUpdate })  {
         "#F43F5E", // Rose - Special / Highlighted
     ];
 
-    // Tag CRUD state
-    const [tags, setTags] = useState([]);
     const [showTagModal, setShowTagModal] = useState(false);
     const [tagName, setTagName] = useState("");
     const [tagColor, setTagColor] = useState(tagColors[0]);
     const [editingTag, setEditingTag] = useState(null);
     const [saving, setSaving] = useState(false);
-
-    // Delete confirmation modal state
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [deletingTag, setDeletingTag] = useState(null);
-
-    // Fetch tags from backend (only tags created by this user)
-    const fetchTags = () => {
-        axios
-            .get("/tags", { headers: { Accept: "application/json" } })
-            .then((res) => {
-                const allTags = res.data.data || [];
-                const filteredTags = userId
-                    ? allTags.filter((tag) => tag.user_id === userId)
-                    : allTags;
-                setTags(filteredTags);
-            })
-            .catch(() => setTags([]));
-    };
-    useEffect(() => {
-        fetchTags();
-    }, [userId]);
+    const [openDropdownId, setOpenDropdownId] = useState(null);
+    const dropdownRefs = useRef({});
+    const [selectedTagId, setSelectedTagId] = useState(null);
 
     // Open modal for create/edit
     const openTagModal = (tag = null) => {
@@ -94,7 +76,7 @@ export default function  TagsSection({ onTagUpdate })  {
                 await axios.post("/tags", payload);
             }
             setShowTagModal(false);
-            fetchTags();
+            if (fetchAllTags) fetchAllTags(); // <-- update parent's tag list
         } finally {
             setSaving(false);
         }
@@ -120,7 +102,35 @@ export default function  TagsSection({ onTagUpdate })  {
                 tagId: deletingTag.id,
             });
         }
-        fetchTags();
+        if (fetchAllTags) fetchAllTags(); // <-- update parent's tag list
+    };
+
+    // Close dropdown on outside click
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (
+                openDropdownId &&
+                dropdownRefs.current[openDropdownId] &&
+                !dropdownRefs.current[openDropdownId].contains(event.target)
+            ) {
+                setOpenDropdownId(null);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [openDropdownId]);
+
+    // Handler for clicking a tag row (filter/search by tag)
+    const handleTagClick = (tag) => {
+        setSelectedTagId(tag.id === selectedTagId ? null : tag.id);
+        if (onTagClick) {
+            onTagClick(tag);
+        } else {
+            // Example: filterGrammarByTag(tag.id);
+            console.log("Grammar check/filter for tag:", tag.id);
+        }
     };
 
     return (
@@ -138,12 +148,27 @@ export default function  TagsSection({ onTagUpdate })  {
                 </button>
             </div>
             <div className="tags-container">
-                {tags.length > 0 ? (
+                {allTags && allTags.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-                        {tags.map((tag) => (
+                        {allTags.map((tag) => (
                             <div
                                 key={tag.id}
-                                className="flex items-center px-4 py-3 mb-3 rounded-xl border-2 border-gray-200 shadow-sm"
+                                className={
+                                    `flex items-center px-3 py-3 mb-3 rounded-xl shadow-sm cursor-pointer ` +
+                                    (selectedTagId === tag.id
+                                        ? "border-blue-600 border-2 bg-blue-50"
+                                        : "border-gray-200 border-2")
+                                }
+                                onClick={e => {
+                                    // Prevent click if dropdown button or menu is clicked
+                                    if (
+                                        dropdownRefs.current[tag.id] &&
+                                        dropdownRefs.current[tag.id].contains(e.target)
+                                    ) {
+                                        return;
+                                    }
+                                    handleTagClick(tag);
+                                }}
                             >
                                 <div
                                     className="w-6 h-6 rounded-md flex-shrink-0 transition-transform duration-300"
@@ -155,24 +180,74 @@ export default function  TagsSection({ onTagUpdate })  {
                                     {tag.name}
                                 </p>
                                 <div className="flex-1"></div>
-                                <button
-                                    className="p-1 hover:bg-gray-100 rounded-md mr-1"
-                                    onClick={() => openTagModal(tag)}
+                                {/* Dropdown menu for Edit/Delete */}
+                                <div
+                                    className="relative"
+                                    ref={el => (dropdownRefs.current[tag.id] = el)}
                                 >
-                                    <Pencil
-                                        size={18}
-                                        className="text-gray-500"
-                                    />
-                                </button>
-                                <button
-                                    className="p-1 hover:bg-gray-100 rounded-md"
-                                    onClick={() => confirmDeleteTag(tag)}
-                                >
-                                    <Trash2
-                                        size={18}
-                                        className="text-red-500"
-                                    />
-                                </button>
+                                    <button
+                                        className="text-gray-400 text-xl cursor-pointer flex items-center hover:bg-gray-100 rounded-full"
+                                        onClick={() =>
+                                            setOpenDropdownId(
+                                                openDropdownId === tag.id
+                                                    ? null
+                                                    : tag.id
+                                            )
+                                        }
+                                        type="button"
+                                    >
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            width="19"
+                                            height="19"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeWidth="2"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            className="lucide lucide-ellipsis-vertical-icon lucide-ellipsis-vertical"
+                                        >
+                                            <circle cx="12" cy="12" r="1" />
+                                            <circle cx="12" cy="5" r="1" />
+                                            <circle cx="12" cy="19" r="1" />
+                                        </svg>
+                                    </button>
+                                    {openDropdownId === tag.id && (
+                                        <div className="absolute right-0 mt-2 w-36 bg-white rounded-xl shadow-lg z-50">
+                                            <div className="px-2 py-2 space-y-1">
+                                                <button
+                                                    className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-gray-700 rounded-lg transition"
+                                                    onClick={() => {
+                                                        setOpenDropdownId(null);
+                                                        openTagModal(tag);
+                                                    }}
+                                                    type="button"
+                                                >
+                                                    <Pencil
+                                                        size={16}
+                                                        className="text-blue-500"
+                                                    />
+                                                    Edit Tag
+                                                </button>
+                                                <button
+                                                    className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm hover:bg-red-100 text-red-600 rounded-lg transition"
+                                                    onClick={() => {
+                                                        setOpenDropdownId(null);
+                                                        confirmDeleteTag(tag);
+                                                    }}
+                                                    type="button"
+                                                >
+                                                    <Trash2
+                                                        size={16}
+                                                        className="text-red-500"
+                                                    />
+                                                    Delete
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         ))}
                     </div>
