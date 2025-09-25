@@ -4,7 +4,7 @@ import { Pencil, Trash2, Plus, Tags } from "lucide-react";
 import TagModal from "./TagModal";
 import axios from "axios";
 
-export default function TagsSection() {
+export default function  TagsSection({ onTagUpdate })  { 
     const { auth } = usePage().props;
     const userId = auth?.user?.id;
 
@@ -83,6 +83,13 @@ export default function TagsSection() {
         try {
             if (editingTag) {
                 await axios.patch(`/tags/${editingTag.id}`, payload);
+                // Notify parent about tag edit
+                if (onTagUpdate) {
+                    onTagUpdate({
+                        type: "edit",
+                        tag: { ...editingTag, name: tagName, color: tagColor },
+                    });
+                }
             } else {
                 await axios.post("/tags", payload);
             }
@@ -106,6 +113,13 @@ export default function TagsSection() {
         await axios.delete(`/tags/${deletingTag.id}`);
         setShowDeleteModal(false);
         setDeletingTag(null);
+        // Notify parent about tag delete
+        if (onTagUpdate) {
+            onTagUpdate({
+                type: "delete",
+                tagId: deletingTag.id,
+            });
+        }
         fetchTags();
     };
 

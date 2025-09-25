@@ -113,6 +113,7 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::resource('grammar-checkers', GrammarCheckerController::class)->except(['create', 'edit']);
+    Route::post('/grammar-checkers/{grammarChecker}/tags', [GrammarCheckerController::class, 'updateTags']);
 });
 
 require __DIR__ . '/auth.php';

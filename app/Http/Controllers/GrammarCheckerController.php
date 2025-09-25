@@ -11,7 +11,7 @@ class GrammarCheckerController extends Controller
 {
     public function index(Request $request)
     {
-        $query = GrammarChecker::query();
+        $query = GrammarChecker::with('tags');
 
         // Search by title if search term is provided
         if ($request->has('search') && $request->search) {
@@ -75,7 +75,7 @@ class GrammarCheckerController extends Controller
 
     public function show(GrammarChecker $grammarChecker)
     {
-        return response()->json($grammarChecker);
+        return response()->json($grammarChecker->load('tags'));
     }
 
     public function update(Request $request, GrammarChecker $grammarChecker)
@@ -114,5 +114,16 @@ class GrammarCheckerController extends Controller
         }
 
         return redirect()->route('grammar-checkers.index')->with('success', 'Grammar check deleted successfully.');
+    }
+
+    // Add this method at the end of the controller class
+    public function updateTags(Request $request, GrammarChecker $grammarChecker)
+    {
+        $request->validate([
+            'tag_ids' => 'array',
+            'tag_ids.*' => 'exists:tags,id',
+        ]);
+        $grammarChecker->tags()->sync($request->tag_ids ?? []);
+        return response()->json($grammarChecker->load('tags'));
     }
 }
