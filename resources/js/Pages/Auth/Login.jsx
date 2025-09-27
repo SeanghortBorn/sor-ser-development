@@ -1,161 +1,173 @@
-import Checkbox from '@/Components/Checkbox';
-import InputError from '@/Components/InputError';
-import InputLabel from '@/Components/InputLabel';
-import PrimaryButton from '@/Components/PrimaryButton';
-import TextInput from '@/Components/TextInput';
-import GuestLayout from '@/Layouts/GuestLayout';
-import { Head, Link, useForm } from '@inertiajs/react';
-import { useState } from 'react';
+import { useState } from "react";
+import { Head, useForm } from "@inertiajs/react";
+import WaveBackground from "@/Components/Animations/WaveBackground";
+import InputError from "@/Components/InputError";
 
 export default function Login({ status, canResetPassword }) {
     const { data, setData, post, processing, errors, reset } = useForm({
-        email: '',
-        password: '',
+        email: "",
+        password: "",
         remember: false,
     });
     const [showPassword, setShowPassword] = useState(false);
 
     const submit = (e) => {
         e.preventDefault();
-
-        post(route('login'), {
-            onFinish: () => reset('password'),
+        post(route("login"), {
+            onFinish: () => reset("password"),
         });
     };
 
     return (
-        <GuestLayout>
+        <>
             <Head title="Log in" />
-
-            <div className="w-full max-w-sm mx-auto">
-                {status && (
-                    <div className="mb-4 p-3 text-sm text-green-700 bg-green-50 border border-green-200 rounded-md">
-                        {status}
-                    </div>
-                )}
-
-                <div className="text-center mb-8">
-                    <h1 className="text-2xl font-semibold text-gray-900">
-                        Sign in
-                    </h1>
-                    <p className="text-gray-600 mt-2 text-sm">
-                        Welcome back! Please enter your details.
-                    </p>
-                </div>
-
-                <form onSubmit={submit} className="space-y-4">
-                    <div>
-                        <InputLabel htmlFor="email" value="Email" className="text-sm font-medium text-gray-700" />
-                        <TextInput
-                            id="email"
-                            type="email"
-                            name="email"
-                            value={data.email}
-                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            placeholder="Enter your email"
-                            autoComplete="username"
-                            isFocused={true}
-                            onChange={(e) => setData('email', e.target.value)}
-                        />
-                        <InputError message={errors.email} className="mt-1" />
-                    </div>
-
-                    <div>
-                        <InputLabel htmlFor="password" value="Password" className="text-sm font-medium text-gray-700" />
-                        <div className="relative">
-                            <TextInput
-                                id="password"
-                                type={showPassword ? "text" : "password"}
-                                name="password"
-                                value={data.password}
-                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-10"
-                                placeholder="Enter your password"
-                                autoComplete="current-password"
-                                onChange={(e) => setData('password', e.target.value)}
-                            />
-                            <button
-                                type="button"
-                                onClick={() => setShowPassword((v) => !v)}
-                                className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500 focus:outline-none"
-                                tabIndex={-1}
-                            >
-                                {showPassword ? (
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-5.523 0-10-4.477-10-10 0-1.657.336-3.234.938-4.675m1.675-2.175A9.956 9.956 0 0112 3c5.523 0 10 4.477 10 10 0 1.657-.336 3.234-.938 4.675m-1.675 2.175A9.956 9.956 0 0112 21c-5.523 0-10-4.477-10-10 0-1.657.336-3.234.938-4.675" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                                ) : (
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-5.523 0-10-4.477-10-10 0-1.657.336-3.234.938-4.675m1.675-2.175A9.956 9.956 0 0112 3c5.523 0 10 4.477 10 10 0 1.657-.336 3.234-.938 4.675m-1.675 2.175A9.956 9.956 0 0112 21c-5.523 0-10-4.477-10-10 0-1.657.336-3.234.938-4.675" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3l18 18" /></svg>
-                                )}
-                            </button>
-                        </div>
-                        <InputError message={errors.password} className="mt-1" />
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                        <label className="flex items-center">
-                            <Checkbox
-                                name="remember"
-                                checked={data.remember}
-                                onChange={(e) => setData('remember', e.target.checked)}
-                                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                            />
-                            <span className="ml-2 text-sm text-gray-600">
-                                Remember me
-                            </span>
-                        </label>
-
-                        {canResetPassword && (
-                            <Link
-                                href={route('password.request')}
-                                className="text-sm text-blue-600 hover:text-blue-700 font-medium"
-                            >
-                                Forgot password?
-                            </Link>
+            <WaveBackground />
+            <div className="fixed inset-0 flex items-center justify-center z-10">
+                <div
+                    className="relative bg-white rounded-2xl w-full max-w-xl shadow-xl"
+                    style={{
+                        boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.18)",
+                        border: "1px solid #e5e7eb",
+                    }}
+                >
+                    {/* Close button */}
+                    <button
+                        type="button"
+                        className="absolute top-5 right-6 text-gray-400 hover:text-gray-600 text-2xl z-10"
+                        aria-label="Close"
+                        onClick={() => window.history.back()}
+                        style={{
+                            background: "none",
+                            border: "none",
+                        }}
+                    >
+                        &times;
+                    </button>
+                    {/* Login Form Content */}
+                    <div className="px-7 py-6">
+                        <h2 className="text-2xl font-bold text-[#222a54] mb-3">
+                            Login
+                        </h2>
+                        {status && (
+                            <div className="mb-4 p-3 text-sm text-green-700 bg-green-50 border border-green-200 rounded-md">
+                                {status}
+                            </div>
                         )}
-                    </div>
-
-                    <PrimaryButton
-                        className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 px-4 rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
-                        disabled={processing}
-                    >
-                        {processing ? 'Signing in...' : 'Sign in'}
-                    </PrimaryButton>
-                </form>
-
-                <div className="mt-6">
-                    <div className="relative">
-                        <div className="absolute inset-0 flex items-center">
-                            <div className="w-full border-t border-gray-300" />
-                        </div>
-                        <div className="relative flex justify-center text-sm">
-                            <span className="px-2 bg-white text-gray-500">Or continue with</span>
-                        </div>
-                    </div>
-
-                    <div className="mt-4">
                         <a
-                            href={route('auth.google')}
-                            className="w-full inline-flex justify-center items-center px-4 py-2.5 border border-gray-300 rounded-md bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                            href={route("auth.google")}
+                            className="w-full flex items-center justify-center gap-3 px-3 py-[14px] border-[3px] border-gray-200 rounded-2xl hover:bg-gray-50 transition-colors mb-4"
                         >
-                            <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24">
-                                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                            <svg className="w-5 h-5" viewBox="0 0 24 24">
+                                <path
+                                    fill="#4285f4"
+                                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                                />
+                                <path
+                                    fill="#34a853"
+                                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                                />
+                                <path
+                                    fill="#fbbc05"
+                                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                                />
+                                <path
+                                    fill="#ea4335"
+                                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                                />
                             </svg>
-                            Continue with Google
+                            <span className="text-gray-700 font-medium">
+                                Continue with Google
+                            </span>
                         </a>
+                        <div className="flex items-center mb-2">
+                            <div className="flex-1 border-t border-gray-200"></div>
+                            <span className="px-3 text-base text-gray-400 font-medium">
+                                Or
+                            </span>
+                            <div className="flex-1 border-t border-gray-200"></div>
+                        </div>
+                        <form className="space-y-2" onSubmit={submit}>
+                            <div>
+                                <label
+                                    htmlFor="email"
+                                    className="block text-base font-semibold text-[#222a54] mb-2"
+                                >
+                                    Email Address
+                                </label>
+                                <input
+                                    id="email"
+                                    type="email"
+                                    name="email"
+                                    value={data.email}
+                                    onChange={(e) =>
+                                        setData("email", e.target.value)
+                                    }
+                                    autoComplete="username"
+                                    placeholder="Enter your email"
+                                    className="w-full px-3 py-[12px] border border-gray-300 rounded-xl transition-colors text-gray-600 focus:ring-3 focus:ring-gray-100 focus:outline-none text-[18px] font-medium mb-2"
+                                />
+                                <InputError
+                                    message={errors.email}
+                                    className="mt-1"
+                                />
+                            </div>
+                            <div>
+                                <label
+                                    htmlFor="password"
+                                    className="block text-base font-semibold text-[#222a54] mb-1"
+                                >
+                                    Password
+                                </label>
+                                <input
+                                    id="password"
+                                    type={showPassword ? "text" : "password"}
+                                    name="password"
+                                    value={data.password}
+                                    onChange={(e) =>
+                                        setData("password", e.target.value)
+                                    }
+                                    autoComplete="current-password"
+                                    placeholder="Enter your password"
+                                    className="w-full px-3 py-[12px] border border-gray-300 rounded-xl transition-colors text-gray-600 focus:ring-3 focus:ring-gray-100 focus:outline-none text-[18px] font-medium mb-2"
+                                />
+                                <button
+                                    type="button"
+                                    className="absolute right-10 mt-[-38px] text-gray-400 hover:text-gray-600"
+                                    tabIndex={-1}
+                                    aria-label="Toggle password visibility"
+                                    style={{ background: "none", border: "none" }}
+                                >
+                                </button>
+                                <InputError
+                                    message={errors.password}
+                                    className="mt-1"
+                                />
+                            </div>
+                            <button
+                                type="submit"
+                                className="w-1/3 mt-3 border-[3px] border-blue-500 text-blue-600 hover:bg-[#f5f7ff] font-semibold py-2 rounded-2xl transition text-md"
+                                disabled={processing}
+                            >
+                                {processing ? "Logging in..." : "Login"}
+                            </button>
+                        </form>
+                        <div className="mt-3 text-start space-y-2">
+                            <a
+                                href={route("password.request")}
+                                className="text-base text-[#2563eb] hover:underline font-medium block"
+                            >
+                                Forgot your password?
+                            </a>
+                            <a
+                                href={route("register")}
+                                className="text-base text-[#2563eb] hover:underline font-medium block"
+                            >
+                                Create Account
+                            </a>
+                        </div>
                     </div>
-                </div>
-                {/* Sign up link */}
-                <div className="mt-6 text-center">
-                    <span className="text-sm text-gray-600">Don't have an account? </span>
-                    <Link
-                        href={route('register')}
-                        className="text-sm text-blue-600 hover:text-blue-700 font-medium"
-                    >
-                        Sign up
-                    </Link>
                 </div>
             </div>
-        </GuestLayout>
+        </>
     );
 }
