@@ -114,6 +114,11 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('grammar-checkers', GrammarCheckerController::class)->except(['create', 'edit']);
     Route::post('/grammar-checkers/{grammarChecker}/tags', [GrammarCheckerController::class, 'updateTags']);
+
+    Route::post('/feedback', [App\Http\Controllers\FeedbackController::class, 'store']);
+    Route::get('/feedback', [App\Http\Controllers\FeedbackController::class, 'index'])->name('feedback.index');
+    Route::get('/feedback/create', [App\Http\Controllers\FeedbackController::class, 'create'])->name('feedback.create');
+    
 });
 
 require __DIR__ . '/auth.php';

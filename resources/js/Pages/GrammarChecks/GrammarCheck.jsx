@@ -128,7 +128,7 @@ export default function GrammarCheck() {
     }, [auth.user]);
 
     // SidebarCheckGrammar component moved inline
-    function SidebarCheckGrammar({ text = "", onReplace }) {
+    function SidebarCheckGrammar({ text = "", onReplace, checkerId }) {
         const corrections = [
             { error: "helo", suggestion: "hello" },
             { error: "wld", suggestion: "world" },
@@ -144,21 +144,134 @@ export default function GrammarCheck() {
             { error: "thier", suggestion: "their" },
         ];
 
-        const foundCorrections = corrections.filter((c) =>
-            text.toLowerCase().includes(c.error)
-        );
+        // New local states for dismiss + feedback
+        const [dismissed, setDismissed] = useState([]); // array of error strings
+        const [feedbackFor, setFeedbackFor] = useState(null); // error string currently giving feedback on
+        const [feedbackText, setFeedbackText] = useState("");
+        const [feedbackState, setFeedbackState] = useState("idle"); // idle | sending | sent | error
+        const [feedbackError, setFeedbackError] = useState(null); // store server/client error
+        const [retryCount, setRetryCount] = useState(0);
+        const MAX_RETRIES = 3; // kept (only manual now)
+        const [lastSignature, setLastSignature] = useState(null); // prevent duplicate sends
+        // NEW: track which corrections already received feedback
+        const [feedbackSent, setFeedbackSent] = useState([]); // array of error strings
+        const [feedbackPrefix, setFeedbackPrefix] = useState(""); // NEW: locked prefix
+
+        const foundCorrections = corrections
+            .filter((c) => text.toLowerCase().includes(c.error))
+            .filter((c) => !dismissed.includes(c.error));
+
+        const handleDismiss = (error) => {
+            setDismissed((prev) => [...prev, error]);
+            if (feedbackFor === error) {
+                setFeedbackFor(null);
+                setFeedbackText("");
+            }
+        };
+
+        const submitFeedback = async (c) => {
+            if (!feedbackText.trim()) return;
+            if (feedbackState === "sending") return;
+            // Prevent duplicate identical submission when already sent
+            const signature = `${checkerId || 'none'}|${c.error}|${feedbackText.trim()}`;
+            if (lastSignature === signature && (feedbackState === "sent" || feedbackState === "sending")) return;
+
+            setLastSignature(signature);
+            setFeedbackState("sending");
+            setFeedbackError(null);
+            try {
+                await axios.post("/feedback", {
+                    checker_id: checkerId || null,
+                    error: c.error,
+                    suggestion: c.suggestion,
+                    message: feedbackText.trim(),
+                }, { headers: { Accept: "application/json" } });
+                // mark success for this specific correction
+                setFeedbackSent(prev => prev.includes(c.error) ? prev : [...prev, c.error]);
+                setFeedbackState("sent");
+                setRetryCount(0);
+                // Close textarea immediately and clear input; maintain success indicator separately
+                setFeedbackFor(null);
+                setFeedbackText("");
+                // reset generic state to idle so other corrections work independently
+                setTimeout(() => setFeedbackState("idle"), 50);
+            } catch (e) {
+                const serverMsg = e?.response?.data?.message || e?.message || "Unknown error";
+                setFeedbackError(serverMsg);
+                setFeedbackState("error");
+            }
+        };
+
+        const manualRetry = (c) => {
+            if (!feedbackText.trim()) return;
+            setRetryCount((r) => (r < MAX_RETRIES ? r + 1 : r));
+            submitFeedback(c);
+        };
+
+        const handleFeedbackChange = (e) => {
+            let val = e.target.value;
+            if (feedbackPrefix && !val.startsWith(feedbackPrefix)) {
+                // Enforce prefix
+                const after = val.slice(feedbackPrefix.length).replace(/^[^]*?(?=)/, "");
+                val = feedbackPrefix + after;
+            }
+            setFeedbackText(val);
+        };
+
+        const guardCaret = (el) => {
+            if (!feedbackPrefix) return;
+            if (el.selectionStart < feedbackPrefix.length) {
+                el.setSelectionRange(feedbackPrefix.length, feedbackPrefix.length);
+            }
+        };
+
+        const handleKeyDown = (e) => {
+            if (!feedbackPrefix) return;
+            const el = e.target;
+            const start = el.selectionStart;
+            const end = el.selectionEnd;
+            const protect = () => {
+                e.preventDefault();
+                setTimeout(() => guardCaret(el), 0);
+            };
+            // Block backspace/delete or typing inside prefix
+            if (start < feedbackPrefix.length) {
+                // Any character input
+                if (e.key.length === 1) return protect();
+                if (e.key === 'Backspace') return protect();
+                if (e.key === 'Delete') return protect();
+                if (e.key === 'ArrowLeft' && start <= feedbackPrefix.length) return protect();
+                if (e.key === 'Home') return protect();
+            }
+            // Block backspace exactly at prefix boundary (would delete last prefix char)
+            if (e.key === 'Backspace' && start === feedbackPrefix.length && end === feedbackPrefix.length) {
+                return protect();
+            }
+        };
+
+        const handleSelect = (e) => {
+            guardCaret(e.target);
+        };
 
         return (
             <div className="w-80 flex flex-col h-full">
                 <div className="bg-gray-50 hover:bg-gray-100 border border-slate-200 h-full flex flex-col overflow-hidden">
                     <div className="px-6 py-4 border-b border-slate-200 bg-white">
-                        <h3 className="text-lg font-bold text-slate-800 mb-2">Grammar Check</h3>
+                        <div className="flex items-center justify-between mb-2">
+                            <h3 className="text-lg font-bold text-slate-800">Grammar Check</h3>
+                            <a
+                                href={route('feedback.create')}
+                                className="text-xs px-2 py-1 rounded-md bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                            >
+                                New Feedback
+                            </a>
+                        </div>
                         <div className="flex items-center gap-2">
                             {foundCorrections.length > 0 ? (
                                 <>
                                     <AlertCircle className="w-4 h-4 text-amber-500" />
                                     <span className="text-sm text-slate-600 font-medium">
-                                        {foundCorrections.length} issue{foundCorrections.length > 1 ? "s" : ""} found
+                                        {foundCorrections.length} issue{foundCorrections.length > 1 ? 's' : ''} found
                                     </span>
                                 </>
                             ) : (
@@ -169,7 +282,7 @@ export default function GrammarCheck() {
                                     </span>
                                 </>
                             )}
-                        </div>
+                        </div>  
                     </div>
                     <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4 hide-scrollbar">
                         {foundCorrections.length > 0 ? (
@@ -195,25 +308,100 @@ export default function GrammarCheck() {
                                             </span>
                                         </p>
                                     </div>
-                                    <div className="flex gap-2">
+                                    <div className="flex gap-2 flex-wrap">
                                         <button
                                             className="flex items-center gap-1 flex-1 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium transition-all duration-200 shadow-sm"
                                             onClick={() => {
                                                 if (onReplace) {
-                                                    const newText = text.replace(
-                                                        new RegExp(c.error, "gi"),
-                                                        c.suggestion
-                                                    );
+                                                    const newText = text.replace(new RegExp(c.error, "gi"), c.suggestion);
                                                     onReplace(newText);
                                                 }
                                             }}
                                         >
                                             <Check size={16} /> Accept
                                         </button>
-                                        <button className="flex items-center gap-1 px-3 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg text-sm font-medium transition-all duration-200 shadow-sm">
+                                        <button
+                                            className="flex items-center gap-1 px-3 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg text-sm font-medium transition-all duration-200 shadow-sm"
+                                            onClick={() => handleDismiss(c.error)}
+                                        >
                                             <X size={16} /> Dismiss
                                         </button>
+                                        <button
+                                            disabled={feedbackSent.includes(c.error)}
+                                            className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 shadow-sm ${feedbackSent.includes(c.error) ? "bg-emerald-100 text-emerald-700 cursor-default" : feedbackFor === c.error ? "bg-blue-600 text-white" : "bg-blue-100 text-blue-700 hover:bg-blue-200"}`}
+                                            onClick={() => {
+                                                if (feedbackSent.includes(c.error)) return; // already sent
+                                                if (feedbackFor === c.error) {
+                                                    setFeedbackFor(null);
+                                                    setFeedbackText("");
+                                                    setFeedbackPrefix("");
+                                                } else {
+                                                    const prefix = `Issue with word "${c.error}" (suggested: "${c.suggestion}") - `;
+                                                    setFeedbackFor(c.error);
+                                                    setFeedbackPrefix(prefix);
+                                                    setFeedbackText(prefix);
+                                                    // place caret at end after render
+                                                    setTimeout(() => {
+                                                        const ta = document.getElementById(`fb-${c.error}`);
+                                                        if (ta) ta.setSelectionRange(prefix.length, prefix.length);
+                                                    }, 0);
+                                                }
+                                            }}
+                                        >
+                                            {feedbackSent.includes(c.error) ? <><CheckCircle2 size={16}/> Sent</> : 'Feedback'}
+                                        </button>
                                     </div>
+                                    {feedbackFor === c.error && !feedbackSent.includes(c.error) && (
+                                        <div className="mt-3 space-y-2 animate-fade-in">
+                                            <textarea
+                                                id={`fb-${c.error}`}
+                                                value={feedbackText}
+                                                onChange={handleFeedbackChange}
+                                                onKeyDown={handleKeyDown}
+                                                onClick={handleSelect}
+                                                onSelect={handleSelect}
+                                                placeholder="Tell us why this is wrong / helpful..."
+                                                className="w-full text-sm border border-slate-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[70px] resize-none"
+                                            />
+                                            <div className="flex items-center justify-between">
+                                                <div className="text-xs text-slate-400 max-w-[150px] break-words">
+                                                    {feedbackState === "sending" && <span className="text-blue-600">Sending...</span>}
+                                                    {feedbackState === "error" && (
+                                                        <span className="text-red-600">
+                                                            {retryCount >= MAX_RETRIES - 1 ? (feedbackError ? `${feedbackError}` : "Error") : ""}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <div className="flex gap-2">
+                                                    {feedbackState === "error" && retryCount >= MAX_RETRIES - 1 && (
+                                                        <button
+                                                            onClick={() => manualRetry(c)}
+                                                            className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs rounded-lg"
+                                                        >
+                                                            Retry
+                                                        </button>
+                                                    )}
+                                                    <button
+                                                        disabled={feedbackState === "sending" || !feedbackText.trim()}
+                                                        onClick={() => submitFeedback(c)}
+                                                        className="px-3 py-1.5 bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-700 text-white text-xs rounded-lg"
+                                                    >
+                                                        {feedbackState === "sending" ? "Sending" : "Send"}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            {feedbackError && feedbackState === "error" && retryCount >= MAX_RETRIES - 1 && (
+                                                <div className="text-[11px] text-red-500 italic">
+                                                    Could not send feedback. Please check your connection or try again later.
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                    {feedbackSent.includes(c.error) && (
+                                        <div className="mt-3 text-xs text-emerald-600 font-medium flex items-center gap-1">
+                                            <CheckCircle2 className="w-4 h-4" /> Feedback sent. Thank you!
+                                        </div>
+                                    )}
                                 </div>
                             ))
                         ) : (
@@ -298,7 +486,7 @@ export default function GrammarCheck() {
                     </div>
                     
                     {/* Right side - Grammar Check Sidebar (no gap) */}
-                    <SidebarCheckGrammar text={paragraph} onReplace={setParagraph} />
+                    <SidebarCheckGrammar text={paragraph} onReplace={setParagraph} checkerId={checkerId} />
                 </div>
 
                 {/* Account Modal inside section */}
