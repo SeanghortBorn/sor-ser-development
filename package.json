@@ -27,6 +27,7 @@
         "admin-lte": "^3.2.0",
         "bootstrap": "^4.3.1",
         "flag-icons": "^7.5.0",
+        "framer-motion": "^12.23.22",
         "jquery": "^3.7.1",
         "lucide-react": "^0.543.0",
         "moment": "^2.30.1",

@@ -1,39 +1,48 @@
-import React, { useState } from 'react';
-import QuizStart from './QuizStart';
-import QuizQuestion from './QuizQuestion';
-import QuizResult from './QuizResult';
+import React, { useState } from "react";
+import QuizStart from "./QuizStart";
+import QuizQuestion from "./QuizQuestion";
+import QuizResult from "./QuizResult";
 
-const QuizList = ({ quizzes }) => {
+const QuizList = ({ quizzes, quizStarted, setQuizStarted, onBack }) => {
     const [quizIndex, setQuizIndex] = useState(null);
     const [currentQuestion, setCurrentQuestion] = useState(0);
     const [score, setScore] = useState(0);
+    const [showResult, setShowResult] = useState(false);
 
-    if (!quizzes || quizzes.length === 0) return <p>Loading quizzes...</p>;
+    if (!quizzes || quizzes.length === 0) {
+        return <p>No quizzes available.</p>;
+    }
 
-    const quiz = quizzes[quizIndex ?? 0];
+    const quiz = quizIndex !== null ? quizzes[quizIndex] : null;
 
     const handleStart = (index) => {
         setQuizIndex(index);
         setCurrentQuestion(0);
         setScore(0);
+        setShowResult(false);
+        if (setQuizStarted) setQuizStarted(true);
     };
 
-    const handleAnswer = (isCorrect) => {
-        if (isCorrect) setScore(score + 1);
+    // Handles answer for MCQ, True/False, Fill-in-the-blank, Checkboxes
+    const handleAnswer = (isCorrect, isCheckboxes = false) => {
+        if (isCorrect) setScore((prev) => prev + 1);
 
-        if (currentQuestion + 1 < quiz.questions.length) {
-            setCurrentQuestion(currentQuestion + 1);
-        } else {
-            setCurrentQuestion(null); // quiz finished
+        if (quiz && currentQuestion + 1 < quiz.questions.length) {
+            setTimeout(() => setCurrentQuestion((prev) => prev + 1), isCheckboxes ? 0 : 400);
+        } else if (quiz && currentQuestion + 1 === quiz.questions.length) {
+            setTimeout(() => setShowResult(true), isCheckboxes ? 0 : 400);
         }
     };
 
     const handleBack = () => {
-        // Always go back to quiz selection
         setQuizIndex(null);
+        setCurrentQuestion(0);
+        setScore(0);
+        setShowResult(false);
+        if (onBack) onBack();
     };
 
-    // Show start screen if quiz not started
+    // Start screen (list of quizzes)
     if (quizIndex === null) {
         return (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -44,10 +53,10 @@ const QuizList = ({ quizzes }) => {
         );
     }
 
-    // Show quiz content (questions or results)
+    // Quiz content (questions or results)
     return (
         <div className="relative">
-            {/* Single Back button */}
+            {/* Back button */}
             <div className="mb-4">
                 <button
                     onClick={handleBack}
@@ -57,16 +66,25 @@ const QuizList = ({ quizzes }) => {
                 </button>
             </div>
 
-            {currentQuestion === null ? (
+            {showResult ? (
                 <QuizResult
                     score={score}
                     total={quiz.questions.length}
-                    onRestart={() => setQuizIndex(null)}
+                    onRestart={() => {
+                        setCurrentQuestion(0);
+                        setScore(0);
+                        setShowResult(false);
+                    }}
                 />
             ) : (
                 <QuizQuestion
-                    question={quiz.questions[currentQuestion]}
-                    onAnswer={handleAnswer}
+                    question={{
+                        type: quiz.questions[currentQuestion].type,
+                        question: quiz.questions[currentQuestion].text,
+                        options: quiz.questions[currentQuestion].options || [],
+                        answer: quiz.questions[currentQuestion].correct_answer,
+                    }}
+                    onAnswer={(isCorrect, isCheckboxes) => handleAnswer(isCorrect, isCheckboxes)}
                     progress={((currentQuestion + 1) / quiz.questions.length) * 100}
                 />
             )}

@@ -24,7 +24,9 @@ Route::inertia('/grammar-check', 'GrammarChecks/GrammarCheck');
 Route::inertia('/home', 'HomePages/Home');
 Route::inertia('/subscribe', 'Subscribes/SubscribePage');
 Route::inertia('/about', 'Abouts/index')->name('about');
-Route::inertia('/quiz-practice', 'Quizzes/DoQuiz');
+
+// Quiz landing page for students/guests (published quizzes)
+Route::get('/quiz-practice', [QuizController::class, 'landingPage'])->name('quiz.practice');
 
 Route::middleware(['auth', 'check.user.role'])->group(function () {
     Route::get('/dashboard', function () {
