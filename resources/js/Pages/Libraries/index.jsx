@@ -4,6 +4,7 @@ import { useRef, useState, useEffect } from "react";
 import { Plus, FileText, Pencil, Trash2, Tags } from "lucide-react";
 import Footer from "@/Components/Footer/Footer";
 import TagsSection from "@/Components/Tags/TagsSection";
+import AnalyticsSection from "@/Components/Analytics/AnalyticsSection";
 import axios from "axios";
 
 export default function Library() {
@@ -259,6 +260,10 @@ export default function Library() {
             <Head title="Library" />
             <HeaderNavbar />
             <div className="min-h-screen w-full max-w-7xl mx-auto py-8">
+                
+                {/* Analytics Section */}
+                <AnalyticsSection />
+                
                 {/* Tags Section */}
                 <TagsSection
                     onTagUpdate={handleTagUpdate}
