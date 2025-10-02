@@ -115,7 +115,7 @@ const AdminLayout = ({ breadcrumb, children }) => {
                         </button>
 
                         {dropdownOpen && (
-                            <div className="absolute right-[0.4rem] mt-2 w-64 bg-white border border-gray-200 rounded-xl shadow-lg z-50">
+                            <div className="absolute right-[0.4rem] mt-2 mx-auto max-w-xl bg-white border border-gray-200 rounded-xl shadow-lg z-50">
                                 {/* User Info Header */}
                                 <div className="px-4 py-3 border-b border-gray-200">
                                     <div className="flex items-center gap-3">
@@ -135,7 +135,7 @@ const AdminLayout = ({ breadcrumb, children }) => {
                                     <Link
                                         href={route("profile.edit")}
                                         onClick={() => setDropdownOpen(false)}
-                                        className="flex items-center px-4 py-2 text-sm text-blue-900 hover:bg-gray-100 rounded-lg transition"
+                                        className="flex items-center px-3 py-2 text-sm text-blue-900 hover:bg-gray-100 rounded-lg transition"
                                     >
                                         <i className="fas fa-user-circle w-4 mr-3 text-gray-500"></i>
                                         My Account
@@ -146,7 +146,7 @@ const AdminLayout = ({ breadcrumb, children }) => {
                                         href={route("logout")}
                                         as="button"
                                         onClick={() => setDropdownOpen(false)}
-                                        className="flex items-center w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition"
+                                        className="flex items-center w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition"
                                     >
                                         <i className="fas fa-sign-out-alt w-4 mr-3 text-red-500"></i>
                                         Sign Out
