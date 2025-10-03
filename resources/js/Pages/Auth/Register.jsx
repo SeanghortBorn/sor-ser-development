@@ -183,9 +183,9 @@ export default function Register() {
                             <button
                                 type="submit"
                                 disabled={processing}
-                                className="w-1/3 mt-3 border-[3px] border-blue-500 text-blue-600 hover:bg-[#f5f7ff] font-semibold py-2 rounded-2xl transition text-md"
+                                className="w-1/3 mt-2 border-2 border-blue-500 text-blue-600 hover:bg-[#f5f7ff] font-semibold py-1.5 rounded-xl transition text-md"
                             >
-                                Sign Up
+                                {processing ? "Registering..." : "Register"}
                             </button>
                         </form>
 

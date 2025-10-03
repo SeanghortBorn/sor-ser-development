@@ -145,13 +145,13 @@ export default function Login({ status, canResetPassword }) {
                             </div>
                             <button
                                 type="submit"
-                                className="w-1/3 mt-3 border-[3px] border-blue-500 text-blue-600 hover:bg-[#f5f7ff] font-semibold py-2 rounded-2xl transition text-md"
+                                className="w-1/3 mt-3 border-2 border-blue-500 text-blue-600 hover:bg-[#f5f7ff] font-semibold py-1.5 rounded-xl transition text-md"
                                 disabled={processing}
                             >
                                 {processing ? "Logging in..." : "Login"}
                             </button>
                         </form>
-                        <div className="mt-3 text-start space-y-2">
+                        <div className="mt-2 text-start space-y-1">
                             <a
                                 href={route("password.request")}
                                 className="text-base text-[#2563eb] hover:underline font-medium block"

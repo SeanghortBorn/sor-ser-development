@@ -29,6 +29,7 @@ Route::inertia('/about', 'Abouts/index')->name('about');
 // Quiz landing page for students/guests (published quizzes)
 Route::get('/quiz-practice', [QuizController::class, 'landingPage'])->name('quiz.practice');
 
+// Route::middleware(['auth','verified', 'check.user.role'])->group(function () {
 Route::middleware(['auth', 'check.user.role'])->group(function () {
     Route::get('/dashboard', function () {
         return Inertia::render('Dashboards/Dashboard');

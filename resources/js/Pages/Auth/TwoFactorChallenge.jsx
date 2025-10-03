@@ -1,12 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Head, useForm } from "@inertiajs/react";
-import AuthenticationCard from "@/Components/AuthenticationCard";
-import AuthenticationCardLogo from "@/Components/AuthenticationCardLogo";
 import InputError from "@/Components/InputError";
-import InputLabel from "@/Components/InputLabel";
-import PrimaryButton from "@/Components/PrimaryButton";
-import TextInput from "@/Components/TextInput";
 import Checkbox from "@/Components/Checkbox";
+import WaveBackground from "@/Components/Animations/WaveBackground";
 
 const TwoFactorChallenge = () => {
     const [recovery, setRecovery] = useState(false);
@@ -19,12 +15,9 @@ const TwoFactorChallenge = () => {
         remember_device: false,
     });
 
-    const toggleRecovery = () => {
-        setRecovery((prevRecovery) => !prevRecovery);
-    };
+    const toggleRecovery = () => setRecovery((prev) => !prev);
 
     useEffect(() => {
-        // Focus the appropriate input after recovery state changes
         if (recovery) {
             recoveryCodeInput.current?.focus();
             setData("code", "");
@@ -42,124 +35,146 @@ const TwoFactorChallenge = () => {
     return (
         <>
             <Head title="Two-factor Confirmation" />
+            <WaveBackground />
 
-            <AuthenticationCard>
-                <AuthenticationCardLogo className="w-20 h-20" />
+            <div className="fixed inset-0 flex items-center justify-center z-10">
+                <div
+                    className="relative bg-white rounded-2xl w-full max-w-xl shadow-xl"
+                    style={{
+                        boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.18)",
+                        border: "1px solid #e5e7eb",
+                    }}
+                >
+                    {/* Close button */}
+                    <button
+                        type="button"
+                        className="absolute top-5 right-6 text-gray-400 hover:text-gray-600 text-2xl z-10"
+                        aria-label="Close"
+                        onClick={() => window.history.back()}
+                        style={{
+                            background: "none",
+                            border: "none",
+                        }}
+                    >
+                        &times;
+                    </button>
 
-                <div className="mb-4 text-sm text-gray-600">
-                    {!recovery ? (
-                        <>
-                            Please confirm access to your account by entering
-                            the authentication code provided by your
-                            authenticator application.
-                            <div className="mt-2 text-xs text-gray-500">
-                                Open your authenticator app (like Google
-                                Authenticator, Microsoft Authenticator, or
-                                Authy) and enter the 6-digit code shown for this
-                                account.
-                            </div>
-                        </>
-                    ) : (
-                        <>
-                            Please confirm access to your account by entering
-                            one of your emergency recovery codes.
-                            <div className="mt-2 text-xs text-gray-500">
-                                These are the one-time use codes you saved when
-                                setting up two-factor authentication.
-                            </div>
-                        </>
-                    )}
-                </div>
+                    {/* Content */}
+                    <div className="px-7 py-6">
+                        <h2 className="text-2xl font-bold text-[#222a54] mb-1">
+                            Two-Factor Authentication
+                        </h2>
 
-                <form onSubmit={submit}>
-                    {!recovery ? (
-                        <div>
-                            <InputLabel htmlFor="code" value="Code" />
-                            <TextInput
-                                id="code"
-                                ref={codeInput}
-                                value={data.code}
-                                onChange={(e) => {
-                                    // Only allow numeric input and limit to 6 characters
-                                    const value = e.target.value
-                                        .replace(/[^0-9]/g, "")
-                                        .slice(0, 6);
-                                    setData("code", value);
-                                }}
-                                type="text"
-                                inputMode="numeric"
-                                className="mt-1 block w-full"
-                                autoFocus
-                                autoComplete="one-time-code"
-                                maxLength="6"
-                                placeholder="123456"
-                            />
-                            <InputError
-                                message={errors.code}
-                                className="mt-2"
-                            />
-                        </div>
-                    ) : (
-                        <div>
-                            <InputLabel
-                                htmlFor="recovery_code"
-                                value="Recovery Code"
-                            />
-                            <TextInput
-                                id="recovery_code"
-                                ref={recoveryCodeInput}
-                                value={data.recovery_code}
-                                onChange={(e) =>
-                                    setData("recovery_code", e.target.value)
-                                }
-                                type="text"
-                                className="mt-1 block w-full"
-                                autoComplete="one-time-code"
-                                placeholder="ABCDEF-GHIJKL"
-                            />
-                            <InputError
-                                message={errors.recovery_code}
-                                className="mt-2"
-                            />
-                        </div>
-                    )}
-
-                    <div className="block mt-4">
-                        <label className="flex items-center">
-                            <Checkbox
-                                name="remember_device"
-                                checked={data.remember_device}
-                                onChange={(e) =>
-                                    setData("remember_device", e.target.checked)
-                                }
-                            />
-                            <span className="ms-2 text-sm text-gray-600">
-                                Remember this device for 30 days
-                            </span>
-                        </label>
-                    </div>
-
-                    <div className="flex items-center justify-end mt-4">
-                        <button
-                            type="button"
-                            className="text-sm text-gray-600 hover:text-gray-900 underline cursor-pointer"
-                            onClick={toggleRecovery}
-                        >
+                        <p className="text-base text-gray-600 mb-3">
                             {!recovery
-                                ? "Use a recovery code"
-                                : "Use an authentication code"}
-                        </button>
+                                ? "Enter the 6-digit code from your authenticator app."
+                                : "Enter one of your emergency recovery codes."}
+                        </p>
 
-                        <PrimaryButton
-                            className="ms-4"
-                            disabled={processing}
-                            style={{ opacity: processing ? 0.25 : 1 }}
-                        >
-                            {processing ? "Verifying..." : "Log in"}
-                        </PrimaryButton>
+                        <form onSubmit={submit} className="space-y-5">
+                            {!recovery ? (
+                                <div>
+                                    <label
+                                        htmlFor="code"
+                                        className="block text-base font-semibold text-[#222a54] mb-2"
+                                    >
+                                        Authentication Code
+                                    </label>
+                                    <input
+                                        id="code"
+                                        ref={codeInput}
+                                        type="text"
+                                        inputMode="numeric"
+                                        maxLength="6"
+                                        autoComplete="one-time-code"
+                                        placeholder="123456"
+                                        value={data.code}
+                                        onChange={(e) =>
+                                            setData(
+                                                "code",
+                                                e.target.value
+                                                    .replace(/[^0-9]/g, "")
+                                                    .slice(0, 6)
+                                            )
+                                        }
+                                        className="w-full px-3 py-[12px] border border-gray-300 rounded-xl transition-colors text-gray-600 focus:ring-3 focus:ring-blue-100 focus:outline-none text-[16px] font-medium placeholder-gray-400"
+                                        required
+                                    />
+                                    <InputError
+                                        message={errors.code}
+                                        className="mt-1"
+                                    />
+                                </div>
+                            ) : (
+                                <div>
+                                    <label
+                                        htmlFor="recovery_code"
+                                        className="block text-base font-semibold text-[#222a54] mb-2"
+                                    >
+                                        Recovery Code
+                                    </label>
+                                    <input
+                                        id="recovery_code"
+                                        ref={recoveryCodeInput}
+                                        type="text"
+                                        placeholder="ABCDEF-GHIJKL"
+                                        autoComplete="one-time-code"
+                                        value={data.recovery_code}
+                                        onChange={(e) =>
+                                            setData(
+                                                "recovery_code",
+                                                e.target.value
+                                            )
+                                        }
+                                        className="w-full px-3 py-[12px] border border-gray-300 rounded-xl transition-colors text-gray-600 focus:ring-3 focus:ring-blue-100 focus:outline-none text-[16px] font-medium placeholder-gray-400"
+                                        required
+                                    />
+                                    <InputError
+                                        message={errors.recovery_code}
+                                        className="mt-1"
+                                    />
+                                </div>
+                            )}
+
+                            <div className="flex items-center">
+                                <Checkbox
+                                    name="remember_device"
+                                    checked={data.remember_device}
+                                    onChange={(e) =>
+                                        setData(
+                                            "remember_device",
+                                            e.target.checked
+                                        )
+                                    }
+                                />
+                                <span className="ms-2 text-sm text-gray-600">
+                                    Remember this device for 30 days
+                                </span>
+                            </div>
+
+                            <div className="flex flex-col sm:flex-row sm:justify-end sm:items-center gap-3 mt-2 space-x-1">
+                                <button
+                                    type="button"
+                                    onClick={toggleRecovery}
+                                    className="text-sm font-semibold text-blue-600 hover:underline"
+                                >
+                                    {!recovery
+                                        ? "Use a recovery code"
+                                        : "Use an authentication code"}
+                                </button>
+
+                                <button
+                                    type="submit"
+                                    disabled={processing}
+                                    className="w-1/3 flex items-center justify-center bg-blue-600 text-white font-semibold py-1.5 px-4 rounded-xl hover:bg-blue-500 transition-all duration-200 transform disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                                >
+                                    {processing ? "Verifying..." : "Log In"}
+                                </button>
+                            </div>
+                        </form>
                     </div>
-                </form>
-            </AuthenticationCard>
+                </div>
+            </div>
         </>
     );
 };
