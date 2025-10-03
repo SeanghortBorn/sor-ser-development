@@ -105,12 +105,12 @@ export default function HeaderNavbar() {
                             Quiz & Practice
                         </Link>
                         <Link
-                            href="/about"
+                            href="/contacts"
                             className={`px-3 py-[1.3rem] font-medium transition ${isActive(
-                                "/about"
+                                "/contacts"
                             )}`}
                         >
-                            About
+                            Contacts
                         </Link>
                     </div>
                 </div>
@@ -272,13 +272,13 @@ export default function HeaderNavbar() {
                                 Quiz & Practice
                             </Link>
                             <Link
-                                href="/about"
+                                href="/contacts"
                                 className={`py-2 px-3 rounded-lg ${isActive(
-                                    "/about"
+                                    "/contacts"
                                 )} hover:bg-gray-50`}
                                 onClick={() => setMobileMenuOpen(false)}
                             >
-                                About
+                                Contacts
                             </Link>
 
                             {/* Authenticated User Actions */}

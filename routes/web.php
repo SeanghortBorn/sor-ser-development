@@ -24,7 +24,7 @@ Route::redirect('/', '/home');
 Route::inertia('/grammar-check', 'GrammarChecks/GrammarCheck');
 Route::inertia('/home', 'Homes/index')->name('home');
 Route::inertia('/subscribe', 'Subscribes/index')->name('subscribe');
-Route::inertia('/about', 'Abouts/index')->name('about');
+Route::inertia('/contacts', 'Contacts/index')->name('contacts');
 
 // Quiz landing page for students/guests (published quizzes)
 Route::get('/quiz-practice', [QuizController::class, 'landingPage'])->name('quiz.practice');
