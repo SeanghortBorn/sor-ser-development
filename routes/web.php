@@ -22,7 +22,7 @@ use Laravel\Fortify\Http\Controllers\TwoFactorSecretKeyController;
 
 Route::redirect('/', '/home');
 Route::inertia('/grammar-check', 'GrammarChecks/GrammarCheck');
-Route::inertia('/home', 'HomePages/Home');
+Route::inertia('/home', 'Homes/index')->name('home');
 Route::inertia('/subscribe', 'Subscribes/index')->name('subscribe');
 Route::inertia('/about', 'Abouts/index')->name('about');
 
