@@ -1,7 +1,6 @@
 import Breadcrumb from "@/Components/Breadcrumb";
 import Modal from "@/Components/Modal";
 import Pagination from "@/Components/Pagination";
-import SecondaryButton from "@/Components/SecondaryButton";
 import AdminLayout from "@/Layouts/AdminLayout";
 import { Head, Link, useForm, usePage } from "@inertiajs/react";
 import moment from "moment";
@@ -31,6 +30,13 @@ export default function UserPage({ users, permissions = [] }) {
     const [blockTarget, setBlockTarget] = useState(null);
     const [blockProcessing, setBlockProcessing] = useState(false); // add this
 
+    // Reset password modal state
+    const [showResetModal, setShowResetModal] = useState(false);
+    const [resetTarget, setResetTarget] = useState(null);
+    const [resetPassword, setResetPassword] = useState("");
+    const [resetProcessing, setResetProcessing] = useState(false);
+    const [resetError, setResetError] = useState("");
+
     const openPermissionModal = (user) => {
         setSelectedUser(user);
         setUserPermissions(
@@ -58,6 +64,7 @@ export default function UserPage({ users, permissions = [] }) {
             .then(() => {
                 setPermProcessing(false);
                 setShowPermissionModal(false);
+                window.location.reload();
             })
             .catch(() => setPermProcessing(false));
     };
@@ -81,6 +88,44 @@ export default function UserPage({ users, permissions = [] }) {
                 setBlockProcessing(false); // stop processing
                 setShowBlockModal(false);
                 setBlockTarget(null);
+            });
+    };
+
+    // Open reset password modal
+    const openResetModal = (user) => {
+        setResetTarget(user);
+        setResetPassword("");
+        setResetError("");
+        setShowResetModal(true);
+    };
+
+    // Handle reset password submit
+    const handleResetPassword = (e) => {
+        e.preventDefault();
+        if (!resetTarget || !resetPassword) {
+            setResetError("Password is required.");
+            return;
+        }
+        setResetProcessing(true);
+        setResetError("");
+        window.axios
+            .post(route("users.reset-password", resetTarget.id), {
+                password: resetPassword,
+            })
+            .then(() => {
+                setShowResetModal(false);
+                setResetTarget(null);
+                setResetPassword("");
+                setResetProcessing(false);
+                // toast.success("Password reset successfully!");
+                window.location.reload();
+            })
+            .catch((err) => {
+                setResetProcessing(false);
+                setResetError(
+                    err?.response?.data?.message ||
+                        "Failed to reset password."
+                );
             });
     };
 
@@ -200,7 +245,7 @@ export default function UserPage({ users, permissions = [] }) {
                                                                   (p) => p.name
                                                               )
                                                               .join(", ")
-                                                        : "-"}
+                                                        : ""}
                                                 </td>
                                                 <td className="py-3 px-4">
                                                     {moment(
@@ -265,7 +310,7 @@ export default function UserPage({ users, permissions = [] }) {
                                                                             type="button"
                                                                             className="inline-flex items-center gap-1.5 px-2 py-2 text-sm font-medium rounded-xl bg-amber-500 text-white hover:bg-amber-600 transition"
                                                                             onClick={() =>
-                                                                                openPermissionModal(
+                                                                                openResetModal(
                                                                                     item
                                                                                 )
                                                                             }
@@ -404,7 +449,7 @@ export default function UserPage({ users, permissions = [] }) {
                                     Assign Permissions
                                 </h2>
                                 <p className="text-sm text-gray-600">
-                                    Select the permissions you want to assign to{" "}
+                                    Select the permission you want to assign to{" "}
                                     <span className="font-medium">
                                         {selectedUser?.name}
                                     </span>
@@ -412,22 +457,33 @@ export default function UserPage({ users, permissions = [] }) {
                                 </p>
 
                                 <div className="max-h-64 overflow-y-auto border rounded-lg p-3 bg-gray-50 hide-scrollbar">
+                                    {/* Option to remove permission (set to none) */}
+                                    {/* <label className="flex items-center gap-2 py-1 text-sm">
+                                        <input
+                                            type="radio"
+                                            name="permission"
+                                            className="rounded text-blue-600 focus:ring-0"
+                                            checked={userPermissions.length === 0}
+                                            onChange={() => setUserPermissions([])}
+                                        />
+                                        <span className="text-gray-500 italic">No Permission</span>
+                                    </label> */}
                                     {permissions.map((perm) => (
                                         <label
                                             key={perm.id}
                                             className="flex items-center gap-2 py-1 text-sm"
                                         >
                                             <input
-                                                type="checkbox"
+                                                type="radio"
+                                                name="permission"
                                                 className="rounded text-blue-600 focus:ring-0"
-                                                checked={userPermissions.includes(
-                                                    perm.id
-                                                )}
-                                                onChange={() =>
-                                                    handlePermissionChange(
-                                                        perm.id
+                                                checked={userPermissions[0] === perm.id}
+                                                onClick={() =>
+                                                    setUserPermissions(
+                                                        userPermissions[0] === perm.id ? [] : [perm.id]
                                                     )
                                                 }
+                                                readOnly
                                             />
                                             {perm.name}
                                         </label>
@@ -450,6 +506,76 @@ export default function UserPage({ users, permissions = [] }) {
                                         className="rounded-[10px] px-9 py-1 bg-blue-600 text-white font-semibold hover:bg-blue-700 transition disabled:opacity-60"
                                     >
                                         {permProcessing ? "Saving..." : "Save"}
+                                    </button>
+                                </div>
+                            </form>
+                        </Modal>
+
+                        {/* Reset Password Modal */}
+                        <Modal
+                            show={showResetModal}
+                            onClose={() => {
+                                setShowResetModal(false);
+                                setResetTarget(null);
+                                setResetPassword("");
+                                setResetProcessing(false);
+                                setResetError("");
+                            }}
+                            maxWidth="lg"
+                        >
+                            <form
+                                onSubmit={handleResetPassword}
+                                className="p-6"
+                            >
+                                <h2 className="text-lg font-semibold text-gray-800 mb-1">
+                                    Reset Password
+                                </h2>
+                                <p className="text-gray-700 mb-4">
+                                    Enter a new password for{" "}
+                                    <span className="font-semibold">
+                                        {resetTarget?.name}
+                                    </span>
+                                    .
+                                </p>
+                                <div className="mb-4">
+                                    <label className="block text-sm font-medium mb-1">
+                                        New Password
+                                    </label>
+                                    <input
+                                        type="password"
+                                        placeholder="Enter new password"
+                                        className="w-full px-3 py-[12px] border border-gray-300 rounded-xl transition-colors text-gray-600 focus:ring-3 focus:ring-gray-100 focus:outline-none text-[18px] font-medium mb-2"
+                                        value={resetPassword}
+                                        onChange={e => setResetPassword(e.target.value)}
+                                        disabled={resetProcessing}
+                                    />
+                                    {resetError && (
+                                        <div className="text-red-600 text-xs mt-1">
+                                            {resetError}
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="flex justify-between gap-3">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setShowResetModal(false);
+                                            setResetTarget(null);
+                                            setResetPassword("");
+                                            setResetProcessing(false);
+                                            setResetError("");
+                                        }}
+                                        className="rounded-[10px] border-2 border-gray-300 px-8 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold"
+                                        disabled={resetProcessing}
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        className="rounded-[10px] px-9 py-1 bg-blue-600 text-white font-semibold hover:bg-blue-700 transition"
+                                        disabled={resetProcessing}
+                                    >
+                                        {resetProcessing ? "Saving..." : "Save"}
                                     </button>
                                 </div>
                             </form>

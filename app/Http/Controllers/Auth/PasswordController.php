@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -25,5 +26,22 @@ class PasswordController extends Controller
         ]);
 
         return back();
+    }
+
+    /**
+     * Admin resets a user's password.
+     */
+    public function adminReset(Request $request, $userId)
+    {
+        // You may want to add authorization logic here (e.g., Gate/Policy)
+        $request->validate([
+            'password' => ['required', Password::defaults()],
+        ]);
+
+        $user = User::findOrFail($userId);
+        $user->password = Hash::make($request->password);
+        $user->save();
+
+        return response()->json(['message' => 'Password reset successfully.']);
     }
 }

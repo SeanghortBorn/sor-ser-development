@@ -54,6 +54,9 @@ Route::middleware('auth')->group(function () {
 
     Route::put('password', [PasswordController::class, 'update'])->name('password.update');
 
+    Route::post('users/{user}/reset-password', [PasswordController::class, 'adminReset'])
+        ->name('users.reset-password');
+
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
         ->name('logout');
 });
