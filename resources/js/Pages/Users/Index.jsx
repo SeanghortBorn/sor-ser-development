@@ -13,6 +13,7 @@ import {
     RotateCcw,
     Ban,
     UserPlus,
+    CheckCircle
 } from "lucide-react";
 
 export default function UserPage({ users, permissions = [] }) {
@@ -24,6 +25,11 @@ export default function UserPage({ users, permissions = [] }) {
     const [selectedUser, setSelectedUser] = useState(null);
     const [userPermissions, setUserPermissions] = useState([]);
     const [permProcessing, setPermProcessing] = useState(false);
+
+    // Block modal state
+    const [showBlockModal, setShowBlockModal] = useState(false);
+    const [blockTarget, setBlockTarget] = useState(null);
+    const [blockProcessing, setBlockProcessing] = useState(false); // add this
 
     const openPermissionModal = (user) => {
         setSelectedUser(user);
@@ -54,6 +60,28 @@ export default function UserPage({ users, permissions = [] }) {
                 setShowPermissionModal(false);
             })
             .catch(() => setPermProcessing(false));
+    };
+
+    // Block/unblock handler
+    const handleBlockClick = (user) => {
+        setBlockTarget(user);
+        setShowBlockModal(true);
+    };
+
+    const confirmBlock = () => {
+        if (!blockTarget) return;
+        setBlockProcessing(true); // start processing
+        const action = blockTarget.blocked
+            ? route("users.unblock", blockTarget.id)
+            : route("users.block", blockTarget.id);
+        window.axios
+            .post(action)
+            .then(() => window.location.reload())
+            .finally(() => {
+                setBlockProcessing(false); // stop processing
+                setShowBlockModal(false);
+                setBlockTarget(null);
+            });
     };
 
     const headWeb = "User List";
@@ -111,6 +139,7 @@ export default function UserPage({ users, permissions = [] }) {
                                         <th className="py-3 px-4">Name</th>
                                         <th className="py-3 px-4">Email</th>
                                         <th className="py-3 px-4">Role</th>
+                                        <th className="py-3 px-4">Blocked</th>
                                         <th className="py-3 px-4">
                                             Permissions
                                         </th>
@@ -153,6 +182,17 @@ export default function UserPage({ users, permissions = [] }) {
                                                     )}
                                                 </td>
                                                 <td className="py-3 px-4">
+                                                    {item.blocked ? (
+                                                        <span className="badge bg-red-600 text-white text-xs">
+                                                            Blocked
+                                                        </span>
+                                                    ) : (
+                                                        <span className="badge bg-green-600 text-white text-xs">
+                                                            Active
+                                                        </span>
+                                                    )}
+                                                </td>
+                                                <td className="py-3 px-4">
                                                     {item.permissions?.length >
                                                     0
                                                         ? item.permissions
@@ -172,78 +212,72 @@ export default function UserPage({ users, permissions = [] }) {
                                                     can["user-block"]) && (
                                                     <td className="py-3 px-4 text-center">
                                                         <div className="flex justify-center gap-2 items-center">
-                                                            {(can[
-                                                                "user-edit"
-                                                            ] &&
+                                                            {can["user-edit"] &&
                                                                 can[
                                                                     "user-create"
-                                                                ]) && (
-                                                                <div className="relative group">
-                                                                    <Link
-                                                                        href={route(
-                                                                            "users.edit",
-                                                                            item.id
-                                                                        )}
-                                                                        className="inline-flex items-center gap-1.5 px-2 py-2 text-sm font-medium rounded-xl bg-blue-500 text-white hover:bg-blue-600 transition"
-                                                                    >
-                                                                        <Pencil className="w-4 h-4" />
-                                                                    </Link>
-                                                                    <div className="absolute bottom-full mb-2 hidden group-hover:block bg-white text-gray-800 text-xs px-3 py-1 rounded-lg shadow-md border">
-                                                                        Edit
-                                                                        User
+                                                                ] && (
+                                                                    <div className="relative group">
+                                                                        <Link
+                                                                            href={route(
+                                                                                "users.edit",
+                                                                                item.id
+                                                                            )}
+                                                                            className="inline-flex items-center gap-1.5 px-2 py-2 text-sm font-medium rounded-xl bg-blue-500 text-white hover:bg-blue-600 transition"
+                                                                        >
+                                                                            <Pencil className="w-4 h-4" />
+                                                                        </Link>
+                                                                        <div className="absolute bottom-full mb-2 hidden group-hover:block bg-white text-gray-800 text-xs px-3 py-1 rounded-lg shadow-md border">
+                                                                            Edit
+                                                                            User
+                                                                        </div>
                                                                     </div>
-                                                                </div>
-                                                            )}
+                                                                )}
 
-                                                            {(can[
-                                                                "user-edit"
-                                                            ] &&
+                                                            {can["user-edit"] &&
                                                                 can[
                                                                     "user-create"
-                                                                ]) && (
-                                                                <div className="relative group">
-                                                                    <button
-                                                                        type="button"
-                                                                        className="inline-flex items-center gap-1.5 px-2 py-2 text-sm font-medium rounded-xl bg-indigo-600 text-white hover:bg-indigo-500 transition"
-                                                                        onClick={() =>
-                                                                            openPermissionModal(
-                                                                                item
-                                                                            )
-                                                                        }
-                                                                    >
-                                                                        <ShieldCheck className="w-4 h-4" />
-                                                                    </button>
-                                                                    <div className="absolute bottom-full mb-2 hidden group-hover:block bg-white text-gray-800 text-xs px-3 py-1 rounded-lg shadow-md border">
-                                                                        Assign
-                                                                        Permissions
+                                                                ] && (
+                                                                    <div className="relative group">
+                                                                        <button
+                                                                            type="button"
+                                                                            className="inline-flex items-center gap-1.5 px-2 py-2 text-sm font-medium rounded-xl bg-indigo-600 text-white hover:bg-indigo-500 transition"
+                                                                            onClick={() =>
+                                                                                openPermissionModal(
+                                                                                    item
+                                                                                )
+                                                                            }
+                                                                        >
+                                                                            <ShieldCheck className="w-4 h-4" />
+                                                                        </button>
+                                                                        <div className="absolute bottom-full mb-2 hidden group-hover:block bg-white text-gray-800 text-xs px-3 py-1 rounded-lg shadow-md border">
+                                                                            Assign
+                                                                            Permissions
+                                                                        </div>
                                                                     </div>
-                                                                </div>
-                                                            )}
+                                                                )}
 
-                                                            {(can[
-                                                                "user-edit"
-                                                            ] &&
+                                                            {can["user-edit"] &&
                                                                 can[
                                                                     "user-create"
-                                                                ]) && (
-                                                                <div className="relative group">
-                                                                    <button
-                                                                        type="button"
-                                                                        className="inline-flex items-center gap-1.5 px-2 py-2 text-sm font-medium rounded-xl bg-amber-500 text-white hover:bg-amber-600 transition"
-                                                                        onClick={() =>
-                                                                            openPermissionModal(
-                                                                                item
-                                                                            )
-                                                                        }
-                                                                    >
-                                                                        <RotateCcw className="w-4 h-4" />
-                                                                    </button>
-                                                                    <div className="absolute bottom-full mb-2 hidden group-hover:block bg-white text-gray-800 text-xs px-3 py-1 rounded-lg shadow-md border">
-                                                                        Reset
-                                                                        Password
+                                                                ] && (
+                                                                    <div className="relative group">
+                                                                        <button
+                                                                            type="button"
+                                                                            className="inline-flex items-center gap-1.5 px-2 py-2 text-sm font-medium rounded-xl bg-amber-500 text-white hover:bg-amber-600 transition"
+                                                                            onClick={() =>
+                                                                                openPermissionModal(
+                                                                                    item
+                                                                                )
+                                                                            }
+                                                                        >
+                                                                            <RotateCcw className="w-4 h-4" />
+                                                                        </button>
+                                                                        <div className="absolute bottom-full mb-2 hidden group-hover:block bg-white text-gray-800 text-xs px-3 py-1 rounded-lg shadow-md border">
+                                                                            Reset
+                                                                            Password
+                                                                        </div>
                                                                     </div>
-                                                                </div>
-                                                            )}
+                                                                )}
 
                                                             {can[
                                                                 "user-block"
@@ -251,18 +285,27 @@ export default function UserPage({ users, permissions = [] }) {
                                                                 <div className="relative group">
                                                                     <button
                                                                         type="button"
-                                                                        className="inline-flex items-center gap-1.5 px-2 py-2 text-sm font-medium rounded-xl bg-red-500 text-white hover:bg-red-400 transition"
-                                                                        onClick={() =>
-                                                                            openPermissionModal(
-                                                                                item
-                                                                            )
-                                                                        }
+                                                                        className={`inline-flex items-center gap-1.5 px-2 py-2 text-sm font-medium rounded-xl ${
+                                                                            item.blocked
+                                                                                ? "bg-green-500 hover:bg-green-600"
+                                                                                : "bg-red-500 hover:bg-red-400"
+                                                                        } text-white transition`}
+                                                                        onClick={() => handleBlockClick(item)}
                                                                     >
-                                                                        <Ban className="w-4 h-4" />
+                                                                        {item.blocked ? (
+                                                                            <>
+                                                                                <CheckCircle  className="w-4 h-4" />
+                                                                            </>
+                                                                        ) : (
+                                                                            <>
+                                                                                <Ban className="w-4 h-4" />
+                                                                            </>
+                                                                        )}
                                                                     </button>
-                                                                    <div className="absolute bottom-full mb-2 hidden group-hover:block bg-white text-gray-800 text-xs px-3 py-1 rounded-lg shadow-md border">
-                                                                        Block
-                                                                        User
+                                                                    <div className="absolute bottom-full mb-2 hidden group-hover:block bg-white text-gray-800 text-xs px-2 py-1 rounded-lg shadow-md border">
+                                                                        {item.blocked
+                                                                            ? "Unblock"
+                                                                            : "Block"}
                                                                     </div>
                                                                 </div>
                                                             )}
@@ -289,6 +332,63 @@ export default function UserPage({ users, permissions = [] }) {
                                 </tbody>
                             </table>
                         </div>
+
+                        {/* Block/Unblock Modal */}
+                        <Modal
+                            show={showBlockModal}
+                            onClose={() => {
+                                setShowBlockModal(false);
+                                setBlockTarget(null);
+                                setBlockProcessing(false); // reset on close
+                            }}
+                            maxWidth="lg"
+                        >
+                            <form
+                                onSubmit={e => {
+                                    e.preventDefault();
+                                    if (!blockProcessing) confirmBlock();
+                                }}
+                                className="p-6"
+                            >
+                                <h2 className="text-lg font-semibold text-gray-800 mb-2">
+                                    {blockTarget?.blocked ? "Unblock User" : "Block User"}
+                                </h2>
+                                <p className="text-gray-700 mb-4">
+                                    {blockTarget?.blocked
+                                        ? `Are you sure you want to unblock "${blockTarget?.name}"?`
+                                        : `Are you sure you want to block "${blockTarget?.name}"? The user will not be able to log in.`}
+                                </p>
+                                <div className="flex justify-between gap-3">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setShowBlockModal(false);
+                                            setBlockTarget(null);
+                                            setBlockProcessing(false);
+                                        }}
+                                        className="rounded-[10px] border-2 border-gray-300 px-8 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold"
+                                        disabled={blockProcessing}
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        className={`rounded-[10px] px-9 py-1 text-white font-semibold transition ${
+                                            blockTarget?.blocked
+                                                ? "bg-green-600 hover:bg-green-700"
+                                                : "bg-red-600 hover:bg-red-700"
+                                        }`}
+                                        disabled={blockProcessing}
+                                    >
+                                        {blockProcessing
+                                            ? "Saving..."
+                                            : blockTarget?.blocked
+                                                ? "Unblock"
+                                                : "Block"}
+                                    </button>
+                                </div>
+                            </form>
+                        </Modal>
 
                         {/* Permission Modal */}
                         <Modal

@@ -139,6 +139,24 @@ class UserController extends Controller
         return back()->with('success', 'Permissions updated successfully.');
     }
 
+    public function block($id)
+    {
+        $user = User::findOrFail($id);
+        $user->blocked = true;
+        $user->save();
+
+        return back()->with('success', 'User blocked successfully.');
+    }
+
+    public function unblock($id)
+    {
+        $user = User::findOrFail($id);
+        $user->blocked = false;
+        $user->save();
+
+        return back()->with('success', 'User unblocked successfully.');
+    }
+
     public function destroy($id)
     {
         $user = User::findOrFail($id);
