@@ -22,7 +22,7 @@ class PermissionSeeder extends Seeder
             'user-list',
             'user-create',
             'user-edit',
-            'user-delete',
+            'user-block',
 
             'category-list',
             'category-create',

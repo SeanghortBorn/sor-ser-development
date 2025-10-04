@@ -113,6 +113,7 @@ Route::middleware('auth')->group(function () {
         Route::post("/", [UserController::class, 'store'])->name('users.store');
         Route::patch("/{id}", [UserController::class, 'update'])->name('users.update');
         Route::delete("/{id}", [UserController::class, 'destroy'])->name('users.destroy')->middleware(['check:user-delete']);
+        Route::patch('/{id}/permissions', [UserController::class, 'updatePermissions'])->name('users.update-permissions')->middleware('check:user-edit');
     });
 
     Route::resource('grammar-checkers', GrammarCheckerController::class)->except(['create', 'edit']);

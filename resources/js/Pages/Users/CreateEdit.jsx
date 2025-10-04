@@ -21,11 +21,7 @@ export default function UsersCreateEdit({ user, roles }) {
                 : [],
             password: '', // Always a string
         });
-    
-    const handleSelectRole = (e) => {
-        const selectedOptions = Array.from(e.target.selectedOptions).map(option => parseInt(option.value));
-        setData(prev => ({ ...prev, roles: selectedOptions }));
-    };
+
     const submit = (e) => {
         e.preventDefault();
         if (!user.id) {
@@ -56,7 +52,7 @@ export default function UsersCreateEdit({ user, roles }) {
                             <form onSubmit={submit}>
                                 <div className="card-body">
                                     {/* #ID Field (readonly, only for edit) */}
-                                    {user.id && (
+                                    {/* {user.id && (
                                         <div className="form-group">
                                             <label className="text-uppercase" htmlFor="id">#ID</label>
                                             <input
@@ -66,7 +62,7 @@ export default function UsersCreateEdit({ user, roles }) {
                                                 readOnly
                                             />
                                         </div>
-                                    )}
+                                    )} */}
 
                                     {/* Name Field */}
                                     <div className="form-group">
@@ -131,7 +127,7 @@ export default function UsersCreateEdit({ user, roles }) {
                                             onChange={e => setData('roles', e.target.value ? [parseInt(e.target.value)] : [])}
                                             className="form-control"
                                         >
-                                            <option value="">Select Role</option>
+                                            <option value="">Select a Role (optional)</option>
                                             {roles.map((role) => (
                                                 <option key={role.id} value={role.id}>
                                                     {role.name}

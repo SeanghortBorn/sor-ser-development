@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -14,9 +15,11 @@ class UserController extends Controller
 {
     public function index()
     {
-        $users = User::with('roles')->paginate(10)->appends(request()->query());
+        $users = User::with(['roles', 'permissions'])->paginate(10)->appends(request()->query());
+        $permissions = Permission::all();
         return Inertia::render('Users/Index', [
             'users' => $users,
+            'permissions' => $permissions,
         ]);
     }
 
@@ -45,11 +48,11 @@ class UserController extends Controller
                 'string',
                 'email',
                 'max:255',
-                Rule::unique('users', 'email'), // use table name and column explicitly
+                Rule::unique('users', 'email'),
             ],
             'password' => ['required', 'string', 'min:8'],
             'roles' => ['nullable', 'array'],
-            'roles.*' => ['integer', 'exists:roles,id'], // validate each role id exists if provided
+            'roles.*' => ['integer', 'exists:roles,id'],
         ])->validate();
 
         $user = User::create([
@@ -58,20 +61,24 @@ class UserController extends Controller
             'password' => Hash::make($validated['password']),
         ]);
 
+        // Assign roles only if provided and not empty
         if (!empty($validated['roles'])) {
             $user->assignRole($validated['roles']);
         }
+        // If roles is empty/null, do not assign any role (user will have no roles)
         return to_route('users.index')->with("success", "User created successfully");
     }
 
     public function edit($id)
     {
-        $user = User::with(['roles'])->find($id);
+        $user = User::with(['roles', 'permissions'])->find($id);
         $roles = Role::all();
+        $permissions = Permission::all();
 
         return Inertia::render('Users/CreateEdit', [
             'roles' => $roles,
-            'user' => $user
+            'user' => $user,
+            'permissions' => $permissions,
         ]);
     }
 
@@ -100,13 +107,36 @@ class UserController extends Controller
         }
         $user->save();
 
+        // Sync roles, allow empty array (user can have no roles)
         if (!empty($validated['roles'])) {
             $user->syncRoles($validated['roles']);
         } else {
-            $user->syncRoles([]);
+            $user->syncRoles([]); // Remove all roles if none provided
         }
 
         return to_route('users.index')->with("success", "User updated successfully");
+    }
+
+    public function updatePermissions(Request $request, $id)
+    {
+        $user = User::findOrFail($id);
+
+        // Accept empty array or missing permissions key
+        $validated = $request->validate([
+            'permissions' => ['nullable', 'array'],
+            'permissions.*' => ['integer', 'exists:permissions,id'],
+        ]);
+
+        // If permissions is not present, treat as empty array
+        $permissions = $validated['permissions'] ?? [];
+
+        $user->syncPermissions($permissions);
+
+        // If AJAX, return JSON, else redirect back
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json(['success' => true]);
+        }
+        return back()->with('success', 'Permissions updated successfully.');
     }
 
     public function destroy($id)
