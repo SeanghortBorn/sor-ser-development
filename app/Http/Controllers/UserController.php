@@ -13,13 +13,25 @@ use App\Models\User;
 
 class UserController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::with(['roles', 'permissions'])->paginate(10)->appends(request()->query());
+        $query = User::with(['roles', 'permissions']);
+
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        $users = $query->paginate(10)->appends($request->only('search'));
         $permissions = Permission::all();
+
         return Inertia::render('Users/Index', [
             'users' => $users,
             'permissions' => $permissions,
+            'search' => $request->input('search', ''),
         ]);
     }
 

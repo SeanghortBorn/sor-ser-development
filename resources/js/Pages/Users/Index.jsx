@@ -2,9 +2,9 @@ import Breadcrumb from "@/Components/Breadcrumb";
 import Modal from "@/Components/Modal";
 import Pagination from "@/Components/Pagination";
 import AdminLayout from "@/Layouts/AdminLayout";
-import { Head, Link, useForm, usePage } from "@inertiajs/react";
+import { Head, Link, useForm, usePage, router } from "@inertiajs/react";
 import moment from "moment";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
     Search,
     Pencil,
@@ -19,7 +19,6 @@ export default function UserPage({ users, permissions = [] }) {
     const { auth } = usePage().props;
     const can = auth?.can ?? {};
 
-    const datasList = users.data;
     const [showPermissionModal, setShowPermissionModal] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
     const [userPermissions, setUserPermissions] = useState([]);
@@ -36,6 +35,18 @@ export default function UserPage({ users, permissions = [] }) {
     const [resetPassword, setResetPassword] = useState("");
     const [resetProcessing, setResetProcessing] = useState(false);
     const [resetError, setResetError] = useState("");
+    const [search, setSearch] = useState(usePage().props.search || "");
+
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            if (search && search.trim() !== "") {
+                router.get(route("users.index"), { search }, { preserveState: true, replace: true });
+            } else {
+                router.get(route("users.index"), {}, { preserveState: true, replace: true });
+            }
+        }, 400);
+        return () => clearTimeout(timeout);
+    }, [search]);
 
     const openPermissionModal = (user) => {
         setSelectedUser(user);
@@ -43,14 +54,6 @@ export default function UserPage({ users, permissions = [] }) {
             user.permissions ? user.permissions.map((p) => p.id) : []
         );
         setShowPermissionModal(true);
-    };
-
-    const handlePermissionChange = (permId) => {
-        setUserPermissions((prev) =>
-            prev.includes(permId)
-                ? prev.filter((id) => id !== permId)
-                : [...prev, permId]
-        );
     };
 
     const submitPermissions = (e) => {
@@ -64,7 +67,7 @@ export default function UserPage({ users, permissions = [] }) {
             .then(() => {
                 setPermProcessing(false);
                 setShowPermissionModal(false);
-                window.location.reload();
+                router.reload({ only: ['users'] }); // update user list in real time
             })
             .catch(() => setPermProcessing(false));
     };
@@ -77,15 +80,17 @@ export default function UserPage({ users, permissions = [] }) {
 
     const confirmBlock = () => {
         if (!blockTarget) return;
-        setBlockProcessing(true); // start processing
+        setBlockProcessing(true);
         const action = blockTarget.blocked
             ? route("users.unblock", blockTarget.id)
             : route("users.block", blockTarget.id);
         window.axios
             .post(action)
-            .then(() => window.location.reload())
+            .then(() => {
+                router.reload({ only: ['users'] }); // update user list in real time
+            })
             .finally(() => {
-                setBlockProcessing(false); // stop processing
+                setBlockProcessing(false);
                 setShowBlockModal(false);
                 setBlockTarget(null);
             });
@@ -117,8 +122,7 @@ export default function UserPage({ users, permissions = [] }) {
                 setResetTarget(null);
                 setResetPassword("");
                 setResetProcessing(false);
-                // toast.success("Password reset successfully!");
-                window.location.reload();
+                router.reload({ only: ['users'] }); // update user list in real time
             })
             .catch((err) => {
                 setResetProcessing(false);
@@ -152,12 +156,14 @@ export default function UserPage({ users, permissions = [] }) {
 
                             {/* Right side (Search + Add User) */}
                             <div className="flex items-center gap-3 ml-auto">
-                                <form className="inline-block">
+                                <form className="inline-block" onSubmit={e => e.preventDefault()}>
                                     <div className="inline-flex items-center gap-2 px-3 rounded-lg border hover:shadow-lg transition text-sm bg-white">
                                         <Search className="w-4 h-4 text-gray-500" />
                                         <input
                                             type="text"
-                                            placeholder="Search User"
+                                            placeholder="Search by name or email"
+                                            value={search}
+                                            onChange={e => setSearch(e.target.value)}
                                             className="px-2 outline-none border-none bg-transparent text-sm placeholder-gray-400 w-full min-w-[150px] focus:outline-none focus:ring-0"
                                         />
                                     </div>
@@ -200,8 +206,8 @@ export default function UserPage({ users, permissions = [] }) {
                                     </tr>
                                 </thead>
                                 <tbody className="text-sm text-gray-700">
-                                    {datasList.length > 0 ? (
-                                        datasList.map((item) => (
+                                    {users.data.length > 0 ? (
+                                        users.data.map((item) => (
                                             <tr
                                                 key={item.id}
                                                 className="border-t hover:bg-gray-50 transition"
@@ -582,7 +588,7 @@ export default function UserPage({ users, permissions = [] }) {
                         </Modal>
 
                         {/* Pagination */}
-                        {users.total > 15 && (
+                        {users.total > 10 && (
                             <div className="px-6 py-3 border-t flex justify-center">
                                 <Pagination
                                     links={users.links}
