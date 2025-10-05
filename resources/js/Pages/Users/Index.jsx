@@ -15,38 +15,26 @@ import {
     CheckCircle
 } from "lucide-react";
 
-export default function UserPage({ users, permissions = [] }) {
+export default function UserPage({ users, permissions = [], search: searchProp = "" }) {
     const { auth } = usePage().props;
     const can = auth?.can ?? {};
-
     const [showPermissionModal, setShowPermissionModal] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
     const [userPermissions, setUserPermissions] = useState([]);
     const [permProcessing, setPermProcessing] = useState(false);
-
-    // Block modal state
     const [showBlockModal, setShowBlockModal] = useState(false);
     const [blockTarget, setBlockTarget] = useState(null);
-    const [blockProcessing, setBlockProcessing] = useState(false); // add this
-
-    // Reset password modal state
+    const [blockProcessing, setBlockProcessing] = useState(false);
     const [showResetModal, setShowResetModal] = useState(false);
     const [resetTarget, setResetTarget] = useState(null);
     const [resetPassword, setResetPassword] = useState("");
     const [resetProcessing, setResetProcessing] = useState(false);
     const [resetError, setResetError] = useState("");
-    const [search, setSearch] = useState(usePage().props.search || "");
+    const [searchTerm, setSearchTerm] = useState(searchProp);
 
     useEffect(() => {
-        const timeout = setTimeout(() => {
-            if (search && search.trim() !== "") {
-                router.get(route("users.index"), { search }, { preserveState: true, replace: true });
-            } else {
-                router.get(route("users.index"), {}, { preserveState: true, replace: true });
-            }
-        }, 400);
-        return () => clearTimeout(timeout);
-    }, [search]);
+        setSearchTerm(searchProp);
+    }, [searchProp]);
 
     const openPermissionModal = (user) => {
         setSelectedUser(user);
@@ -67,7 +55,7 @@ export default function UserPage({ users, permissions = [] }) {
             .then(() => {
                 setPermProcessing(false);
                 setShowPermissionModal(false);
-                router.reload({ only: ['users'] }); // update user list in real time
+                router.reload({ only: ['users'] });
             })
             .catch(() => setPermProcessing(false));
     };
@@ -87,7 +75,7 @@ export default function UserPage({ users, permissions = [] }) {
         window.axios
             .post(action)
             .then(() => {
-                router.reload({ only: ['users'] }); // update user list in real time
+                router.reload({ only: ['users'] });
             })
             .finally(() => {
                 setBlockProcessing(false);
@@ -122,7 +110,7 @@ export default function UserPage({ users, permissions = [] }) {
                 setResetTarget(null);
                 setResetPassword("");
                 setResetProcessing(false);
-                router.reload({ only: ['users'] }); // update user list in real time
+                router.reload({ only: ['users'] });
             })
             .catch((err) => {
                 setResetProcessing(false);
@@ -131,6 +119,19 @@ export default function UserPage({ users, permissions = [] }) {
                         "Failed to reset password."
                 );
             });
+    };
+
+    const handleSearch = (e) => {
+        const term = e.target.value;
+        setSearchTerm(term);
+        router.get(
+            route("users.index"),
+            { search: term },
+            {
+                preserveState: true,
+                replace: true,
+            }
+        );
     };
 
     const headWeb = "User List";
@@ -157,14 +158,14 @@ export default function UserPage({ users, permissions = [] }) {
                             {/* Right side (Search + Add User) */}
                             <div className="flex items-center gap-3 ml-auto">
                                 <form className="inline-block" onSubmit={e => e.preventDefault()}>
-                                    <div className="inline-flex items-center gap-2 px-3 rounded-lg border hover:shadow-lg transition text-sm bg-white">
+                                    <div className="inline-flex items-center gap-2 px-3 rounded-xl border hover:shadow-lg transition text-sm bg-white">
                                         <Search className="w-4 h-4 text-gray-500" />
                                         <input
                                             type="text"
                                             placeholder="Search by name or email"
-                                            value={search}
-                                            onChange={e => setSearch(e.target.value)}
                                             className="px-2 outline-none border-none bg-transparent text-sm placeholder-gray-400 w-full min-w-[150px] focus:outline-none focus:ring-0"
+                                            value={searchTerm}
+                                            onChange={handleSearch}
                                         />
                                     </div>
                                 </form>
