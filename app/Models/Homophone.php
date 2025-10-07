@@ -27,7 +27,21 @@ class Homophone
     public static function create($data)
     {
         $all = static::all();
-        $data['id'] = count($all) ? max(array_column($all, 'id')) + 1 : 1;
+        if (!isset($data['id']) || !$data['id']) {
+            $data['id'] = count($all) ? max(array_column($all, 'id')) + 1 : 1;
+        }
+        // Always store homophone as array of strings
+        if (isset($data['homophone'])) {
+            if (is_array($data['homophone'])) {
+                $data['homophone'] = array_map('strval', $data['homophone']);
+            } elseif (is_string($data['homophone'])) {
+                $data['homophone'] = array_map('trim', explode(',', $data['homophone']));
+            } else {
+                $data['homophone'] = [];
+            }
+        } else {
+            $data['homophone'] = [];
+        }
         $all[] = $data;
         file_put_contents(storage_path('app/homophones.json'), json_encode($all, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
         return $data;
