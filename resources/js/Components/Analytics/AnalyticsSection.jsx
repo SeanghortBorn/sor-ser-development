@@ -17,14 +17,36 @@ const monthlyData = [
 ];
 
 export default function AnalyticsSection() {
-    const { auth } = usePage().props;
-    const userId = auth?.user?.id;
+    const { auth, quizAnalysis } = usePage().props; // quizAnalysis = array of user's attempts
+    const user = auth?.user;
     const [activeTab, setActiveTab] = useState("Quarterly");
+
+    // Calculate quiz performance
+    const userAttempts = quizAnalysis?.filter(a => a.user_id === user?.id) || [];
+    const totalCorrect = userAttempts.reduce((sum, a) => sum + a.correct, 0);
+    const totalIncorrect = userAttempts.reduce((sum, a) => sum + a.incorrect, 0);
+    const totalQuestions = totalCorrect + totalIncorrect;
+    const percentCorrect = totalQuestions ? Math.round((totalCorrect / totalQuestions) * 100) : 0;
 
     return (
         <div className="mb-8 mt-3">
             {/* Top Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                {/* Quiz Performance Card */}
+                <div className="bg-white px-3 py-3 shadow-sm rounded-xl border border-gray-100 flex flex-col gap-2">
+                    <p className="text-gray-700 text-base font-medium">
+                        Quiz Performance
+                    </p>
+                    <div className="flex items-center justify-between">
+                        <h2 className="text-2xl font-semibold">{percentCorrect}%</h2>
+                        <div className="flex flex-col text-right">
+                            <span className="text-gray-500 text-sm">{user?.name}</span>
+                            <span className="text-gray-400 text-xs">
+                                Correct: {totalCorrect} | Incorrect: {totalIncorrect}
+                            </span>
+                        </div>
+                    </div>
+                </div>
                 {/* Grammar Accuracy */}
                 <div className="bg-white px-3 py-3 shadow-sm rounded-xl border border-gray-100 flex flex-col gap-2">
                     <p className="text-gray-700 text-base font-medium">
@@ -162,18 +184,14 @@ export default function AnalyticsSection() {
                                         <div
                                             className="w-3 rounded-t-xl bg-blue-200 transition-all duration-300 hover:opacity-80"
                                             style={{
-                                                height: `${
-                                                    data.shipment * 1.6
-                                                }px`,
+                                                height: `${data.shipment * 1.6}px`,
                                             }}
                                             title={`Shipment: ${data.shipment}%`}
                                         ></div>
                                         <div
                                             className="w-3 rounded-t-xl bg-blue-600 transition-all duration-300 hover:opacity-80"
                                             style={{
-                                                height: `${
-                                                    data.delivery * 1.6
-                                                }px`,
+                                                height: `${data.delivery * 1.6}px`,
                                             }}
                                             title={`Delivery: ${data.delivery}%`}
                                         ></div>

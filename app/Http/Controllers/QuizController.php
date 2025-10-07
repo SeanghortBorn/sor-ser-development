@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Quiz;
+use App\Models\QuizAttempt;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
+use Illuminate\Support\Facades\Auth;
 
 class QuizController extends Controller
 {
@@ -34,7 +36,6 @@ class QuizController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
-        // Decode correct_answer and options safely
         $quizzes->each(function ($quiz) {
             $quiz->questions->each(function ($q) {
                 $q->correct_answer = $this->safeDecode($q->correct_answer);
@@ -64,7 +65,6 @@ class QuizController extends Controller
     {
         $data = $request->validate([
             'title' => 'required|max:255|min:2',
-            'subject' => 'required|max:255',
             'description' => 'nullable|string',
             'groups' => 'nullable|array',
             'status' => 'required|in:Draft,Published',
@@ -73,7 +73,6 @@ class QuizController extends Controller
 
         $quiz = Quiz::create([
             'title' => $data['title'],
-            'subject' => $data['subject'],
             'description' => $data['description'] ?? '',
             'groups' => $data['groups'] ?? [],
             'status' => $data['status'],
@@ -91,7 +90,6 @@ class QuizController extends Controller
     {
         $quiz = Quiz::with('questions')->findOrFail($id);
 
-        // Decode options + correct answers safely for editing
         $quiz->questions->each(function ($q) {
             $q->correct_answer = $this->safeDecode($q->correct_answer);
             $q->options = $this->safeDecode($q->options);
@@ -109,7 +107,6 @@ class QuizController extends Controller
     {
         $data = $request->validate([
             'title' => 'required|max:255|min:2',
-            'subject' => 'required|max:255',
             'description' => 'nullable|string',
             'groups' => 'nullable|array',
             'status' => 'required|in:Draft,Published',
@@ -119,7 +116,6 @@ class QuizController extends Controller
         $quiz = Quiz::findOrFail($id);
         $quiz->update([
             'title' => $data['title'],
-            'subject' => $data['subject'],
             'description' => $data['description'] ?? '',
             'groups' => $data['groups'] ?? [],
             'status' => $data['status'],
@@ -152,7 +148,6 @@ class QuizController extends Controller
             ->where('status', 'Published')
             ->findOrFail($id);
 
-        // Decode safely
         $quiz->questions->each(function ($q) {
             $q->correct_answer = $this->safeDecode($q->correct_answer);
             $q->options = $this->safeDecode($q->options);
@@ -162,7 +157,104 @@ class QuizController extends Controller
     }
 
     /**
-     * Save questions helper
+     * Handle quiz submission
+     */
+    public function submitAttempt(Request $request)
+    {
+        $request->validate([
+            'quiz_id' => 'required|exists:quizzes,id',
+            'score' => 'required|integer|min:0',
+            'answers' => 'required|array',
+        ]);
+
+        $attempt = QuizAttempt::create([
+            'user_id' => Auth::id(),
+            'quiz_id' => $request->quiz_id,
+            'score' => $request->score,
+            'answers' => json_encode($request->answers),
+        ]);
+
+        // Redirect to the result page
+        return redirect()->route('quizzes.result', ['attempt' => $attempt->id]);
+    }
+
+    /**
+     * Show the result page
+     */
+    public function showResult(QuizAttempt $attempt)
+    {
+        $quiz = Quiz::with('questions')->findOrFail($attempt->quiz_id);
+
+        $quiz->questions->each(function ($q) {
+            $q->correct_answer = $this->safeDecode($q->correct_answer);
+            $q->options = $this->safeDecode($q->options);
+        });
+
+        $answers = json_decode($attempt->answers, true);
+
+        return Inertia::render('Quizzes/QuizResult', [
+            'quiz' => $quiz,
+            'attempt' => $attempt,
+            'answers' => $answers,
+        ]);
+    }
+    public function analyse()
+    {
+        // Get all quiz attempts with user info
+        $attempts = QuizAttempt::with('user', 'quiz.questions')->get();
+
+        $analysisData = $attempts->map(function ($attempt) {
+            $answers = json_decode($attempt->answers, true) ?? [];
+            $quiz = $attempt->quiz;
+            $totalQuestions = $quiz->questions->count();
+            $correctCount = 0;
+
+            foreach ($quiz->questions as $index => $question) {
+                $questionCorrect = json_decode($question->correct_answer, true);
+                $userAnswer = $answers[$index]['answer'] ?? null;
+
+                switch ($question->type) {
+                    case 'Checkboxes':
+                        if (is_array($userAnswer) && is_array($questionCorrect)) {
+                            sort($userAnswer);
+                            sort($questionCorrect);
+                            if ($userAnswer === $questionCorrect) $correctCount++;
+                        }
+                        break;
+                    case 'Matching':
+                        if (is_array($userAnswer) && is_array($questionCorrect)) {
+                            if ($userAnswer === $questionCorrect) $correctCount++;
+                        }
+                        break;
+                    case 'True/False':
+                    case 'Multiple Choice':
+                    case 'Fill-in-the-blank':
+                        if ($userAnswer == $questionCorrect) $correctCount++;
+                        break;
+                }
+            }
+
+            return [
+                'user_id' => $attempt->user_id,
+                'user_name' => $attempt->user->name ?? 'Unknown',
+                'quiz_id' => $attempt->quiz_id,
+                'quiz_title' => $quiz->title ?? 'Unknown Quiz',
+                'total_questions' => $totalQuestions,
+                'correct' => $correctCount,
+                'incorrect' => $totalQuestions - $correctCount,
+                'percentage' => $totalQuestions > 0 ? round(($correctCount / $totalQuestions) * 100, 2) : 0,
+                'attempted_at' => $attempt->created_at,
+            ];
+        });
+
+        return Inertia::render('Analytics/AnalyticsSection', [
+            'quizAnalysis' => $analysisData,
+        ]);
+    }
+
+
+    /**
+     * Helper to save questions
      */
     private function saveQuestions(Quiz $quiz, array $questions)
     {
@@ -178,19 +270,16 @@ class QuizController extends Controller
                     break;
 
                 case 'True/False':
-                    // Fix: Save "True" or "False" as string, not boolean
                     $correct = ($correct === "True" || $correct === true) ? "True" : "False";
                     $options = json_encode($options);
                     break;
 
                 case 'Matching':
-                    // Expect structure: options = [ {left: "", right: ""}, ... ]
                     $correct = json_encode($correct ?? []);
                     $options = json_encode($options ?? []);
                     break;
 
                 default:
-                    // Multiple Choice or Fill-in-the-blank
                     $correct = $correct ? (string)$correct : null;
                     $options = json_encode($options);
             }

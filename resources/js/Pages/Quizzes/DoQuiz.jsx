@@ -2,6 +2,7 @@ import HeaderNavbar from '@/Components/Navbars/HeaderNavbar';
 import { Head, usePage } from '@inertiajs/react';
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import { router } from '@inertiajs/react';
 
 export default function Quiz() {
     const { quizData } = usePage().props;
@@ -73,8 +74,26 @@ export default function Quiz() {
 
         setScore(newScore);
         setShowResult(true);
-    };
 
+        // Submit to server
+        router.post(
+            route('quizzes.submit'),
+            {
+                quiz_id: currentQuiz.id,
+                score: newScore,
+                answers: userAnswers
+            },
+            {
+                onSuccess: (page) => {
+                    // Display a pop-up notification
+                    alert('Quiz submitted successfully! ✅');
+                    // You can also update state if needed:
+                    // setShowResult(true);
+                },
+                preserveState: true,
+            }
+        );
+    };
     const handleRestart = () => {
         setQuizStarted(false);
         setCurrentQuiz(null);

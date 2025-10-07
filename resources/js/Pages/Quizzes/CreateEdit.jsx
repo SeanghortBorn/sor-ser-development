@@ -13,9 +13,9 @@ export default function QuizzesCreateEdit() {
     const [quiz, setQuiz] = useState({
         title: datas?.title || "",
         subject: datas?.subject || "",
-        description: datas?.description || "",
         groups: datas?.groups || [],
         status: datas?.status || "Draft",
+        description: datas?.description || "", 
     });
 
     // Questions State
@@ -90,7 +90,6 @@ export default function QuizzesCreateEdit() {
                 {
                     type: "Multiple Choice",
                     text: "",
-                    description: "", // <-- Added
                     options: ["", "", "", ""],
                     correct_answer: "",
                 },
@@ -105,7 +104,6 @@ export default function QuizzesCreateEdit() {
             {
                 type: "Multiple Choice",
                 text: "",
-                description: "", // <-- Added
                 options: ["", "", "", ""],
                 correct_answer: "",
             },
@@ -235,7 +233,6 @@ export default function QuizzesCreateEdit() {
                     return {
                         type: q.type,
                         text: q.text,
-                        description: q.description, // <-- Added
                         options: Array.isArray(q.options)
                             ? q.options.map(pair => ({
                                 left: pair.left || "",
@@ -304,26 +301,6 @@ export default function QuizzesCreateEdit() {
                                 className="w-full py-2 px-3 rounded-[10px] border border-gray-200 bg-gray-50 focus:ring-1 focus:ring-blue-500 focus:outline-none"
                                 required
                             />
-                        </div>
-
-                        {/* Subject */}
-                        <div className="w-1/4">
-                            <label className="block text-gray-700 mb-2 font-medium">
-                                Subject/Category
-                            </label>
-                            <select
-                                value={quiz.subject}
-                                onChange={(e) =>
-                                    setQuiz({ ...quiz, subject: e.target.value })
-                                }
-                                className="w-full py-2 px-3 rounded-[10px] border border-gray-200 bg-gray-50 focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                                required
-                            >
-                                <option value="">Select subject</option>
-                                <option value="Math">Math</option>
-                                <option value="Science">Science</option>
-                                <option value="History">History</option>
-                            </select>
                         </div>
 
                         {/* Status */}
@@ -491,27 +468,6 @@ export default function QuizzesCreateEdit() {
                                     className="w-full px-3 py-2 rounded-[10px] bg-gray-50 border border-gray-200 focus:ring-1 focus:ring-blue-400 focus:outline-none"
                                 />
                             </div>
-
-                            {/* Question Description */}
-                            <div className="mb-4">
-                                <label className="block text-gray-700 mb-2 font-medium">
-                                    Question Description
-                                </label>
-                                <textarea
-                                    value={q.description}
-                                    onChange={(e) =>
-                                        updateQuestion(
-                                            idx,
-                                            "description",
-                                            e.target.value
-                                        )
-                                    }
-                                    placeholder="Enter question description"
-                                    className="w-full px-3 py-2 rounded-[10px] border border-gray-200 bg-gray-50 focus:ring-1 focus:ring-blue-400 focus:outline-none"
-                                    rows="3"
-                                />
-                            </div>
-
                             {/* Options (MCQ/Checkboxes) */}
                             {(q.type === "Multiple Choice" ||
                                 q.type === "Checkboxes") && (

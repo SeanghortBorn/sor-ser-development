@@ -13,7 +13,6 @@ return new class extends Migration
             $table->foreignId('quiz_id')->constrained('quizzes')->onDelete('cascade');
             $table->string('type'); // Multiple Choice, True/False, Fill-in-the-blank
             $table->text('text');
-            $table->text('description')->nullable(); // <-- Added
             $table->json('options')->nullable(); // For MCQ
             $table->string('correct_answer')->nullable();
             $table->integer('order')->default(0);
