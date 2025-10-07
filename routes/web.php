@@ -10,6 +10,7 @@ use App\Http\Controllers\RolesController;
 use App\Http\Controllers\TagController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\GrammarCheckerController;
+use App\Http\Controllers\ArticleController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -49,29 +50,29 @@ Route::get('/two-factor-challenge', [AuthenticatedSessionController::class, 'cre
 Route::middleware('auth')->group(function () {
     Route::prefix('user')->group(function () {
         Route::post('/two-factor-authentication', [TwoFactorAuthenticationController::class, 'store'])
-        ->name('two-factor.enable');
+            ->name('two-factor.enable');
 
-    Route::post('/confirmed-two-factor-authentication', [ConfirmedTwoFactorAuthenticationController::class, 'store'])
-        ->name('two-factor.confirm');
+        Route::post('/confirmed-two-factor-authentication', [ConfirmedTwoFactorAuthenticationController::class, 'store'])
+            ->name('two-factor.confirm');
 
-    Route::delete('/two-factor-authentication', [TwoFactorAuthenticationController::class, 'destroy'])
-        ->name('two-factor.disable');
+        Route::delete('/two-factor-authentication', [TwoFactorAuthenticationController::class, 'destroy'])
+            ->name('two-factor.disable');
 
-    Route::get('/two-factor-qr-code', [TwoFactorQrCodeController::class, 'show'])
-        ->name('two-factor.qr-code')
-        ->middleware('password.confirm');
+        Route::get('/two-factor-qr-code', [TwoFactorQrCodeController::class, 'show'])
+            ->name('two-factor.qr-code')
+            ->middleware('password.confirm');
 
-    Route::get('/two-factor-secret-key', [TwoFactorSecretKeyController::class, 'show'])
-        ->name('two-factor.secret-key')
-        ->middleware('password.confirm');
+        Route::get('/two-factor-secret-key', [TwoFactorSecretKeyController::class, 'show'])
+            ->name('two-factor.secret-key')
+            ->middleware('password.confirm');
 
-    Route::get('/two-factor-recovery-codes', [RecoveryCodeController::class, 'index'])
-        ->name('two-factor.recovery-codes')
-        ->middleware('password.confirm');
+        Route::get('/two-factor-recovery-codes', [RecoveryCodeController::class, 'index'])
+            ->name('two-factor.recovery-codes')
+            ->middleware('password.confirm');
 
-    Route::post('/two-factor-recovery-codes', [RecoveryCodeController::class, 'store'])
-        ->name('two-factor.regenerate-recovery-codes')
-        ->middleware('password.confirm');
+        Route::post('/two-factor-recovery-codes', [RecoveryCodeController::class, 'store'])
+            ->name('two-factor.regenerate-recovery-codes')
+            ->middleware('password.confirm');
     });
 
     Route::inertia('/library', 'Libraries/index');
@@ -105,7 +106,7 @@ Route::middleware('auth')->group(function () {
         Route::patch("/{id}", [RolesController::class, 'update'])->name('roles.update');
         Route::delete("/{id}", [RolesController::class, 'destroy'])->name('roles.destroy')->middleware(['check:role-delete']);
     });
-    
+
     Route::prefix('users')->group(function () {
         Route::get('/', [UserController::class, 'index'])->name('users.index')->middleware(['check:user-list']);
         Route::get('/create', [UserController::class, 'create'])->name('users.create')->middleware(['check:user-create']);
@@ -121,10 +122,18 @@ Route::middleware('auth')->group(function () {
     Route::resource('grammar-checkers', GrammarCheckerController::class)->except(['create', 'edit']);
     Route::post('/grammar-checkers/{grammarChecker}/tags', [GrammarCheckerController::class, 'updateTags']);
 
+    Route::prefix('articles')->group(function () {
+        Route::get('/', [ArticleController::class, 'index'])->name('articles.index')->middleware(['check:article-list']);
+        Route::get('/create', [ArticleController::class, 'create'])->name('articles.create')->middleware(['check:article-create']);
+        Route::get('/{id}', [ArticleController::class, 'edit'])->name('articles.edit')->middleware(['check:article-edit']);
+        Route::post("/", [ArticleController::class, 'store'])->name('articles.store');
+        Route::patch("/{id}", [ArticleController::class, 'update'])->name('articles.update');
+        Route::delete("/{id}", [ArticleController::class, 'destroy'])->name('articles.destroy')->middleware(['check:article-delete']);
+    });
+
     Route::post('/feedback', [App\Http\Controllers\FeedbackController::class, 'store']);
     Route::get('/feedback', [App\Http\Controllers\FeedbackController::class, 'index'])->name('feedback.index');
     Route::get('/feedback/create', [App\Http\Controllers\FeedbackController::class, 'create'])->name('feedback.create');
-    
 });
 
 require __DIR__ . '/auth.php';

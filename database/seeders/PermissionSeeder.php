@@ -34,6 +34,11 @@ class PermissionSeeder extends Seeder
             'quiz-edit',
             'quiz-delete',
             'do-quiz',
+
+            'article-list',
+            'article-create',
+            'article-edit',
+            'article-delete',
         ];
 
         foreach ($permissions as $permission) {
