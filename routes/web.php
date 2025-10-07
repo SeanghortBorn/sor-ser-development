@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\TwoFactorLoginController;
+use App\Http\Controllers\HomophoneController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\GoogleController;
@@ -11,6 +12,7 @@ use App\Http\Controllers\TagController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\GrammarCheckerController;
 use App\Http\Controllers\ArticleController;
+use App\Models\Homophone;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -129,6 +131,18 @@ Route::middleware('auth')->group(function () {
         Route::post("/", [ArticleController::class, 'store'])->name('articles.store');
         Route::patch("/{id}", [ArticleController::class, 'update'])->name('articles.update');
         Route::delete("/{id}", [ArticleController::class, 'destroy'])->name('articles.destroy')->middleware(['check:article-delete']);
+    });
+
+    Route::prefix('homophones')->group(function () {
+        Route::get('/', [HomophoneController::class, 'index'])->name('homophones.index')->middleware(['check:homophone-list']);
+        Route::get('/create', [HomophoneController::class, 'create'])->name('homophones.create')->middleware(['check:homophone-create']);
+        Route::get('/{id}', [HomophoneController::class, 'edit'])->name('homophones.edit')->middleware(['check:homophone-edit']);
+        Route::post("/", [HomophoneController::class, 'store'])->name('homophones.store');
+        Route::patch("/{id}", [HomophoneController::class, 'update'])->name('homophones.update');
+        Route::delete("/{id}", [HomophoneController::class, 'destroy'])->name('homophones.destroy')->middleware(['check:homophone-delete']);
+        Route::get('/json', function () {
+            return response()->json(['homophones' => Homophone::all()]);
+        })->name('homophones.json');
     });
 
     Route::post('/feedback', [App\Http\Controllers\FeedbackController::class, 'store']);

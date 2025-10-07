@@ -164,7 +164,7 @@ const AdminLayout = ({ breadcrumb, children }) => {
             {/* Main content */}
             <div className="content-wrapper flex-1 px-2 overflow-y-auto">
                 {breadcrumb && breadcrumb}
-                <section className="content px-3">{children}</section>
+                <section className="content px-2">{children}</section>
             </div>
         </div>
     );

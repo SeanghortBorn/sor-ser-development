@@ -39,6 +39,11 @@ class PermissionSeeder extends Seeder
             'article-create',
             'article-edit',
             'article-delete',
+
+            'homophone-list',
+            'homophone-create',
+            'homophone-edit',
+            'homophone-delete',
         ];
 
         foreach ($permissions as $permission) {

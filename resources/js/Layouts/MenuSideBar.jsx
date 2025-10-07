@@ -12,7 +12,7 @@ function MenuGroup({ label, icon, children, active }) {
         <div className="mb-2">
             <button
                 onClick={() => setOpen((prev) => !prev)}
-                className={`flex items-center w-full px-3 py-2.5 rounded-lg font-medium transition-all duration-300 group ${
+                className={`flex items-center w-full px-2 py-2.5 rounded-lg font-medium transition-all duration-300 group ${
                     open || active
                         ? "bg-blue-100 text-blue-700 border-l-4 border-blue-500"
                         : "hover:bg-gray-50 text-gray-700 hover:text-gray-900"
@@ -69,7 +69,7 @@ function MenuItem({ href, icon, label, active }) {
     return (
         <Link
             href={href}
-            className={`flex items-center px-3 py-2.5 rounded-lg font-medium transition-all duration-200 ${
+            className={`flex items-center px-2 py-2.5 rounded-lg font-medium transition-all duration-200 ${
                 active
                     ? "bg-blue-100 text-blue-700 border-l-4 border-blue-500"
                     : "hover:bg-gray-50 text-gray-700 border-l-4 border-transparent"
@@ -207,15 +207,36 @@ export default function MenuSideBar({ lang, setLang }) {
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                class="lucide lucide-clipboard-plus-icon lucide-clipboard-plus"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="lucide lucide-clipboard-plus-icon lucide-clipboard-plus"
             >
                 <rect width="8" height="4" x="8" y="2" rx="1" ry="1" />
                 <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
                 <path d="M9 14h6" />
                 <path d="M12 17v-6" />
+            </svg>
+        ),
+        homophone: (
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="lucide lucide-book-plus"
+            >
+                {/* Book */}
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                <path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15z" />
+                {/* Plus sign */}
+                <line x1="12" y1="8" x2="12" y2="16" />
+                <line x1="8" y1="12" x2="16" y2="12" />
             </svg>
         ),
     };
@@ -272,6 +293,27 @@ export default function MenuSideBar({ lang, setLang }) {
                                     href={route("articles.create")}
                                     label={"Create Article"}
                                     active={routeName === "articles.create"}
+                                />
+                            )}
+                        </MenuGroup>
+                    )}
+
+                    {(can["homophone-list"] || can["homophone-create"]) && (
+                        <MenuGroup
+                            label={"Homophones"}
+                            icon={icons.homophone}
+                            active={isActive("homophones")}
+                        >
+                            <MenuItem
+                                href={route("homophones.index")}
+                                label={"Homophone List"}
+                                active={routeName === "homophones.index"}
+                            />
+                            {can["homophone-create"] && (
+                                <MenuItem
+                                    href={route("homophones.create")}
+                                    label={"Create Homophone"}
+                                    active={routeName === "homophones.create"}
                                 />
                             )}
                         </MenuGroup>
