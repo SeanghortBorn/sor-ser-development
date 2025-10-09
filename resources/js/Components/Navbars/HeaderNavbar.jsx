@@ -94,7 +94,7 @@ export default function HeaderNavbar() {
                                 "/grammar-check"
                             )}`}
                         >
-                            Grammar Check
+                            Homophone Check
                         </Link>
                         <Link
                             href="/quiz-practice"
@@ -260,7 +260,7 @@ export default function HeaderNavbar() {
                                 )} hover:bg-gray-50`}
                                 onClick={() => setMobileMenuOpen(false)}
                             >
-                                Grammar Check
+                                Homophone Check
                             </Link>
                             <Link
                                 href="/quiz-practice"

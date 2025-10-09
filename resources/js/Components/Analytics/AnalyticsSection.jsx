@@ -31,9 +31,9 @@ export default function AnalyticsSection() {
     return (
         <div className="mb-8 mt-3">
             {/* Top Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 {/* Quiz Performance Card */}
-                <div className="bg-white px-3 py-3 shadow-sm rounded-xl border border-gray-100 flex flex-col gap-2">
+                {/* <div className="bg-white px-3 py-3 shadow-sm rounded-xl border border-gray-100 flex flex-col gap-2">
                     <p className="text-gray-700 text-base font-medium">
                         Quiz Performance
                     </p>
@@ -46,7 +46,7 @@ export default function AnalyticsSection() {
                             </span>
                         </div>
                     </div>
-                </div>
+                </div> */}
                 {/* Grammar Accuracy */}
                 <div className="bg-white px-3 py-3 shadow-sm rounded-xl border border-gray-100 flex flex-col gap-2">
                     <p className="text-gray-700 text-base font-medium">
