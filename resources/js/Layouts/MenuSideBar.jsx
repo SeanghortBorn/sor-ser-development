@@ -1,6 +1,67 @@
 import { Link, usePage } from "@inertiajs/react";
 import { useEffect, useState } from "react";
 
+function MenuGroup({ label, icon, children, active }) {
+    const [open, setOpen] = useState(active);
+
+    useEffect(() => {
+        setOpen(active);
+    }, [active]);
+
+    return (
+        <div className="mb-2">
+            <button
+                onClick={() => setOpen((prev) => !prev)}
+                className={`flex items-center w-full px-2 py-2.5 rounded-lg font-medium transition-all duration-300 group ${
+                    open || active
+                        ? "bg-blue-100 text-blue-700 border-l-4 border-blue-500"
+                        : "hover:bg-gray-50 text-gray-700 hover:text-gray-900"
+                }`}
+            >
+                <span
+                    className={`mr-3 transition-colors duration-300 ${
+                        open || active
+                            ? "text-blue-600"
+                            : "text-gray-400 group-hover:text-gray-600"
+                    }`}
+                >
+                    {icon}
+                </span>
+                <span className="flex-1 text-left text-sm font-semibold">
+                    {label}
+                </span>
+                <svg
+                    className={`w-4 h-4 ml-auto transition-all duration-300 ${
+                        open ? "rotate-90" : ""
+                    } ${
+                        open || active
+                            ? "text-blue-600"
+                            : "text-gray-400 group-hover:text-gray-600"
+                    }`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 5l7 7-7 7"
+                    />
+                </svg>
+            </button>
+
+            <div
+                className={`transition-all duration-300 overflow-hidden ${
+                    open ? "max-h-96 opacity-100 mt-2" : "max-h-0 opacity-0"
+                }`}
+            >
+                <div className="pl-2 space-y-1">{children}</div>
+            </div>
+        </div>
+    );
+}
+
 /* ----------------------------
  * Simple Menu Item
  * ---------------------------- */
@@ -138,6 +199,46 @@ export default function MenuSideBar({ lang, setLang }) {
                 <path d="M3 12h18" />
             </svg>
         ),
+        article: (
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="lucide lucide-clipboard-plus-icon lucide-clipboard-plus"
+            >
+                <rect width="8" height="4" x="8" y="2" rx="1" ry="1" />
+                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+                <path d="M9 14h6" />
+                <path d="M12 17v-6" />
+            </svg>
+        ),
+        homophone: (
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="lucide lucide-book-plus"
+            >
+                {/* Book */}
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                <path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15z" />
+                {/* Plus sign */}
+                <line x1="12" y1="8" x2="12" y2="16" />
+                <line x1="8" y1="12" x2="16" y2="12" />
+            </svg>
+        ),
     };
 
     return (
@@ -172,88 +273,139 @@ export default function MenuSideBar({ lang, setLang }) {
                     <MenuItem
                         href={route("dashboard")}
                         icon={icons.dashboard}
-                        label={t("Dashboard", "ផ្ទាំងគ្រប់គ្រង")}
+                        label={"Dashboard"}
                         active={isActive("dashboard")}
                     />
 
-                    {/* Settings Section */}
-                    <MenuItem
-                        href={route("quizzes.index")}
-                        icon={icons.quiz}
-                        label={t("Quizzes", "សំណួរ")}
-                        active={isActive("quizzes.index")}
-                    />
+                    {(can["article-list"] || can["article-create"]) && (
+                        <MenuGroup
+                            label={"Articles"}
+                            icon={icons.article}
+                            active={isActive("articles")}
+                        >
+                            <MenuItem
+                                href={route("articles.index")}
+                                label={"Article List"}
+                                active={routeName === "articles.index"}
+                            />
+                            {can["article-create"] && (
+                                <MenuItem
+                                    href={route("articles.create")}
+                                    label={"Create Article"}
+                                    active={routeName === "articles.create"}
+                                />
+                            )}
+                        </MenuGroup>
+                    )}
+
+                    {(can["homophone-list"] || can["homophone-create"]) && (
+                        <MenuGroup
+                            label={"Homophones"}
+                            icon={icons.homophone}
+                            active={isActive("homophones")}
+                        >
+                            <MenuItem
+                                href={route("homophones.index")}
+                                label={"Homophone List"}
+                                active={routeName === "homophones.index"}
+                            />
+                            {can["homophone-create"] && (
+                                <MenuItem
+                                    href={route("homophones.create")}
+                                    label={"Create Homophone"}
+                                    active={routeName === "homophones.create"}
+                                />
+                            )}
+                        </MenuGroup>
+                    )}
+
+                    {(can["quiz-list"] || can["quiz-create"]) && (
+                        <MenuGroup
+                            label={"Quizzes"}
+                            icon={icons.quiz}
+                            active={isActive("quizzes")}
+                        >
+                            <MenuItem
+                                href={route("quizzes.index")}
+                                label={"Quiz List"}
+                                active={routeName === "quizzes.index"}
+                            />
+                            {can["quiz-create"] && (
+                                <MenuItem
+                                    href={route("quizzes.create")}
+                                    label={"Create Quiz"}
+                                    active={routeName === "quizzes.create"}
+                                />
+                            )}
+                        </MenuGroup>
+                    )}
 
                     {/* Authentication Section */}
                     {(can["role-list"] || can["user-list"]) && (
                         <>
                             <div className="text-xs font-semibold text-gray-400 mb-2 pt-2 px-2 tracking-wider uppercase">
-                                {t("Authentication", "ការផ្ទៀងផ្ទាត់")}
+                                {"Authentication"}
                             </div>
 
-                            <MenuItem
+                            {/* <MenuItem
                                 href={route("roles.index")}
                                 icon={icons.role}
                                 label={t("Roles List", "បញ្ជីតួនាទី")}
                                 active={routeName === "roles.index"}
-                            />
+                            /> */}
 
-                            {/* {can["role-list"] && (
+                            {(can["role-list"] || can["role-create"]) && (
                                 <MenuGroup
-                                    label={t("Roles", "តួនាទី")}
+                                    label={"Roles"}
                                     icon={icons.role}
                                     active={isActive("roles")}
                                 >
                                     <MenuItem
                                         href={route("roles.index")}
-                                        label={t("Roles List", "បញ្ជីតួនាទី")}
+                                        label={"Roles List"}
                                         active={routeName === "roles.index"}
                                     />
                                     {can["role-create"] && (
                                         <MenuItem
                                             href={route("roles.create")}
-                                            label={t("Create Role", "បង្កើតតួនាទី")}
-                                            active={routeName === "roles.create"}
+                                            label={"Create Role"}
+                                            active={
+                                                routeName === "roles.create"
+                                            }
                                         />
                                     )}
                                 </MenuGroup>
-                            )} */}
+                            )}
 
                             {/* Users */}
-                            <MenuItem
+                            {/* <MenuItem
                                 href={route("users.index")}
                                 icon={icons.user}
                                 label={t("User List", "បញ្ជីអ្នកប្រើប្រាស់")}
                                 active={routeName === "users.index"}
-                            />
-                            {/* {can["user-list"] && (
+                            /> */}
+                            {(can["user-list"] || can["user-create"]) && (
                                 <MenuGroup
-                                    label={t("Users", "អ្នកប្រើប្រាស់")}
+                                    label={"Users"}
                                     icon={icons.user}
                                     active={isActive("users")}
                                 >
                                     <MenuItem
                                         href={route("users.index")}
-                                        label={t(
-                                            "User List",
-                                            "បញ្ជីអ្នកប្រើប្រាស់"
-                                        )}
+                                        label={"User List"}
                                         active={routeName === "users.index"}
                                     />
                                     {can["user-create"] && (
                                         <MenuItem
                                             href={route("users.create")}
-                                            label={t(
-                                                "Create User",
-                                                "បង្កើតអ្នកប្រើប្រាស់"
-                                            )}
+                                            label={"Create User"}
                                             active={
                                                 routeName === "users.create"
                                             }
                                         />
                                     )}
                                 </MenuGroup>
-                            )} */}
+                            )}
                         </>
                     )}
 
@@ -261,7 +413,7 @@ export default function MenuSideBar({ lang, setLang }) {
                     <MenuItem
                         href={route("feedback.index")}
                         icon={icons.feedback}
-                        label={t("Feedback", "មតិយោបល់")}
+                        label={"Feedback"}
                         active={routeName === "feedback.index"}
                     />
                 </nav>

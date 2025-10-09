@@ -34,6 +34,7 @@
         "popper.js": "^1.16.1",
         "react-quill": "^2.0.0",
         "recharts": "^3.2.1",
-        "summernote": "^0.9.1"
+        "summernote": "^0.9.1",
+        "xlsx": "^0.18.5"
     }
 }
