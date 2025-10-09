@@ -11,6 +11,19 @@ class HomophoneController extends Controller
     public function index(Request $request)
     {
         $all = Homophone::all();
+        // Search filter
+        $search = trim($request->query('search', ''));
+        if ($search !== '') {
+            $searchLower = mb_strtolower($search, 'UTF-8');
+            $all = array_filter($all, function ($item) use ($searchLower) {
+                return (
+                    mb_stripos($item['word'] ?? '', $searchLower, 0, 'UTF-8') !== false ||
+                    mb_stripos($item['pos'] ?? '', $searchLower, 0, 'UTF-8') !== false ||
+                    mb_stripos($item['pro'] ?? '', $searchLower, 0, 'UTF-8') !== false
+                );
+            });
+            $all = array_values($all); // reindex after filter
+        }
         // Sort by id ascending (start from id 1)
         usort($all, fn($a, $b) => $a['id'] <=> $b['id']);
         $page = max(1, (int)$request->query('page', 1));
@@ -89,7 +102,8 @@ class HomophoneController extends Controller
                 'current_page' => $page,
                 'last_page' => $lastPage,
                 'links' => $links,
-            ]
+            ],
+            'search' => $search, // pass to frontend
         ]);
     }
 
@@ -176,12 +190,65 @@ class HomophoneController extends Controller
             ]);
         }
 
-        // Validate each homophone entry
-        foreach ($homophones as $data) {
-            Homophone::create($data);
+        // Normalize keys and import only valid entries
+        $existing = Homophone::all();
+        // Build a set of existing entries by word+pos+pro+definition (normalized)
+        function normalize($str) {
+            return preg_replace('/\s+/u', ' ', trim((string)$str));
+        }
+        $existingSet = [];
+        foreach ($existing as $item) {
+            $key = md5(
+                normalize($item['word'] ?? '') . '|' .
+                normalize($item['pos'] ?? '') . '|' .
+                normalize($item['pro'] ?? '') . '|' .
+                normalize($item['definition'] ?? '')
+            );
+            $existingSet[$key] = $item;
         }
 
-        return redirect()->route('homophones.index')->with('success', "Homophones imported successfully. Estimated time: {$estimatedSeconds}s for {$count} items.");
+        $imported = 0;
+        foreach ($homophones as $data) {
+            // Map keys if needed
+            $normalized = [
+                'word' => $data['word'] ?? $data['Word'] ?? null,
+                'pos' => $data['pos'] ?? $data['POS'] ?? null,
+                'pro' => $data['pro'] ?? $data['Pronunciation'] ?? null,
+                'definition' => $data['definition'] ?? $data['Definition'] ?? null,
+                'example' => $data['example'] ?? $data['Example'] ?? '',
+                'phoneme' => $data['phoneme'] ?? $data['Phoneme'] ?? '',
+                'homophone' => $data['homophone'] ?? [],
+            ];
+            // Only import if all required fields exist
+            if (
+                empty($normalized['word']) ||
+                empty($normalized['pos']) ||
+                empty($normalized['pro']) ||
+                empty($normalized['definition'])
+            ) {
+                continue; // skip invalid
+            }
+            // If homophone is string, convert to array
+            if (is_string($normalized['homophone'])) {
+                $normalized['homophone'] = array_filter(array_map('trim', explode(',', $normalized['homophone'])));
+            }
+            // Check for full duplicate (word+pos+pro+definition, normalized)
+            $key = md5(
+                normalize($normalized['word']) . '|' .
+                normalize($normalized['pos']) . '|' .
+                normalize($normalized['pro']) . '|' .
+                normalize($normalized['definition'])
+            );
+            if (isset($existingSet[$key])) {
+                // Already exists, skip
+                continue;
+            } else {
+                Homophone::create($normalized);
+                $imported++;
+            }
+        }
+
+        return redirect()->route('homophones.index')->with('success', "Homophones imported: {$imported}. Estimated time: {$estimatedSeconds}s for {$count} items.");
     }
 
     public function clear()

@@ -3,11 +3,11 @@ import { Head, Link, router, usePage } from "@inertiajs/react";
 import AdminLayout from "@/Layouts/AdminLayout";
 import Breadcrumb from "@/Components/Breadcrumb";
 import Pagination from "@/Components/Pagination";
-import { ClipboardPlus } from "lucide-react";
+import { ClipboardPlus, Search } from "lucide-react";
 import Modal from "@/Components/Modal";
 import * as XLSX from "xlsx";
 
-export default function HomophonesPage({ homophones }) {
+export default function HomophonesPage({ homophones, search = "" }) {
     const { auth } = usePage().props;
     const can = auth?.can ?? {};
     const datasList = homophones?.data || homophones || [];
@@ -20,6 +20,8 @@ export default function HomophonesPage({ homophones }) {
     const [showClearModal, setShowClearModal] = useState(false);
     const [clearProcessing, setClearProcessing] = useState(false);
     const [dropdownOpen, setDropdownOpen] = useState(false);
+    const [searchTerm, setSearchTerm] = useState(search);
+    const [selectedImportFile, setSelectedImportFile] = useState(null);
     const fileInputRef = useRef();
     const dropdownRef = useRef(null);
 
@@ -42,13 +44,22 @@ export default function HomophonesPage({ homophones }) {
         });
     };
 
-    const handleImportFile = async (e) => {
+    // Change: only store file on input, do not import yet
+    const handleFileInputChange = (e) => {
         setImportError("");
         const file = e.target.files[0];
-        if (!file) return;
+        setSelectedImportFile(file || null);
+    };
+
+    // Import when user clicks Import button
+    const handleImportClick = async (e) => {
+        e.preventDefault();
+        setImportError("");
+        if (!selectedImportFile) return;
         setImportProcessing(true);
 
         try {
+            const file = selectedImportFile;
             if (file.name.endsWith(".json")) {
                 const formData = new FormData();
                 formData.append("file", file);
@@ -61,7 +72,9 @@ export default function HomophonesPage({ homophones }) {
                     onFinish: () => {
                         setImportProcessing(false);
                         setShowImportModal(false);
-                        fileInputRef.current.value = "";
+                        setSelectedImportFile(null);
+                        if (fileInputRef.current)
+                            fileInputRef.current.value = "";
                     },
                     onError: () => {
                         setImportError("Import failed.");
@@ -97,7 +110,9 @@ export default function HomophonesPage({ homophones }) {
                         onFinish: () => {
                             setImportProcessing(false);
                             setShowImportModal(false);
-                            fileInputRef.current.value = "";
+                            setSelectedImportFile(null);
+                            if (fileInputRef.current)
+                                fileInputRef.current.value = "";
                         },
                         onError: (err) => {
                             setImportError("Import failed.");
@@ -154,6 +169,20 @@ export default function HomophonesPage({ homophones }) {
         return () => document.removeEventListener("mousedown", handleClick);
     }, [dropdownOpen]);
 
+    // Search handler
+    const handleSearch = (e) => {
+        const value = e.target.value;
+        setSearchTerm(value);
+        router.get(
+            route("homophones.index"),
+            { search: value },
+            {
+                preserveState: true,
+                replace: true,
+            }
+        );
+    };
+
     return (
         <AdminLayout
             breadcrumb={<Breadcrumb header={headWeb} links={linksBreadcrumb} />}
@@ -166,76 +195,97 @@ export default function HomophonesPage({ homophones }) {
                             <h3 className="text-xl font-semibold">
                                 Homophones
                             </h3>
-                            <div className="relative flex gap-2 filter-dropdown-parent">
-                                <div className="relative" ref={dropdownRef}>
-                                    {/* Dropdown Button */}
-                                    <button
-                                        type="button"
-                                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm bg-blue-600 hover:bg-blue-500 text-white transition focus:outline-none focus:ring-1 focus:ring-gray-400"
-                                        onClick={() =>
-                                            setDropdownOpen((open) => !open)
-                                        }
-                                    >
-                                        <span>Filter</span>
-                                        <i
-                                            className={`fas fa-chevron-down ml-1 transition-transform duration-200 ${
-                                                dropdownOpen ? "rotate-180" : ""
-                                            }`}
-                                        />
-                                    </button>
-
-                                    {/* Dropdown Menu */}
-                                    {dropdownOpen && (
-                                        <div className="absolute right-0 mt-2 w-32 bg-white border-gray-200 rounded-xl shadow-lg z-50 animate-fade-in">
-                                            <div className="py-2 px-2">
-                                                {can["homophone-create"] && (
-                                                    <button
-                                                        type="button"
-                                                        className="flex items-center rounded-lg gap-2 w-full text-left px-3 py-2 text-sm hover:bg-blue-50 text-blue-700 transition"
-                                                        onClick={() => {
-                                                            setShowImportModal(
-                                                                true
-                                                            );
-                                                            setDropdownOpen(
-                                                                false
-                                                            );
-                                                        }}
-                                                    >
-                                                        <i className="fas fa-file-import w-4 h-4" />
-                                                        Import
-                                                    </button>
-                                                )}
-                                                {can["homophone-delete"] && (
-                                                    <button
-                                                        type="button"
-                                                        className="flex items-center rounded-lg gap-2 w-full text-left px-3 py-2 text-sm hover:bg-red-50 text-red-700 transition"
-                                                        onClick={() => {
-                                                            setShowClearModal(
-                                                                true
-                                                            );
-                                                            setDropdownOpen(
-                                                                false
-                                                            );
-                                                        }}
-                                                    >
-                                                        <i className="fas fa-trash w-4 h-4" />
-                                                        Clear All
-                                                    </button>
-                                                )}
-                                            </div>
-                                        </div>
-                                    )}
+                            <div className="flex gap-2 items-center space-x-2">
+                                {/* Search input */}
+                                <div className="inline-flex items-center gap-2 px-3 rounded-xl border hover:shadow-lg transition text-sm bg-white">
+                                    <Search className="w-4 h-4 text-gray-500" />
+                                    <input
+                                        type="text"
+                                        className="px-2 w-[250px] py-2 rounded-[10px] border-none border-gray-300 text-sm  focus:outline-none focus:ring-0"
+                                        placeholder="Search Word, POS, Pronunciation"
+                                        value={searchTerm}
+                                        onChange={handleSearch}
+                                    />
                                 </div>
-                                {can["homophone-create"] &&
-                                    can["homophone-list"] && (
-                                        <Link
-                                            href={route("homophones.create")}
-                                            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm text-white bg-green-600 hover:bg-green-500 transition"
+                                <div className="relative flex gap-2 filter-dropdown-parent">
+                                    <div className="relative" ref={dropdownRef}>
+                                        {/* Dropdown Button */}
+                                        <button
+                                            type="button"
+                                            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm bg-blue-600 hover:bg-blue-500 text-white transition focus:outline-none focus:ring-1 focus:ring-gray-400"
+                                            onClick={() =>
+                                                setDropdownOpen((open) => !open)
+                                            }
                                         >
-                                            <ClipboardPlus className="w-4 h-4" />
-                                            Add New
-                                        </Link>
-                                    )}
+                                            <span>Filter</span>
+                                            <i
+                                                className={`fas fa-chevron-down ml-1 transition-transform duration-200 ${
+                                                    dropdownOpen
+                                                        ? "rotate-180"
+                                                        : ""
+                                                }`}
+                                            />
+                                        </button>
+
+                                        {/* Dropdown Menu */}
+                                        {dropdownOpen && (
+                                            <div className="absolute right-0 mt-2 w-32 bg-white border-gray-200 rounded-xl shadow-lg z-50 animate-fade-in">
+                                                <div className="py-2 px-2">
+                                                    {can[
+                                                        "homophone-create"
+                                                    ] && (
+                                                        <button
+                                                            type="button"
+                                                            className="flex items-center rounded-lg gap-2 w-full text-left px-3 py-2 text-sm hover:bg-blue-50 text-blue-700 transition"
+                                                            onClick={() => {
+                                                                setShowImportModal(
+                                                                    true
+                                                                );
+                                                                setDropdownOpen(
+                                                                    false
+                                                                );
+                                                            }}
+                                                        >
+                                                            <i className="fas fa-file-import w-4 h-4" />
+                                                            Import
+                                                        </button>
+                                                    )}
+                                                    {can[
+                                                        "homophone-delete"
+                                                    ] && (
+                                                        <button
+                                                            type="button"
+                                                            className="flex items-center rounded-lg gap-2 w-full text-left px-3 py-2 text-sm hover:bg-red-50 text-red-700 transition"
+                                                            onClick={() => {
+                                                                setShowClearModal(
+                                                                    true
+                                                                );
+                                                                setDropdownOpen(
+                                                                    false
+                                                                );
+                                                            }}
+                                                        >
+                                                            <i className="fas fa-trash w-4 h-4" />
+                                                            Clear All
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                    {can["homophone-create"] &&
+                                        can["homophone-list"] && (
+                                            <Link
+                                                href={route(
+                                                    "homophones.create"
+                                                )}
+                                                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm text-white bg-green-600 hover:bg-green-500 transition"
+                                            >
+                                                <ClipboardPlus className="w-4 h-4" />
+                                                Add New
+                                            </Link>
+                                        )}
+                                </div>
                             </div>
                         </div>
                         <div className="overflow-x-auto">
@@ -387,12 +437,13 @@ export default function HomophonesPage({ homophones }) {
                                 setShowImportModal(false);
                                 setImportError("");
                                 setImportProcessing(false);
+                                setSelectedImportFile(null);
                                 if (fileInputRef.current)
                                     fileInputRef.current.value = "";
                             }}
                             maxWidth="lg"
                         >
-                            <form className="p-6">
+                            <form className="p-6" onSubmit={handleImportClick}>
                                 <h2 className="text-lg font-semibold text-gray-800 mb-2">
                                     Import Homophones
                                 </h2>
@@ -400,26 +451,66 @@ export default function HomophonesPage({ homophones }) {
                                     Upload a <b>.json</b> or <b>.xlsx/.xls</b>{" "}
                                     file with homophone data.
                                 </p>
-                                <input
-                                    type="file"
-                                    accept=".json,.xlsx,.xls"
-                                    ref={fileInputRef}
-                                    onChange={handleImportFile}
-                                    disabled={importProcessing}
-                                    className="mb-4"
-                                />
-                                {importError && (
-                                    <div className="text-red-600 mb-2">
-                                        {importError}
+                                <div>
+                                    <label className="block text-sm font-medium mb-2">
+                                        Select File <span> </span>
+                                    </label>
+                                    <div
+                                        className="flex items-center justify-center h-32 border-2 border-dashed border-gray-300 rounded-xl hover:border-blue-500 cursor-pointer relative bg-gray-50 hover:bg-blue-50 transition"
+                                        onClick={() => {
+                                            if (fileInputRef.current)
+                                                fileInputRef.current.click();
+                                        }}
+                                        style={{ minHeight: 100 }}
+                                    >
+                                        <input
+                                            type="file"
+                                            accept=".json,.xlsx,.xls"
+                                            ref={fileInputRef}
+                                            onChange={handleFileInputChange}
+                                            disabled={importProcessing}
+                                            className="absolute inset-0 opacity-0 cursor-pointer"
+                                            tabIndex={-1}
+                                            style={{ pointerEvents: "auto" }}
+                                            onClick={(e) => e.stopPropagation()} // Prevent parent click
+                                        />
+                                        <div className="text-center space-y-2 pointer-events-none">
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                className="mx-auto h-8 w-8 text-gray-400 pointer-events-none"
+                                                fill="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path d="M12 16a1 1 0 0 1-1-1V9.414L8.707 11.707a1 1 0 1 1-1.414-1.414l4-4a1 1 0 0 1 1.414 0l4 4a1 1 0 0 1-1.414 1.414L13 9.414V15a1 1 0 0 1-1 1z" />
+                                                <path d="M4 18a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v1a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1z" />
+                                            </svg>
+                                            <div className="text-sm text-gray-500 pointer-events-none">
+                                                {selectedImportFile
+                                                    ? selectedImportFile.name
+                                                    : "Select a file or drag here"}
+                                            </div>
+                                            <div className="inline-block px-3 py-1 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 transition pointer-events-none">
+                                                {selectedImportFile
+                                                    ? "Change file"
+                                                    : "Select a file"}
+                                            </div>
+                                            
+                                        </div>
                                     </div>
-                                )}
-                                <div className="flex justify-end gap-3">
+                                    {importError && (
+                                        <div className="text-red-600 mt-2 text-sm">
+                                            {importError}
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="flex justify-between gap-3 mt-6">
                                     <button
                                         type="button"
                                         onClick={() => {
                                             setShowImportModal(false);
                                             setImportError("");
                                             setImportProcessing(false);
+                                            setSelectedImportFile(null);
                                             if (fileInputRef.current)
                                                 fileInputRef.current.value = "";
                                         }}
@@ -428,12 +519,19 @@ export default function HomophonesPage({ homophones }) {
                                     >
                                         Cancel
                                     </button>
+                                    <button
+                                        type="submit"
+                                        className="rounded-[10px] px-8 py-1 bg-blue-600 text-white font-semibold hover:bg-blue-700 transition"
+                                        disabled={
+                                            importProcessing ||
+                                            !selectedImportFile
+                                        }
+                                    >
+                                        {importProcessing
+                                            ? "Importing..."
+                                            : "Import"}
+                                    </button>
                                 </div>
-                                {importProcessing && (
-                                    <div className="mt-2 text-blue-600">
-                                        Importing...
-                                    </div>
-                                )}
                             </form>
                         </Modal>
 
