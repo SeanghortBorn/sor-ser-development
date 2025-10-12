@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Article;
+use App\Models\Audio;
+use App\Models\File;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 use Illuminate\Support\Facades\Storage;
+use \Illuminate\Support\Facades\Auth;
 
 class ArticleController extends Controller
 {
@@ -42,36 +45,68 @@ class ArticleController extends Controller
     {
         $validated = $request->validate([
             'title' => 'required|max:255|min:2',
-            'file' => 'nullable|file',
-            'audio' => 'nullable|file',
+            'file' => 'required|file|max:10240|mimes:txt,pdf,doc,docx', // max 10MB, allowed types
+            'audio' => 'required|file|max:20480|mimes:mp3,wav,m4a,ogg', // max 20MB, allowed types
         ]);
-        $validated['user_id'] = auth()->id();
+        $validated['user_id'] = Auth::user()->id;
 
         // Handle file upload
         if ($request->hasFile('file')) {
             $file = $request->file('file');
-            $fileModel = new \App\Models\File();
-            $fileModel->title = $file->getClientOriginalName();
-            $storedPath = $file->store('uploads/files', 'public');
-            $fileModel->file_path = Storage::url($storedPath);
-            $fileModel->file_size = $file->getSize();
-            $fileModel->file_type = $file->getClientMimeType();
-            $fileModel->word_count = 0;
-            $fileModel->save();
-            $validated['file_id'] = $fileModel->id;
+            if ($file->getSize() === 0) {
+                return back()->withErrors(['file' => 'Uploaded file is empty.']);
+            }
+            try {
+                $fileModel = new File();
+                $fileModel->title = $file->getClientOriginalName();
+                $storedPath = $file->store('uploads/files', 'public');
+                $fileModel->file_path = Storage::url($storedPath);
+                $fileModel->file_size = $file->getSize();
+                $fileModel->file_type = $file->getClientMimeType();
+
+                // Count Khmer words if text file
+                $wordCount = 0;
+                if ($fileModel->file_type === 'text/plain') {
+                    $fileContent = file_get_contents($file->getRealPath());
+                    $tokens = preg_split('/\s+/u', $fileContent, -1, PREG_SPLIT_NO_EMPTY);
+                    $khmerWordCount = 0;
+                    foreach ($tokens as $token) {
+                        if (preg_match('/[\x{1780}-\x{17FF}]/u', $token)) {
+                            $khmerWordCount++;
+                        }
+                    }
+                    $wordCount = $khmerWordCount;
+                }
+                $fileModel->word_count = $wordCount;
+                $fileModel->save();
+                $validated['file_id'] = $fileModel->id;
+            } catch (\Exception $e) {
+                return back()->withErrors(['file' => 'File upload failed: ' . $e->getMessage()]);
+            }
+        } else {
+            return back()->withErrors(['file' => 'No file uploaded.']);
         }
 
         // Handle audio upload
         if ($request->hasFile('audio')) {
             $audio = $request->file('audio');
-            $audioModel = new \App\Models\Audio();
-            $audioModel->title = $audio->getClientOriginalName();
-            $storedPath = $audio->store('uploads/audios', 'public');
-            $audioModel->file_path = Storage::url($storedPath);
-            $audioModel->file_size = $audio->getSize();
-            $audioModel->duration = 0;
-            $audioModel->save();
-            $validated['audios_id'] = $audioModel->id;
+            if ($audio->getSize() === 0) {
+                return back()->withErrors(['audio' => 'Uploaded audio is empty.']);
+            }
+            try {
+                $audioModel = new Audio();
+                $audioModel->title = $audio->getClientOriginalName();
+                $storedPath = $audio->store('uploads/audios', 'public');
+                $audioModel->file_path = Storage::url($storedPath);
+                $audioModel->file_size = $audio->getSize();
+                $audioModel->duration = 0;
+                $audioModel->save();
+                $validated['audios_id'] = $audioModel->id;
+            } catch (\Exception $e) {
+                return back()->withErrors(['audio' => 'Audio upload failed: ' . $e->getMessage()]);
+            }
+        } else {
+            return back()->withErrors(['audio' => 'No audio uploaded.']);
         }
 
         $model->create($validated);
@@ -112,10 +147,8 @@ class ArticleController extends Controller
             'audio' => 'nullable|file',
         ]);
 
-        // Update title
         $article->title = $validated['title'];
 
-        // Helper to map public URL to storage path for deletion
         $toStoragePath = function (?string $url) {
             if (!$url) return null;
             return str_starts_with($url, '/storage/')
@@ -131,21 +164,47 @@ class ArticleController extends Controller
                 Storage::delete($toStoragePath($article->file->file_path));
                 // Update existing file row
                 $storedPath = $file->store('uploads/files', 'public');
+                $fileType = $file->getClientMimeType();
+                $wordCount = 0;
+                if ($fileType === 'text/plain') {
+                    $fileContent = file_get_contents($file->getRealPath());
+                    $tokens = preg_split('/\s+/u', $fileContent, -1, PREG_SPLIT_NO_EMPTY);
+                    $khmerWordCount = 0;
+                    foreach ($tokens as $token) {
+                        if (preg_match('/[\x{1780}-\x{17FF}]/u', $token)) {
+                            $khmerWordCount++;
+                        }
+                    }
+                    $wordCount = $khmerWordCount;
+                }
                 $article->file->update([
                     'title' => $file->getClientOriginalName(),
                     'file_path' => Storage::url($storedPath),
                     'file_size' => $file->getSize(),
-                    'file_type' => $file->getClientMimeType(),
+                    'file_type' => $fileType,
+                    'word_count' => $wordCount,
                 ]);
             } else {
                 // Create new file row and link
-                $fileModel = new \App\Models\File();
+                $fileModel = new File();
                 $fileModel->title = $file->getClientOriginalName();
                 $storedPath = $file->store('uploads/files', 'public');
                 $fileModel->file_path = Storage::url($storedPath);
                 $fileModel->file_size = $file->getSize();
                 $fileModel->file_type = $file->getClientMimeType();
-                $fileModel->word_count = 0;
+                $wordCount = 0;
+                if ($fileModel->file_type === 'text/plain') {
+                    $fileContent = file_get_contents($file->getRealPath());
+                    $tokens = preg_split('/\s+/u', $fileContent, -1, PREG_SPLIT_NO_EMPTY);
+                    $khmerWordCount = 0;
+                    foreach ($tokens as $token) {
+                        if (preg_match('/[\x{1780}-\x{17FF}]/u', $token)) {
+                            $khmerWordCount++;
+                        }
+                    }
+                    $wordCount = $khmerWordCount;
+                }
+                $fileModel->word_count = $wordCount;
                 $fileModel->save();
                 $article->file_id = $fileModel->id;
             }
@@ -167,7 +226,7 @@ class ArticleController extends Controller
                 ]);
             } else {
                 // Create new audio row and link
-                $audioModel = new \App\Models\Audio();
+                $audioModel = new Audio();
                 $audioModel->title = $audio->getClientOriginalName();
                 $storedPath = $audio->store('uploads/audios', 'public');
                 $audioModel->file_path = Storage::url($storedPath);
