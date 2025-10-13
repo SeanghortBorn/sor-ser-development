@@ -16,15 +16,20 @@ class ArticleController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request): Response
+    public function index(Request $request)
     {
-        $rsDatas = Article::with(['file', 'audio'])
-            ->latest()
-            ->paginate(10)
-            ->appends(request()->query());
-
+        $query = Article::with(['file', 'audio']);
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where('title', 'like', "%$search%")
+                ->orWhereHas('file', function($q) use ($search) {
+                    $q->where('title', 'like', "%$search%");
+                });
+        }
+        $rsDatas = $query->latest()->paginate(10)->appends($request->only('search'));
         return Inertia::render('Articles/Index', [
-            'articles' => $rsDatas
+            'articles' => $rsDatas,
+            'search' => $request->input('search', ''),
         ]);
     }
 

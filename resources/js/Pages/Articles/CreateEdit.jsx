@@ -21,11 +21,13 @@ export default function ArticlesCreateEdit({ datas, isEdit }) {
         if (datas) {
             setForm({
                 title: datas.title || "",
-                file: null,      // <-- always null on edit
-                audio: null,     // <-- always null on edit
+                file: null, // <-- always null on edit
+                audio: null, // <-- always null on edit
             });
             setPreviewFile(datas.file ? resolveUrl(datas.file, "files") : null);
-            setPreviewAudio(datas.audio ? resolveUrl(datas.audio, "audios") : null);
+            setPreviewAudio(
+                datas.audio ? resolveUrl(datas.audio, "audios") : null
+            );
         }
     }, [datas]);
 
@@ -126,9 +128,16 @@ export default function ArticlesCreateEdit({ datas, isEdit }) {
             <div className="bg-gradient-to-br from-slate-50 to-blue-50/30 mb-12">
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                     <div className="p-6">
-                        <h2 className="text-2xl font-semibold mb-4">
-                            {isEdit ? "Edit Article" : "Add New Article"}
-                        </h2>
+                        <div className="border-b mb-3">
+                            <h2 className="text-2xl font-semibold mb-2">
+                                {isEdit ? "Edit Article" : "Create New Article"}
+                            </h2>
+                            <p className="text-sm text-gray-500">
+                                {isEdit
+                                    ? "Update the details of this article below."
+                                    : "Fill out the form below to create a new article."}
+                            </p>
+                        </div>
                         <form
                             onSubmit={submit}
                             className="space-y-4"
@@ -205,7 +214,23 @@ export default function ArticlesCreateEdit({ datas, isEdit }) {
                                     <div className="flex items-center justify-between bg-gray-50 border rounded-xl p-3 mt-3 hover:bg-gray-100 transition">
                                         <div className="flex items-center space-x-3">
                                             <div className="bg-green-100 p-2 rounded-lg flex items-center justify-center text-green-600">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-json2-icon lucide-file-json-2"><path d="M4 22h14a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v4"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M4 12a1 1 0 0 0-1 1v1a1 1 0 0 1-1 1 1 1 0 0 1 1 1v1a1 1 0 0 0 1 1"/><path d="M8 18a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1 1 1 0 0 1-1-1v-1a1 1 0 0 0-1-1"/></svg>
+                                                <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    width="24"
+                                                    height="24"
+                                                    viewBox="0 0 24 24"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    strokeWidth="2"
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    className="lucide lucide-file-json2-icon lucide-file-json-2"
+                                                >
+                                                    <path d="M4 22h14a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v4" />
+                                                    <path d="M14 2v4a2 2 0 0 0 2 2h4" />
+                                                    <path d="M4 12a1 1 0 0 0-1 1v1a1 1 0 0 1-1 1 1 1 0 0 1 1 1v1a1 1 0 0 0 1 1" />
+                                                    <path d="M8 18a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1 1 1 0 0 1-1-1v-1a1 1 0 0 0-1-1" />
+                                                </svg>
                                             </div>
                                             <div className="flex items-center mt-2 space-x-2 justify-center">
                                                 <p className="text-sm font-medium text-gray-800">
