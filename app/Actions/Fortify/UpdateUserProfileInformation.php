@@ -27,6 +27,12 @@ class UpdateUserProfileInformation implements UpdatesUserProfileInformation
                 'max:255',
                 Rule::unique('users')->ignore($user->id),
             ],
+
+            'age' => ['nullable', 'integer', 'min:1', 'max:120'],
+
+            'education_level' => ['nullable', 'string', 'max:50'],
+
+            'khmer_experience' => ['nullable', 'string', 'max:50'],
         ])->validateWithBag('updateProfileInformation');
 
         if ($input['email'] !== $user->email &&
@@ -36,6 +42,9 @@ class UpdateUserProfileInformation implements UpdatesUserProfileInformation
             $user->forceFill([
                 'name' => $input['name'],
                 'email' => $input['email'],
+                'age' => $input['age'] ?? null,
+                'education_level' => $input['education_level'] ?? null,
+                'khmer_experience' => $input['khmer_experience'] ?? null,
             ])->save();
         }
     }
@@ -51,6 +60,9 @@ class UpdateUserProfileInformation implements UpdatesUserProfileInformation
             'name' => $input['name'],
             'email' => $input['email'],
             'email_verified_at' => null,
+            'age' => $input['age'] ?? null,
+            'education_level' => $input['education_level'] ?? null,
+            'khmer_experience' => $input['khmer_experience'] ?? null,
         ])->save();
 
         $user->sendEmailVerificationNotification();
