@@ -10,7 +10,7 @@ class KhmerSegmentController extends Controller
     public function segment(Request $request)
     {
         $text = $request->input('text', '');
-        $response = Http::post('https://ad9bae85-2730-4d17-884a-59f7d0c1c65a-00-2g5ttjxd1n3o1.picard.replit.dev/segment', [
+        $response = Http::post(env('KHMER_SEGMENT_API_URL') . '/segment', [
             'text' => $text,
         ]);
         return response()->json($response->json());
