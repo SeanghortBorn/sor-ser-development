@@ -6,13 +6,7 @@ import axios from "axios";
 import GrammarCheckSection from "@/Components/GrammarChecks/GrammarCheckSection";
 import GrammarCheckHeader from "@/Components/GrammarChecks/GrammarCheckHeader";
 import React from "react";
-import {
-  Check,
-  X,
-  AlertCircle,
-  CheckCircle2,
-  RotateCcw,
-} from "lucide-react";
+import { Check, X, AlertCircle, CheckCircle2, RotateCcw } from "lucide-react";
 
 export default function GrammarCheck() {
     const { auth } = usePage().props;
@@ -30,6 +24,18 @@ export default function GrammarCheck() {
     const [previousDocuments, setPreviousDocuments] = useState([]);
     const [isZoomed, setIsZoomed] = useState(false);
 
+    // Dropdown for articles
+    const [articles, setArticles] = useState([]);
+    const [selectedArticle, setSelectedArticle] = useState(null);
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+    const dropdownRef = useRef(null);
+
+    // Audio management for selected article
+    const audioRef = useRef(null);
+    const [audioUrl, setAudioUrl] = useState(null);
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [audioError, setAudioError] = useState(null); // New: track audio fetch errors
+
     // Fetch history on mount
     const fetchHistory = () => {
         axios
@@ -45,29 +51,77 @@ export default function GrammarCheck() {
             .catch(() => setPreviousDocuments([]));
     };
 
+    // Fetch articles on mount
+    useEffect(() => {
+        axios
+            .get("/api/articles", { headers: { Accept: "application/json" } })
+            .then((res) => {
+                setArticles(
+                    Array.isArray(res.data) ? res.data : res.data.data || []
+                );
+            })
+            .catch(() => setArticles([]));
+    }, []);
+
     useEffect(() => {
         fetchHistory();
     }, []);
 
+    // Replace useClickAway with custom outside click handler
+    useEffect(() => {
+        if (!dropdownOpen) return;
+        function handleClickOutside(event) {
+            if (
+                dropdownRef.current &&
+                !dropdownRef.current.contains(event.target)
+            ) {
+                setDropdownOpen(false);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [dropdownOpen]);
+
     // Debounce auto-save
     const saveTimeout = useRef();
 
-    const calculateWordCount = (text) =>
-        text ? text.trim().split(/\s+/).length : 0;
-    const calculateReadingTime = (text) =>
-        Math.ceil((calculateWordCount(text) / 200) * 60);
+    // Replace calculateWordCount with API-based Khmer word segmentation
+    const calculateWordCount = async (text) => {
+        if (!text || !text.trim()) return 0;
+        try {
+            const res = await axios.post(
+                "/api/khmer-segment",
+                { text },
+                { headers: { "Content-Type": "application/json" } }
+            );
+            if (res.data && Array.isArray(res.data.tokens)) {
+                return res.data.tokens.length;
+            }
+            return text.trim().split(/\s+/).length;
+        } catch (e) {
+            console.error("Khmer segment API error:", e);
+            return text.trim().split(/\s+/).length;
+        }
+    };
 
-    const autoSave = (newTitle, newParagraph) => {
+    const calculateReadingTime = (wordCount) =>
+        Math.ceil((wordCount / 200) * 60);
+
+    // Update autoSave to use async word count
+    const autoSave = async (newTitle, newParagraph) => {
         if (!userId) return;
         setSaving(true);
 
+        const wordCount = await calculateWordCount(newParagraph);
         const payload = {
             user_id: userId,
             title: newTitle ?? "",
             paragraph: newParagraph ?? "",
-            word_count: calculateWordCount(newParagraph),
+            word_count: wordCount,
             incorrect_word_count: 0,
-            reading_time: calculateReadingTime(newParagraph),
+            reading_time: calculateReadingTime(wordCount),
         };
 
         if (checkerId) {
@@ -99,16 +153,15 @@ export default function GrammarCheck() {
         }
     };
 
-    // Auto-save on docTitle or paragraph change
+    // Auto-save on docTitle or paragraph change (update to async)
     useEffect(() => {
         if (!userId) return;
         if (!docTitle.trim() && !paragraph.trim()) return;
 
         if (saveTimeout.current) clearTimeout(saveTimeout.current);
-        saveTimeout.current = setTimeout(
-            () => autoSave(docTitle, paragraph),
-            700
-        );
+        saveTimeout.current = setTimeout(() => {
+            autoSave(docTitle, paragraph);
+        }, 700);
 
         return () => clearTimeout(saveTimeout.current);
     }, [docTitle, paragraph]);
@@ -173,21 +226,33 @@ export default function GrammarCheck() {
             if (!feedbackText.trim()) return;
             if (feedbackState === "sending") return;
             // Prevent duplicate identical submission when already sent
-            const signature = `${checkerId || 'none'}|${c.error}|${feedbackText.trim()}`;
-            if (lastSignature === signature && (feedbackState === "sent" || feedbackState === "sending")) return;
+            const signature = `${checkerId || "none"}|${
+                c.error
+            }|${feedbackText.trim()}`;
+            if (
+                lastSignature === signature &&
+                (feedbackState === "sent" || feedbackState === "sending")
+            )
+                return;
 
             setLastSignature(signature);
             setFeedbackState("sending");
             setFeedbackError(null);
             try {
-                await axios.post("/feedback", {
-                    checker_id: checkerId || null,
-                    error: c.error,
-                    suggestion: c.suggestion,
-                    message: feedbackText.trim(),
-                }, { headers: { Accept: "application/json" } });
+                await axios.post(
+                    "/feedback",
+                    {
+                        checker_id: checkerId || null,
+                        error: c.error,
+                        suggestion: c.suggestion,
+                        message: feedbackText.trim(),
+                    },
+                    { headers: { Accept: "application/json" } }
+                );
                 // mark success for this specific correction
-                setFeedbackSent(prev => prev.includes(c.error) ? prev : [...prev, c.error]);
+                setFeedbackSent((prev) =>
+                    prev.includes(c.error) ? prev : [...prev, c.error]
+                );
                 setFeedbackState("sent");
                 setRetryCount(0);
                 // Close textarea immediately and clear input; maintain success indicator separately
@@ -196,7 +261,8 @@ export default function GrammarCheck() {
                 // reset generic state to idle so other corrections work independently
                 setTimeout(() => setFeedbackState("idle"), 50);
             } catch (e) {
-                const serverMsg = e?.response?.data?.message || e?.message || "Unknown error";
+                const serverMsg =
+                    e?.response?.data?.message || e?.message || "Unknown error";
                 setFeedbackError(serverMsg);
                 setFeedbackState("error");
             }
@@ -212,7 +278,9 @@ export default function GrammarCheck() {
             let val = e.target.value;
             if (feedbackPrefix && !val.startsWith(feedbackPrefix)) {
                 // Enforce prefix
-                const after = val.slice(feedbackPrefix.length).replace(/^[^]*?(?=)/, "");
+                const after = val
+                    .slice(feedbackPrefix.length)
+                    .replace(/^[^]*?(?=)/, "");
                 val = feedbackPrefix + after;
             }
             setFeedbackText(val);
@@ -221,7 +289,10 @@ export default function GrammarCheck() {
         const guardCaret = (el) => {
             if (!feedbackPrefix) return;
             if (el.selectionStart < feedbackPrefix.length) {
-                el.setSelectionRange(feedbackPrefix.length, feedbackPrefix.length);
+                el.setSelectionRange(
+                    feedbackPrefix.length,
+                    feedbackPrefix.length
+                );
             }
         };
 
@@ -238,13 +309,18 @@ export default function GrammarCheck() {
             if (start < feedbackPrefix.length) {
                 // Any character input
                 if (e.key.length === 1) return protect();
-                if (e.key === 'Backspace') return protect();
-                if (e.key === 'Delete') return protect();
-                if (e.key === 'ArrowLeft' && start <= feedbackPrefix.length) return protect();
-                if (e.key === 'Home') return protect();
+                if (e.key === "Backspace") return protect();
+                if (e.key === "Delete") return protect();
+                if (e.key === "ArrowLeft" && start <= feedbackPrefix.length)
+                    return protect();
+                if (e.key === "Home") return protect();
             }
             // Block backspace exactly at prefix boundary (would delete last prefix char)
-            if (e.key === 'Backspace' && start === feedbackPrefix.length && end === feedbackPrefix.length) {
+            if (
+                e.key === "Backspace" &&
+                start === feedbackPrefix.length &&
+                end === feedbackPrefix.length
+            ) {
                 return protect();
             }
         };
@@ -258,9 +334,11 @@ export default function GrammarCheck() {
                 <div className="bg-gray-50 hover:bg-gray-100 border border-slate-200 h-full flex flex-col overflow-hidden">
                     <div className="px-6 py-4 border-b border-slate-200 bg-white">
                         <div className="flex items-center justify-between mb-2">
-                            <h3 className="text-lg font-bold text-slate-800">Grammar Check</h3>
+                            <h3 className="text-lg font-bold text-slate-800">
+                                Grammar Check
+                            </h3>
                             <a
-                                href={route('feedback.create')}
+                                href={route("feedback.create")}
                                 className="text-xs px-2 py-1 rounded-md bg-blue-600 text-white hover:bg-blue-700 transition-colors"
                             >
                                 New Feedback
@@ -271,7 +349,11 @@ export default function GrammarCheck() {
                                 <>
                                     <AlertCircle className="w-4 h-4 text-amber-500" />
                                     <span className="text-sm text-slate-600 font-medium">
-                                        {foundCorrections.length} issue{foundCorrections.length > 1 ? 's' : ''} found
+                                        {foundCorrections.length} issue
+                                        {foundCorrections.length > 1
+                                            ? "s"
+                                            : ""}{" "}
+                                        found
                                     </span>
                                 </>
                             ) : (
@@ -282,7 +364,7 @@ export default function GrammarCheck() {
                                     </span>
                                 </>
                             )}
-                        </div>  
+                        </div>
                     </div>
                     <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4 hide-scrollbar">
                         {foundCorrections.length > 0 ? (
@@ -302,7 +384,9 @@ export default function GrammarCheck() {
                                             <span className="px-2 py-0.5 bg-red-100 text-red-700 rounded-md font-mono font-medium">
                                                 {c.error}
                                             </span>
-                                            <span className="mx-2 text-slate-400">→</span>
+                                            <span className="mx-2 text-slate-400">
+                                                →
+                                            </span>
                                             <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-md font-mono font-medium">
                                                 {c.suggestion}
                                             </span>
@@ -313,7 +397,14 @@ export default function GrammarCheck() {
                                             className="flex items-center gap-1 flex-1 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium transition-all duration-200 shadow-sm"
                                             onClick={() => {
                                                 if (onReplace) {
-                                                    const newText = text.replace(new RegExp(c.error, "gi"), c.suggestion);
+                                                    const newText =
+                                                        text.replace(
+                                                            new RegExp(
+                                                                c.error,
+                                                                "gi"
+                                                            ),
+                                                            c.suggestion
+                                                        );
                                                     onReplace(newText);
                                                 }
                                             }}
@@ -322,15 +413,30 @@ export default function GrammarCheck() {
                                         </button>
                                         <button
                                             className="flex items-center gap-1 px-3 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg text-sm font-medium transition-all duration-200 shadow-sm"
-                                            onClick={() => handleDismiss(c.error)}
+                                            onClick={() =>
+                                                handleDismiss(c.error)
+                                            }
                                         >
                                             <X size={16} /> Dismiss
                                         </button>
                                         <button
-                                            disabled={feedbackSent.includes(c.error)}
-                                            className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 shadow-sm ${feedbackSent.includes(c.error) ? "bg-emerald-100 text-emerald-700 cursor-default" : feedbackFor === c.error ? "bg-blue-600 text-white" : "bg-blue-100 text-blue-700 hover:bg-blue-200"}`}
+                                            disabled={feedbackSent.includes(
+                                                c.error
+                                            )}
+                                            className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 shadow-sm ${
+                                                feedbackSent.includes(c.error)
+                                                    ? "bg-emerald-100 text-emerald-700 cursor-default"
+                                                    : feedbackFor === c.error
+                                                    ? "bg-blue-600 text-white"
+                                                    : "bg-blue-100 text-blue-700 hover:bg-blue-200"
+                                            }`}
                                             onClick={() => {
-                                                if (feedbackSent.includes(c.error)) return; // already sent
+                                                if (
+                                                    feedbackSent.includes(
+                                                        c.error
+                                                    )
+                                                )
+                                                    return; // already sent
                                                 if (feedbackFor === c.error) {
                                                     setFeedbackFor(null);
                                                     setFeedbackText("");
@@ -342,64 +448,119 @@ export default function GrammarCheck() {
                                                     setFeedbackText(prefix);
                                                     // place caret at end after render
                                                     setTimeout(() => {
-                                                        const ta = document.getElementById(`fb-${c.error}`);
-                                                        if (ta) ta.setSelectionRange(prefix.length, prefix.length);
+                                                        const ta =
+                                                            document.getElementById(
+                                                                `fb-${c.error}`
+                                                            );
+                                                        if (ta)
+                                                            ta.setSelectionRange(
+                                                                prefix.length,
+                                                                prefix.length
+                                                            );
                                                     }, 0);
                                                 }
                                             }}
                                         >
-                                            {feedbackSent.includes(c.error) ? <><CheckCircle2 size={16}/> Sent</> : 'Feedback'}
+                                            {feedbackSent.includes(c.error) ? (
+                                                <>
+                                                    <CheckCircle2 size={16} />{" "}
+                                                    Sent
+                                                </>
+                                            ) : (
+                                                "Feedback"
+                                            )}
                                         </button>
                                     </div>
-                                    {feedbackFor === c.error && !feedbackSent.includes(c.error) && (
-                                        <div className="mt-3 space-y-2 animate-fade-in">
-                                            <textarea
-                                                id={`fb-${c.error}`}
-                                                value={feedbackText}
-                                                onChange={handleFeedbackChange}
-                                                onKeyDown={handleKeyDown}
-                                                onClick={handleSelect}
-                                                onSelect={handleSelect}
-                                                placeholder="Tell us why this is wrong / helpful..."
-                                                className="w-full text-sm border border-slate-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[70px] resize-none"
-                                            />
-                                            <div className="flex items-center justify-between">
-                                                <div className="text-xs text-slate-400 max-w-[150px] break-words">
-                                                    {feedbackState === "sending" && <span className="text-blue-600">Sending...</span>}
-                                                    {feedbackState === "error" && (
-                                                        <span className="text-red-600">
-                                                            {retryCount >= MAX_RETRIES - 1 ? (feedbackError ? `${feedbackError}` : "Error") : ""}
-                                                        </span>
-                                                    )}
-                                                </div>
-                                                <div className="flex gap-2">
-                                                    {feedbackState === "error" && retryCount >= MAX_RETRIES - 1 && (
+                                    {feedbackFor === c.error &&
+                                        !feedbackSent.includes(c.error) && (
+                                            <div className="mt-3 space-y-2 animate-fade-in">
+                                                <textarea
+                                                    id={`fb-${c.error}`}
+                                                    value={feedbackText}
+                                                    onChange={
+                                                        handleFeedbackChange
+                                                    }
+                                                    onKeyDown={handleKeyDown}
+                                                    onClick={handleSelect}
+                                                    onSelect={handleSelect}
+                                                    placeholder="Tell us why this is wrong / helpful..."
+                                                    className="w-full text-sm border border-slate-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[70px] resize-none"
+                                                />
+                                                <div className="flex items-center justify-between">
+                                                    <div className="text-xs text-slate-400 max-w-[150px] break-words">
+                                                        {feedbackState ===
+                                                            "sending" && (
+                                                            <span className="text-blue-600">
+                                                                Sending...
+                                                            </span>
+                                                        )}
+                                                        {feedbackState ===
+                                                            "error" && (
+                                                            <span className="text-red-600">
+                                                                {retryCount >=
+                                                                MAX_RETRIES - 1
+                                                                    ? feedbackError
+                                                                        ? `${feedbackError}`
+                                                                        : "Error"
+                                                                    : ""}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <div className="flex gap-2">
+                                                        {feedbackState ===
+                                                            "error" &&
+                                                            retryCount >=
+                                                                MAX_RETRIES -
+                                                                    1 && (
+                                                                <button
+                                                                    onClick={() =>
+                                                                        manualRetry(
+                                                                            c
+                                                                        )
+                                                                    }
+                                                                    className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs rounded-lg"
+                                                                >
+                                                                    Retry
+                                                                </button>
+                                                            )}
                                                         <button
-                                                            onClick={() => manualRetry(c)}
-                                                            className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs rounded-lg"
+                                                            disabled={
+                                                                feedbackState ===
+                                                                    "sending" ||
+                                                                !feedbackText.trim()
+                                                            }
+                                                            onClick={() =>
+                                                                submitFeedback(
+                                                                    c
+                                                                )
+                                                            }
+                                                            className="px-3 py-1.5 bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-700 text-white text-xs rounded-lg"
                                                         >
-                                                            Retry
+                                                            {feedbackState ===
+                                                            "sending"
+                                                                ? "Sending"
+                                                                : "Send"}
                                                         </button>
+                                                    </div>
+                                                </div>
+                                                {feedbackError &&
+                                                    feedbackState === "error" &&
+                                                    retryCount >=
+                                                        MAX_RETRIES - 1 && (
+                                                        <div className="text-[11px] text-red-500 italic">
+                                                            Could not send
+                                                            feedback. Please
+                                                            check your
+                                                            connection or try
+                                                            again later.
+                                                        </div>
                                                     )}
-                                                    <button
-                                                        disabled={feedbackState === "sending" || !feedbackText.trim()}
-                                                        onClick={() => submitFeedback(c)}
-                                                        className="px-3 py-1.5 bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-700 text-white text-xs rounded-lg"
-                                                    >
-                                                        {feedbackState === "sending" ? "Sending" : "Send"}
-                                                    </button>
-                                                </div>
                                             </div>
-                                            {feedbackError && feedbackState === "error" && retryCount >= MAX_RETRIES - 1 && (
-                                                <div className="text-[11px] text-red-500 italic">
-                                                    Could not send feedback. Please check your connection or try again later.
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
+                                        )}
                                     {feedbackSent.includes(c.error) && (
                                         <div className="mt-3 text-xs text-emerald-600 font-medium flex items-center gap-1">
-                                            <CheckCircle2 className="w-4 h-4" /> Feedback sent. Thank you!
+                                            <CheckCircle2 className="w-4 h-4" />{" "}
+                                            Feedback sent. Thank you!
                                         </div>
                                     )}
                                 </div>
@@ -413,7 +574,8 @@ export default function GrammarCheck() {
                                     Great job!
                                 </h4>
                                 <p className="text-sm text-slate-500 leading-relaxed max-w-xs mb-4">
-                                    No grammar or spelling issues detected in your text.
+                                    No grammar or spelling issues detected in
+                                    your text.
                                 </p>
                                 <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm shadow-md">
                                     <RotateCcw size={16} /> Re-check Text
@@ -425,7 +587,11 @@ export default function GrammarCheck() {
                         <div className="px-6 py-3 border-t border-slate-100 bg-white">
                             <div className="flex items-center justify-between text-xs text-slate-500">
                                 <span>
-                                    {foundCorrections.length} correction{foundCorrections.length > 1 ? "s" : ""} available
+                                    {foundCorrections.length} correction
+                                    {foundCorrections.length > 1
+                                        ? "s"
+                                        : ""}{" "}
+                                    available
                                 </span>
                                 <span className="flex items-center gap-1 text-emerald-600 font-medium">
                                     <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
@@ -438,6 +604,81 @@ export default function GrammarCheck() {
             </div>
         );
     }
+
+    // Improved audio URL detection
+    const getArticleAudioUrl = (article) => {
+        if (!article) return null;
+        if (article.audio && article.audio.file_path) {
+            return article.audio.file_path;
+        }
+        return null;
+    };
+
+    // Updated handleSelectArticle to fetch audio URL and handle errors
+    const handleSelectArticle = async (article) => {
+        setSelectedArticle(article);
+        setDropdownOpen(false);
+        setDocTitle(article ? article.title : "");
+        setAudioError(null);
+
+        if (!article) {
+            setAudioUrl(null);
+            return;
+        }
+
+        // Get audio ID from the article
+        const audioId = article.audios_id;
+
+        if (!audioId) {
+            setAudioUrl(null);
+            return;
+        }
+
+        try {
+            const res = await axios.get(`/api/audios/${audioId}`);
+            const audioData = res.data?.data;
+
+            if (audioData && audioData.file_path) {
+                setAudioUrl(audioData.file_path);
+            } else {
+                setAudioUrl(null);
+                setAudioError("Audio file not found");
+            }
+        } catch (e) {
+            console.error("Failed to fetch audio:", e);
+            setAudioError("Unable to load audio for this article.");
+            setAudioUrl(null);
+        }
+
+        // Reset audio player
+        if (audioRef.current) {
+            audioRef.current.pause();
+            audioRef.current.currentTime = 0;
+        }
+        setIsPlaying(false);
+    };
+
+    // Updated togglePlay with error handling
+    const togglePlay = () => {
+        if (!audioUrl || !audioRef.current) {
+            setAudioError("No audio available to play.");
+            return;
+        }
+        if (isPlaying) {
+            audioRef.current.pause();
+            setIsPlaying(false);
+        } else {
+            audioRef.current
+                .play()
+                .then(() => setIsPlaying(true))
+                .catch((e) => {
+                    console.error("Playback failed:", e);
+                    setAudioError("Failed to play audio. Please try again.");
+                    setIsPlaying(false);
+                });
+        }
+    };
+
     return (
         <>
             <Head title="Grammar Check" />
@@ -452,19 +693,126 @@ export default function GrammarCheck() {
                 >
                     {/* Left side - Document Editor */}
                     <div className="flex-1 flex flex-col bg-gray-50 hover:bg-gray-100 border border-slate-200 p-4">
-                        {/* Document Title Input */}
-                        <div className="mb-4 bg-white rounded-xl w-[200px] px-2 border border-slate-200">
-                            <input
-                                type="text"
-                                value={docTitle}
-                                onChange={(e) => setDocTitle(e.target.value)}
-                                className="w-full text-[16px] font-medium text-gray-700 bg-transparent border-none outline-none placeholder-gray-500 px-2 py-2 rounded-lg"
-                                style={{
-                                    boxShadow: "none",
-                                    background: "transparent",
-                                }}
-                                placeholder="Untitled document"
-                            />
+                        {/* Document Title Input & Article Dropdown */}
+                        <div className="flex justify-between items-center mb-4">
+                            <div className="bg-white rounded-xl w-[200px] px-2 border border-slate-200">
+                                <input
+                                    type="text"
+                                    value={docTitle}
+                                    onChange={(e) => {
+                                        setDocTitle(e.target.value);
+                                        setSelectedArticle(null);
+                                        setAudioUrl(null);
+                                        setAudioError(null);
+                                    }}
+                                    className="w-full text-[16px] font-medium text-gray-700 bg-transparent border-none outline-none placeholder-gray-500 px-2 py-2 rounded-lg focus:ring-0"
+                                    placeholder="Untitled document"
+                                />
+                            </div>
+
+                            {audioUrl && (
+                                <div className="flex items-center justify-center border rounded-3xl shadow-sm w-full max-w-md mx-auto">
+                                    <audio
+                                        ref={audioRef}
+                                        src={audioUrl}
+                                        className="w-full rounded-lg h-10 outline-none"
+                                        controls
+                                    />
+                                </div>
+                            )}
+                            {audioError && (
+                                <span className="text-sm text-red-500">
+                                    {audioError}
+                                </span>
+                            )}
+                            {!audioUrl && selectedArticle && (
+                                <span className="text-sm text-gray-500">
+                                    No audio available
+                                </span>
+                            )}
+
+                            <div className="flex items-center gap-3">
+                                {/* Article Dropdown */}
+                                <div
+                                    className="relative w-[200px]"
+                                    ref={dropdownRef}
+                                >
+                                    <button
+                                        type="button"
+                                        className={`w-52 px-3 py-2 text-sm rounded-xl border bg-white shadow-sm text-left flex justify-between items-center focus:outline-none focus:ring-2 border-gray-300 focus:ring-blue-200 focus:border-blue-400`}
+                                        onClick={() =>
+                                            setDropdownOpen(!dropdownOpen)
+                                        }
+                                    >
+                                        {selectedArticle
+                                            ? selectedArticle.title
+                                            : "Select an Article"}
+                                        <svg
+                                            className={`w-4 h-4 ml-2 transition-transform ${
+                                                dropdownOpen
+                                                    ? "rotate-180"
+                                                    : "rotate-0"
+                                            }`}
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                                d="M19 9l-7 7-7-7"
+                                            />
+                                        </svg>
+                                    </button>
+                                    {dropdownOpen && (
+                                        <div className="absolute right-0 top-full mt-2 w-full bg-white border border-gray-200 rounded-xl shadow-lg z-50 max-h-60 overflow-y-auto hide-scrollbar">
+                                            <div className="px-2 py-2 space-y-1">
+                                                <button
+                                                    type="button"
+                                                    className={`flex items-center gap-2 w-full text-left px-4 py-2 text-sm rounded-lg transition ${
+                                                        !selectedArticle
+                                                            ? "bg-blue-100 text-blue-700 font-bold"
+                                                            : "hover:bg-gray-100 text-gray-700"
+                                                    }`}
+                                                    onClick={() =>
+                                                        handleSelectArticle(
+                                                            null
+                                                        )
+                                                    }
+                                                >
+                                                    Select an Article
+                                                </button>
+                                                {articles.map((article) => (
+                                                    <button
+                                                        key={article.id}
+                                                        type="button"
+                                                        className={`flex items-center gap-2 w-full text-left px-4 py-2 text-sm rounded-lg transition ${
+                                                            selectedArticle &&
+                                                            selectedArticle.id ===
+                                                                article.id
+                                                                ? "bg-blue-100 text-blue-700 font-bold"
+                                                                : "hover:bg-gray-100 text-gray-700"
+                                                        }`}
+                                                        onClick={() =>
+                                                            handleSelectArticle(
+                                                                article
+                                                            )
+                                                        }
+                                                    >
+                                                        {/* Show both ID and title */}
+                                                        <span className="font-mono text-gray-500">
+                                                            #{article.id}
+                                                        </span>
+                                                        <span>{article.title}</span>
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
                         </div>
 
                         {/* Textarea */}
@@ -477,16 +825,20 @@ export default function GrammarCheck() {
                                 placeholder="Type your text here..."
                                 value={paragraph}
                                 onChange={(e) => setParagraph(e.target.value)}
-                                onCopy={handleBlock}
-                                onPaste={handleBlock}
-                                onCut={handleBlock}
+                                // onCopy={handleBlock}
+                                // onPaste={handleBlock}
+                                // onCut={handleBlock}
                                 onDoubleClick={() => setIsZoomed(!isZoomed)}
                             />
                         </div>
                     </div>
-                    
+
                     {/* Right side - Grammar Check Sidebar (no gap) */}
-                    <SidebarCheckGrammar text={paragraph} onReplace={setParagraph} checkerId={checkerId} />
+                    <SidebarCheckGrammar
+                        text={paragraph}
+                        onReplace={setParagraph}
+                        checkerId={checkerId}
+                    />
                 </div>
 
                 {/* Account Modal inside section */}

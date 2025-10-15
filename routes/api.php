@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\KhmerSegmentController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
@@ -17,3 +18,5 @@ Route::group([ 'middleware' => 'api', 'prefix' => 'auth' ], function ($router) {
         Route::post('/logout', [AuthController::class, 'logout'])->name('api.logout');
     });
 });
+
+Route::post('/khmer-segment', [KhmerSegmentController::class, 'segment']);

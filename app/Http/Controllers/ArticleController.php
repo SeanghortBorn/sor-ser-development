@@ -22,7 +22,7 @@ class ArticleController extends Controller
         if ($request->filled('search')) {
             $search = $request->input('search');
             $query->where('title', 'like', "%$search%")
-                ->orWhereHas('file', function($q) use ($search) {
+                ->orWhereHas('file', function ($q) use ($search) {
                     $q->where('title', 'like', "%$search%");
                 });
         }
@@ -256,5 +256,33 @@ class ArticleController extends Controller
         $rsDatasModel->delete();
 
         return back()->with('message', 'Deleted successfully');
+    }
+
+    /**
+     * Return articles as JSON for API consumers.
+     */
+    public function apiList(Request $request)
+    {
+        // Return articles with audio and file relations
+        $articles = Article::with(['audio', 'file'])
+            ->orderBy('id', 'desc')
+            ->get();
+        return response()->json($articles);
+    }
+
+    /**
+     * Get audio details for an article.
+     */
+    public function getAudio($id)
+    {
+        $audio = Audio::findOrFail($id);
+        return response()->json([
+            'data' => [
+                'id' => $audio->id,
+                'title' => $audio->title,
+                'file_path' => $audio->file_path,
+                'duration' => $audio->duration
+            ]
+        ]);
     }
 }

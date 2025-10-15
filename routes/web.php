@@ -77,6 +77,9 @@ Route::middleware('auth')->group(function () {
             ->middleware('password.confirm');
     });
 
+    Route::get('/api/articles', [ArticleController::class, 'apiList']);
+    Route::get('/api/audios/{id}', [ArticleController::class, 'getAudio']); // Add this line
+    
     Route::inertia('/library', 'Libraries/index');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
