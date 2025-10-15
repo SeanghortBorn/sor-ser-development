@@ -256,31 +256,36 @@ class QuizController extends Controller
     /**
      * Helper to save questions
      */
+    /**
+     * Helper to save questions
+     */
     private function saveQuestions(Quiz $quiz, array $questions)
     {
         foreach ($questions as $i => $q) {
-            $correct = $q['correct_answer'] ?? null;
             $options = $q['options'] ?? [];
 
             switch ($q['type']) {
                 case 'Checkboxes':
+                    $correct = $q['correct_answer'] ?? [];
                     if (!is_array($correct)) $correct = $correct ? [$correct] : [];
                     $correct = json_encode($correct);
                     $options = json_encode($options);
                     break;
 
                 case 'True/False':
-                    $correct = ($correct === "True" || $correct === true) ? "True" : "False";
+                    $correct = ($q['correct_answer'] === "True" || $q['correct_answer'] === true) ? "True" : "False";
                     $options = json_encode($options);
                     break;
 
                 case 'Matching':
+                    // Always sync correct_answer with options
+                    $correct = $options;
                     $correct = json_encode($correct ?? []);
                     $options = json_encode($options ?? []);
                     break;
 
                 default:
-                    $correct = $correct ? (string)$correct : null;
+                    $correct = $q['correct_answer'] ? (string)$q['correct_answer'] : null;
                     $options = json_encode($options);
             }
 
