@@ -15,7 +15,7 @@ export default function QuizzesCreateEdit() {
         subject: datas?.subject || "",
         groups: datas?.groups || [],
         status: datas?.status || "Draft",
-        description: datas?.description || "", 
+        description: datas?.description || "",
     });
 
     // Questions State
@@ -134,10 +134,11 @@ export default function QuizzesCreateEdit() {
                     return {
                         ...q,
                         type: value,
-                        options: [{ left: "", right: "" }],
-                        correct_answer: [],
+                        options: q.options && q.options.length ? q.options : [{ left: "", right: "" }],
+                        correct_answer: q.correct_answer && q.correct_answer.length ? q.correct_answer : [],
                     };
                 }
+
                 // If changing type, reset for other types
                 if (field === "type" && value === "Multiple Choice") {
                     return {
@@ -587,10 +588,13 @@ export default function QuizzesCreateEdit() {
                                     <h3 className="text-lg font-medium text-gray-700 mb-2">
                                         Matching Pairs
                                     </h3>
-
-                                    {(q.options && q.options.length > 0 ? q.options : [{ left: "", right: "" }]).map((pair, pIdx) => (
+                                    {/* Input pairs (Edit mode for teacher) */}
+                                    {(q.options && q.options.length > 0
+                                        ? q.options
+                                        : [{ left: "", right: "" }]
+                                    ).map((pair, pIdx) => (
                                         <div key={pIdx} className="flex gap-3 items-center mb-3">
-                                            {/* Left Side */}
+                                            {/* Left side */}
                                             <input
                                                 type="text"
                                                 value={pair.left || ""}
@@ -603,9 +607,7 @@ export default function QuizzesCreateEdit() {
                                                 className="w-1/3 px-3 py-2 rounded-[10px] border border-gray-200 bg-gray-50 focus:ring-1 focus:ring-blue-400 focus:outline-none"
                                             />
 
-                                            <span className="text-gray-600 font-medium">=</span>
-
-                                            {/* Right Side */}
+                                            {/* Right side */}
                                             <input
                                                 type="text"
                                                 value={pair.right || ""}
@@ -618,17 +620,12 @@ export default function QuizzesCreateEdit() {
                                                 className="w-1/3 px-3 py-2 rounded-[10px] border border-gray-200 bg-gray-50 focus:ring-1 focus:ring-blue-400 focus:outline-none"
                                             />
 
-                                            {/* Remove Pair */}
+                                            {/* Delete pair */}
                                             <button
                                                 type="button"
                                                 onClick={() => {
-                                                    // Remove pair from options and correct_answer by index
                                                     const newOptions = q.options.filter((_, i) => i !== pIdx);
-                                                    const newCorrect = Array.isArray(q.correct_answer)
-                                                        ? q.correct_answer.filter((_, i) => i !== pIdx)
-                                                        : [];
                                                     updateQuestion(idx, "options", newOptions);
-                                                    updateQuestion(idx, "correct_answer", newCorrect);
                                                 }}
                                                 className="text-red-400 hover:text-red-500 transition"
                                                 disabled={(q.options || []).length <= 1}
@@ -638,7 +635,7 @@ export default function QuizzesCreateEdit() {
                                         </div>
                                     ))}
 
-                                    {/* Add Pair Button */}
+                                    {/* Add new pair */}
                                     <button
                                         type="button"
                                         onClick={() => {
@@ -647,51 +644,12 @@ export default function QuizzesCreateEdit() {
                                         }}
                                         className="mt-3 text-blue-600 hover:underline"
                                     >
-                                        + Add Pair
+                                        Add matching pair
                                     </button>
 
-                                    {/* Correct Matches Selector */}
-                                    <div className="mt-4">
-                                        <h4 className="text-md font-medium text-gray-700 mb-2">
-                                            Select Correct Matches
-                                        </h4>
-                                        {(q.options || []).map((pair, i) => (
-                                            <div key={i} className="flex gap-3 items-center mb-2">
-                                                <span className="w-1/3">{pair.left}</span>
-                                                <select
-                                                    value={q.correct_answer && q.correct_answer[i] ? q.correct_answer[i].right : ""}
-                                                    onChange={(e) => {
-                                                        const newCorrect = [...(q.correct_answer || [])];
-                                                        newCorrect[i] = { left: pair.left, right: e.target.value };
-                                                        // Fill missing pairs with empty objects
-                                                        for (let j = 0; j < q.options.length; j++) {
-                                                            if (!newCorrect[j]) newCorrect[j] = { left: q.options[j].left, right: "" };
-                                                        }
-                                                        updateQuestion(idx, "correct_answer", newCorrect);
-                                                    }}
-                                                    className="w-1/3 px-3 py-2 rounded-[10px] border border-gray-200 bg-gray-50 focus:ring-1 focus:ring-blue-400 focus:outline-none"
-                                                >
-                                                    <option value="">Select match</option>
-                                                    {(q.options || []).map((opt) => (
-                                                        <option key={opt.right} value={opt.right}>
-                                                            {opt.right}
-                                                        </option>
-                                                    ))}
-                                                </select>
-                                            </div>
-                                        ))}
-                                    </div>
-
-                                    {/* Preview Correct Matches */}
-                                    <div className="mt-3 text-sm text-green-600">
-                                        {q.correct_answer && q.correct_answer.length > 0 && (
-                                            <>
-                                                Correct Pairs:{" "}
-                                                <strong>
-                                                    {q.correct_answer.map((p) => `${p.left} = ${p.right}`).join(", ")}
-                                                </strong>
-                                            </>
-                                        )}
+                                    {/* Note */}
+                                    <div className="text-sm text-gray-400 mt-2">
+                                        The matching pairs will be shuffled when taking the quiz
                                     </div>
                                 </div>
                             )}
