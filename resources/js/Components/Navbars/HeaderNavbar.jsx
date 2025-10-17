@@ -89,9 +89,9 @@ export default function HeaderNavbar() {
                             </Link>
                         )}
                         <Link
-                            href="/grammar-check"
+                            href="/homophone-check"
                             className={`px-3 py-[1.3rem] font-medium transition ${isActive(
-                                "/grammar-check"
+                                "/homophone-check"
                             )}`}
                         >
                             Homophone Check
@@ -254,9 +254,9 @@ export default function HeaderNavbar() {
                                 </Link>
                             )}
                             <Link
-                                href="/grammar-check"
+                                href="/homophone-check"
                                 className={`py-2 px-3 rounded-lg ${isActive(
-                                    "/grammar-check"
+                                    "/homophone-check"
                                 )} hover:bg-gray-50`}
                                 onClick={() => setMobileMenuOpen(false)}
                             >

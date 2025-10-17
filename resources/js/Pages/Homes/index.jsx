@@ -22,10 +22,10 @@ export default function index() {
                     </h2>
 
                     <div className="flex gap-6">
-                        <Link href="/grammar-check">
+                        <Link href="/homophone-check">
                             <button className="relative z-10 font-sans text-white font-semibold border-2 border-white rounded-full px-8 py-2 text-[18px] transition duration-300 ease-in-out hover:bg-white group">
                                 <span className="transition duration-300 group-hover:text-gray-700">
-                                    Grammar Check
+                                    Homophone Check
                                 </span>
                             </button>
                         </Link>

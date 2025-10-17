@@ -5,18 +5,18 @@ import { usePage } from "@inertiajs/react";
 export default function GrammarCheckSection() {
     const { auth } = usePage().props;
     return (
-        <div className="max-w-7xl mx-auto px-4 py-6">
+        <div className="max-w-7xl mx-auto px-4 mt-10">
             {auth.user ? (
                 <>
                     <div className="text-center ">
                         <h1 className="text-2xl md:text-3xl font-semibold text-gray-600">
                             Triple your productivity with the{" "}
                             <span className="text-blue-500 font-semibold">
-                                Grammar Checker
+                                Homophone Checker
                             </span>
                         </h1>
                         <p className="text-gray-600 mt-4 max-w-6xl mx-auto">
-                            SorSer's Grammar Checker uses AI to instantly fix
+                            SorSer's Homophone Checker uses AI to instantly fix
                             grammar, spelling, and punctuation mistakes. Start
                             typing, and the AI will detect and correct errors in
                             real time, making your writing clear, accurate, and
@@ -31,11 +31,11 @@ export default function GrammarCheckSection() {
                         <h1 className="text-2xl md:text-3xl font-semibold text-gray-600">
                             Triple your productivity with the{" "}
                             <span className="text-blue-500 font-semibold">
-                                Grammar Checker
+                                Homophone Checker
                             </span>
                         </h1>
                         <p className="text-gray-600 mt-4 max-w-6xl mx-auto">
-                            SorSer's Grammar Checker uses AI to instantly fix
+                            SorSer's Homophone Checker uses AI to instantly fix
                             grammar, spelling, and punctuation mistakes. Start
                             typing, and the AI will detect and correct errors in
                             real time, making your writing clear, accurate, and

@@ -24,7 +24,7 @@ use Laravel\Fortify\Http\Controllers\TwoFactorQrCodeController;
 use Laravel\Fortify\Http\Controllers\TwoFactorSecretKeyController;
 
 Route::redirect('/', '/home');
-Route::inertia('/grammar-check', 'GrammarChecks/GrammarCheck');
+Route::inertia('/homophone-check', 'HomophoneChecks/Index')->name('homophone.check');
 Route::inertia('/home', 'Homes/index')->name('home');
 Route::inertia('/subscribe', 'Subscribes/index')->name('subscribe');
 Route::inertia('/contacts', 'Contacts/index')->name('contacts');

@@ -77,7 +77,7 @@ export default function index() {
                                 </p>
                                 <div className="flex flex-wrap gap-4">
                                     <a
-                                        href="/grammar-check"
+                                        href="/homophone-check"
                                         className="px-4 py-2 bg-gradient-to-r from-blue-400 to-indigo-400 text-white rounded-xl font-semibold hover:shadow-lg hover:translate-y-[-1px] transition-all"
                                     >
                                         Explore Features

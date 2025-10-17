@@ -13,7 +13,7 @@ export default function GrammarCheckHeader() {
                 Upload a document, paste your notes, or select a video to
                 automatically generate a quiz with AI.
             </p> */}
-            <div className="mt-2 flex justify-between items-center text-md">
+            <div className="flex justify-between items-center text-md">
                 <span className="text-gray-500 text-md">
                     Try it out above by using <span className="font-semibold">handwritten notes.</span>
                 </span>
