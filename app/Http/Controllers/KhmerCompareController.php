@@ -35,9 +35,17 @@ class KhmerCompareController extends Controller
                         } elseif (Storage::exists($alt2)) {
                             $articleText = Storage::get($alt2);
                         } else {
-                            Log::warning("Article file not found", ['article_id' => $articleId]);
+                            // --- FIX: fallback to article->text field if file not found ---
+                            if (!empty($article->text)) {
+                                $articleText = $article->text;
+                            } else {
+                                Log::warning("Article file not found and no text field", ['article_id' => $articleId]);
+                            }
                         }
                     }
+                } elseif ($article && !empty($article->text)) {
+                    // --- FIX: fallback if no file but text exists ---
+                    $articleText = $article->text;
                 } else {
                     Log::warning("Article or file not found", ['article_id' => $articleId]);
                 }
@@ -47,6 +55,11 @@ class KhmerCompareController extends Controller
                     'error' => $e->getMessage(),
                 ]);
             }
+        }
+
+        // --- FIX: Ensure $articleText is always a string ---
+        if (!is_string($articleText)) {
+            $articleText = '';
         }
 
         // ✂️ Split text into words
