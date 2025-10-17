@@ -36,6 +36,9 @@ export default function GrammarCheck() {
     const [isPlaying, setIsPlaying] = useState(false);
     const [audioError, setAudioError] = useState(null); // New: track audio fetch errors
 
+    // Comparison result state
+    const [comparisonResult, setComparisonResult] = useState(null);
+
     // Fetch history on mount
     const fetchHistory = () => {
         axios
@@ -329,6 +332,226 @@ export default function GrammarCheck() {
             guardCaret(e.target);
         };
 
+        // Add handlers for comparison result actions
+        const handleComparisonAction = (item, action) => {
+            if (!item || !onReplace || !comparisonResult) return;
+
+            let comparison = [...comparisonResult.comparison];
+            let userWords = [...comparisonResult.user_words];
+
+            const index = comparison.findIndex(comp => comp === item);
+            if (index === -1) return;
+
+            // Accept logic for "missing" type
+            if (item.type === "missing" && action === "accept") {
+                const position = item.article_word.article_index;
+                userWords.splice(position, 0, item.actions.accept.result);
+
+                // If next item is "extra" and index == i+1, remove that word too
+                // --- FIX: Do NOT auto-remove extra word here ---
+                // (Remove the following block to prevent auto-accept of extra)
+                // const next = comparison[index + 1];
+                // if (next && next.type === "extra") {
+                //     userWords.splice(position + 1, 1);
+                //     comparison.splice(index + 1, 1);
+                // }
+            }
+            // Accept logic for "extra" type
+            else if (item.type === "extra" && action === "accept") {
+                // Remove the extra word at the correct position
+                const position = item.user_word.user_index;
+                if (typeof position === "number") {
+                    userWords.splice(position, 1);
+                }
+            }
+            // Accept logic for "replaced" type
+            else if (item.type === "replaced" && action === "accept") {
+                const userIdx = item.user_word.user_index;
+                if (typeof userIdx === "number") {
+                    userWords[userIdx] = item.actions.accept.result;
+                }
+            }
+            // Accept logic for "same"
+            else if (item.type === "same" && action === "accept") {
+                // Do nothing
+            }
+            // Accept logic for other types (fallback)
+            else if (action === "accept") {
+                let position = 0;
+                for (let i = 0; i < index; i++) {
+                    if (comparison[i].type !== "missing") position++;
+                }
+                if (item.article_word) userWords[position] = item.article_word;
+            }
+            // Dismiss logic
+            else if (action === "dismiss") {
+                // Do nothing
+            }
+
+            // Remove the current item from comparison
+            comparison = comparison.filter((_, i) => i !== index);
+
+            // --- FIX: Only sync userWords to articleWords if ALL types are resolved (including extra) ---
+            const remainingDiffs = comparison.filter(
+                c => c.type === "missing" || c.type === "replaced" || c.type === "extra"
+            );
+            if (remainingDiffs.length === 0) {
+                userWords = [...comparisonResult.article_words];
+                setTimeout(() => setComparisonResult(null), 500);
+            }
+
+            setComparisonResult({
+                ...comparisonResult,
+                comparison,
+                user_words: userWords
+            });
+
+            // Update text
+            onReplace(userWords.join(" "));
+        };
+
+        // If comparisonResult exists, show detailed comparison (missing, replaced, extra)
+        if (comparisonResult) {
+            return (
+                <div className="w-80 flex flex-col h-full">
+                    <div className="bg-gray-50 hover:bg-gray-100 border border-slate-200 h-full flex flex-col overflow-hidden">
+                        <div className="px-6 py-4 border-b border-slate-200 bg-white">
+                            <h3 className="text-lg font-bold text-slate-800 mb-2">
+                                Grammar Check
+                            </h3>
+                            <div className="flex items-center gap-2 mb-1">
+                                <AlertCircle className="w-4 h-4 text-amber-500" />
+                                <span className="text-sm text-slate-600 font-medium">
+                                    Comparison Results
+                                </span>
+                            </div>
+                        </div>
+                        <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4 hide-scrollbar">
+                            <ul className="space-y-4">
+                                {comparisonResult.comparison
+                                    .filter(item =>
+                                        item.type === "missing" ||
+                                        item.type === "replaced" ||
+                                        item.type === "extra" // <-- show extra
+                                    )
+                                    .map((item, idx) => (
+                                        <li key={idx}>
+                                            <div className="group border border-slate-200 rounded-xl p-4 bg-white hover:bg-slate-50 transition-all duration-200 shadow-sm">
+                                                <div className="mb-3">
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        {item.type === "missing" && (
+                                                            <>
+                                                                <AlertCircle className="w-4 h-4 text-red-500" />
+                                                                <span className="text-xs font-semibold text-red-600 uppercase tracking-wide">
+                                                                    Missing Word
+                                                                </span>
+                                                            </>
+                                                        )}
+                                                        {item.type === "replaced" && (
+                                                            <>
+                                                                <AlertCircle className="w-4 h-4 text-amber-500" />
+                                                                <span className="text-xs font-semibold text-amber-600 uppercase tracking-wide">
+                                                                    Replaced Word
+                                                                </span>
+                                                            </>
+                                                        )}
+                                                        {item.type === "extra" && (
+                                                            <>
+                                                                <AlertCircle className="w-4 h-4 text-blue-500" />
+                                                                <span className="text-xs font-semibold text-blue-600 uppercase tracking-wide">
+                                                                    Extra Word
+                                                                </span>
+                                                            </>
+                                                        )}
+                                                    </div>
+                                                    <p className="text-sm text-slate-700 flex items-center gap-2">
+                                                        <span className={`px-2 py-0.5 rounded-md font-mono font-medium ${
+                                                            item.type === "extra"
+                                                                ? "bg-blue-100 text-blue-700"
+                                                                : "bg-red-100 text-red-700"
+                                                        }`}>
+                                                            {item.user_word && item.user_word.user_word !== undefined
+                                                                ? item.user_word.user_word
+                                                                : "<missing>"}
+                                                        </span>
+                                                        <span className="mx-2 text-slate-400">→</span>
+                                                        <span className={`px-2 py-0.5 rounded-md font-mono font-medium ${
+                                                            item.type === "extra"
+                                                                ? "bg-gray-100 text-gray-400"
+                                                                : "bg-emerald-100 text-emerald-700"
+                                                        }`}>
+                                                            {item.article_word && item.article_word.article_word !== undefined
+                                                                ? item.article_word.article_word
+                                                                : "<missing>"}
+                                                        </span>
+                                                    </p>
+                                                </div>
+                                                <div className="flex gap-2 flex-wrap">
+                                                    <button
+                                                        className="flex items-center gap-1 flex-1 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium transition-all duration-200 shadow-sm"
+                                                        onClick={() => handleComparisonAction(item, "accept")}
+                                                    >
+                                                        <Check size={16} /> Accept
+                                                    </button>
+                                                    <button
+                                                        className="flex items-center gap-1 px-3 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg text-sm font-medium transition-all duration-200 shadow-sm"
+                                                        onClick={() => handleComparisonAction(item, "dismiss")}
+                                                    >
+                                                        <X size={16} /> Dismiss
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    ))}
+                            </ul>
+                            {/* Show message if no differences or empty comparison */}
+                            {(!comparisonResult.comparison.length ||
+                              !comparisonResult.comparison.some(item =>
+                                  item.type === "missing" ||
+                                  item.type === "replaced" ||
+                                  item.type === "extra"
+                              )) && (
+                                <div className="text-center py-8">
+                                    <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto mb-2" />
+                                    <h5 className="text-lg font-medium text-gray-700">Perfect Match!</h5>
+                                    <p className="text-sm text-gray-500">Your text matches the article exactly.</p>
+                                </div>
+                            )}
+                            <div className="mt-4 text-center">
+                                <button 
+                                    onClick={() => setComparisonResult(null)} 
+                                    className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm shadow-sm hover:bg-blue-700"
+                                >
+                                    Back to Grammar Check
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // If no corrections and no comparison result, show "no issues" message
+        if (foundCorrections.length === 0 && !comparisonResult) {
+            return (
+                <div className="flex flex-col items-center justify-center h-full text-center py-8">
+                    <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mb-4">
+                        <CheckCircle2 className="w-8 h-8 text-emerald-600" />
+                    </div>
+                    <h4 className="text-lg font-semibold text-slate-800 mb-1">
+                        Great job!
+                    </h4>
+                    <p className="text-sm text-slate-500 leading-relaxed max-w-xs mb-4">
+                        No grammar or spelling issues detected in
+                        your text.
+                    </p>
+                    <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm shadow-md">
+                        <RotateCcw size={16} /> Re-check Text
+                    </button>
+                </div>
+            );
+        }
+
         return (
             <div className="w-80 flex flex-col h-full">
                 <div className="bg-gray-50 hover:bg-gray-100 border border-slate-200 h-full flex flex-col overflow-hidden">
@@ -345,7 +568,13 @@ export default function GrammarCheck() {
                             </a>
                         </div>
                         <div className="flex items-center gap-2">
-                            {foundCorrections.length > 0 ? (
+                            {comparisonResult ? (
+                                <>
+                                    <span className="text-sm text-slate-600 font-medium">
+                                        Comparison Results
+                                    </span>
+                                </>
+                            ) : foundCorrections.length > 0 ? (
                                 <>
                                     <AlertCircle className="w-4 h-4 text-amber-500" />
                                     <span className="text-sm text-slate-600 font-medium">
@@ -367,7 +596,105 @@ export default function GrammarCheck() {
                         </div>
                     </div>
                     <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4 hide-scrollbar">
-                        {foundCorrections.length > 0 ? (
+                        {comparisonResult ? (
+                            // Show Comparison Results in sidebar
+                            <>
+                                <h4 className="font-medium text-gray-700 mb-2">
+                                    Article Comparison
+                                </h4>
+                                <div className="mb-4 mt-2 px-3 py-2 bg-gray-50 border rounded-lg">
+                                    <p className="text-sm text-gray-600">
+                                        <span className="font-medium">
+                                            {comparisonResult.stats.replaced}
+                                        </span>{" "}
+                                        replaced,
+                                        <span className="font-medium ml-1">
+                                            {comparisonResult.stats.missing}
+                                        </span>{" "}
+                                        missing words
+                                    </p>
+                                </div>
+                                
+                                {/* Only show differences (replaced/missing), hide "same" items */}
+                                <ul className="space-y-4">
+                                    {comparisonResult.comparison
+                                        .filter(item => item.type === "replaced" || item.type === "missing")
+                                        .map((item, idx) => (
+                                            <li key={idx}>
+                                                <div className="group border border-slate-200 rounded-xl p-4 bg-white hover:bg-slate-50 transition-all duration-200 shadow-sm">
+                                                    <div className="mb-3">
+                                                        <div className="flex items-center gap-2 mb-1">
+                                                            {item.type === "missing" && (
+                                                                <>
+                                                                    <AlertCircle className="w-4 h-4 text-red-500" />
+                                                                    <span className="text-xs font-semibold text-red-600 uppercase tracking-wide">
+                                                                        Missing Word
+                                                                    </span>
+                                                                </>
+                                                            )}
+                                                            {item.type === "replaced" && (
+                                                                <>
+                                                                    <AlertCircle className="w-4 h-4 text-amber-500" />
+                                                                    <span className="text-xs font-semibold text-amber-600 uppercase tracking-wide">
+                                                                        Replaced Word
+                                                                    </span>
+                                                                </>
+                                                            )}
+                                                        </div>
+                                                        <p className="text-sm text-slate-700 flex items-center gap-2">
+                                                            <span className="px-2 py-0.5 bg-red-100 text-red-700 rounded-md font-mono font-medium">
+                                                                {item.user_word && item.user_word.user_word !== undefined
+                                                                    ? item.user_word.user_word
+                                                                    : "<missing>"}
+                                                            </span>
+                                                            <span className="mx-2 text-slate-400">→</span>
+                                                            <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-md font-mono font-medium">
+                                                                {item.article_word && item.article_word.article_word !== undefined
+                                                                    ? item.article_word.article_word
+                                                                    : "<missing>"}
+                                                            </span>
+                                                        </p>
+                                                    </div>
+                                                    <div className="flex gap-2 flex-wrap">
+                                                        <button
+                                                            className="flex items-center gap-1 flex-1 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium transition-all duration-200 shadow-sm"
+                                                            onClick={() => handleComparisonAction(item, "accept")}
+                                                        >
+                                                            <Check size={16} /> Accept
+                                                        </button>
+                                                        <button
+                                                            className="flex items-center gap-1 px-3 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg text-sm font-medium transition-all duration-200 shadow-sm"
+                                                            onClick={() => handleComparisonAction(item, "dismiss")}
+                                                        >
+                                                            <X size={16} /> Dismiss
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                      ))}
+                                </ul>
+                                
+                                {/* Show message if no differences or empty comparison */}
+                                {(!comparisonResult.comparison.length || 
+                                  !comparisonResult.comparison.filter(item => item.type === "replaced" || item.type === "missing").length) && (
+                                    <div className="text-center py-8">
+                                        <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto mb-2" />
+                                        <h5 className="text-lg font-medium text-gray-700">Perfect Match!</h5>
+                                        <p className="text-sm text-gray-500">Your text matches the article exactly.</p>
+                                    </div>
+                                )}
+                                
+                                <div className="mt-4 text-center">
+                                    <button 
+                                        onClick={() => setComparisonResult(null)} 
+                                        className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm shadow-sm hover:bg-blue-700"
+                                    >
+                                        Back to Grammar Check
+                                    </button>
+                                </div>
+                            </>
+                        ) : foundCorrections.length > 0 ? (
+                            // Show grammar corrections
                             foundCorrections.map((c) => (
                                 <div
                                     key={c.error}
@@ -566,6 +893,7 @@ export default function GrammarCheck() {
                                 </div>
                             ))
                         ) : (
+                            // Show "no issues" message
                             <div className="flex flex-col items-center justify-center h-full text-center py-8">
                                 <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mb-4">
                                     <CheckCircle2 className="w-8 h-8 text-emerald-600" />
@@ -583,21 +911,10 @@ export default function GrammarCheck() {
                             </div>
                         )}
                     </div>
+
                     {foundCorrections.length > 0 && (
                         <div className="px-6 py-3 border-t border-slate-100 bg-white">
-                            <div className="flex items-center justify-between text-xs text-slate-500">
-                                <span>
-                                    {foundCorrections.length} correction
-                                    {foundCorrections.length > 1
-                                        ? "s"
-                                        : ""}{" "}
-                                    available
-                                </span>
-                                <span className="flex items-center gap-1 text-emerald-600 font-medium">
-                                    <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
-                                    Ready to fix
-                                </span>
-                            </div>
+                            {/* ...existing code for footer... */}
                         </div>
                     )}
                 </div>
@@ -676,6 +993,36 @@ export default function GrammarCheck() {
                     setAudioError("Failed to play audio. Please try again.");
                     setIsPlaying(false);
                 });
+        }
+    };
+
+    // Compare function
+    const runCompare = async () => {
+        if (!selectedArticle || !paragraph.trim()) return;
+        try {
+            // Clear any previous results
+            setComparisonResult(null);
+            
+            const res = await axios.post("/api/compare", {
+                article_id: selectedArticle.id,
+                userInput: paragraph,
+            });
+            
+            if (res.data && Array.isArray(res.data.comparison)) {
+                console.log("Comparison result:", res.data);
+                setComparisonResult(res.data);
+                
+                // Log differences for debugging
+                const added = res.data.comparison.filter(item => item.type === "added");
+                const deleted = res.data.comparison.filter(item => item.type === "deleted");
+                console.log(`Found ${added.length} added and ${deleted.length} deleted words`);
+            } else {
+                console.error("Invalid comparison result format:", res.data);
+                setComparisonResult(null);
+            }
+        } catch (e) {
+            console.error("Error in comparison:", e);
+            setComparisonResult(null);
         }
     };
 
@@ -805,7 +1152,9 @@ export default function GrammarCheck() {
                                                         <span className="font-mono text-gray-500">
                                                             #{article.id}
                                                         </span>
-                                                        <span>{article.title}</span>
+                                                        <span>
+                                                            {article.title}
+                                                        </span>
                                                     </button>
                                                 ))}
                                             </div>
@@ -817,19 +1166,33 @@ export default function GrammarCheck() {
 
                         {/* Textarea */}
                         <div className="flex-1">
-                            <textarea
-                                className={`w-full h-full text-[17.5px] bg-white border border-slate-200 outline-none p-4 placeholder:text-gray-700 resize-none overflow-y-auto transition-all duration-300 ease-in-out hide-scrollbar ${
-                                    isZoomed ? "min-h-[90vh]" : "min-h-[85vh]"
-                                }`}
-                                style={{ boxShadow: "none" }}
-                                placeholder="Type your text here..."
-                                value={paragraph}
-                                onChange={(e) => setParagraph(e.target.value)}
-                                // onCopy={handleBlock}
-                                // onPaste={handleBlock}
-                                // onCut={handleBlock}
-                                onDoubleClick={() => setIsZoomed(!isZoomed)}
-                            />
+                            {/* Always show textarea for editing, and overlay the highlighted comparison if available */}
+                            <div className="relative w-full h-full">
+                                <textarea
+                                    className={`w-full h-full text-[17.5px] bg-white border border-slate-200 outline-none p-4 placeholder:text-gray-700 resize-none overflow-y-auto transition-all duration-300 ease-in-out hide-scrollbar ${
+                                        isZoomed ? "min-h-[90vh]" : "min-h-[85vh]"
+                                    }`}
+                                    style={{ boxShadow: "none" }}
+                                    placeholder="Type your text here..."
+                                    value={paragraph}
+                                    onChange={(e) => setParagraph(e.target.value)}
+                                    onDoubleClick={() => setIsZoomed(!isZoomed)}
+                                />
+                                
+                            </div>
+                            {/* Add Compare Button */}
+                            <div className="mt-4 flex gap-2">
+                                <button
+                                    type="button"
+                                    className="px-4 py-2 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition"
+                                    onClick={runCompare}
+                                    disabled={
+                                        !selectedArticle || !paragraph.trim()
+                                    }
+                                >
+                                    Compare with Article
+                                </button>
+                            </div>
                         </div>
                     </div>
 
