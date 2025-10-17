@@ -476,7 +476,7 @@ export default function Index() {
 
                 {/* Account Modal */}
                 {showAccountModal && (
-                    <div className="absolute inset-0 bg-opacity-20 flex items-center justify-center z-50">
+                    <div className="absolute inset-0 bg-opacity-20 flex items-center justify-center z-10">
                         <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8 w-full max-w-xl mx-4">
                             <div className="text-center">
                                 <h2 className="text-[24px] font-semibold text-gray-900 mb-2">
