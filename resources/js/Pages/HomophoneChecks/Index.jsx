@@ -37,7 +37,34 @@ export default function Index() {
 
     // Comparison result state
     const [comparisonResult, setComparisonResult] = useState(null);
-    const [isChecking, setIsChecking] = useState(false); // Add loading state
+    const [isChecking, setIsChecking] = useState(false);
+    const [currentTime, setCurrentTime] = useState(0);
+    const [duration, setDuration] = useState(0);
+
+    // Add session tracking
+    const [sessionId, setSessionId] = useState(null);
+    // Add pause tracking
+    const [pauseStartTime, setPauseStartTime] = useState(null);
+
+    useEffect(() => {
+        // Generate session ID on mount
+        setSessionId(`session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`);
+    }, []);
+
+    // Track text input (debounced)
+    const trackTextInput = useRef();
+    useEffect(() => {
+        if (!userId || !paragraph.trim() || !sessionId) return;
+        
+        if (trackTextInput.current) clearTimeout(trackTextInput.current);
+        trackTextInput.current = setTimeout(() => {
+            axios.post('/api/track/text-input', {
+                grammar_checker_id: checkerId,
+                character_entered: paragraph.slice(-1), // Last character
+                session_id: sessionId,
+            }).catch(err => console.error('Track text input error:', err));
+        }, 2000);
+    }, [paragraph, userId, checkerId, sessionId]);
 
     // Fetch history on mount
     const fetchHistory = () => {
@@ -239,18 +266,134 @@ export default function Index() {
             return;
         }
         if (isPlaying) {
+            // Pausing audio
+            const pauseTime = Date.now();
+            setPauseStartTime(pauseTime);
             audioRef.current.pause();
             setIsPlaying(false);
+            
+            // Track pause with current playback position
+            if (userId && selectedArticle?.audios_id) {
+                axios.post('/api/track/audio-activity', {
+                    audio_id: selectedArticle.audios_id,
+                    article_id: selectedArticle.id,
+                    activity_type: 'audio_pause',
+                    playback_position: audioRef.current.currentTime,
+                    pause_duration: 0, // Will be calculated on resume
+                    session_id: sessionId,
+                }).catch(err => console.error('Track audio pause error:', err));
+            }
         } else {
+            // Resuming audio
+            let pauseDuration = 0;
+            if (pauseStartTime) {
+                pauseDuration = (Date.now() - pauseStartTime) / 1000; // Convert to seconds
+                setPauseStartTime(null);
+            }
+
             audioRef.current
                 .play()
-                .then(() => setIsPlaying(true))
+                .then(() => {
+                    setIsPlaying(true);
+                    // Track play with pause duration
+                    if (userId && selectedArticle?.audios_id) {
+                        axios.post('/api/track/audio-activity', {
+                            audio_id: selectedArticle.audios_id,
+                            article_id: selectedArticle.id,
+                            activity_type: 'audio_play',
+                            playback_position: audioRef.current.currentTime,
+                            pause_duration: pauseDuration,
+                            session_id: sessionId,
+                        }).catch(err => console.error('Track audio play error:', err));
+                    }
+                })
                 .catch((e) => {
                     console.error("Playback failed:", e);
                     setAudioError("Failed to play audio. Please try again.");
                     setIsPlaying(false);
                 });
         }
+    };
+
+    // Skip forward 10 seconds
+    const skipForward = () => {
+        if (audioRef.current) {
+            const oldPosition = audioRef.current.currentTime;
+            audioRef.current.currentTime = Math.min(
+                audioRef.current.currentTime + 10,
+                audioRef.current.duration
+            );
+            // Track forward
+            if (userId && selectedArticle?.audios_id) {
+                axios.post('/api/track/audio-activity', {
+                    audio_id: selectedArticle.audios_id,
+                    article_id: selectedArticle.id,
+                    activity_type: 'audio_forward',
+                    playback_position: audioRef.current.currentTime,
+                    session_id: sessionId,
+                }).catch(err => console.error('Track audio forward error:', err));
+            }
+        }
+    };
+
+    // Skip backward 10 seconds
+    const skipBackward = () => {
+        if (audioRef.current) {
+            const oldPosition = audioRef.current.currentTime;
+            audioRef.current.currentTime = Math.max(
+                audioRef.current.currentTime - 10,
+                0
+            );
+            // Track rewind
+            if (userId && selectedArticle?.audios_id) {
+                axios.post('/api/track/audio-activity', {
+                    audio_id: selectedArticle.audios_id,
+                    article_id: selectedArticle.id,
+                    activity_type: 'audio_rewind',
+                    playback_position: audioRef.current.currentTime,
+                    session_id: sessionId,
+                }).catch(err => console.error('Track audio rewind error:', err));
+            }
+        }
+    };
+
+    // Handle time update
+    const handleTimeUpdate = () => {
+        if (audioRef.current) {
+            setCurrentTime(audioRef.current.currentTime);
+        }
+    };
+
+    // Handle metadata loaded
+    const handleLoadedMetadata = () => {
+        if (audioRef.current) {
+            setDuration(audioRef.current.duration);
+        }
+    };
+
+    // Handle audio ended
+    const handleAudioEnded = () => {
+        setIsPlaying(false);
+        if (audioRef.current) {
+            audioRef.current.currentTime = 0;
+        }
+    };
+
+    // Seek to position
+    const handleSeek = (e) => {
+        if (audioRef.current) {
+            const rect = e.currentTarget.getBoundingClientRect();
+            const pos = (e.clientX - rect.left) / rect.width;
+            audioRef.current.currentTime = pos * audioRef.current.duration;
+        }
+    };
+
+    // Format time (seconds to mm:ss)
+    const formatTime = (seconds) => {
+        if (isNaN(seconds)) return "0:00";
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${mins}:${secs.toString().padStart(2, "0")}`;
     };
 
     // Compare with article
@@ -307,9 +450,128 @@ export default function Index() {
                                         <audio
                                             ref={audioRef}
                                             src={audioUrl}
-                                            className="w-full rounded-lg h-10"
-                                            controls
+                                            onTimeUpdate={handleTimeUpdate}
+                                            onLoadedMetadata={
+                                                handleLoadedMetadata
+                                            }
+                                            onEnded={handleAudioEnded}
+                                            className="hidden"
                                         />
+                                        <div className="bg-white border border-gray-300 rounded-xl px-3 py-1 shadow-sm">
+                                            <div className="flex items-center gap-3">
+                                                {/* Play/Pause Button */}
+                                                <button
+                                                    onClick={togglePlay}
+                                                    className="w-6 h-6 flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white rounded-full transition"
+                                                >
+                                                    {isPlaying ? (
+                                                        <svg
+                                                            xmlns="http://www.w3.org/2000/svg"
+                                                            className="h-4 w-4"
+                                                            viewBox="0 0 24 24"
+                                                            fill="currentColor"
+                                                        >
+                                                            <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
+                                                        </svg>
+                                                    ) : (
+                                                        <svg
+                                                            xmlns="http://www.w3.org/2000/svg"
+                                                            className="h-4 w-4"
+                                                            viewBox="0 0 24 24"
+                                                            fill="currentColor"
+                                                        >
+                                                            <path d="M8 5v14l11-7z" />
+                                                        </svg>
+                                                    )}
+                                                </button>
+                                                <div className="flex space-x-0">
+                                                    {/* Skip Backward 10s */}
+                                                    <button
+                                                        onClick={skipBackward}
+                                                        className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-full transition"
+                                                        title="Back 10s"
+                                                    >
+                                                        <svg
+                                                            xmlns="http://www.w3.org/2000/svg"
+                                                            className="h-5 w-5 text-gray-700"
+                                                            viewBox="0 0 24 24"
+                                                            fill="none"
+                                                            stroke="currentColor"
+                                                            strokeWidth="2"
+                                                        >
+                                                            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                                                            <path d="M3 3v5h5" />
+                                                            <text
+                                                                x="12"
+                                                                y="16"
+                                                                fontSize="8"
+                                                                fill="currentColor"
+                                                                textAnchor="middle"
+                                                                fontWeight="bold"
+                                                            >
+                                                                10
+                                                            </text>
+                                                        </svg>
+                                                    </button>
+
+                                                    {/* Skip Forward 10s */}
+                                                    <button
+                                                        onClick={skipForward}
+                                                        className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-full transition"
+                                                        title="Forward 10s"
+                                                    >
+                                                        <svg
+                                                            xmlns="http://www.w3.org/2000/svg"
+                                                            className="h-5 w-5 text-gray-700"
+                                                            viewBox="0 0 24 24"
+                                                            fill="none"
+                                                            stroke="currentColor"
+                                                            strokeWidth="2"
+                                                        >
+                                                            <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
+                                                            <path d="M21 3v5h-5" />
+                                                            <text
+                                                                x="12"
+                                                                y="16"
+                                                                fontSize="8"
+                                                                fill="currentColor"
+                                                                textAnchor="middle"
+                                                                fontWeight="bold"
+                                                            >
+                                                                10
+                                                            </text>
+                                                        </svg>
+                                                    </button>
+                                                </div>
+
+                                                {/* Progress Bar */}
+                                                <div className="flex-1 flex items-center gap-2">
+                                                    <span className="text-xs text-gray-600 font-medium min-w-[35px]">
+                                                        {formatTime(
+                                                            currentTime
+                                                        )}
+                                                    </span>
+                                                    <div
+                                                        className="flex-1 h-1.5 bg-gray-200 rounded-full cursor-pointer relative"
+                                                        onClick={handleSeek}
+                                                    >
+                                                        <div
+                                                            className="h-full bg-blue-600 rounded-full transition-all"
+                                                            style={{
+                                                                width: `${
+                                                                    (currentTime /
+                                                                        duration) *
+                                                                        100 || 0
+                                                                }%`,
+                                                            }}
+                                                        />
+                                                    </div>
+                                                    <span className="text-xs text-gray-600 font-medium min-w-[35px]">
+                                                        {formatTime(duration)}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 ) : (
                                     <div className="w-64">
@@ -411,7 +673,7 @@ export default function Index() {
                             {/* Textarea */}
                             <div className="relative">
                                 <textarea
-                                    className={`w-full h-[54vh] text-lg bg-white border border-gray-200 rounded-xl p-4 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder-gray-500 resize-none overflow-y-auto hide-scrollbar ${
+                                    className={`w-full h-[54vh] text-md bg-white border border-gray-200 rounded-xl py-3 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder-gray-500 resize-none overflow-y-auto hide-scrollbar ${
                                         isZoomed ? "min-h-[50vh]" : ""
                                     }`}
                                     placeholder="Type your text here..."
@@ -433,7 +695,9 @@ export default function Index() {
                                     className="px-3 py-2 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                                     onClick={runCompare}
                                     disabled={
-                                        !selectedArticle || !paragraph.trim() || isChecking
+                                        !selectedArticle ||
+                                        !paragraph.trim() ||
+                                        isChecking
                                     }
                                 >
                                     {isChecking && (
@@ -458,7 +722,9 @@ export default function Index() {
                                             ></path>
                                         </svg>
                                     )}
-                                    {isChecking ? "Checking..." : "Check Homophone"}
+                                    {isChecking
+                                        ? "Checking..."
+                                        : "Check Homophone"}
                                 </button>
                             </div>
                         </div>

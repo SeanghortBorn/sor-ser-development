@@ -52,5 +52,5 @@ mkdir -p storage/framework/cache/data
 
 npm install react-quill
 
-# This command links public/storage to storage/app/public
+# This command links public/storage to storage/app/public for file/audio
 php artisan storage:link

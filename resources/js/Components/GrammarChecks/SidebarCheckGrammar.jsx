@@ -148,6 +148,18 @@ export default function SidebarCheckGrammar({
     const handleComparisonAction = (item, action, skipUpdate = false) => {
         if (!item || !onReplace || !comparisonResult) return;
 
+        // Track the action
+        axios.post('/api/track/comparison-action', {
+            grammar_checker_id: checkerId,
+            article_id: comparisonResult.article_id, // You may need to pass this
+            action: action,
+            comparison_type: item.type,
+            user_word: item.user_word?.user_word || '',
+            article_word: item.article_word?.article_word || '',
+            word_position: item.user_word?.user_index || item.article_word?.article_index,
+            session_id: sessionStorage.getItem('sessionId'),
+        }).catch(err => console.error('Track comparison action error:', err));
+
         let comparison = [...comparisonResult.comparison];
         let userWords = [...comparisonResult.user_words];
 
