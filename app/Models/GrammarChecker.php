@@ -16,6 +16,7 @@ class GrammarChecker extends Model
         'word_count',
         'incorrect_word_count',
         'reading_time',
+        'article_id',
     ];
 
     public function user()

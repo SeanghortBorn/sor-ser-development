@@ -49,6 +49,7 @@ class GrammarCheckerController extends Controller
             'word_count' => 'required|integer',
             'incorrect_word_count' => 'required|integer',
             'reading_time' => 'required|integer',
+            'article_id' => 'nullable|exists:articles,id', // <-- add validation
         ]);
 
         $data = [
@@ -57,6 +58,7 @@ class GrammarCheckerController extends Controller
             'incorrect_word_count' => $request->incorrect_word_count,
             'reading_time' => $request->reading_time,
             'user_id' => Auth::id(),
+            'article_id' => $request->article_id, // <-- add this line
         ];
         // Only set title if not empty, otherwise let DB default
         if ($request->filled('title')) {
@@ -86,12 +88,18 @@ class GrammarCheckerController extends Controller
             'word_count' => 'required|integer',
             'incorrect_word_count' => 'required|integer',
             'reading_time' => 'required|integer',
+            'article_id' => 'nullable|exists:articles,id', // <-- add validation
         ]);
 
         $data = $request->all();
         // Only set title if not empty, otherwise let DB default
         if (array_key_exists('title', $data) && !$data['title']) {
             unset($data['title']);
+        }
+
+        // Ensure article_id is set (even if null)
+        if (!array_key_exists('article_id', $data)) {
+            $data['article_id'] = null;
         }
 
         $grammarChecker->update($data);

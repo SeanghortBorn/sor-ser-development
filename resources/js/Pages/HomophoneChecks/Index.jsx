@@ -8,818 +8,824 @@ import SidebarCheckGrammar from "@/Components/GrammarChecks/SidebarCheckGrammar"
 import axios from "axios";
 
 export default function Index() {
-    const { auth } = usePage().props;
-    const userId = auth?.user?.id;
+	const { auth } = usePage().props;
+	const userId = auth?.user?.id;
 
-    // State for modals
-    const [showAccountModal, setShowAccountModal] = useState(false);
-    const [showBlockModal, setShowBlockModal] = useState(false);
+	// State for modals
+	const [showAccountModal, setShowAccountModal] = useState(false);
+	const [showBlockModal, setShowBlockModal] = useState(false);
 
-    // Document states
-    const [docTitle, setDocTitle] = useState("");
-    const [paragraph, setParagraph] = useState("");
-    const [checkerId, setCheckerId] = useState(null);
-    const [saving, setSaving] = useState(false);
-    const [previousDocuments, setPreviousDocuments] = useState([]);
-    const [isZoomed, setIsZoomed] = useState(false);
+	// Document states
+	const [docTitle, setDocTitle] = useState("");
+	const [paragraph, setParagraph] = useState("");
+	const [checkerId, setCheckerId] = useState(null);
+	const [saving, setSaving] = useState(false);
+	const [previousDocuments, setPreviousDocuments] = useState([]);
+	const [isZoomed, setIsZoomed] = useState(false);
 
-    // Dropdown for articles
-    const [articles, setArticles] = useState([]);
-    const [selectedArticle, setSelectedArticle] = useState(null);
-    const [dropdownOpen, setDropdownOpen] = useState(false);
-    const dropdownRef = useRef(null);
+	// Dropdown for articles
+	const [articles, setArticles] = useState([]);
+	const [selectedArticle, setSelectedArticle] = useState(null);
+	const [dropdownOpen, setDropdownOpen] = useState(false);
+	const dropdownRef = useRef(null);
 
-    // Audio management
-    const audioRef = useRef(null);
-    const [audioUrl, setAudioUrl] = useState(null);
-    const [isPlaying, setIsPlaying] = useState(false);
-    const [audioError, setAudioError] = useState(null);
+	// Audio management
+	const audioRef = useRef(null);
+	const [audioUrl, setAudioUrl] = useState(null);
+	const [isPlaying, setIsPlaying] = useState(false);
+	const [audioError, setAudioError] = useState(null);
 
-    // Comparison result state
-    const [comparisonResult, setComparisonResult] = useState(null);
-    const [isChecking, setIsChecking] = useState(false);
-    const [currentTime, setCurrentTime] = useState(0);
-    const [duration, setDuration] = useState(0);
+	// Comparison result state
+	const [comparisonResult, setComparisonResult] = useState(null);
+	const [isChecking, setIsChecking] = useState(false);
+	const [currentTime, setCurrentTime] = useState(0);
+	const [duration, setDuration] = useState(0);
 
-    // Add session tracking
-    const [sessionId, setSessionId] = useState(null);
-    // Add pause tracking
-    const [pauseStartTime, setPauseStartTime] = useState(null);
+	// Add session tracking
+	const [sessionId, setSessionId] = useState(null);
+	// Add pause tracking
+	const [pauseStartTime, setPauseStartTime] = useState(null);
 
-    useEffect(() => {
-        // Generate session ID on mount
-        setSessionId(`session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`);
-    }, []);
+	// Prevent duplicate concurrent "create" requests
+	const creatingNewRef = useRef(false);
 
-    // Track text input (debounced)
-    const trackTextInput = useRef();
-    useEffect(() => {
-        if (!userId || !paragraph.trim() || !sessionId) return;
-        
-        if (trackTextInput.current) clearTimeout(trackTextInput.current);
-        trackTextInput.current = setTimeout(() => {
-            axios.post('/api/track/text-input', {
-                grammar_checker_id: checkerId,
-                character_entered: paragraph.slice(-1), // Last character
-                session_id: sessionId,
-            }).catch(err => console.error('Track text input error:', err));
-        }, 2000);
-    }, [paragraph, userId, checkerId, sessionId]);
+	// Track last saved time for minimal UI feedback
+	const [lastSavedAt, setLastSavedAt] = useState(null);
 
-    // Fetch history on mount
-    const fetchHistory = () => {
-        if (!userId) return; // Don't fetch if user is not authenticated
-        axios
-            .get("/grammar-checkers", {
-                headers: { Accept: "application/json" },
-            })
-            .then((res) => {
-                const docs = Array.isArray(res.data)
-                    ? res.data
-                    : res.data.data || [];
-                setPreviousDocuments(docs);
-            })
-            .catch((err) => {
-                // Silently handle 401 errors
-                if (err.response?.status !== 401) {
-                    console.error("Error fetching history:", err);
-                }
-                setPreviousDocuments([]);
-            });
-    };
+	useEffect(() => {
+		// Generate session ID on mount
+		setSessionId(`session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`);
+	}, []);
 
-    // Fetch articles on mount
-    useEffect(() => {
-        if (!userId) return; // Don't fetch if user is not authenticated
-        axios
-            .get("/api/articles", { headers: { Accept: "application/json" } })
-            .then((res) => {
-                setArticles(
-                    Array.isArray(res.data) ? res.data : res.data.data || []
-                );
-            })
-            .catch((err) => {
-                // Silently handle 401 errors
-                if (err.response?.status !== 401) {
-                    console.error("Error fetching articles:", err);
-                }
-                setArticles([]);
-            });
-    }, [userId]); // Add userId as dependency
+	// Track text input (debounced)
+	const trackTextInput = useRef();
+	useEffect(() => {
+		if (!userId || !paragraph.trim() || !sessionId) return;
+		
+		if (trackTextInput.current) clearTimeout(trackTextInput.current);
+		trackTextInput.current = setTimeout(() => {
+			axios.post('/api/track/text-input', {
+				grammar_checker_id: checkerId,
+				character_entered: paragraph.slice(-1), // Last character
+				session_id: sessionId,
+			}).catch(err => console.error('Track text input error:', err));
+		}, 2000);
+	}, [paragraph, userId, checkerId, sessionId]);
 
-    useEffect(() => {
-        fetchHistory();
-    }, [userId]); // Add userId as dependency
+	// Fetch history on mount
+	const fetchHistory = () => {
+		if (!userId) return; // Don't fetch if user is not authenticated
+		axios
+			.get("/grammar-checkers", {
+				headers: { Accept: "application/json" },
+			})
+			.then((res) => {
+				const docs = Array.isArray(res.data)
+					? res.data
+					: res.data.data || [];
+				setPreviousDocuments(docs);
+			})
+			.catch((err) => {
+				// Silently handle 401 errors
+				if (err.response?.status !== 401) {
+					console.error("Error fetching history:", err);
+				}
+				setPreviousDocuments([]);
+			});
+	};
 
-    // Handle outside click for dropdown
-    useEffect(() => {
-        if (!dropdownOpen) return;
-        const handleClickOutside = (event) => {
-            if (
-                dropdownRef.current &&
-                !dropdownRef.current.contains(event.target)
-            ) {
-                setDropdownOpen(false);
-            }
-        };
-        document.addEventListener("mousedown", handleClickOutside);
-        return () =>
-            document.removeEventListener("mousedown", handleClickOutside);
-    }, [dropdownOpen]);
+	// Fetch articles on mount
+	useEffect(() => {
+		if (!userId) return; // Don't fetch if user is not authenticated
+		axios
+			.get("/api/articles", { headers: { Accept: "application/json" } })
+			.then((res) => {
+				setArticles(
+					Array.isArray(res.data) ? res.data : res.data.data || []
+				);
+			})
+			.catch((err) => {
+				// Silently handle 401 errors
+				if (err.response?.status !== 401) {
+					console.error("Error fetching articles:", err);
+				}
+				setArticles([]);
+			});
+	}, [userId]); // Add userId as dependency
 
-    // Debounce auto-save
-    const saveTimeout = useRef();
+	useEffect(() => {
+		fetchHistory();
+	}, [userId]); // Add userId as dependency
 
-    // Khmer word segmentation
-    const calculateWordCount = async (text) => {
-        if (!text || !text.trim()) return 0;
-        try {
-            const res = await axios.post(
-                "/api/khmer-segment",
-                { text },
-                { headers: { "Content-Type": "application/json" } }
-            );
-            return res.data && Array.isArray(res.data.tokens)
-                ? res.data.tokens.length
-                : text.trim().split(/\s+/).length;
-        } catch (e) {
-            console.error("Khmer segment API error:", e);
-            return text.trim().split(/\s+/).length;
-        }
-    };
+	// Handle outside click for dropdown
+	useEffect(() => {
+		if (!dropdownOpen) return;
+		const handleClickOutside = (event) => {
+			if (
+				dropdownRef.current &&
+				!dropdownRef.current.contains(event.target)
+			) {
+				setDropdownOpen(false);
+			}
+		};
+		document.addEventListener("mousedown", handleClickOutside);
+		return () =>
+			document.removeEventListener("mousedown", handleClickOutside);
+	}, [dropdownOpen]);
 
-    const calculateReadingTime = (wordCount) =>
-        Math.ceil((wordCount / 200) * 60);
+	// Debounce auto-save
+	const saveTimeout = useRef();
 
-    // Auto-save
-    const autoSave = async (newTitle, newParagraph) => {
-        if (!userId) return;
-        setSaving(true);
-        const wordCount = await calculateWordCount(newParagraph);
-        const payload = {
-            user_id: userId,
-            title: newTitle ?? "",
-            paragraph: newParagraph ?? "",
-            word_count: wordCount,
-            incorrect_word_count: 0,
-            reading_time: calculateReadingTime(wordCount),
-        };
+	// Khmer word segmentation
+	const calculateWordCount = async (text) => {
+		if (!text || !text.trim()) return 0;
+		try {
+			const res = await axios.post(
+				"/api/khmer-segment",
+				{ text },
+				{ headers: { "Content-Type": "application/json" } }
+			);
+			return res.data && Array.isArray(res.data.tokens)
+				? res.data.tokens.length
+				: text.trim().split(/\s+/).length;
+		} catch (e) {
+			console.error("Khmer segment API error:", e);
+			return text.trim().split(/\s+/).length;
+		}
+	};
 
-        if (checkerId) {
-            axios
-                .patch(`/grammar-checkers/${checkerId}`, payload, {
-                    headers: { Accept: "application/json" },
-                })
-                .then((res) => {
-                    setCheckerId(res.data.id);
-                    fetchHistory();
-                })
-                .catch((err) =>
-                    console.error("Save update error:", err.response?.data)
-                )
-                .finally(() => setSaving(false));
-        } else {
-            axios
-                .post("/grammar-checkers", payload, {
-                    headers: { Accept: "application/json" },
-                })
-                .then((res) => {
-                    setCheckerId(res.data.id);
-                    fetchHistory();
-                })
-                .catch((err) =>
-                    console.error("Save Document error:", err.response?.data)
-                )
-                .finally(() => setSaving(false));
-        }
-    };
+	const calculateReadingTime = (wordCount) =>
+		Math.ceil((wordCount / 200) * 60);
 
-    useEffect(() => {
-        if (!userId || (!docTitle.trim() && !paragraph.trim())) return;
-        if (saveTimeout.current) clearTimeout(saveTimeout.current);
-        saveTimeout.current = setTimeout(() => {
-            autoSave(docTitle, paragraph);
-        }, 700);
-        return () => clearTimeout(saveTimeout.current);
-    }, [docTitle, paragraph]);
+	// Compare with article
+	const runCompare = async () => {
+		if (!selectedArticle || !paragraph.trim()) return;
+		setIsChecking(true); // Start loading
+		try {
+			setComparisonResult(null);
+			const res = await axios.post("/api/compare", {
+				article_id: selectedArticle.id,
+				userInput: paragraph,
+			});
+			if (res.data && Array.isArray(res.data.comparison)) {
+				setComparisonResult(res.data);
+			} else {
+				console.error("Invalid comparison result format:", res.data);
+				setComparisonResult(null);
+			}
+		} catch (e) {
+			console.error("Error in comparison:", e);
+			setComparisonResult(null);
+		} finally {
+			setIsChecking(false); // Stop loading
+		}
+	};
 
-    // Block copy/paste/cut
-    const handleBlock = (e) => {
-        e.preventDefault();
-        setShowBlockModal(true);
-    };
+	// Auto-save
+	const autoSave = async (newTitle, newParagraph) => {
+		if (!userId) return;
+		setSaving(true);
+		const wordCount = await calculateWordCount(newParagraph);
+		const payload = {
+			user_id: userId,
+			title: newTitle ?? "",
+			paragraph: newParagraph ?? "",
+			word_count: wordCount,
+			incorrect_word_count: 0,
+			reading_time: calculateReadingTime(wordCount),
+			article_id: selectedArticle ? selectedArticle.id : null, // <-- ADD THIS LINE
+		};
 
-    // Show account modal for unauthenticated users
-    useEffect(() => {
-        setShowAccountModal(!auth.user);
-    }, [auth.user]);
+		// If no checkerId, ensure only one create request is in-flight
+		if (!checkerId) {
+			if (creatingNewRef.current) {
+				// another create is in progress; skip this create to avoid duplicates
+				setSaving(false);
+				return;
+			}
+			creatingNewRef.current = true;
+			try {
+				const res = await axios.post("/grammar-checkers", payload, {
+					headers: { Accept: "application/json" },
+				});
+				// Prefer res.data.id or res.data.data.id if API nests it
+				const newId = res.data?.id ?? res.data?.data?.id ?? null;
+				if (newId) {
+					setCheckerId(newId);
+				}
+				fetchHistory();
+				setLastSavedAt(Date.now());
+				// Trigger real-time compare after successful save
+				if (selectedArticle && newParagraph.trim()) {
+					runCompare();
+				}
+			} catch (err) {
+				console.error("Save Document error:", err.response?.data ?? err);
+			} finally {
+				creatingNewRef.current = false;
+				setSaving(false);
+			}
+		} else {
+			// Update existing
+			try {
+				const res = await axios.patch(`/grammar-checkers/${checkerId}`, payload, {
+					headers: { Accept: "application/json" },
+				});
+				const updatedId = res.data?.id ?? res.data?.data?.id ?? checkerId;
+				setCheckerId(updatedId);
+				fetchHistory();
+				setLastSavedAt(Date.now());
+				// Trigger real-time compare after successful update
+				if (selectedArticle && newParagraph.trim()) {
+					runCompare();
+				}
+			} catch (err) {
+				console.error("Save update error:", err.response?.data ?? err);
+			} finally {
+				setSaving(false);
+			}
+		}
+        console.log(payload);
+	};
 
-    // Get article audio URL
-    const getArticleAudioUrl = (article) => {
-        return article?.audio?.file_path || null;
-    };
+	useEffect(() => {
+		if (!userId || (!docTitle.trim() && !paragraph.trim())) return;
+		if (saveTimeout.current) clearTimeout(saveTimeout.current);
+		saveTimeout.current = setTimeout(() => {
+			autoSave(docTitle, paragraph);
+		}, 700);
+		return () => clearTimeout(saveTimeout.current);
+	}, [docTitle, paragraph]);
 
-    // Select article
-    const handleSelectArticle = async (article) => {
-        setSelectedArticle(article);
-        setDropdownOpen(false);
-        setDocTitle(article ? article.title : "");
-        setAudioError(null);
+	// Block copy/paste/cut
+	const handleBlock = (e) => {
+		e.preventDefault();
+		setShowBlockModal(true);
+	};
 
-        if (!article) {
-            setAudioUrl(null);
-            return;
-        }
+	// Show account modal for unauthenticated users
+	useEffect(() => {
+		setShowAccountModal(!auth.user);
+	}, [auth.user]);
 
-        const audioId = article.audios_id;
-        if (!audioId) {
-            setAudioUrl(null);
-            return;
-        }
+	// Get article audio URL
+	const getArticleAudioUrl = (article) => {
+		return article?.audio?.file_path || null;
+	};
 
-        try {
-            const res = await axios.get(`/api/audios/${audioId}`);
-            const audioData = res.data?.data;
-            if (audioData && audioData.file_path) {
-                setAudioUrl(audioData.file_path);
-            } else {
-                setAudioUrl(null);
-                setAudioError("Audio file not found");
-            }
-        } catch (e) {
-            console.error("Failed to fetch audio:", e);
-            setAudioError("Unable to load audio for this article.");
-            setAudioUrl(null);
-        }
+	// Select article
+	const handleSelectArticle = async (article) => {
+		setSelectedArticle(article);
+		setDropdownOpen(false);
+		setDocTitle(article ? article.title : "");
+		setAudioError(null);
 
-        if (audioRef.current) {
-            audioRef.current.pause();
-            audioRef.current.currentTime = 0;
-        }
-        setIsPlaying(false);
-    };
+		if (!article) {
+			setAudioUrl(null);
+			return;
+		}
 
-    // Toggle audio playback
-    const togglePlay = () => {
-        if (!audioUrl || !audioRef.current) {
-            setAudioError("No audio available to play.");
-            return;
-        }
-        if (isPlaying) {
-            // Pausing audio
-            const pauseTime = Date.now();
-            setPauseStartTime(pauseTime);
-            audioRef.current.pause();
-            setIsPlaying(false);
-            
-            // Track pause with current playback position
-            if (userId && selectedArticle?.audios_id) {
-                axios.post('/api/track/audio-activity', {
-                    audio_id: selectedArticle.audios_id,
-                    article_id: selectedArticle.id,
-                    activity_type: 'audio_pause',
-                    playback_position: audioRef.current.currentTime,
-                    pause_duration: 0, // Will be calculated on resume
-                    session_id: sessionId,
-                }).catch(err => console.error('Track audio pause error:', err));
-            }
-        } else {
-            // Resuming audio
-            let pauseDuration = 0;
-            if (pauseStartTime) {
-                pauseDuration = (Date.now() - pauseStartTime) / 1000; // Convert to seconds
-                setPauseStartTime(null);
-            }
+		const audioId = article.audios_id;
+		if (!audioId) {
+			setAudioUrl(null);
+			return;
+		}
 
-            audioRef.current
-                .play()
-                .then(() => {
-                    setIsPlaying(true);
-                    // Track play with pause duration
-                    if (userId && selectedArticle?.audios_id) {
-                        axios.post('/api/track/audio-activity', {
-                            audio_id: selectedArticle.audios_id,
-                            article_id: selectedArticle.id,
-                            activity_type: 'audio_play',
-                            playback_position: audioRef.current.currentTime,
-                            pause_duration: pauseDuration,
-                            session_id: sessionId,
-                        }).catch(err => console.error('Track audio play error:', err));
-                    }
-                })
-                .catch((e) => {
-                    console.error("Playback failed:", e);
-                    setAudioError("Failed to play audio. Please try again.");
-                    setIsPlaying(false);
-                });
-        }
-    };
+		try {
+			const res = await axios.get(`/api/audios/${audioId}`);
+			const audioData = res.data?.data;
+			if (audioData && audioData.file_path) {
+				setAudioUrl(audioData.file_path);
+			} else {
+				setAudioUrl(null);
+				setAudioError("Audio file not found");
+			}
+		} catch (e) {
+			console.error("Failed to fetch audio:", e);
+			setAudioError("Unable to load audio for this article.");
+			setAudioUrl(null);
+		}
 
-    // Skip forward 10 seconds
-    const skipForward = () => {
-        if (audioRef.current) {
-            const oldPosition = audioRef.current.currentTime;
-            audioRef.current.currentTime = Math.min(
-                audioRef.current.currentTime + 10,
-                audioRef.current.duration
-            );
-            // Track forward
-            if (userId && selectedArticle?.audios_id) {
-                axios.post('/api/track/audio-activity', {
-                    audio_id: selectedArticle.audios_id,
-                    article_id: selectedArticle.id,
-                    activity_type: 'audio_forward',
-                    playback_position: audioRef.current.currentTime,
-                    session_id: sessionId,
-                }).catch(err => console.error('Track audio forward error:', err));
-            }
-        }
-    };
+		if (audioRef.current) {
+			audioRef.current.pause();
+			audioRef.current.currentTime = 0;
+		}
+		setIsPlaying(false);
 
-    // Skip backward 10 seconds
-    const skipBackward = () => {
-        if (audioRef.current) {
-            const oldPosition = audioRef.current.currentTime;
-            audioRef.current.currentTime = Math.max(
-                audioRef.current.currentTime - 10,
-                0
-            );
-            // Track rewind
-            if (userId && selectedArticle?.audios_id) {
-                axios.post('/api/track/audio-activity', {
-                    audio_id: selectedArticle.audios_id,
-                    article_id: selectedArticle.id,
-                    activity_type: 'audio_rewind',
-                    playback_position: audioRef.current.currentTime,
-                    session_id: sessionId,
-                }).catch(err => console.error('Track audio rewind error:', err));
-            }
-        }
-    };
+		// Trigger auto-save to update article_id if checkerId exists
+		if (checkerId) {
+			autoSave(docTitle, paragraph);
+		}
+	};
 
-    // Handle time update
-    const handleTimeUpdate = () => {
-        if (audioRef.current) {
-            setCurrentTime(audioRef.current.currentTime);
-        }
-    };
+	// Toggle audio playback
+	const togglePlay = () => {
+		if (!audioUrl || !audioRef.current) {
+			setAudioError("No audio available to play.");
+			return;
+		}
+		if (isPlaying) {
+			// Pausing audio
+			const pauseTime = Date.now();
+			setPauseStartTime(pauseTime);
+			audioRef.current.pause();
+			setIsPlaying(false);
+			
+			// Track pause with current playback position
+			if (userId && selectedArticle?.audios_id) {
+				axios.post('/api/track/audio-activity', {
+					audio_id: selectedArticle.audios_id,
+					article_id: selectedArticle.id,
+					activity_type: 'audio_pause',
+					playback_position: audioRef.current.currentTime,
+					pause_duration: 0, // Will be calculated on resume
+					session_id: sessionId,
+				}).catch(err => console.error('Track audio pause error:', err));
+			}
+		} else {
+			// Resuming audio
+			let pauseDuration = 0;
+			if (pauseStartTime) {
+				pauseDuration = (Date.now() - pauseStartTime) / 1000; // Convert to seconds
+				setPauseStartTime(null);
+			}
 
-    // Handle metadata loaded
-    const handleLoadedMetadata = () => {
-        if (audioRef.current) {
-            setDuration(audioRef.current.duration);
-        }
-    };
+			audioRef.current
+				.play()
+				.then(() => {
+					setIsPlaying(true);
+					// Track play with pause duration
+					if (userId && selectedArticle?.audios_id) {
+						axios.post('/api/track/audio-activity', {
+							audio_id: selectedArticle.audios_id,
+							article_id: selectedArticle.id,
+							activity_type: 'audio_play',
+							playback_position: audioRef.current.currentTime,
+							pause_duration: pauseDuration,
+							session_id: sessionId,
+						}).catch(err => console.error('Track audio play error:', err));
+					}
+				})
+				.catch((e) => {
+					console.error("Playback failed:", e);
+					setAudioError("Failed to play audio. Please try again.");
+					setIsPlaying(false);
+				});
+		}
+	};
 
-    // Handle audio ended
-    const handleAudioEnded = () => {
-        setIsPlaying(false);
-        if (audioRef.current) {
-            audioRef.current.currentTime = 0;
-        }
-    };
+	// Skip forward 10 seconds
+	const skipForward = () => {
+		if (audioRef.current) {
+			const oldPosition = audioRef.current.currentTime;
+			audioRef.current.currentTime = Math.min(
+				audioRef.current.currentTime + 10,
+				audioRef.current.duration
+			);
+			// Track forward
+			if (userId && selectedArticle?.audios_id) {
+				axios.post('/api/track/audio-activity', {
+					audio_id: selectedArticle.audios_id,
+					article_id: selectedArticle.id,
+					activity_type: 'audio_forward',
+					playback_position: audioRef.current.currentTime,
+					session_id: sessionId,
+				}).catch(err => console.error('Track audio forward error:', err));
+			}
+		}
+	};
 
-    // Seek to position
-    const handleSeek = (e) => {
-        if (audioRef.current) {
-            const rect = e.currentTarget.getBoundingClientRect();
-            const pos = (e.clientX - rect.left) / rect.width;
-            audioRef.current.currentTime = pos * audioRef.current.duration;
-        }
-    };
+	// Skip backward 10 seconds
+	const skipBackward = () => {
+		if (audioRef.current) {
+			const oldPosition = audioRef.current.currentTime;
+			audioRef.current.currentTime = Math.max(
+				audioRef.current.currentTime - 10,
+				0
+			);
+			// Track rewind
+			if (userId && selectedArticle?.audios_id) {
+				axios.post('/api/track/audio-activity', {
+					audio_id: selectedArticle.audios_id,
+					article_id: selectedArticle.id,
+					activity_type: 'audio_rewind',
+					playback_position: audioRef.current.currentTime,
+					session_id: sessionId,
+				}).catch(err => console.error('Track audio rewind error:', err));
+			}
+		}
+	};
 
-    // Format time (seconds to mm:ss)
-    const formatTime = (seconds) => {
-        if (isNaN(seconds)) return "0:00";
-        const mins = Math.floor(seconds / 60);
-        const secs = Math.floor(seconds % 60);
-        return `${mins}:${secs.toString().padStart(2, "0")}`;
-    };
+	// Handle time update
+	const handleTimeUpdate = () => {
+		if (audioRef.current) {
+			setCurrentTime(audioRef.current.currentTime);
+		}
+	};
 
-    // Compare with article
-    const runCompare = async () => {
-        if (!selectedArticle || !paragraph.trim()) return;
-        setIsChecking(true); // Start loading
-        try {
-            setComparisonResult(null);
-            const res = await axios.post("/api/compare", {
-                article_id: selectedArticle.id,
-                userInput: paragraph,
-            });
-            if (res.data && Array.isArray(res.data.comparison)) {
-                setComparisonResult(res.data);
-            } else {
-                console.error("Invalid comparison result format:", res.data);
-                setComparisonResult(null);
-            }
-        } catch (e) {
-            console.error("Error in comparison:", e);
-            setComparisonResult(null);
-        } finally {
-            setIsChecking(false); // Stop loading
-        }
-    };
+	// Handle metadata loaded
+	const handleLoadedMetadata = () => {
+		if (audioRef.current) {
+			setDuration(audioRef.current.duration);
+		}
+	};
 
-    // Clear comparison result when textarea is cleared or article is deselected
-    useEffect(() => {
-        if (!paragraph.trim() || !selectedArticle) {
-            setComparisonResult(null);
-        }
-    }, [paragraph, selectedArticle]);
+	// Handle audio ended
+	const handleAudioEnded = () => {
+		setIsPlaying(false);
+		if (audioRef.current) {
+			audioRef.current.currentTime = 0;
+		}
+	};
 
-    return (
-        <>
-            <Head title="Homophone Check" />
-            <HeaderNavbar />
-            <GrammarCheckSection />
+	// Seek to position
+	const handleSeek = (e) => {
+		if (audioRef.current) {
+			const rect = e.currentTarget.getBoundingClientRect();
+			const pos = (e.clientX - rect.left) / rect.width;
+			audioRef.current.currentTime = pos * audioRef.current.duration;
+		}
+	};
 
-            <section className="relative py-4">
-                <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
-                    <div
-                        className={`flex flex-row gap-4 transition-all duration-300 ${
-                            showAccountModal ? "blur-sm" : ""
-                        }`}
-                    >
-                        {/* Left Side - Document Editor */}
-                        <div className="flex-1 bg-white rounded-xl border border-gray-200 shadow-sm p-6 h-[75vh]">
-                            {/* Title and Article Dropdown */}
-                            <div className="flex justify-between items-center mb-4">
-                                {/* Conditionally render title input or audio player */}
-                                {audioUrl ? (
-                                    <div className="flex-1 mr-4">
-                                        <audio
-                                            ref={audioRef}
-                                            src={audioUrl}
-                                            onTimeUpdate={handleTimeUpdate}
-                                            onLoadedMetadata={
-                                                handleLoadedMetadata
-                                            }
-                                            onEnded={handleAudioEnded}
-                                            className="hidden"
-                                        />
-                                        <div className="bg-white border border-gray-300 rounded-xl px-3 py-1 shadow-sm">
-                                            <div className="flex items-center gap-3">
-                                                {/* Play/Pause Button */}
-                                                <button
-                                                    onClick={togglePlay}
-                                                    className="w-6 h-6 flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white rounded-full transition"
-                                                >
-                                                    {isPlaying ? (
-                                                        <svg
-                                                            xmlns="http://www.w3.org/2000/svg"
-                                                            className="h-4 w-4"
-                                                            viewBox="0 0 24 24"
-                                                            fill="currentColor"
-                                                        >
-                                                            <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
-                                                        </svg>
-                                                    ) : (
-                                                        <svg
-                                                            xmlns="http://www.w3.org/2000/svg"
-                                                            className="h-4 w-4"
-                                                            viewBox="0 0 24 24"
-                                                            fill="currentColor"
-                                                        >
-                                                            <path d="M8 5v14l11-7z" />
-                                                        </svg>
-                                                    )}
-                                                </button>
-                                                <div className="flex space-x-0">
-                                                    {/* Skip Backward 10s */}
-                                                    <button
-                                                        onClick={skipBackward}
-                                                        className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-full transition"
-                                                        title="Back 10s"
-                                                    >
-                                                        <svg
-                                                            xmlns="http://www.w3.org/2000/svg"
-                                                            className="h-5 w-5 text-gray-700"
-                                                            viewBox="0 0 24 24"
-                                                            fill="none"
-                                                            stroke="currentColor"
-                                                            strokeWidth="2"
-                                                        >
-                                                            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-                                                            <path d="M3 3v5h5" />
-                                                            <text
-                                                                x="12"
-                                                                y="16"
-                                                                fontSize="8"
-                                                                fill="currentColor"
-                                                                textAnchor="middle"
-                                                                fontWeight="bold"
-                                                            >
-                                                                10
-                                                            </text>
-                                                        </svg>
-                                                    </button>
+	// Format time (seconds to mm:ss)
+	const formatTime = (seconds) => {
+		if (isNaN(seconds)) return "0:00";
+		const mins = Math.floor(seconds / 60);
+		const secs = Math.floor(seconds % 60);
+		return `${mins}:${secs.toString().padStart(2, "0")}`;
+	};
 
-                                                    {/* Skip Forward 10s */}
-                                                    <button
-                                                        onClick={skipForward}
-                                                        className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-full transition"
-                                                        title="Forward 10s"
-                                                    >
-                                                        <svg
-                                                            xmlns="http://www.w3.org/2000/svg"
-                                                            className="h-5 w-5 text-gray-700"
-                                                            viewBox="0 0 24 24"
-                                                            fill="none"
-                                                            stroke="currentColor"
-                                                            strokeWidth="2"
-                                                        >
-                                                            <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
-                                                            <path d="M21 3v5h-5" />
-                                                            <text
-                                                                x="12"
-                                                                y="16"
-                                                                fontSize="8"
-                                                                fill="currentColor"
-                                                                textAnchor="middle"
-                                                                fontWeight="bold"
-                                                            >
-                                                                10
-                                                            </text>
-                                                        </svg>
-                                                    </button>
-                                                </div>
+	// Clear comparison result when textarea is cleared or article is deselected
+	useEffect(() => {
+		if (!paragraph.trim() || !selectedArticle) {
+			setComparisonResult(null);
+		}
+	}, [paragraph, selectedArticle]);
 
-                                                {/* Progress Bar */}
-                                                <div className="flex-1 flex items-center gap-2">
-                                                    <span className="text-xs text-gray-600 font-medium min-w-[35px]">
-                                                        {formatTime(
-                                                            currentTime
-                                                        )}
-                                                    </span>
-                                                    <div
-                                                        className="flex-1 h-1.5 bg-gray-200 rounded-full cursor-pointer relative"
-                                                        onClick={handleSeek}
-                                                    >
-                                                        <div
-                                                            className="h-full bg-blue-600 rounded-full transition-all"
-                                                            style={{
-                                                                width: `${
-                                                                    (currentTime /
-                                                                        duration) *
-                                                                        100 || 0
-                                                                }%`,
-                                                            }}
-                                                        />
-                                                    </div>
-                                                    <span className="text-xs text-gray-600 font-medium min-w-[35px]">
-                                                        {formatTime(duration)}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <div className="w-64">
-                                        <input
-                                            type="text"
-                                            value={docTitle}
-                                            onChange={(e) => {
-                                                setDocTitle(e.target.value);
-                                                setSelectedArticle(null);
-                                                setAudioUrl(null);
-                                                setAudioError(null);
-                                            }}
-                                            className="w-full text-md font-medium text-gray-700 bg-white border border-gray-300 rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder-gray-500"
-                                            placeholder="Untitled document"
-                                        />
-                                    </div>
-                                )}
+	return (
+		<>
+			<Head title="Homophone Check" />
+			<HeaderNavbar />
+			<GrammarCheckSection />
 
-                                <div
-                                    className="relative w-64"
-                                    ref={dropdownRef}
-                                >
-                                    <button
-                                        type="button"
-                                        className="w-full px-3 py-2.5 text-sm bg-white border border-gray-300 rounded-xl shadow-sm text-left flex justify-between items-center focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        onClick={() =>
-                                            setDropdownOpen(!dropdownOpen)
-                                        }
-                                    >
-                                        {selectedArticle
-                                            ? selectedArticle.title
-                                            : "Select an Article"}
-                                        <svg
-                                            className={`w-4 h-4 ml-2 transition-transform ${
-                                                dropdownOpen
-                                                    ? "rotate-180"
-                                                    : "rotate-0"
-                                            }`}
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                            xmlns="http://www.w3.org/2000/svg"
-                                        >
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth={2}
-                                                d="M19 9l-7 7-7-7"
-                                            />
-                                        </svg>
-                                    </button>
-                                    {dropdownOpen && (
-                                        <div className="absolute right-0 top-full mt-2 w-full bg-white border border-gray-200 rounded-xl shadow-lg z-50 max-h-60 overflow-y-auto hide-scrollbar">
-                                            <div className="px-2 py-2 space-y-1">
-                                                <button
-                                                    type="button"
-                                                    className={`w-full text-left px-4 py-2 text-sm rounded-xl transition ${
-                                                        !selectedArticle
-                                                            ? "bg-blue-100 text-blue-700 font-medium"
-                                                            : "hover:bg-gray-100 text-gray-700"
-                                                    }`}
-                                                    onClick={() =>
-                                                        handleSelectArticle(
-                                                            null
-                                                        )
-                                                    }
-                                                >
-                                                    Select an Article
-                                                </button>
-                                                {articles.map((article) => (
-                                                    <button
-                                                        key={article.id}
-                                                        type="button"
-                                                        className={`w-full text-left px-4 py-2 text-sm rounded-lg transition ${
-                                                            selectedArticle &&
-                                                            selectedArticle.id ===
-                                                                article.id
-                                                                ? "bg-blue-100 text-blue-700 font-medium"
-                                                                : "hover:bg-gray-100 text-gray-700"
-                                                        }`}
-                                                        onClick={() =>
-                                                            handleSelectArticle(
-                                                                article
-                                                            )
-                                                        }
-                                                    >
-                                                        <span className="font-mono text-gray-500">
-                                                            #{article.id}
-                                                        </span>{" "}
-                                                        {article.title}
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
+			<section className="relative py-4">
+				<div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
+					<div
+						className={`flex flex-row gap-4 transition-all duration-300 ${
+							showAccountModal ? "blur-sm" : ""
+						}`}
+					>
+						{/* Left Side - Document Editor */}
+						<div className="flex-1 bg-white rounded-xl border border-gray-200 shadow-sm p-6 h-[75vh]">
+							{/* Title and Article Dropdown */}
+							<div className="flex justify-between items-center mb-4">
+								{/* Conditionally render title input or audio player */}
+								{audioUrl ? (
+									<div className="flex-1 mr-4">
+										<audio
+											ref={audioRef}
+											src={audioUrl}
+											onTimeUpdate={handleTimeUpdate}
+											onLoadedMetadata={
+												handleLoadedMetadata
+											}
+											onEnded={handleAudioEnded}
+											className="hidden"
+										/>
+										<div className="bg-white border border-gray-300 rounded-xl px-3 py-1 shadow-sm">
+											<div className="flex items-center gap-3">
+												{/* Play/Pause Button */}
+												<button
+													onClick={togglePlay}
+													className="w-6 h-6 flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white rounded-full transition"
+												>
+													{isPlaying ? (
+														<svg
+															xmlns="http://www.w3.org/2000/svg"
+															className="h-4 w-4"
+															viewBox="0 0 24 24"
+															fill="currentColor"
+														>
+															<path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
+														</svg>
+													) : (
+														<svg
+															xmlns="http://www.w3.org/2000/svg"
+															className="h-4 w-4"
+															viewBox="0 0 24 24"
+															fill="currentColor"
+														>
+															<path d="M8 5v14l11-7z" />
+														</svg>
+													)}
+												</button>
+												<div className="flex space-x-0">
+													{/* Skip Backward 10s */}
+													<button
+														onClick={skipBackward}
+														className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-full transition"
+														title="Back 10s"
+													>
+														<svg
+															xmlns="http://www.w3.org/2000/svg"
+															className="h-5 w-5 text-gray-700"
+															viewBox="0 0 24 24"
+															fill="none"
+															stroke="currentColor"
+															strokeWidth="2"
+														>
+															<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+															<path d="M3 3v5h5" />
+															<text
+																x="12"
+																y="16"
+																fontSize="8"
+																fill="currentColor"
+																textAnchor="middle"
+																fontWeight="bold"
+															>
+																10
+															</text>
+														</svg>
+													</button>
 
-                            {/* Textarea */}
-                            <div className="relative">
-                                <textarea
-                                    className={`w-full h-[54vh] text-md bg-white border border-gray-200 rounded-xl py-3 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder-gray-500 resize-none overflow-y-auto hide-scrollbar ${
-                                        isZoomed ? "min-h-[50vh]" : ""
-                                    }`}
-                                    placeholder="Type your text here..."
-                                    value={paragraph}
-                                    onChange={(e) =>
-                                        setParagraph(e.target.value)
-                                    }
-                                    onDoubleClick={() => setIsZoomed(!isZoomed)}
-                                    // onCopy={handleBlock}
-                                    // onPaste={handleBlock}
-                                    // onCut={handleBlock}
-                                />
-                            </div>
+													{/* Skip Forward 10s */}
+													<button
+														onClick={skipForward}
+														className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-full transition"
+														title="Forward 10s"
+													>
+														<svg
+															xmlns="http://www.w3.org/2000/svg"
+															className="h-5 w-5 text-gray-700"
+															viewBox="0 0 24 24"
+															fill="none"
+															stroke="currentColor"
+															strokeWidth="2"
+														>
+															<path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
+															<path d="M21 3v5h-5" />
+															<text
+																x="12"
+																y="16"
+																fontSize="8"
+																fill="currentColor"
+																textAnchor="middle"
+																fontWeight="bold"
+															>
+																10
+															</text>
+														</svg>
+													</button>
+												</div>
 
-                            {/* Compare Button and Word Count */}
-                            <div className="flex justify-end items-center mt-2">
-                                <button
-                                    type="button"
-                                    className="px-3 py-2 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                                    onClick={runCompare}
-                                    disabled={
-                                        !selectedArticle ||
-                                        !paragraph.trim() ||
-                                        isChecking
-                                    }
-                                >
-                                    {isChecking && (
-                                        <svg
-                                            className="animate-spin h-4 w-4 text-white"
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <circle
-                                                className="opacity-25"
-                                                cx="12"
-                                                cy="12"
-                                                r="10"
-                                                stroke="currentColor"
-                                                strokeWidth="4"
-                                            ></circle>
-                                            <path
-                                                className="opacity-75"
-                                                fill="currentColor"
-                                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                            ></path>
-                                        </svg>
-                                    )}
-                                    {isChecking
-                                        ? "Checking..."
-                                        : "Check Homophone"}
-                                </button>
-                            </div>
-                        </div>
+												{/* Progress Bar */}
+												<div className="flex-1 flex items-center gap-2">
+													<span className="text-xs text-gray-600 font-medium min-w-[35px]">
+														{formatTime(
+															currentTime
+														)}
+													</span>
+													<div
+														className="flex-1 h-1.5 bg-gray-200 rounded-full cursor-pointer relative"
+														onClick={handleSeek}
+													>
+														<div
+															className="h-full bg-blue-600 rounded-full transition-all"
+															style={{
+																width: `${
+																	(currentTime /
+																		duration) *
+																		100 || 0
+																}%`,
+															}}
+														/>
+													</div>
+													<span className="text-xs text-gray-600 font-medium min-w-[35px]">
+														{formatTime(duration)}
+													</span>
+												</div>
+											</div>
+										</div>
+									</div>
+								) : (
+									<div className="w-64">
+										<input
+											type="text"
+											value={docTitle}
+											onChange={(e) => {
+												setDocTitle(e.target.value);
+												setSelectedArticle(null);
+												setAudioUrl(null);
+												setAudioError(null);
+											}}
+											className="w-full text-md font-medium text-gray-700 bg-white border border-gray-300 rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder-gray-500"
+											placeholder="Untitled document"
+										/>
+									</div>
+								)}
 
-                        {/* Right Side - Sidebar */}
-                        <SidebarCheckGrammar
-                            text={paragraph}
-                            onReplace={setParagraph}
-                            checkerId={checkerId}
-                            comparisonResult={comparisonResult}
-                            setComparisonResult={setComparisonResult}
-                        />
-                    </div>
-                </div>
+								<div
+									className="relative w-64"
+									ref={dropdownRef}
+								>
+									<button
+										type="button"
+										className="w-full px-3 py-2.5 text-sm bg-white border border-gray-300 rounded-xl shadow-sm text-left flex justify-between items-center focus:outline-none focus:ring-2 focus:ring-blue-500"
+										onClick={() =>
+											setDropdownOpen(!dropdownOpen)
+										}
+									>
+										{selectedArticle
+											? selectedArticle.title
+											: "Select an Article"}
+										<svg
+											className={`w-4 h-4 ml-2 transition-transform ${
+												dropdownOpen
+													? "rotate-180"
+													: "rotate-0"
+											}`}
+											fill="none"
+											stroke="currentColor"
+											viewBox="0 0 24 24"
+											xmlns="http://www.w3.org/2000/svg"
+										>
+											<path
+												strokeLinecap="round"
+												strokeLinejoin="round"
+												strokeWidth={2}
+												d="M19 9l-7 7-7-7"
+											/>
+										</svg>
+									</button>
+									{dropdownOpen && (
+										<div className="absolute right-0 top-full mt-2 w-full bg-white border border-gray-200 rounded-xl shadow-lg z-50 max-h-60 overflow-y-auto hide-scrollbar">
+											<div className="px-2 py-2 space-y-1">
+												<button
+													type="button"
+													className={`w-full text-left px-4 py-2 text-sm rounded-xl transition ${
+														!selectedArticle
+															? "bg-blue-100 text-blue-700 font-medium"
+															: "hover:bg-gray-100 text-gray-700"
+													}`}
+													onClick={() =>
+														handleSelectArticle(
+															null
+														)
+													}
+												>
+													Select an Article
+												</button>
+												{articles.map((article) => (
+													<button
+														key={article.id}
+														type="button"
+														className={`w-full text-left px-4 py-2 text-sm rounded-lg transition ${
+															selectedArticle &&
+															selectedArticle.id ===
+																article.id
+																? "bg-blue-100 text-blue-700 font-medium"
+																: "hover:bg-gray-100 text-gray-700"
+														}`}
+														onClick={() =>
+															handleSelectArticle(
+																article
+															)
+														}
+													>
+														<span className="font-mono text-gray-500">
+															#{article.id}
+														</span>{" "}
+														{article.title}
+													</button>
+												))}
+											</div>
+										</div>
+									)}
+								</div>
+							</div>
 
-                {/* Account Modal */}
-                {showAccountModal && (
-                    <div className="absolute inset-0 bg-opacity-20 flex items-center justify-center z-10">
-                        <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8 w-full max-w-xl mx-4">
-                            <div className="text-center">
-                                <h2 className="text-[24px] font-semibold text-gray-900 mb-2">
-                                    Create an account to get started
-                                </h2>
-                                <p className="text-gray-600 text-md leading-relaxed font-sans">
-                                    Create a free SorSer account to start
-                                    Grammar Checker with AI
-                                </p>
-                                <div className="space-y-3">
-                                    <a
-                                        href={route("auth.google")}
-                                        className="w-full flex items-center justify-center gap-3 px-3 py-3 border-[3px] border-gray-200 rounded-2xl hover:bg-gray-50 transition-colors"
-                                    >
-                                        <svg
-                                            className="w-5 h-5"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                fill="#4285f4"
-                                                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                                            />
-                                            <path
-                                                fill="#34a853"
-                                                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                                            />
-                                            <path
-                                                fill="#fbbc05"
-                                                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                                            />
-                                            <path
-                                                fill="#ea4335"
-                                                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                                            />
-                                        </svg>
-                                        <span className="text-gray-700 font-medium">
-                                            Sign Up with Google
-                                        </span>
-                                    </a>
+							{/* Textarea */}
+							<div className="relative">
+								<textarea
+									className={`w-full h-[54vh] text-md bg-white border border-gray-200 rounded-xl py-3 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder-gray-500 resize-none overflow-y-auto hide-scrollbar ${
+										isZoomed ? "min-h-[50vh]" : ""
+									}`}
+									placeholder="Type your text here..."
+									value={paragraph}
+									onChange={(e) => setParagraph(e.target.value)}
+									onDoubleClick={() => setIsZoomed(!isZoomed)}
+									disabled={!selectedArticle} // <-- disable until article is selected
+									// onCopy={handleBlock}
+									// onPaste={handleBlock}
+									// onCut={handleBlock}
+								/>
+							</div>
 
-                                    <Link
-                                        href={route("register")}
-                                        className="w-full flex items-center justify-center gap-3 px-3 py-3 border-[3px] border-gray-200 rounded-2xl hover:bg-gray-50 transition-colors"
-                                    >
-                                        <div className="w-5 h-5 flex items-center justify-center">
-                                            <svg
-                                                className="w-12 h-12 text-gray-700"
-                                                fill="currentColor"
-                                                viewBox="0 0 20 20"
-                                            >
-                                                <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-                                                <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-                                            </svg>
-                                        </div>
-                                        <span className="font-medium text-gray-500">
-                                            Sign Up by Email
-                                        </span>
-                                    </Link>
-                                </div>
+							{/* Auto-check status (manual button removed) */}
+							<div className="flex justify-end items-center mt-2">
+								{isChecking ? (
+									<span className="text-sm text-gray-500">Checking...</span>
+								) : lastSavedAt ? (
+									<span className="text-sm text-gray-500">Last saved {new Date(lastSavedAt).toLocaleTimeString()}</span>
+								) : (
+									<span className="text-sm text-gray-400">Not saved yet</span>
+								)}
+							</div>
+						</div>
 
-                                <div className="mt-6 text-md">
-                                    <span className="text-gray-500">Or </span>
-                                    <Link href={route("login")}>
-                                        <span className="text-blue-500 font-medium">
-                                            Sign In
-                                        </span>
-                                    </Link>{" "}
-                                    to an existing account
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                )}
-            </section>
+						{/* Right Side - Sidebar */}
+						<SidebarCheckGrammar
+							text={paragraph}
+							onReplace={setParagraph}
+							checkerId={checkerId}
+							comparisonResult={comparisonResult}
+							setComparisonResult={setComparisonResult}
+							articleId={selectedArticle?.id} // <-- add this prop
+						/>
+					</div>
+				</div>
 
-            <GrammarCheckHeader />
-            <Footer />
-        </>
-    );
+				{/* Account Modal */}
+				{showAccountModal && (
+					<div className="absolute inset-0 bg-opacity-20 flex items-center justify-center z-10">
+						<div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8 w-full max-w-xl mx-4">
+							<div className="text-center">
+								<h2 className="text-[24px] font-semibold text-gray-900 mb-2">
+									Create an account to get started
+								</h2>
+								<p className="text-gray-600 text-md leading-relaxed font-sans">
+									Create a free SorSer account to start
+									Grammar Checker with AI
+								</p>
+								<div className="space-y-3">
+									<a
+										href={route("auth.google")}
+										className="w-full flex items-center justify-center gap-3 px-3 py-3 border-[3px] border-gray-200 rounded-2xl hover:bg-gray-50 transition-colors"
+									>
+										<svg
+											className="w-5 h-5"
+											viewBox="0 0 24 24"
+										>
+											<path
+												fill="#4285f4"
+												d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+											/>
+											<path
+												fill="#34a853"
+												d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+											/>
+											<path
+												fill="#fbbc05"
+												d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+											/>
+											<path
+												fill="#ea4335"
+												d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+											/>
+										</svg>
+										<span className="text-gray-700 font-medium">
+											Sign Up with Google
+										</span>
+									</a>
+
+									<Link
+										href={route("register")}
+										className="w-full flex items-center justify-center gap-3 px-3 py-3 border-[3px] border-gray-200 rounded-2xl hover:bg-gray-50 transition-colors"
+									>
+										<div className="w-5 h-5 flex items-center justify-center">
+											<svg
+												className="w-12 h-12 text-gray-700"
+												fill="currentColor"
+												viewBox="0 0 20 20"
+											>
+												<path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+												<path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+											</svg>
+										</div>
+										<span className="font-medium text-gray-500">
+											Sign Up by Email
+										</span>
+									</Link>
+								</div>
+
+								<div className="mt-6 text-md">
+									<span className="text-gray-500">Or </span>
+									<Link href={route("login")}>
+										<span className="text-blue-500 font-medium">
+											Sign In
+										</span>
+									</Link>{" "}
+									to an existing account
+								</div>
+							</div>
+						</div>
+					</div>
+				)}
+			</section>
+
+			<GrammarCheckHeader />
+			<Footer />
+		</>
+	);
 }

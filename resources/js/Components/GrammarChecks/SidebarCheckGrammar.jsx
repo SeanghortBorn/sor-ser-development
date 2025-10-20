@@ -8,6 +8,7 @@ export default function SidebarCheckGrammar({
     checkerId,
     comparisonResult,
     setComparisonResult,
+    articleId, // <-- add this prop
 }) {
     // State management - add dismissed items tracking
     const [dismissedItems, setDismissedItems] = useState([]); // Track dismissed comparison items
@@ -151,7 +152,7 @@ export default function SidebarCheckGrammar({
         // Track the action
         axios.post('/api/track/comparison-action', {
             grammar_checker_id: checkerId,
-            article_id: comparisonResult.article_id, // You may need to pass this
+            article_id: articleId ?? null,
             action: action,
             comparison_type: item.type,
             user_word: item.user_word?.user_word || '',
@@ -322,22 +323,24 @@ export default function SidebarCheckGrammar({
                 {/* Scrollable List */}
                 <div className="space-y-2 px-4 py-0 flex-1 overflow-y-auto hide-scrollbar">
                     {/* Summary Card */}
-                    <div className="flex justify-between items-center border border-gray-200 rounded-xl px-4 py-2 bg-white shadow-sm">
-                        <span className="flex items-center">
-                            <span className="text-red-500 text-sm font-semibold">
-                                {differences.length} differences
+                    {differences.length > 0 && (
+                        <div className="flex justify-between items-center border border-gray-200 rounded-xl px-4 py-2 bg-white shadow-sm">
+                            <span className="flex items-center">
+                                <span className="text-red-500 text-sm font-semibold">
+                                    {differences.length} differences
+                                </span>
+                                <span className="text-gray-600 text-sm ml-1">
+                                    found
+                                </span>
                             </span>
-                            <span className="text-gray-600 text-sm ml-1">
-                                found
-                            </span>
-                        </span>
-                        <button
-                            className="border border-green-500 text-green-600 px-3 py-1 rounded-full text-xs font-medium hover:bg-green-50 transition"
-                            onClick={handleAcceptAll}
-                        >
-                            Accept all
-                        </button>
-                    </div>
+                            <button
+                                className="border border-green-500 text-green-600 px-3 py-1 rounded-full text-xs font-medium hover:bg-green-50 transition"
+                                onClick={handleAcceptAll}
+                            >
+                                Accept all
+                            </button>
+                        </div>
+                    )}
 
                     {/* Difference Cards */}
                     {differences.map((item, idx) => (
@@ -407,7 +410,7 @@ export default function SidebarCheckGrammar({
                     {/* No Differences Message */}
                     {differences.length === 0 && (
                         <div className="text-center py-8">
-                            <Check className="w-12 h-12 text-green-500 mx-auto mb-3" />
+                            <Check className="mt-20 w-12 h-12 text-green-500 mx-auto mb-3" />
                             <h5 className="text-base font-semibold text-gray-700 mb-1">
                                 Perfect Match!
                             </h5>
@@ -419,15 +422,6 @@ export default function SidebarCheckGrammar({
                 </div>
 
                 <div className="flex px-6 py-3 mt-2 border-t border-gray-200 bg-gray-50 items-center justify-center">
-                    <button
-                        onClick={() => {
-                            setComparisonResult(null);
-                            setDismissedItems([]); // Clear dismissed items when going back
-                        }}
-                        className="w-full px-4 py-2 bg-blue-600 text-white rounded-xl text-sm font-medium shadow-sm hover:bg-blue-700 transition"
-                    >
-                        Back to Grammar Check
-                    </button>
                 </div>
             </div>
         );
@@ -466,7 +460,7 @@ export default function SidebarCheckGrammar({
             {/* Scrollable List */}
             <div className="space-y-3 px-4 py-8 flex-1 overflow-y-auto hide-scrollbar">
                 {/* Show "no issues" message */}
-                <div className="text-center flex flex-col items-center justify-center min-h-[200px]">
+                <div className="mt-12 text-center flex flex-col items-center justify-center min-h-[200px]">
                     <Check className="w-16 h-16 text-green-500 mb-3" />
                     <h5 className="text-base font-semibold text-gray-700 mb-2">
                         Great Job!
@@ -475,6 +469,9 @@ export default function SidebarCheckGrammar({
                         No grammar or spelling issues detected in your text.
                     </p>
                 </div>
+            </div>
+            
+            <div className="flex px-6 py-3 mt-2 border-t border-gray-200 bg-gray-50 items-center justify-center">
             </div>
         </div>
     );
