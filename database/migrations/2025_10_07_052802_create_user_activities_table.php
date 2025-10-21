@@ -8,18 +8,6 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // 1. Text input activities
-        Schema::create('user_text_activities', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->nullable()->constrained()->onDelete('cascade');
-            $table->foreignId('grammar_checker_id')->nullable()->constrained('grammar_checkers')->onDelete('cascade');
-            $table->text('character_entered')->nullable();
-            $table->string('session_id', 100)->nullable();
-            $table->timestamps();
-            $table->index(['user_id', 'grammar_checker_id', 'created_at'], 'utxt_user_gc_created');
-            $table->index('session_id', 'utxt_session');
-        });
-
         // 2. Comparison activities
         Schema::create('user_comparison_activities', function (Blueprint $table) {
             $table->id();
@@ -61,7 +49,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('user_text_activities');
         Schema::dropIfExists('user_comparison_activities');
         Schema::dropIfExists('user_audio_activities');
     }

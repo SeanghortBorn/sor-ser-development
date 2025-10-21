@@ -11,34 +11,6 @@ use Illuminate\Support\Str;
 
 class UserActivityController extends Controller
 {
-    // Track text input
-    public function trackTextInput(Request $request)
-    {
-        try {
-            $validated = $request->validate([
-                'grammar_checker_id' => 'nullable|exists:grammar_checkers,id',
-                'character_entered' => 'required|string',
-                'session_id' => 'nullable|string',
-            ]);
-
-            $data = [
-                'user_id' => Auth::id(),
-                'grammar_checker_id' => $validated['grammar_checker_id'] ?? null,
-                'character_entered' => $validated['character_entered'],
-                'session_id' => $validated['session_id'] ?? \Illuminate\Support\Str::uuid(),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ];
-
-            $activityId = DB::table('user_text_activities')->insertGetId($data);
-
-            return response()->json(['success' => true, 'activity_id' => $activityId]);
-        } catch (\Exception $e) {
-            Log::error('Track text input error: ' . $e->getMessage());
-            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
-        }
-    }
-
     // Track comparison action (accept/dismiss)
     public function trackComparisonAction(Request $request)
     {
@@ -162,9 +134,6 @@ class UserActivityController extends Controller
             $userId = Auth::id();
             
             $stats = [
-                'total_text_inputs' => UserActivity::where('user_id', $userId)
-                    ->where('activity_type', 'text_input')
-                    ->count(),
                 'total_comparisons' => UserActivity::where('user_id', $userId)
                     ->where('activity_type', 'comparison_action')
                     ->count(),

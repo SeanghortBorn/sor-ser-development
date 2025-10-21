@@ -22,18 +22,15 @@ Route::group([ 'middleware' => 'api', 'prefix' => 'auth' ], function ($router) {
 });
 
 Route::post('/khmer-segment', [KhmerSegmentController::class, 'segment']);
-// Route::post('/khmer-compare', [KhmerCompareController::class, 'check']);
 Route::post('/compare', [KhmerCompareController::class, 'compare']);
 
 // User activity tracking routes (without auth for testing)
-Route::post('/track/text-input', [UserActivityController::class, 'trackTextInput']);
 Route::post('/track/comparison-action', [UserActivityController::class, 'trackComparisonAction']);
 Route::post('/track/audio-activity', [UserActivityController::class, 'trackAudioActivity']);
 Route::get('/track/stats', [UserActivityController::class, 'getStats']);
 
 // Or with auth
 Route::middleware(['auth:sanctum'])->group(function () {
-    Route::post('/track/text-input', [UserActivityController::class, 'trackTextInput']);
     Route::post('/track/comparison-action', [UserActivityController::class, 'trackComparisonAction']);
     Route::post('/track/audio-activity', [UserActivityController::class, 'trackAudioActivity']);
     Route::get('/track/stats', [UserActivityController::class, 'getStats']);

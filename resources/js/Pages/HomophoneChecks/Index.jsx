@@ -57,21 +57,6 @@ export default function Index() {
 		setSessionId(`session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`);
 	}, []);
 
-	// Track text input (debounced)
-	const trackTextInput = useRef();
-	useEffect(() => {
-		if (!userId || !paragraph.trim() || !sessionId) return;
-		
-		if (trackTextInput.current) clearTimeout(trackTextInput.current);
-		trackTextInput.current = setTimeout(() => {
-			axios.post('/api/track/text-input', {
-				grammar_checker_id: checkerId,
-				character_entered: paragraph.slice(-1), // Last character
-				session_id: sessionId,
-			}).catch(err => console.error('Track text input error:', err));
-		}, 2000);
-	}, [paragraph, userId, checkerId, sessionId]);
-
 	// Fetch history on mount
 	const fetchHistory = () => {
 		if (!userId) return; // Don't fetch if user is not authenticated
@@ -160,9 +145,9 @@ export default function Index() {
 	// Compare with article
 	const runCompare = async () => {
 		if (!selectedArticle || !paragraph.trim()) return;
+		// DON'T clear comparisonResult here - keep old data during check
 		setIsChecking(true); // Start loading
 		try {
-			setComparisonResult(null);
 			const res = await axios.post("/api/compare", {
 				article_id: selectedArticle.id,
 				userInput: paragraph,
@@ -741,7 +726,8 @@ export default function Index() {
 							checkerId={checkerId}
 							comparisonResult={comparisonResult}
 							setComparisonResult={setComparisonResult}
-							articleId={selectedArticle?.id} // <-- add this prop
+							articleId={selectedArticle?.id}
+							isChecking={isChecking} // <-- ADD THIS LINE
 						/>
 					</div>
 				</div>
