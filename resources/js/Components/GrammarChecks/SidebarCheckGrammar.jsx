@@ -8,6 +8,8 @@ export default function SidebarCheckGrammar({
     checkerId,
     comparisonResult,
     setComparisonResult,
+    articleId,
+    isChecking = false, // <-- ADD THIS PROP
 }) {
     // State management - add dismissed items tracking
     const [dismissedItems, setDismissedItems] = useState([]); // Track dismissed comparison items
@@ -151,7 +153,7 @@ export default function SidebarCheckGrammar({
         // Track the action
         axios.post('/api/track/comparison-action', {
             grammar_checker_id: checkerId,
-            article_id: comparisonResult.article_id, // You may need to pass this
+            article_id: articleId ?? null,
             action: action,
             comparison_type: item.type,
             user_word: item.user_word?.user_word || '',
@@ -306,13 +308,13 @@ export default function SidebarCheckGrammar({
                         <button className="text-sm text-blue-900 px-3 py-1.5 font-medium flex items-center hover:bg-gray-100 rounded-lg transition">
                             All{" "}
                             <span className="text-xs bg-gray-200 rounded-full px-2 py-0.5 ml-2">
-                                {differences.length}
+                                {isChecking ? "..." : differences.length}
                             </span>
                         </button>
                         <button className="text-sm text-green-600 px-3 py-1.5 font-medium flex items-center hover:bg-gray-100 rounded-lg transition">
                             Differences{" "}
                             <span className="text-xs bg-gray-200 rounded-full px-2 py-0.5 ml-2">
-                                {differences.length}
+                                {isChecking ? "..." : differences.length}
                             </span>
                         </button>
                     </div>
@@ -321,113 +323,121 @@ export default function SidebarCheckGrammar({
 
                 {/* Scrollable List */}
                 <div className="space-y-2 px-4 py-0 flex-1 overflow-y-auto hide-scrollbar">
-                    {/* Summary Card */}
-                    <div className="flex justify-between items-center border border-gray-200 rounded-xl px-4 py-2 bg-white shadow-sm">
-                        <span className="flex items-center">
-                            <span className="text-red-500 text-sm font-semibold">
-                                {differences.length} differences
-                            </span>
-                            <span className="text-gray-600 text-sm ml-1">
-                                found
-                            </span>
-                        </span>
-                        <button
-                            className="border border-green-500 text-green-600 px-3 py-1 rounded-full text-xs font-medium hover:bg-green-50 transition"
-                            onClick={handleAcceptAll}
-                        >
-                            Accept all
-                        </button>
-                    </div>
-
-                    {/* Difference Cards */}
-                    {differences.map((item, idx) => (
-                        <div
-                            key={idx}
-                            onClick={() => handleCardClick(idx)}
-                            className={`bg-white rounded-xl p-3 border shadow-sm cursor-pointer transition ${
-                                idx === 0
-                                    ? "border-blue-500 border-2"
-                                    : "border-gray-200"
-                            }`}
-                        >
-                            <p className="text-xs text-gray-500 font-medium mb-2">
-                                {item.type === "missing" && "Missing Word"}
-                                {item.type === "replaced" && "Replaced Word"}
-                                {item.type === "extra" && "Extra Word"}
-                            </p>
-                            <div className="mb-3">
-                                <span
-                                    className={`line-through text-sm mr-2 ${
-                                        idx === 0
-                                            ? "text-red-500"
-                                            : "text-gray-500"
-                                    }`}
-                                >
-                                    {item.user_word &&
-                                    item.user_word.user_word !== undefined
-                                        ? item.user_word.user_word
-                                        : "<missing>"}
-                                </span>
-                                <span
-                                    className={`text-sm font-semibold mr-2 ${
-                                        idx === 0
-                                            ? "text-green-600"
-                                            : "text-green-700"
-                                    }`}
-                                >
-                                    {item.article_word &&
-                                    item.article_word.article_word !== undefined
-                                        ? item.article_word.article_word
-                                        : "<missing>"}
-                                </span>
-                            </div>
-                            <div className="flex space-x-2">
-                                <button
-                                    className="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-full flex items-center text-xs font-medium transition"
-                                    onClick={() =>
-                                        handleComparisonAction(item, "accept")
-                                    }
-                                >
-                                    <Check className="w-3.5 h-3.5 mr-1" />{" "}
-                                    Accept
-                                </button>
-                                <button
-                                    className="flex items-center text-gray-700 hover:text-red-600 px-2 py-1.5 text-xs font-medium transition"
-                                    onClick={() =>
-                                        handleComparisonAction(item, "dismiss")
-                                    }
-                                >
-                                    <Trash className="w-3.5 h-3.5 mr-1" />{" "}
-                                    Ignore
-                                </button>
-                            </div>
-                        </div>
-                    ))}
-
-                    {/* No Differences Message */}
-                    {differences.length === 0 && (
-                        <div className="text-center py-8">
-                            <Check className="w-12 h-12 text-green-500 mx-auto mb-3" />
-                            <h5 className="text-base font-semibold text-gray-700 mb-1">
-                                Perfect Match!
+                    {/* Show loading state while checking */}
+                    {isChecking ? (
+                        <div className="mt-12 text-center flex flex-col items-center justify-center min-h-[200px]">
+                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-3"></div>
+                            <h5 className="text-base font-semibold text-gray-700 mb-2">
+                                Checking...
                             </h5>
                             <p className="text-sm text-gray-500">
-                                Your text matches the article exactly.
+                                Comparing your text with the article
                             </p>
                         </div>
+                    ) : (
+                        <>
+                            {/* Summary Card */}
+                            {differences.length > 0 && (
+                                <div className="flex justify-between items-center border border-gray-200 rounded-xl px-4 py-2 bg-white shadow-sm">
+                                    <span className="flex items-center">
+                                        <span className="text-red-500 text-sm font-semibold">
+                                            {differences.length} differences
+                                        </span>
+                                        <span className="text-gray-600 text-sm ml-1">
+                                            found
+                                        </span>
+                                    </span>
+                                    <button
+                                        className="border border-green-500 text-green-600 px-3 py-1 rounded-full text-xs font-medium hover:bg-green-50 transition"
+                                        onClick={handleAcceptAll}
+                                    >
+                                        Accept all
+                                    </button>
+                                </div>
+                            )}
+
+                            {/* Difference Cards */}
+                            {differences.map((item, idx) => (
+                                <div
+                                    key={idx}
+                                    onClick={() => handleCardClick(idx)}
+                                    className={`bg-white rounded-xl p-3 border shadow-sm cursor-pointer transition ${
+                                        idx === 0
+                                            ? "border-blue-500 border-2"
+                                            : "border-gray-200"
+                                    }`}
+                                >
+                                    <p className="text-xs text-gray-500 font-medium mb-2">
+                                        {item.type === "missing" && "Missing Word"}
+                                        {item.type === "replaced" && "Replaced Word"}
+                                        {item.type === "extra" && "Extra Word"}
+                                    </p>
+                                    <div className="mb-3">
+                                        <span
+                                            className={`line-through text-sm mr-2 ${
+                                                idx === 0
+                                                    ? "text-red-500"
+                                                    : "text-gray-500"
+                                            }`}
+                                        >
+                                            {item.user_word &&
+                                            item.user_word.user_word !== undefined
+                                                ? item.user_word.user_word
+                                                : "<missing>"}
+                                        </span>
+                                        <span
+                                            className={`text-sm font-semibold mr-2 ${
+                                                idx === 0
+                                                    ? "text-green-600"
+                                                    : "text-green-700"
+                                            }`}
+                                        >
+                                            {item.article_word &&
+                                            item.article_word.article_word !== undefined
+                                                ? item.article_word.article_word
+                                                : "<missing>"}
+                                        </span>
+                                    </div>
+                                    <div className="flex space-x-2">
+                                        <button
+                                            className="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-full flex items-center text-xs font-medium transition"
+                                            onClick={() =>
+                                                handleComparisonAction(item, "accept")
+                                            }
+                                        >
+                                            <Check className="w-3.5 h-3.5 mr-1" />{" "}
+                                            Accept
+                                        </button>
+                                        <button
+                                            className="flex items-center text-gray-700 hover:text-red-600 px-2 py-1.5 text-xs font-medium transition"
+                                            onClick={() =>
+                                                handleComparisonAction(item, "dismiss")
+                                            }
+                                        >
+                                            <Trash className="w-3.5 h-3.5 mr-1" />{" "}
+                                            Ignore
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+
+                            {/* No Differences Message - only show when NOT checking */}
+                            {differences.length === 0 && (
+                                <div className="text-center py-8">
+                                    <Check className="mt-20 w-12 h-12 text-green-500 mx-auto mb-3" />
+                                    <h5 className="text-base font-semibold text-gray-700 mb-1">
+                                        Perfect Match!
+                                    </h5>
+                                    <p className="text-sm text-gray-500">
+                                        Your text matches the article exactly.
+                                    </p>
+                                </div>
+                            )}
+                        </>
                     )}
                 </div>
 
                 <div className="flex px-6 py-3 mt-2 border-t border-gray-200 bg-gray-50 items-center justify-center">
-                    <button
-                        onClick={() => {
-                            setComparisonResult(null);
-                            setDismissedItems([]); // Clear dismissed items when going back
-                        }}
-                        className="w-full px-4 py-2 bg-blue-600 text-white rounded-xl text-sm font-medium shadow-sm hover:bg-blue-700 transition"
-                    >
-                        Back to Grammar Check
-                    </button>
                 </div>
             </div>
         );
@@ -465,16 +475,32 @@ export default function SidebarCheckGrammar({
 
             {/* Scrollable List */}
             <div className="space-y-3 px-4 py-8 flex-1 overflow-y-auto hide-scrollbar">
-                {/* Show "no issues" message */}
-                <div className="text-center flex flex-col items-center justify-center min-h-[200px]">
-                    <Check className="w-16 h-16 text-green-500 mb-3" />
-                    <h5 className="text-base font-semibold text-gray-700 mb-2">
-                        Great Job!
-                    </h5>
-                    <p className="text-sm text-gray-500">
-                        No grammar or spelling issues detected in your text.
-                    </p>
-                </div>
+                {/* Show loading state while checking */}
+                {isChecking ? (
+                    <div className="mt-12 text-center flex flex-col items-center justify-center min-h-[200px]">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-3"></div>
+                        <h5 className="text-base font-semibold text-gray-700 mb-2">
+                            Checking...
+                        </h5>
+                        <p className="text-sm text-gray-500">
+                            Comparing your text with the article
+                        </p>
+                    </div>
+                ) : (
+                    /* Show "no issues" message */
+                    <div className="mt-12 text-center flex flex-col items-center justify-center min-h-[200px]">
+                        <Check className="w-16 h-16 text-green-500 mb-3" />
+                        <h5 className="text-base font-semibold text-gray-700 mb-2">
+                            Great Job!
+                        </h5>
+                        <p className="text-sm text-gray-500">
+                            No grammar or spelling issues detected in your text.
+                        </p>
+                    </div>
+                )}
+            </div>
+            
+            <div className="flex px-6 py-3 mt-2 border-t border-gray-200 bg-gray-50 items-center justify-center">
             </div>
         </div>
     );

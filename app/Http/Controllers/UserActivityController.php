@@ -5,36 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\UserActivity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class UserActivityController extends Controller
 {
-    // Track text input
-    public function trackTextInput(Request $request)
-    {
-        try {
-            $validated = $request->validate([
-                'grammar_checker_id' => 'nullable|exists:grammar_checkers,id',
-                'character_entered' => 'required|string',
-                'session_id' => 'nullable|string',
-            ]);
-
-            $activity = UserActivity::create([
-                'user_id' => Auth::id(),
-                'grammar_checker_id' => $validated['grammar_checker_id'] ?? null,
-                'activity_type' => 'text_input',
-                'character_entered' => $validated['character_entered'],
-                'session_id' => $validated['session_id'] ?? Str::uuid(),
-            ]);
-
-            return response()->json(['success' => true, 'activity_id' => $activity->id]);
-        } catch (\Exception $e) {
-            Log::error('Track text input error: ' . $e->getMessage());
-            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
-        }
-    }
-
     // Track comparison action (accept/dismiss)
     public function trackComparisonAction(Request $request)
     {
@@ -50,23 +26,24 @@ class UserActivityController extends Controller
                 'session_id' => 'nullable|string',
             ]);
 
-            $activity = UserActivity::create([
+            $data = [
                 'user_id' => Auth::id(),
                 'grammar_checker_id' => $validated['grammar_checker_id'] ?? null,
                 'article_id' => $validated['article_id'] ?? null,
-                'activity_type' => 'comparison_action',
                 'action' => $validated['action'],
                 'comparison_type' => $validated['comparison_type'],
                 'user_word' => $validated['user_word'] ?? '',
                 'article_word' => $validated['article_word'] ?? '',
                 'word_position' => $validated['word_position'] ?? null,
-                'session_id' => $validated['session_id'] ?? Str::uuid(),
-                'metadata' => [
-                    'timestamp' => now()->toISOString(),
-                ],
-            ]);
+                'session_id' => $validated['session_id'] ?? \Illuminate\Support\Str::uuid(),
+                'metadata' => json_encode(['timestamp' => now()->toISOString()]),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
 
-            return response()->json(['success' => true, 'activity_id' => $activity->id]);
+            $activityId = DB::table('user_comparison_activities')->insertGetId($data);
+
+            return response()->json(['success' => true, 'activity_id' => $activityId]);
         } catch (\Exception $e) {
             Log::error('Track comparison action error: ' . $e->getMessage());
             return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
@@ -96,26 +73,26 @@ class UserActivityController extends Controller
                 'activity_type' => $validated['activity_type'],
                 'playback_position' => $validated['playback_position'] ?? null,
                 'session_id' => $sessionId,
+                'metadata' => json_encode(['timestamp' => now()->toISOString()]), // <-- set metadata
+                'created_at' => now(), // <-- set created_at
+                'updated_at' => now(), // <-- set updated_at
             ];
 
             // Increment counters based on activity type
             if ($validated['activity_type'] === 'audio_play') {
                 $data['play_count'] = 1;
-                
-                // If pause duration is provided from frontend, use it
                 if (isset($validated['pause_duration']) && $validated['pause_duration'] > 0) {
                     $data['pause_duration'] = $validated['pause_duration'];
                 } else {
                     // Find the most recent pause for this audio in this session
-                    $lastPause = UserActivity::where('user_id', $userId)
+                    $lastPause = DB::table('user_audio_activities')
+                        ->where('user_id', $userId)
                         ->where('audio_id', $validated['audio_id'])
                         ->where('session_id', $sessionId)
                         ->where('activity_type', 'audio_pause')
                         ->whereNotNull('pause_started_at')
                         ->orderBy('created_at', 'desc')
                         ->first();
-                    
-                    // Calculate pause duration if there was a previous pause
                     if ($lastPause && $lastPause->pause_started_at) {
                         $pauseDuration = now()->diffInSeconds($lastPause->pause_started_at);
                         $data['pause_duration'] = $pauseDuration;
@@ -129,11 +106,12 @@ class UserActivityController extends Controller
                 $data['pause_started_at'] = now();
             }
 
-            $activity = UserActivity::create($data);
+            // Insert into user_audio_activities table
+            $activityId = DB::table('user_audio_activities')->insertGetId($data);
 
             return response()->json([
                 'success' => true, 
-                'activity_id' => $activity->id,
+                'activity_id' => $activityId,
                 'pause_duration' => $data['pause_duration'] ?? null
             ]);
         } catch (\Exception $e) {
@@ -156,9 +134,6 @@ class UserActivityController extends Controller
             $userId = Auth::id();
             
             $stats = [
-                'total_text_inputs' => UserActivity::where('user_id', $userId)
-                    ->where('activity_type', 'text_input')
-                    ->count(),
                 'total_comparisons' => UserActivity::where('user_id', $userId)
                     ->where('activity_type', 'comparison_action')
                     ->count(),

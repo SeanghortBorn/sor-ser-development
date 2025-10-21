@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('grammar_checkers', function (Blueprint $table) {
             $table->id(); // Primary ID
             $table->foreignId('user_id')->constrained()->onDelete('cascade'); // Relation with users table
+            $table->foreignId('article_id')->nullable()->constrained('articles')->onDelete('set null'); // Optional: link to articles
             $table->string('title')->default('Untitled document'); // Grammar check title
             $table->longText('paragraph')->nullable(); // Text for checking, allow NULL
             $table->integer('word_count')->default(0); // Total word count
