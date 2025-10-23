@@ -109,6 +109,9 @@ class KhmerCompareController extends Controller
             $i = 0;
             $j = 0;
 
+            // maximum lookahead to try to align sequences (tuneable)
+            $maxLookahead = 5;
+
             while ($i < $m || $j < $n) {
                 $userWord = $userWords[$i] ?? null;
                 $articleWord = $articleWords[$j] ?? null;
@@ -131,7 +134,63 @@ class KhmerCompareController extends Controller
                     continue;
                 }
 
-                // Missing in user (article has extra at j)
+                // Try multi-word missing (article has extra words not present in user)
+                $foundMissing = false;
+                if ($i < $m && $j < $n) {
+                    for ($k = 1; $k <= $maxLookahead && ($j + $k) < $n; $k++) {
+                        if ($userWord !== null && $userWord === $articleWords[$j + $k]) {
+                            // $k article words are missing from user (positions j .. j+k-1)
+                            for ($t = 0; $t < $k; $t++) {
+                                $result[] = [
+                                    'index_compared' => $indexCompared++,
+                                    'type' => 'missing',
+                                    'user_word' => ['user_word' => '', 'user_index' => null],
+                                    'article_word' => ['article_word' => $articleWords[$j + $t], 'article_index' => $j + $t],
+                                    'actions' => [
+                                        'accept' => ['result' => $articleWords[$j + $t]],
+                                        'dismiss' => ['result' => ''],
+                                    ],
+                                ];
+                            }
+                            $j += $k;
+                            $foundMissing = true;
+                            break;
+                        }
+                    }
+                    if ($foundMissing) {
+                        continue;
+                    }
+                }
+
+                // Try multi-word extra (user has extra words not present in article)
+                $foundExtra = false;
+                if ($i < $m && $j < $n) {
+                    for ($k = 1; $k <= $maxLookahead && ($i + $k) < $m; $k++) {
+                        if ($articleWord !== null && $articleWord === $userWords[$i + $k]) {
+                            // $k user words are extra (positions i .. i+k-1)
+                            for ($t = 0; $t < $k; $t++) {
+                                $result[] = [
+                                    'index_compared' => $indexCompared++,
+                                    'type' => 'extra',
+                                    'user_word' => ['user_word' => $userWords[$i + $t], 'user_index' => $i + $t],
+                                    'article_word' => ['article_word' => '', 'article_index' => null],
+                                    'actions' => [
+                                        'accept' => ['result' => ''],
+                                        'dismiss' => ['result' => $userWords[$i + $t]],
+                                    ],
+                                ];
+                            }
+                            $i += $k;
+                            $foundExtra = true;
+                            break;
+                        }
+                    }
+                    if ($foundExtra) {
+                        continue;
+                    }
+                }
+
+                // Missing in user (article has extra at j) - single lookahead fallback
                 if ($j < $n && ($userWord ?? null) === $nextArticle) {
                     $result[] = [
                         'index_compared' => $indexCompared++,
@@ -147,7 +206,7 @@ class KhmerCompareController extends Controller
                     continue;
                 }
 
-                // Extra in user (user has an extra word at i)
+                // Extra in user (user has an extra word at i) - single lookahead fallback
                 if ($i < $m && $nextUser === $articleWord) {
                     $result[] = [
                         'index_compared' => $indexCompared++,
