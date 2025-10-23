@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AccuracyController;
 use App\Http\Controllers\KhmerCompareController;
 use App\Http\Controllers\KhmerSegmentController;
 use Illuminate\Http\Request;
@@ -28,6 +29,11 @@ Route::post('/compare', [KhmerCompareController::class, 'compare']);
 Route::post('/track/comparison-action', [UserActivityController::class, 'trackComparisonAction']);
 Route::post('/track/audio-activity', [UserActivityController::class, 'trackAudioActivity']);
 Route::get('/track/stats', [UserActivityController::class, 'getStats']);
+
+Route::get('/user-activity-stats', [UserActivityController::class, 'getStats']);
+Route::get('/user-activities/stats', [UserActivityController::class, 'getStats']);
+Route::post('/accuracy', [AccuracyController::class, 'store'])->name('accuracy.store');
+
 
 // Or with auth
 Route::middleware(['auth:sanctum'])->group(function () {

@@ -32,6 +32,7 @@ return new class extends Migration
             $table->foreignId('user_id')->nullable()->constrained()->onDelete('cascade');
             $table->foreignId('audio_id')->nullable()->constrained('audios')->onDelete('cascade');
             $table->foreignId('article_id')->nullable()->constrained('articles')->onDelete('cascade');
+            $table->foreignId('grammar_checker_id')->nullable()->constrained('grammar_checkers')->onDelete('cascade');
             $table->string('activity_type', 50); // 'audio_play', 'audio_pause', etc.
             $table->integer('play_count')->default(0);
             $table->integer('rewind_count')->default(0);

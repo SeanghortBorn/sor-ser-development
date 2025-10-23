@@ -54,7 +54,13 @@ export default function Index() {
 
 	useEffect(() => {
 		// Generate session ID on mount
-		setSessionId(`session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`);
+		const id = `session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+		setSessionId(id);
+		try {
+			sessionStorage.setItem('sessionId', id); // <-- persist for other components
+		} catch (e) {
+			// ignore storage errors
+		}
 	}, []);
 
 	// Fetch history on mount
@@ -321,6 +327,7 @@ export default function Index() {
 				axios.post('/api/track/audio-activity', {
 					audio_id: selectedArticle.audios_id,
 					article_id: selectedArticle.id,
+					grammar_checker_id: checkerId ?? null, // <-- include checker id
 					activity_type: 'audio_pause',
 					playback_position: audioRef.current.currentTime,
 					pause_duration: 0, // Will be calculated on resume
@@ -344,6 +351,7 @@ export default function Index() {
 						axios.post('/api/track/audio-activity', {
 							audio_id: selectedArticle.audios_id,
 							article_id: selectedArticle.id,
+							grammar_checker_id: checkerId ?? null, // <-- include checker id
 							activity_type: 'audio_play',
 							playback_position: audioRef.current.currentTime,
 							pause_duration: pauseDuration,
@@ -372,6 +380,7 @@ export default function Index() {
 				axios.post('/api/track/audio-activity', {
 					audio_id: selectedArticle.audios_id,
 					article_id: selectedArticle.id,
+					grammar_checker_id: checkerId ?? null, // <-- include checker id
 					activity_type: 'audio_forward',
 					playback_position: audioRef.current.currentTime,
 					session_id: sessionId,
@@ -393,6 +402,7 @@ export default function Index() {
 				axios.post('/api/track/audio-activity', {
 					audio_id: selectedArticle.audios_id,
 					article_id: selectedArticle.id,
+					grammar_checker_id: checkerId ?? null, // <-- include checker id
 					activity_type: 'audio_rewind',
 					playback_position: audioRef.current.currentTime,
 					session_id: sessionId,
