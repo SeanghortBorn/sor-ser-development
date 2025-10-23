@@ -121,7 +121,7 @@ export default function AnalyticsSection() {
             </div>
 
             {/* Grammar Checker Statistics Card */}
-            <div className="mt-6 mb-4 bg-white rounded-2xl shadow-sm border w-75 h-[55vh] border-gray-100 p-6">
+            <div className="mt-6 mb-4 bg-white rounded-2xl shadow-sm border w-full h-[55vh] border-gray-100 p-6">
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div>
