@@ -153,6 +153,9 @@ Route::middleware('auth')->group(function () {
         Route::post( '/import', [HomophoneController::class, 'import'])->name('homophones.import');
         Route::post('/clear', [HomophoneController::class, 'clear'])->name('homophones.clear')->middleware(['check:homophone-delete']);
     });
+    Route::get('/homophones.json', function () {
+        return response()->json(['homophones' => Homophone::all()]);
+    })->name('homophones.public');
 
     Route::post('/feedback', [App\Http\Controllers\FeedbackController::class, 'store']);
     Route::get('/feedback', [App\Http\Controllers\FeedbackController::class, 'index'])->name('feedback.index');

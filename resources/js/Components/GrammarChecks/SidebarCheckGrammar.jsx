@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { Check, Trash } from "lucide-react";
+import { Check, Trash, Info } from "lucide-react";
 import axios from "axios";
+import Modal from "@/Components/Modal";
 
 export default function SidebarCheckGrammar({
     text = "",
@@ -12,6 +13,10 @@ export default function SidebarCheckGrammar({
     isChecking = false,
 }) {
     const [dismissedItems, setDismissedItems] = useState([]);
+    const [showExplainModal, setShowExplainModal] = useState(false);
+    const [explainLoading, setExplainLoading] = useState(false);
+    const [explainData, setExplainData] = useState(null);
+    const [homophonesMap, setHomophonesMap] = useState(null);
     const [feedbackFor, setFeedbackFor] = useState(null);
     const [feedbackText, setFeedbackText] = useState("");
     const [feedbackState, setFeedbackState] = useState("idle");
@@ -256,6 +261,91 @@ export default function SidebarCheckGrammar({
         setDismissedItems([]);
     };
 
+    // Normalize word: strip surrounding punctuation and lowercase
+    const normalizeWord = (w) => {
+        if (!w) return "";
+        return String(w)
+            .trim()
+            .replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, "") // trim non-alnum at ends
+            .toLowerCase();
+    };
+
+    // Fetch homophones JSON from backend endpoint and cache by normalized word
+    const fetchHomophones = async () => {
+        if (homophonesMap) return homophonesMap;
+        setExplainLoading(true);
+
+        // try public endpoints first so client can fetch without auth
+        const tryUrls = [
+            "/homophones.json",            // public route we added
+            "/storage/homophones.json",    // possible public storage path
+            "/homophones/json",            // existing authenticated route (fallback)
+        ];
+
+        let list = null;
+        for (const url of tryUrls) {
+            try {
+                const res = await axios.get(url, { headers: { Accept: "application/json" } });
+                // support different shapes returned by endpoints
+                list = res.data?.homophones ?? res.data?.data ?? (Array.isArray(res.data) ? res.data : null);
+                if (!list && typeof res.data === "object" && Array.isArray(Object.values(res.data))) {
+                    list = Object.values(res.data);
+                }
+                if (Array.isArray(list)) break;
+            } catch (err) {
+                // ignore and try next
+            }
+        }
+
+        const map = {};
+        if (Array.isArray(list)) {
+            list.forEach((entry) => {
+                const key = normalizeWord(entry.word);
+                if (key) map[key] = entry;
+            });
+        } else {
+            console.warn("fetchHomophones: no homophones list found at tried endpoints");
+        }
+
+        setHomophonesMap(map);
+        setExplainLoading(false);
+        return map;
+    };
+
+    // Open explanation modal for a comparison item
+    // For 'replaced' and 'missing' types prefer article_word when looking up JSON
+    const openExplain = async (item) => {
+        if (!item) return;
+        setExplainData(null);
+        setShowExplainModal(true);
+        setExplainLoading(true);
+
+        // Prefer article_word for replaced/missing, fallback to user_word
+        const raw = (item.article_word && item.article_word.article_word)
+            || (item.user_word && item.user_word.user_word)
+            || "";
+        const key = normalizeWord(raw);
+
+        try {
+            const map = await fetchHomophones();
+            const found = key && map ? map[key] : null;
+            if (found) {
+                setExplainData(found);
+            } else {
+                setExplainData({ word: raw || key, notFound: true });
+            }
+        } catch (err) {
+            setExplainData({ word: raw || key, notFound: true });
+        } finally {
+            setExplainLoading(false);
+        }
+    };
+
+    const closeExplain = () => {
+        setShowExplainModal(false);
+        setExplainData(null);
+    };
+
     if (comparisonResult) {
         // Filter differences to include only replaced, extra, and missing words up to the last same, replaced, or extra
         const differences = comparisonResult.comparison.filter(
@@ -368,10 +458,22 @@ export default function SidebarCheckGrammar({
                                             <Check className="w-3.5 h-3.5 mr-1" /> Accept
                                         </button>
                                         <button
-                                            className="flex items-center text-gray-700 hover:text-red-600 px-2 py-1.5 text-xs font-medium transition"
+                                            className="flex items-center text-gray-700 hover:text-red-600 px-3 rounded-full border-2 hover:bg-red-50 text-xs font-medium transition"
                                             onClick={(e) => { e.stopPropagation(); handleComparisonAction(item, "dismiss"); }}
                                         >
                                             <Trash className="w-3.5 h-3.5 mr-1" /> Ignore
+                                        </button>
+
+                                        {/* Explanation Button */}
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                openExplain(item);
+                                            }}
+                                            className="flex items-center text-gray-700 hover:text-blue-600 px-3 py-1 rounded-full border border-gray-300 hover:bg-blue-50 text-xs font-medium transition-colors duration-200 ease-in-out"
+                                        >
+                                            <Info className="w-4 h-4 mr-1" />
+                                            Explain
                                         </button>
                                     </div>
                                 </div>
@@ -390,6 +492,93 @@ export default function SidebarCheckGrammar({
                         </>
                     )}
                 </div>
+
+                {/* Explain Modal (use Modal component) */}
+                <Modal show={showExplainModal} onClose={closeExplain} maxWidth="xl">
+                    <div className="p-6">
+                        <div className="mb-2">
+                            {/* Header: Title + Close Button */}
+                            <div className="flex justify-between items-center">
+                                <h3 className="text-lg font-semibold text-gray-800">Explanation</h3>
+                                <button
+                                    className="text-gray-500 hover:text-gray-700"
+                                    onClick={closeExplain}
+                                    aria-label="Close"
+                                >
+                                    ✕
+                                </button>
+                            </div>
+                        </div>
+
+                        {explainLoading ? (
+                            <div className="py-8 text-center">Loading…</div>
+                        ) : explainData ? (
+                            explainData.notFound ? (
+                                <div className="text-sm text-gray-700">
+                                    No entry found for{" "}
+                                    <span className="font-mono">{explainData.word}</span>.
+                                </div>
+                            ) : (
+                                <div className="space-y-3 text-sm text-gray-700">
+                                    {/* General Introduction */}
+                                    {explainData?.word && (
+                                        <div className="text-sm text-gray-70">
+                                            <p>
+                                            <span className="font-semibold text-lg">{explainData.word}</span> —{" "}
+                                            {explainData.shortDescription ||
+                                                `This word is commonly used to describe or refer to ${explainData.word}.`}
+                                            </p>
+                                        </div>
+                                    )}
+                                    <div className="flex flex-row gap-4">
+                                        <div className="flex-1">
+                                            <div className="text-base font-medium text-slate-500">Part of Speech</div>
+                                            <div className="text-sm">{explainData.pos || "—"}</div>
+                                        </div>
+                                        <div className="flex-1">
+                                            <div className="text-base font-medium text-slate-500">Pronunciation</div>
+                                            <div className="text-sm">{explainData.pro || explainData.phoneme || "—"}</div>
+                                        </div>
+                                    </div>
+                                    <div className="flex flex-row gap-4">
+                                        <div className="flex-1">
+                                            <div className="text-base font-medium text-slate-500">Homophones</div>
+                                        <div className="text-sm">{Array.isArray(explainData.homophone) ? explainData.homophone.join(", ") : "—"}</div>
+                                    </div>
+                                        <div className="flex-1">
+                                            <div className="text-base font-medium text-slate-500">phoneme</div>
+                                            <div className="text-sm">
+                                            {typeof explainData.phoneme === "string" && explainData.phoneme.trim() !== ""
+                                                ? explainData.phoneme
+                                                : Array.isArray(explainData.phoneme) && explainData.phoneme.length > 0
+                                                    ? explainData.phoneme.join(", ")
+                                                    : "—"}
+                                        </div></div>
+                                    </div>
+                                    <div>
+                                        <div className="text-base font-medium text-slate-500">Definition</div>
+                                        <div className="text-sm">{explainData.definition || "—"}</div>
+                                    </div>
+                                    <div>
+                                        <div className="text-base font-medium text-slate-500">Example</div>
+                                        <div className="text-sm">{explainData.example || "—"}</div>
+                                    </div>
+                                </div>
+                            )
+                        ) : (
+                            <div className="py-6 text-center text-sm text-gray-500">No data available.</div>
+                        )}
+                        <div className="mt-6 flex justify-end">
+                            <button
+                                onClick={closeExplain}
+                                className="rounded-[10px] border-2 border-gray-300 px-6 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold"
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </Modal>
+
                 <div className="flex px-6 py-3 mt-2 border-t border-gray-200 bg-gray-50 items-center justify-center"></div>
             </div>
         );
