@@ -1,12 +1,14 @@
 import HeaderNavbar from '@/Components/Navbars/HeaderNavbar';
-import { Head, usePage, router } from '@inertiajs/react';
+import { Head, usePage, router, Link } from '@inertiajs/react'; // <-- add Link import
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { BookOpen, CheckCircle, Award, Clock, BarChart3 } from 'lucide-react';
 
 export default function Quiz() {
-    const { quizData } = usePage().props;
+    const { quizData, auth } = usePage().props;
     const quizzes = quizData?.data || [];
+    const isAuthenticated = !!(auth && auth.user);
+    const showAccountModal = !isAuthenticated;
 
     const [quizStarted, setQuizStarted] = useState(false);
     const [currentQuiz, setCurrentQuiz] = useState(null);
@@ -121,7 +123,7 @@ export default function Quiz() {
         <>
             <Head title="Quiz" />
             <HeaderNavbar />
-            <div className="bg-gradient-to-br from-gray-50 via-blue-50 to-gray-50 min-h-screen py-12 px-4 sm:px-6 lg:px-8">
+            <div className="bg-gradient-to-br from-gray-50 via-blue-50 to-gray-50 min-h-screen py-12 px-4 sm:px-6 lg:px-8 relative">
                 <div className="max-w-5xl mx-auto">
 
                     {/* Welcome Screen */}
@@ -179,25 +181,23 @@ export default function Quiz() {
                         <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
-                            className="bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-200"
+                            className="bg-white shadow-lg"
+                            style={{ borderRadius: '20px' }}
                         >
-                            {/* Header */}
-                            <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 md:p-8">
-                                <div className="flex items-start justify-between gap-4 mb-6">
+                            {/* Compact Header */}
+                            <div className="bg-blue-600 text-white p-4" style={{ borderRadius: '20px 20px 0 0' }}>
+                                <div className="flex items-center justify-between mb-3">
                                     <div>
-                                        <h2 className="text-3xl md:text-4xl font-bold">{currentQuiz.title}</h2>
-                                        <p className="text-blue-100 mt-2">Question {currentQuestionIdx + 1} of {currentQuiz.questions.length}</p>
-                                    </div>
-                                    <div className="text-right">
-                                        <Clock className="w-6 h-6 mx-auto mb-2" />
-                                        <span className="text-sm font-semibold">{currentQuiz.questions.length} Questions</span>
+                                        <h2 className="text-xl font-bold">{currentQuiz.title}</h2>
+                                        <p className="text-sm text-white opacity-90 mt-1">Question {currentQuestionIdx + 1} / {currentQuiz.questions.length}</p>
                                     </div>
                                 </div>
 
                                 {/* Progress Bar */}
-                                <div className="w-full bg-blue-400 bg-opacity-30 rounded-full h-3 overflow-hidden">
+                                <div className="w-full bg-white bg-opacity-30 h-2 overflow-hidden" style={{ borderRadius: '20px' }}>
                                     <motion.div
-                                        className="bg-gradient-to-r from-green-400 to-emerald-500 h-3 rounded-full"
+                                        className="bg-white h-2"
+                                        style={{ borderRadius: '20px' }}
                                         initial={{ width: 0 }}
                                         animate={{ width: `${((currentQuestionIdx + 1) / currentQuiz.questions.length) * 100}%` }}
                                         transition={{ duration: 0.5 }}
@@ -205,41 +205,40 @@ export default function Quiz() {
                                 </div>
                             </div>
 
-                            {/* Content */}
-                            <div className="p-6 md:p-8">
+                            {/* Compact Content */}
+                            <div className="p-5">
                                 {/* Current Question */}
                                 {currentQuiz.questions.map((q, idx) => 
                                     idx === currentQuestionIdx && (
                                         <motion.div
                                             key={idx}
-                                            initial={{ opacity: 0, y: 20 }}
+                                            initial={{ opacity: 0, y: 10 }}
                                             animate={{ opacity: 1, y: 0 }}
-                                            className="space-y-6"
+                                            className="space-y-4"
                                         >
-                                            <div className="space-y-2">
-                                                <p className="text-sm font-semibold text-blue-600">Question {idx + 1}</p>
-                                                <p className="text-2xl font-bold text-gray-900">
+                                            <div>
+                                                <p className="text-lg font-bold text-blue-600 mb-3">
                                                     {q.text}
                                                 </p>
                                                 {q.description && (
-                                                    <p className="text-gray-600 text-sm pt-2">{q.description}</p>
+                                                    <p className="text-sm text-blue-500 mb-3">{q.description}</p>
                                                 )}
                                             </div>
 
                                             {/* Options Container */}
-                                            <div className="bg-white-50 rounded-xl p-6 space-y-4">
+                                            <div className="space-y-2">
                                                 {/* Multiple Choice */}
                                                 {q.type === "Multiple Choice" && q.options.map((opt, oIdx) => (
-                                                    <label key={oIdx} className="flex items-center p-4 rounded-lg bg-white border-2 border-white-200 hover:border-blue-500 cursor-pointer transition-all group hover:shadow-md">
+                                                    <label key={oIdx} className="flex items-center p-3 bg-white border-2 border-blue-200 hover:border-blue-600 cursor-pointer transition-all" style={{ borderRadius: '20px' }}>
                                                         <input
                                                             type="radio"
                                                             name={`q-${idx}`}
                                                             value={opt}
                                                             checked={userAnswers[idx]?.answer === opt}
                                                             onChange={() => handleAnswerChange(idx, opt)}
-                                                            className="w-5 h-5 accent-blue-600 cursor-pointer"
+                                                            className="w-4 h-4 accent-blue-600 cursor-pointer"
                                                         />
-                                                        <span className="ml-4 text-gray-800 font-medium group-hover:text-blue-600">{opt}</span>
+                                                        <span className="ml-3 text-blue-900 text-sm">{opt}</span>
                                                     </label>
                                                 ))}
 
@@ -247,7 +246,7 @@ export default function Quiz() {
                                                 {q.type === "Checkboxes" && q.options.map((opt, oIdx) => {
                                                     const selected = Array.isArray(userAnswers[idx]?.answer) ? userAnswers[idx].answer : [];
                                                     return (
-                                                        <label key={oIdx} className="flex items-center p-4 rounded-lg bg-white border-2 border-gray-200 hover:border-blue-500 cursor-pointer transition-all group hover:shadow-md">
+                                                        <label key={oIdx} className="flex items-center p-3 bg-white border-2 border-blue-200 hover:border-blue-600 cursor-pointer transition-all" style={{ borderRadius: '20px' }}>
                                                             <input
                                                                 type="checkbox"
                                                                 value={opt}
@@ -258,25 +257,25 @@ export default function Quiz() {
                                                                     else newSel = newSel.filter((v) => v !== opt);
                                                                     handleAnswerChange(idx, newSel);
                                                                 }}
-                                                                className="w-5 h-5 accent-blue-600 cursor-pointer"
+                                                                className="w-4 h-4 accent-blue-600 cursor-pointer"
                                                             />
-                                                            <span className="ml-4 text-gray-800 font-medium group-hover:text-blue-600">{opt}</span>
+                                                            <span className="ml-3 text-blue-900 text-sm">{opt}</span>
                                                         </label>
                                                     );
                                                 })}
 
                                                 {/* True/False */}
                                                 {q.type === "True/False" && ["True", "False"].map((val, vIdx) => (
-                                                    <label key={vIdx} className="flex items-center p-4 rounded-lg bg-white border-2 border-gray-200 hover:border-blue-500 cursor-pointer transition-all group hover:shadow-md">
+                                                    <label key={vIdx} className="flex items-center p-3 bg-white border-2 border-blue-200 hover:border-blue-600 cursor-pointer transition-all" style={{ borderRadius: '20px' }}>
                                                         <input
                                                             type="radio"
                                                             name={`q-${idx}`}
                                                             value={val}
                                                             checked={userAnswers[idx]?.answer === val}
                                                             onChange={() => handleAnswerChange(idx, val)}
-                                                            className="w-5 h-5 accent-blue-600 cursor-pointer"
+                                                            className="w-4 h-4 accent-blue-600 cursor-pointer"
                                                         />
-                                                        <span className="ml-4 text-gray-800 font-medium group-hover:text-blue-600">{val}</span>
+                                                        <span className="ml-3 text-blue-900 text-sm">{val}</span>
                                                     </label>
                                                 ))}
 
@@ -286,17 +285,18 @@ export default function Quiz() {
                                                         type="text"
                                                         value={userAnswers[idx]?.answer || ""}
                                                         onChange={(e) => handleAnswerChange(idx, e.target.value)}
-                                                        className="w-full px-6 py-4 rounded-lg border-2 border-gray-300 focus:border-blue-500 bg-white text-gray-800 font-medium focus:outline-none focus:ring-4 focus:ring-blue-100 transition-all"
+                                                        className="w-full px-4 py-3 border-2 border-blue-300 focus:border-blue-600 bg-white text-blue-900 text-sm focus:outline-none transition-all"
+                                                        style={{ borderRadius: '20px' }}
                                                         placeholder="Type your answer here"
                                                     />
                                                 )}
 
                                                 {/* Matching */}
                                                 {q.type === "Matching" && (
-                                                    <div className="space-y-4">
+                                                    <div className="space-y-2">
                                                         {q.options.map((pair, idxPair) => (
-                                                            <div key={idxPair} className="flex items-center gap-4">
-                                                                <div className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-100 to-indigo-100 text-gray-800 rounded-lg border border-blue-200 font-medium">
+                                                            <div key={idxPair} className="flex items-center gap-3">
+                                                                <div className="flex-1 px-3 py-2 bg-blue-100 text-blue-900 text-sm border border-blue-300" style={{ borderRadius: '20px' }}>
                                                                     {pair.left}
                                                                 </div>
                                                                 <select
@@ -306,7 +306,8 @@ export default function Quiz() {
                                                                         updated[idxPair] = { left: pair.left, right: e.target.value };
                                                                         handleAnswerChange(idx, updated);
                                                                     }}
-                                                                    className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-lg bg-white text-gray-800 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                                    className="flex-1 px-3 py-2 border-2 border-blue-300 bg-white text-blue-900 text-sm focus:outline-none focus:border-blue-600"
+                                                                    style={{ borderRadius: '20px' }}
                                                                 >
                                                                     <option value="">Select answer</option>
                                                                     {q.options.map((p) => p.right).sort(() => Math.random() - 0.5).map((rightItem, rightIdx) => (
@@ -322,35 +323,37 @@ export default function Quiz() {
                                     )
                                 )}
 
-                                {/* Question Navigator */}
-                                <div className="flex flex-wrap gap-2 my-8 p-4 bg-gray-50 rounded-xl">
+                                {/* Compact Question Navigator */}
+                                <div className="flex flex-wrap gap-2 mt-4 p-3 bg-blue-50" style={{ borderRadius: '20px' }}>
                                     {currentQuiz.questions.map((_, idx) => (
                                         <button
                                             key={idx}
                                             onClick={() => setCurrentQuestionIdx(idx)}
-                                            className={`w-10 h-10 rounded-lg font-semibold transition-all text-sm ${
+                                            className={`w-8 h-8 font-semibold transition-all text-xs ${
                                                 idx === currentQuestionIdx
-                                                    ? "bg-blue-600 text-white shadow-lg scale-110"
+                                                    ? "bg-blue-600 text-white"
                                                     : userAnswers[idx]?.answer !== undefined
-                                                        ? "bg-green-500 text-white hover:bg-green-600"
-                                                        : "bg-gray-300 text-gray-700 hover:bg-gray-400"
+                                                        ? "bg-blue-400 text-white hover:bg-blue-500"
+                                                        : "bg-white text-blue-600 border border-blue-300 hover:bg-blue-100"
                                             }`}
+                                            style={{ borderRadius: '20px' }}
                                         >
                                             {idx + 1}
                                         </button>
                                     ))}
                                 </div>
 
-                                {/* Navigation Buttons */}
-                                <div className="flex justify-between items-center gap-4">
+                                {/* Compact Navigation Buttons */}
+                                <div className="flex justify-between items-center gap-3 mt-4">
                                     <button
                                         onClick={handlePrevQuestion}
                                         disabled={currentQuestionIdx === 0}
-                                        className={`px-6 py-3 rounded-lg font-semibold transition-all ${
+                                        className={`px-5 py-2 font-semibold transition-all text-sm ${
                                             currentQuestionIdx === 0
-                                                ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                                                : "bg-gray-600 hover:bg-gray-700 text-white shadow-md hover:shadow-lg"
+                                                ? "bg-blue-100 text-blue-300 cursor-not-allowed"
+                                                : "bg-white border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white"
                                         }`}
+                                        style={{ borderRadius: '20px' }}
                                     >
                                         Previous
                                     </button>
@@ -358,14 +361,16 @@ export default function Quiz() {
                                     {currentQuestionIdx === currentQuiz.questions.length - 1 ? (
                                         <button
                                             onClick={handleSubmitQuiz}
-                                            className="px-8 py-3 rounded-lg bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-semibold shadow-md hover:shadow-lg transition-all"
+                                            className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold transition-all text-sm"
+                                            style={{ borderRadius: '20px' }}
                                         >
                                             Submit Quiz
                                         </button>
                                     ) : (
                                         <button
                                             onClick={handleNextQuestion}
-                                            className="px-8 py-3 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold shadow-md hover:shadow-lg transition-all"
+                                            className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold transition-all text-sm"
+                                            style={{ borderRadius: '20px' }}
                                         >
                                             Next
                                         </button>
@@ -528,6 +533,82 @@ export default function Quiz() {
                     )}
 
                 </div>
+                {/* Account Modal */}
+                {showAccountModal && (
+                    <div className="absolute inset-0 bg-opacity-20 flex items-center justify-center z-10 backdrop-blur-sm">
+                        <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8 w-full max-w-xl mx-4">
+                            <div className="text-center">
+                                <h2 className="text-[24px] font-semibold text-gray-900 mb-2">
+                                    Create an account to get started
+                                </h2>
+                                <p className="text-gray-600 text-md leading-relaxed font-sans mb-6">
+                                    Create a free SorSer account to start<br />
+                                    Quiz Hub and track your progress
+                                </p>
+                                <div className="space-y-3 mb-4">
+                                    <a
+                                        href={route("auth.google")}
+                                        className="w-full flex items-center justify-center gap-3 px-3 py-3 border-[3px] border-gray-200 rounded-2xl hover:bg-gray-50 transition-colors"
+                                    >
+                                        <svg
+                                            className="w-5 h-5"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                fill="#4285f4"
+                                                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                                            />
+                                            <path
+                                                fill="#34a853"
+                                                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                                            />
+                                            <path
+                                                fill="#fbbc05"
+                                                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                                            />
+                                            <path
+                                                fill="#ea4335"
+                                                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                                            />
+                                        </svg>
+                                        <span className="text-gray-700 font-medium">
+                                            Sign Up with Google
+                                        </span>
+                                    </a>
+
+                                    <Link
+                                        href={route("register")}
+                                        className="w-full flex items-center justify-center gap-3 px-3 py-3 border-[3px] border-gray-200 rounded-2xl hover:bg-gray-50 transition-colors"
+                                    >
+                                        <div className="w-5 h-5 flex items-center justify-center">
+                                            <svg
+                                                className="w-12 h-12 text-gray-700"
+                                                fill="currentColor"
+                                                viewBox="0 0 20 20"
+                                            >
+                                                <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                                                <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                                            </svg>
+                                        </div>
+                                        <span className="font-medium text-gray-500">
+                                            Sign Up by Email
+                                        </span>
+                                    </Link>
+                                </div>
+
+                                <div className="mt-6 text-md">
+                                    <span className="text-gray-500">Or </span>
+                                    <Link href={route("login")}>
+                                        <span className="text-blue-500 font-medium">
+                                            Sign In
+                                        </span>
+                                    </Link>{" "}
+                                    to an existing account
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </>
     );
