@@ -265,17 +265,16 @@ export default function Library() {
                 <AnalyticsSection />
                 
                 {/* Tags Section */}
-                <TagsSection
+                {/* <TagsSection
                     onTagUpdate={handleTagUpdate}
                     onTagClick={handleTagClick}
                     allTags={allTags}
                     fetchAllTags={fetchAllTags}
                     loading={tagsLoading}
-                />
+                /> */}
 
                 {/* Documents Section */}
-                <section className="space-y-6">
-                    {/* Header */}
+                {/* <section className="space-y-6">
                     <div className="flex items-center justify-between mb-4">
                         <h2 className="text-[25px] text-blue-900 font-semibold">
                             Grammar Check
@@ -285,7 +284,6 @@ export default function Library() {
                             Start New
                         </button>
                     </div>
-                    {/* document List */}
                     {!loading && filteredDocuments.length > 0 && (
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                             {filteredDocuments.map((doc) => (
@@ -416,7 +414,6 @@ export default function Library() {
                                             </span>
                                             {doc.word_count}
                                         </p>
-                                        {/* Show tags on card */}
                                         {doc.tags && doc.tags.length > 0 && (
                                             <div className="flex flex-wrap">
                                                 {doc.tags.map((tag) => (
@@ -449,7 +446,6 @@ export default function Library() {
                         </div>
                     )}
 
-                    {/* Empty State */}
                     {!loading && filteredDocuments.length === 0 && (
                         <div className="p-6 text-center border rounded-xl">
                             <FileText
@@ -473,7 +469,7 @@ export default function Library() {
                             </div>
                         </div>
                     )}
-                </section>
+                </section> */}
 
                 {/* Edit Name Modal (render at top level, not inside section/grid) */}
                 {showEditNameModal && (
