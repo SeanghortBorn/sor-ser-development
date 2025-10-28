@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Article;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Http;
 
 class KhmerCompareController extends Controller
 {
@@ -66,11 +67,10 @@ class KhmerCompareController extends Controller
                 $articleText = '';
             }
 
-            // Split text into words - ensure we always get arrays (avoid preg_split false)
-            $userWords = preg_split('/\s+/', $userInput, -1, PREG_SPLIT_NO_EMPTY);
-            if ($userWords === false) $userWords = [];
-            $articleWords = preg_split('/\s+/', trim($articleText), -1, PREG_SPLIT_NO_EMPTY);
-            if ($articleWords === false) $articleWords = [];
+            // Use external Khmer segmentation API to tokenize input and article text.
+            // Fallback to preg_split if segmentation fails or returns unexpected shape.
+            $userWords = $this->segmentText($userInput);
+            $articleWords = $this->segmentText($articleText);
 
             // Quick match if exactly equal
             if (implode(' ', $userWords) === implode(' ', $articleWords)) {
@@ -283,5 +283,41 @@ class KhmerCompareController extends Controller
                 'message' => 'Failed to compare texts on server',
             ], 500);
         }
+    }
+
+    // Helper: call external Khmer segmentation API and return tokens array.
+    // Fallback: use preg_split to approximate tokens when API is unavailable.
+    private function segmentText(?string $text): array
+    {
+        $text = (string) ($text ?? '');
+        $trimmed = trim($text);
+        if ($trimmed === '') return [];
+
+        $apiUrl = env('KHMER_SEGMENT_API_URL') ? rtrim(env('KHMER_SEGMENT_API_URL'), '/') . '/segment' : null;
+
+        if ($apiUrl) {
+            try {
+                // short timeout and handle failures gracefully
+                $res = Http::timeout(3)->post($apiUrl, ['text' => $text]);
+                if ($res->successful()) {
+                    $json = $res->json();
+                    // support 'tokens' or 'data.tokens' shapes
+                    if (!empty($json['tokens']) && is_array($json['tokens'])) {
+                        return array_values(array_filter($json['tokens'], fn($t) => $t !== null && $t !== ''));
+                    }
+                    if (!empty($json['data']['tokens']) && is_array($json['data']['tokens'])) {
+                        return array_values(array_filter($json['data']['tokens'], fn($t) => $t !== null && $t !== ''));
+                    }
+                }
+            } catch (\Throwable $e) {
+                // log at debug level and fallback to preg_split
+                Log::debug('Khmer segment API failed: ' . $e->getMessage(), ['url' => $apiUrl]);
+            }
+        }
+
+        // Final fallback: whitespace split (best-effort)
+        $tokens = preg_split('/\s+/', $trimmed, -1, PREG_SPLIT_NO_EMPTY);
+        if ($tokens === false) return [];
+        return $tokens;
     }
 }
