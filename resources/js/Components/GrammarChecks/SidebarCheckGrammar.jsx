@@ -346,93 +346,113 @@ export default function SidebarCheckGrammar({
         setDismissedItems([]);
     };
 
-    // Normalize word: strip surrounding punctuation and lowercase
+    // 1. NORMALIZE WORD – Remove Khmer diacritics only
     const normalizeWord = (w) => {
         if (!w) return "";
-        return String(w)
-            .trim()
-            .replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, "") // trim non-alnum at ends
+        return w
+            .normalize("NFD")
+            .replace(/[\u17BB-\u17D2]/g, "") // Remove all Khmer diacritics
+            .replace(/\s+/g, "")
             .toLowerCase();
     };
 
-    // Fetch homophones JSON from backend endpoint and cache by normalized word
+    // 2. FETCH HOMOPHONES – Build map with exact + normalized keys
     const fetchHomophones = async () => {
         if (homophonesMap) return homophonesMap;
-        setExplainLoading(true);
 
-        // try public endpoints first so client can fetch without auth
+        setExplainLoading(true);
         const tryUrls = [
             "/homophones.json",
             "/storage/homophones.json",
             "/homophones/json",
         ];
+        let list = [];
 
-        let list = null;
         for (const url of tryUrls) {
             try {
                 const res = await axios.get(url, {
                     headers: { Accept: "application/json" },
                 });
-                // support different shapes returned by endpoints
                 list =
                     res.data?.homophones ??
                     res.data?.data ??
-                    (Array.isArray(res.data) ? res.data : null);
-                if (
-                    !list &&
-                    typeof res.data === "object" &&
-                    Array.isArray(Object.values(res.data))
-                ) {
-                    list = Object.values(res.data);
-                }
-                if (Array.isArray(list)) break;
+                    (Array.isArray(res.data) ? res.data : null) ??
+                    (Array.isArray(Object.values(res.data))
+                        ? Object.values(res.data)
+                        : []);
+                if (list.length) break;
             } catch (err) {
-                // ignore and try next
+                // ignore
             }
         }
 
         const map = {};
-        if (Array.isArray(list)) {
-            list.forEach((entry) => {
-                const key = normalizeWord(entry.word);
-                if (key) map[key] = entry;
-            });
-        } else {
-            console.warn(
-                "fetchHomophones: no homophones list found at tried endpoints"
-            );
-        }
+        list.forEach((entry) => {
+            const exact = entry.word?.trim();
+            const norm = normalizeWord(exact);
+            if (exact) map[exact] = entry;
+            if (norm) map[norm] = entry;
+        });
 
         setHomophonesMap(map);
         setExplainLoading(false);
         return map;
     };
 
-    // Open explanation modal for a comparison item
-    // For 'replaced' and 'missing' types prefer article_word when looking up JSON
+    // 3. OPEN EXPLAIN – Exact → Homophone → Not Found
     const openExplain = async (item) => {
         if (!item) return;
+
         setExplainData(null);
         setShowExplainModal(true);
         setExplainLoading(true);
 
-        // Prefer article_word for replaced/missing, fallback to user_word
         const raw =
             (item.article_word && item.article_word.article_word) ||
             (item.user_word && item.user_word.user_word) ||
             "";
-        const key = normalizeWord(raw);
+
+        if (!raw) {
+            setExplainData({ word: "", notFound: true });
+            setExplainLoading(false);
+            return;
+        }
 
         try {
             const map = await fetchHomophones();
-            const found = key && map ? map[key] : null;
-            if (found) {
-                setExplainData(found);
+
+            // 1. Try exact match
+            if (map[raw]) {
+                setExplainData({ ...map[raw], displayedWord: raw });
+                setExplainLoading(false);
+                return;
+            }
+
+            // 2. Try normalized (homophone)
+            const norm = normalizeWord(raw);
+            const baseEntry = norm ? map[norm] : null;
+
+            if (baseEntry) {
+                const homophones = Array.isArray(baseEntry.homophone)
+                    ? baseEntry.homophone
+                    : [];
+                const isHomophone = homophones.includes(raw);
+
+                if (isHomophone) {
+                    setExplainData({
+                        ...baseEntry,
+                        displayedWord: raw,
+                        isHomophone: true,
+                    });
+                } else {
+                    setExplainData({ word: raw, notFound: true });
+                }
             } else {
-                setExplainData({ word: raw || key, notFound: true });
+                setExplainData({ word: raw, notFound: true });
             }
         } catch (err) {
-            setExplainData({ word: raw || key, notFound: true });
+            console.error("openExplain error:", err);
+            setExplainData({ word: raw, notFound: true });
         } finally {
             setExplainLoading(false);
         }
@@ -789,12 +809,12 @@ export default function SidebarCheckGrammar({
                             </div>
                             {canAccessLibrary === true && (
                                 <button
-                                type="button"
-                                onClick={() => setShowDetailsModal(true)}
-                                className="inline-flex items-center px-3 py-1 border-2 rounded-full text-sm font-medium text-gray-600 hover:bg-gray-100 transition"
-                            >
-                                View details
-                            </button>
+                                    type="button"
+                                    onClick={() => setShowDetailsModal(true)}
+                                    className="inline-flex items-center px-3 py-1 border-2 rounded-full text-sm font-medium text-gray-600 hover:bg-gray-100 transition"
+                                >
+                                    View details
+                                </button>
                             )}
                         </div>
                     )}
@@ -989,7 +1009,6 @@ export default function SidebarCheckGrammar({
                 >
                     <div className="p-6">
                         <div className="mb-2">
-                            {/* Header: Title + Close Button */}
                             <div className="flex justify-between items-center">
                                 <h3 className="text-lg font-semibold text-gray-800">
                                     Explanation
@@ -1003,7 +1022,6 @@ export default function SidebarCheckGrammar({
                                 </button>
                             </div>
                         </div>
-
                         {explainLoading ? (
                             <div className="py-8 text-center">Loading…</div>
                         ) : explainData ? (
@@ -1017,14 +1035,23 @@ export default function SidebarCheckGrammar({
                                 </div>
                             ) : (
                                 <div className="space-y-3 text-sm text-gray-700">
-                                    {/* General Introduction */}
-                                    {explainData?.word && (
-                                        <div className="text-sm text-gray-70">
+                                    {/* Displayed Word + Homophone Note */}
+                                    {explainData.displayedWord && (
+                                        <div>
                                             <p>
                                                 <span className="font-semibold text-lg">
-                                                    {explainData.word}
-                                                </span>{" "}
-                                                —{" "}
+                                                    {explainData.displayedWord}
+                                                </span>
+                                                {explainData.isHomophone && (
+                                                    <span className="ml-2 text-xs text-gray-500">
+                                                        (homophone of{" "}
+                                                        <strong>
+                                                            {explainData.word}
+                                                        </strong>
+                                                        )
+                                                    </span>
+                                                )}
+                                                {" — "}
                                                 {explainData.shortDescription ||
                                                     `This word is commonly used to describe or refer to ${explainData.word}.`}
                                             </p>
@@ -1072,14 +1099,12 @@ export default function SidebarCheckGrammar({
                                             <div className="text-sm">
                                                 {typeof explainData.phoneme ===
                                                     "string" &&
-                                                explainData.phoneme.trim() !==
-                                                    ""
+                                                explainData.phoneme.trim()
                                                     ? explainData.phoneme
                                                     : Array.isArray(
                                                           explainData.phoneme
                                                       ) &&
-                                                      explainData.phoneme
-                                                          .length > 0
+                                                      explainData.phoneme.length
                                                     ? explainData.phoneme.join(
                                                           ", "
                                                       )
