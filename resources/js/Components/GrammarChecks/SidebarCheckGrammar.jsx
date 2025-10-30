@@ -288,7 +288,9 @@ export default function SidebarCheckGrammar({
         }
 
         if (!skipUpdate) {
-            onReplace(userWords.join(" "));
+            // Join with single space to ensure proper spacing
+            const finalText = userWords.join("");
+            onReplace(finalText);
         }
     };
 
@@ -337,8 +339,9 @@ export default function SidebarCheckGrammar({
             if (pushWord !== "") finalWords.push(pushWord);
         }
 
-        // Apply merged result and clear UI
-        onReplace(finalWords.join(" "));
+        // Apply merged result with proper spacing and clear UI
+        const finalText = finalWords.join("");
+        onReplace(finalText);
         setComparisonResult(null);
         setDismissedItems([]);
     };
@@ -953,7 +956,7 @@ export default function SidebarCheckGrammar({
                                                 e.stopPropagation();
                                                 openExplain(item);
                                             }}
-                                            className="flex items-center text-gray-700 hover:text-blue-600 px-3 py-1 rounded-full border border-gray-300 hover:bg-blue-50 text-xs font-medium transition-colors duration-200 ease-in-out"
+                                            className="flex items-center text-gray-700 hover:text-blue-600 px-3 py-1 rounded-full border-2 border-gray-300 hover:bg-blue-50 text-xs font-medium transition-colors duration-200 ease-in-out"
                                         >
                                             <Info className="w-4 h-4 mr-1" />{" "}
                                             Explain
@@ -1347,7 +1350,7 @@ export default function SidebarCheckGrammar({
                         <div className="h-6 w-20 bg-slate-300 rounded-full"></div>
                     </div>
                 ) : (
-                    <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center justify-between font-semibold mb-3">
                         {text.split(" ").filter((w) => w.trim()).length < 25
                             ? `Enter at least 25 words (${
                                   text.split(" ").filter((w) => w.trim()).length
