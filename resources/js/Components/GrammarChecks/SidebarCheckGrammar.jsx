@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Check, Trash, Info } from "lucide-react";
+import { Link, usePage } from "@inertiajs/react";
 import axios from "axios";
 import Modal from "@/Components/Modal";
 
@@ -30,8 +31,50 @@ export default function SidebarCheckGrammar({
     const [activityStats, setActivityStats] = useState(null);
     const [loadingActivityStats, setLoadingActivityStats] = useState(false);
     const MAX_RETRIES = 3;
+    const page = usePage();
+    const { auth } = page.props || {};
 
     const foundCorrections = [];
+
+    const [canAccessLibrary, setCanAccessLibrary] = useState(() => {
+        if (auth?.can?.["student"]) return true;
+        if (
+            typeof window !== "undefined" &&
+            window.__canAccessLibrary !== undefined
+        )
+            return window.__canAccessLibrary;
+        return null;
+    });
+
+    useEffect(() => {
+        if (canAccessLibrary === true || !auth?.user) return;
+        let cancelled = false;
+        (async () => {
+            try {
+                const response = await fetch(
+                    route("api.user.can-access-library"),
+                    {
+                        headers: { "X-Requested-With": "XMLHttpRequest" },
+                    }
+                );
+                const ok = response.ok;
+                if (!cancelled) {
+                    setCanAccessLibrary(ok);
+                    if (typeof window !== "undefined")
+                        window.__canAccessLibrary = ok;
+                }
+            } catch {
+                if (!cancelled) {
+                    setCanAccessLibrary(false);
+                    if (typeof window !== "undefined")
+                        window.__canAccessLibrary = false;
+                }
+            }
+        })();
+        return () => {
+            cancelled = true;
+        };
+    }, [auth?.user, canAccessLibrary]);
 
     const handleCardClick = (idx) => {
         if (idx === 0 || !comparisonResult) return;
@@ -447,26 +490,50 @@ export default function SidebarCheckGrammar({
         // do not clear computedMetrics when comparisonResult becomes null so modal can show last metrics
     }, [comparisonResult]);
 
-    // Compute simple text statistics for the details modal
-    const computeTextStats = (input) => {
+    // segmented text stats used for accurate Khmer word counts in modal/persistence
+    const [segmentedTextStats, setSegmentedTextStats] = useState(null);
+    const [loadingSegment, setLoadingSegment] = useState(false);
+
+    // segmentation helper: try local "/segment" then fallback to known API paths
+    async function segmentTokens(text) {
+        if (!text || !text.trim()) return null;
+        const tryUrls = ["/api/khmer-segment"];
+        for (const url of tryUrls) {
+            try {
+                const res = await axios.post(
+                    url,
+                    { text },
+                    { headers: { "Content-Type": "application/json" } }
+                );
+                const tokens =
+                    res.data?.tokens ??
+                    res.data?.data?.tokens ??
+                    (Array.isArray(res.data) ? res.data : null);
+                if (Array.isArray(tokens)) return tokens;
+            } catch (err) {
+                // try next
+            }
+        }
+        return null;
+    }
+
+    // Fast synchronous stats for immediate UI rendering (fallback)
+    const computeTextStatsSync = (input) => {
         const t = String(input || "").trim();
         const characters = t.length;
         const words = t ? t.split(/\s+/).filter(Boolean).length : 0;
-        // sentences: split by common sentence enders, filter empties
         const sentences = t
             ? t
                   .split(/[.!?]+/)
                   .map((s) => s.trim())
                   .filter(Boolean).length
             : 0;
-        // paragraphs: non-empty blocks separated by two or more newlines or single newline
         const paragraphs = t
             ? t
                   .split(/\n+/)
                   .map((p) => p.trim())
                   .filter(Boolean).length
             : 0;
-        // reading time seconds (200 wpm -> 200 words/min => seconds = words / (200/60))
         const seconds = words > 0 ? Math.ceil((words / 200) * 60) : 0;
         const mins = Math.floor(seconds / 60);
         const secs = seconds % 60;
@@ -481,6 +548,46 @@ export default function SidebarCheckGrammar({
         };
     };
 
+    // Async stats that attempts Khmer segmentation API, falls back to sync
+    async function computeTextStatsAsync(input) {
+        const t = String(input || "").trim();
+        if (!t) return computeTextStatsSync(t);
+        try {
+            const tokens = await segmentTokens(t);
+            const words = Array.isArray(tokens)
+                ? tokens.length
+                : t.split(/\s+/).filter(Boolean).length;
+            const characters = t.length;
+            const sentences = t
+                ? t
+                      .split(/[.!?]+/)
+                      .map((s) => s.trim())
+                      .filter(Boolean).length
+                : 0;
+            const paragraphs = t
+                ? t
+                      .split(/\n+/)
+                      .map((p) => p.trim())
+                      .filter(Boolean).length
+                : 0;
+            const seconds = words > 0 ? Math.ceil((words / 200) * 60) : 0;
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            const readingTime = `${mins} m ${secs} s`;
+            return {
+                characters,
+                words,
+                sentences,
+                paragraphs,
+                readingTime,
+                readingSeconds: seconds,
+            };
+        } catch (e) {
+            console.error("Khmer segmentation error:", e);
+            return computeTextStatsSync(t);
+        }
+    }
+
     // Persist computed metrics to server (one record per user + grammar_checker)
     const [savingAccuracy, setSavingAccuracy] = useState(false);
     const saveTimeoutRef = React.useRef(null);
@@ -491,7 +598,8 @@ export default function SidebarCheckGrammar({
         // Require a grammar checker id to upsert properly
         if (!checkerId && !articleId) return null;
 
-        const textStats = computeTextStats(text);
+        // use Khmer-aware async stats for persisted counts (falls back to sync)
+        const textStats = await computeTextStatsAsync(text);
 
         // Build payload matching AccuracyController::store validation
         const payload = {
@@ -561,26 +669,31 @@ export default function SidebarCheckGrammar({
                 saveTimeoutRef.current = null;
             }
         };
-    }, [
-        computedMetrics,
-        comparisonResult,
-        text,
-        activityStats,
-        checkerId,
-        articleId,
-    ]);
+    }, [computedMetrics, comparisonResult, text, checkerId, articleId]);
 
-    // Fetch activity stats when details modal opens or computedMetrics changes
+    // Fetch activity stats and compute segmented text stats when details modal opens
     useEffect(() => {
         if (!showDetailsModal) return;
-        fetchActivityStats().catch(() => {});
-        // Use debounced save to reduce requests when metrics update quickly
-        saveAccuracyDebounced();
+        fetchActivityStats(checkerId).catch(() => {});
+        let cancelled = false;
+        setLoadingSegment(true);
+        setSegmentedTextStats(null);
+        computeTextStatsAsync(text)
+            .then((s) => {
+                if (!cancelled) setSegmentedTextStats(s);
+            })
+            .catch(() => {})
+            .finally(() => {
+                if (!cancelled) setLoadingSegment(false);
+            });
+        return () => {
+            cancelled = true;
+        };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [showDetailsModal, computedMetrics]);
 
     // NEW: fetch activity stats (best-effort) when requested
-    async function fetchActivityStats() {
+    async function fetchActivityStats(grammarCheckerId = null) {
         setLoadingActivityStats(true);
         setActivityStats(null);
         const tryUrls = [
@@ -597,8 +710,14 @@ export default function SidebarCheckGrammar({
 
         for (const url of tryUrls) {
             try {
+                const params = {};
+                if (sessionParam) params.session_id = sessionParam;
+                if (grammarCheckerId)
+                    params.grammar_checker_id = grammarCheckerId;
+                if (articleId) params.article_id = articleId;
+
                 const res = await axios.get(url, {
-                    params: sessionParam ? { session_id: sessionParam } : {},
+                    params,
                     headers: { Accept: "application/json" },
                 });
                 const data = res.data?.data ?? res.data ?? null;
@@ -620,8 +739,8 @@ export default function SidebarCheckGrammar({
     if (comparisonResult) {
         // computeMetrics still available as fallback; prefer computedMetrics state
         const metrics = computedMetrics ?? computeMetrics(comparisonResult);
-        // compute text stats from current text prop (user text)
-        const textStats = computeTextStats(text);
+        // use segmented stats if available (accurate Khmer count), otherwise fast sync stats for immediate UI
+        const textStats = segmentedTextStats ?? computeTextStatsSync(text);
 
         // Filter differences to include only replaced, extra, and missing words up to the last same, replaced, or extra
         const differences = comparisonResult.comparison.filter(
@@ -653,53 +772,88 @@ export default function SidebarCheckGrammar({
 
         return (
             <div className="w-96 rounded-xl border border-gray-200 bg-white h-[75vh] flex flex-col overflow-hidden shadow-sm">
-                <div className="px-6 py-4 border-gray-200">
-                    <div className="flex items-center justify-between mb-3">
-                        <div className="text-gray-800 text-base font-semibold">
-                            Comparison Results
+                <div className="px-6 pt-4 pb-2 border-gray-200">
+                    {/* Header */}
+                    {isChecking ? (
+                        <div className="flex justify-between items-center border border-gray-200 rounded-xl px-4 py-2 bg-white shadow-sm animate-pulse mb-3">
+                            <div className="h-4 w-40 bg-slate-200 rounded"></div>
+                            <div className="h-6 w-20 bg-slate-300 rounded-full"></div>
                         </div>
-                        <button
-                            type="button"
-                            onClick={() => setShowDetailsModal(true)}
-                            className="inline-flex items-center px-3 py-1 border-2 rounded-full text-sm font-medium text-gray-600 hover:bg-gray-100 transition"
-                        >
-                            View details
-                        </button>
-                    </div>
+                    ) : (
+                        <div className="flex items-center justify-between mb-3">
+                            <div className="text-gray-800 text-base font-semibold">
+                                Comparison Results
+                            </div>
+                            {canAccessLibrary === true && (
+                                <button
+                                type="button"
+                                onClick={() => setShowDetailsModal(true)}
+                                className="inline-flex items-center px-3 py-1 border-2 rounded-full text-sm font-medium text-gray-600 hover:bg-gray-100 transition"
+                            >
+                                View details
+                            </button>
+                            )}
+                        </div>
+                    )}
 
-                    <div className="flex items-center space-x-2">
-                        <button className="text-sm text-blue-900 px-3 py-1.5 font-medium flex items-center hover:bg-gray-100 rounded-lg transition">
-                            All{" "}
-                            <span className="text-xs bg-gray-200 rounded-full px-2 py-0.5 ml-2">
-                                {isChecking
-                                    ? "..."
-                                    : filteredDifferences.length}
-                            </span>
-                        </button>
-                        <button className="text-sm text-green-600 px-3 py-1.5 font-medium flex items-center hover:bg-gray-100 rounded-lg transition">
-                            Differences{" "}
-                            <span className="text-xs bg-gray-200 rounded-full px-2 py-0.5 ml-2">
-                                {isChecking
-                                    ? "..."
-                                    : filteredDifferences.length}
-                            </span>
-                        </button>
-                    </div>
+                    {/* Filter Buttons */}
+                    {isChecking ? (
+                        <div className="flex items-center space-x-2 animate-pulse mb-1">
+                            <div className="h-8 w-20 bg-slate-200 rounded-lg"></div>
+                            <div className="h-8 w-28 bg-slate-200 rounded-lg"></div>
+                        </div>
+                    ) : (
+                        <div className="flex items-center space-x-2">
+                            <button className="text-sm text-blue-900 px-3 py-1.5 font-medium flex items-center hover:bg-gray-100 rounded-lg transition">
+                                All{" "}
+                                <span className="text-xs bg-gray-200 rounded-full px-2 py-0.5 ml-2">
+                                    {filteredDifferences.length}
+                                </span>
+                            </button>
+                            <button className="text-sm text-green-600 px-3 py-1.5 font-medium flex items-center hover:bg-gray-100 rounded-lg transition">
+                                Differences{" "}
+                                <span className="text-xs bg-gray-200 rounded-full px-2 py-0.5 ml-2">
+                                    {filteredDifferences.length}
+                                </span>
+                            </button>
+                        </div>
+                    )}
+
                     <div className="border-b"></div>
                 </div>
-                <div className="space-y-2 px-4 py-0 flex-1 overflow-y-auto hide-scrollbar">
+
+                <div className="space-y-2 px-4 py-0 mb-2 flex-1 overflow-y-auto hide-scrollbar">
                     {isChecking ? (
-                        <div className="mt-12 text-center flex flex-col items-center justify-center min-h-[200px]">
-                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-3"></div>
-                            <h5 className="text-base font-semibold text-gray-700 mb-2">
-                                Checking...
-                            </h5>
-                            <p className="text-sm text-gray-500">
-                                Comparing your text with the article
-                            </p>
+                        // 🟦 Skeleton Loader (replaces spinner)
+                        <div className="space-y-4 animate-pulse">
+                            {/* Header Skeleton */}
+                            <div className="flex justify-between items-center border border-gray-200 rounded-xl px-4 py-2 bg-white shadow-sm">
+                                <div className="h-4 w-40 bg-slate-200 rounded"></div>
+                                <div className="h-6 w-20 bg-slate-300 rounded-full"></div>
+                            </div>
+
+                            {/* Repeated skeleton cards */}
+                            {[...Array(3)].map((_, i) => (
+                                <div
+                                    key={i}
+                                    className="bg-white rounded-xl p-3 border border-gray-200 shadow-sm"
+                                >
+                                    <div className="h-3 w-24 bg-slate-200 rounded mb-3"></div>
+                                    <div className="flex space-x-2 mb-4">
+                                        <div className="h-4 w-16 bg-slate-300 rounded"></div>
+                                        <div className="h-4 w-20 bg-slate-200 rounded"></div>
+                                    </div>
+                                    <div className="flex space-x-3">
+                                        <div className="h-6 w-20 bg-slate-300 rounded-full"></div>
+                                        <div className="h-6 w-20 bg-slate-200 rounded-full"></div>
+                                        <div className="h-6 w-20 bg-slate-200 rounded-full"></div>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     ) : (
                         <>
+                            {/* Actual Comparison Results */}
                             {filteredDifferences.length > 0 && (
                                 <div className="flex justify-between items-center border border-gray-200 rounded-xl px-4 py-2 bg-white shadow-sm">
                                     <span className="flex items-center">
@@ -719,6 +873,8 @@ export default function SidebarCheckGrammar({
                                     </button>
                                 </div>
                             )}
+
+                            {/* Comparison Cards */}
                             {filteredDifferences.map((item, diffIndex) => (
                                 <div
                                     key={`${item.index_compared}-${item.type}`}
@@ -731,11 +887,12 @@ export default function SidebarCheckGrammar({
                                 >
                                     <p className="text-xs text-gray-500 font-medium mb-2">
                                         {item.type === "missing" &&
-                                            `Missing Word`}
+                                            "Missing Word"}
                                         {item.type === "replaced" &&
-                                            `Replaced Word`}
-                                        {item.type === "extra" && `Extra Word`}
+                                            "Replaced Word"}
+                                        {item.type === "extra" && "Extra Word"}
                                     </p>
+
                                     <div className="mb-3">
                                         <span
                                             className={`line-through text-sm mr-2 ${
@@ -761,6 +918,7 @@ export default function SidebarCheckGrammar({
                                                 "<missing>"}
                                         </span>
                                     </div>
+
                                     <div className="flex space-x-2">
                                         <button
                                             className="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-full flex items-center text-xs font-medium transition"
@@ -775,6 +933,7 @@ export default function SidebarCheckGrammar({
                                             <Check className="w-3.5 h-3.5 mr-1" />{" "}
                                             Accept
                                         </button>
+
                                         <button
                                             className="flex items-center text-gray-700 hover:text-red-600 px-3 rounded-full border-2 hover:bg-red-50 text-xs font-medium transition"
                                             onClick={(e) => {
@@ -789,7 +948,6 @@ export default function SidebarCheckGrammar({
                                             Ignore
                                         </button>
 
-                                        {/* Explanation Button */}
                                         <button
                                             onClick={(e) => {
                                                 e.stopPropagation();
@@ -797,12 +955,14 @@ export default function SidebarCheckGrammar({
                                             }}
                                             className="flex items-center text-gray-700 hover:text-blue-600 px-3 py-1 rounded-full border border-gray-300 hover:bg-blue-50 text-xs font-medium transition-colors duration-200 ease-in-out"
                                         >
-                                            <Info className="w-4 h-4 mr-1" />
+                                            <Info className="w-4 h-4 mr-1" />{" "}
                                             Explain
                                         </button>
                                     </div>
                                 </div>
                             ))}
+
+                            {/* Perfect Match State */}
                             {filteredDifferences.length === 0 && (
                                 <div className="text-center py-8">
                                     <Check className="mt-20 w-12 h-12 text-green-500 mx-auto mb-3" />
@@ -982,68 +1142,91 @@ export default function SidebarCheckGrammar({
                                 <div className="text-md text-slate-500 mb-2">
                                     Writing score
                                 </div>
-                                <div className="grid grid-cols-2 gap-4 bg-slate-50 border border-slate-100 rounded-xl p-3">
-                                    <div>
-                                        <div className="text-sm font-medium text-slate-500">
-                                            Accuracy
+
+                                {loadingActivityStats ? (
+                                    // Skeleton loader
+                                    <div className="grid grid-cols-2 gap-4 bg-slate-50 border border-slate-100 rounded-xl p-3 animate-pulse">
+                                        {[...Array(6)].map((_, i) => (
+                                            <div key={i}>
+                                                <div className="h-3 w-20 bg-slate-200 rounded mb-2"></div>
+                                                <div className="h-4 w-12 bg-slate-300 rounded"></div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : activityStats ? (
+                                    <div className="grid grid-cols-2 gap-4 bg-slate-50 border border-slate-100 rounded-xl p-3">
+                                        <div>
+                                            <div className="text-sm font-medium text-slate-500">
+                                                Accuracy
+                                            </div>
+                                            <div className="text-md font-semibold">
+                                                {metrics.accuracy != null
+                                                    ? `${metrics.accuracy}%`
+                                                    : "0%"}
+                                            </div>
                                         </div>
-                                        <div className="text-md font-semibold">
-                                            {metrics.accuracy !== null
-                                                ? `${metrics.accuracy}%`
-                                                : "—"}
+                                        <div>
+                                            <div className="text-sm font-medium text-slate-500">
+                                                Words/Article
+                                            </div>
+                                            <div className="text-md font-semibold">
+                                                {textStats.words}/
+                                                {metrics.total}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div className="text-sm font-medium text-slate-500">
+                                                Incorrect Words
+                                            </div>
+                                            <div className="text-md font-semibold">
+                                                {metrics.replaced}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div className="text-sm font-medium text-slate-500">
+                                                Missing Words
+                                            </div>
+                                            <div className="text-md font-semibold">
+                                                {metrics.missing}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div className="text-sm font-medium text-slate-500">
+                                                Extra Words
+                                            </div>
+                                            <div className="text-md font-semibold">
+                                                {metrics.extra}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div className="text-sm font-medium text-slate-500">
+                                                Reading Time
+                                            </div>
+                                            <div className="text-md font-semibold">
+                                                {textStats.readingTime}
+                                            </div>
                                         </div>
                                     </div>
-                                    <div>
-                                        <div className="text-sm text-slate-500">
-                                            Words/Article
-                                        </div>
-                                        <div className="text-md font-semibold">
-                                            {textStats.words}/{metrics.total}
-                                        </div>
+                                ) : (
+                                    <div className="text-sm text-gray-500 mt-2">
+                                        No activity data available.
                                     </div>
-                                    <div>
-                                        <div className="text-sm font-medium text-slate-500">
-                                            Wrong Words
-                                        </div>
-                                        <div className="text-md font-semibold">
-                                            {metrics.replaced}
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <div className="text-sm font-medium text-slate-500">
-                                            Missing Words
-                                        </div>
-                                        <div className="text-md font-semibold">
-                                            {metrics.missing}
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <div className="text-sm font-medium text-slate-500">
-                                            Extra Words
-                                        </div>
-                                        <div className="text-md font-semibold">
-                                            {metrics.extra}
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <div className="text-sm font-medium text-slate-500">
-                                            Reading Time
-                                        </div>
-                                        <div className="text-md font-semibold">
-                                            {textStats.readingTime}
-                                        </div>
-                                    </div>
-                                </div>
+                                )}
                             </div>
 
-                            {/* NEW: Activity counts from server (accepts/dismisses/pauses) */}
+                            {/* User Activity */}
                             <div className="mt-3">
                                 <div className="text-md text-slate-500 mb-2">
                                     User Activity
                                 </div>
                                 {loadingActivityStats ? (
-                                    <div className="text-sm text-gray-500 py-2">
-                                        Loading activity stats…
+                                    <div className="grid grid-cols-2 gap-4 bg-slate-50 border border-slate-100 rounded-xl p-3 animate-pulse">
+                                        {[...Array(6)].map((_, i) => (
+                                            <div key={i}>
+                                                <div className="h-3 w-20 bg-slate-200 rounded mb-2"></div>
+                                                <div className="h-4 w-12 bg-slate-300 rounded"></div>
+                                            </div>
+                                        ))}
                                     </div>
                                 ) : activityStats ? (
                                     <div className="grid grid-cols-2 gap-4 bg-slate-50 border border-slate-100 rounded-xl p-3">
@@ -1053,80 +1236,69 @@ export default function SidebarCheckGrammar({
                                             </div>
                                             <div className="text-md font-semibold">
                                                 {activityStats.pause_count ??
-                                                    "—"}
+                                                    "0"}
                                             </div>
                                         </div>
-
                                         <div>
                                             <div className="text-sm font-medium text-slate-500">
                                                 Avg Pause (s)
                                             </div>
                                             <div className="text-md font-semibold">
-                                                {activityStats?.avg_pause_duration !==
-                                                    undefined &&
-                                                activityStats?.avg_pause_duration !==
-                                                    null
+                                                {activityStats?.avg_pause_duration !=
+                                                null
                                                     ? formatNumber(
                                                           activityStats.avg_pause_duration,
                                                           2
                                                       )
-                                                    : metrics?.avgPause !==
-                                                          null &&
-                                                      metrics?.avgPause !==
-                                                          undefined
+                                                    : metrics?.avgPause != null
                                                     ? formatNumber(
                                                           metrics.avgPause,
                                                           2
                                                       )
-                                                    : "—"}
+                                                    : "0"}
                                             </div>
                                         </div>
-
                                         <div>
                                             <div className="text-sm font-medium text-slate-500">
                                                 Accepts
                                             </div>
                                             <div className="text-md font-semibold">
-                                                {activityStats.accepts ?? "—"}
+                                                {activityStats.accepts ?? "0"}
                                             </div>
                                         </div>
-
                                         <div>
                                             <div className="text-sm font-medium text-slate-500">
                                                 Dismisses
                                             </div>
                                             <div className="text-md font-semibold">
-                                                {activityStats.dismisses ?? "—"}
+                                                {activityStats.dismisses ?? "0"}
                                             </div>
                                         </div>
-
                                         <div>
                                             <div className="text-sm font-medium text-slate-500">
-                                                Incoerrect
+                                                Incorrect
                                             </div>
                                             <div className="text-md font-semibold">
                                                 {activityStats.replaced_count ??
-                                                    "—"}
+                                                    "0"}
                                             </div>
                                         </div>
-
                                         <div>
                                             <div className="text-sm font-medium text-slate-500">
                                                 Missing
                                             </div>
                                             <div className="text-md font-semibold">
                                                 {activityStats.missing_count ??
-                                                    "—"}
+                                                    "0"}
                                             </div>
                                         </div>
-
                                         <div>
                                             <div className="text-sm font-medium text-slate-500">
                                                 Extra
                                             </div>
                                             <div className="text-md font-semibold">
                                                 {activityStats.extra_count ??
-                                                    "—"}
+                                                    "0"}
                                             </div>
                                         </div>
                                     </div>
@@ -1150,6 +1322,7 @@ export default function SidebarCheckGrammar({
                                 </div>
                             </div>
                         </div>
+
                         <div className="mt-6 flex justify-end">
                             <button
                                 onClick={() => setShowDetailsModal(false)}
@@ -1160,62 +1333,100 @@ export default function SidebarCheckGrammar({
                         </div>
                     </div>
                 </Modal>
-
-                <div className="flex px-6 py-3 mt-2 border-t border-gray-200 bg-gray-50 items-center justify-center"></div>
             </div>
         );
     }
 
     return (
         <div className="w-96 rounded-xl border border-gray-200 bg-white h-[75vh] flex flex-col overflow-hidden shadow-sm">
-            <div className="px-6 py-4 border-gray-200">
-                <div className="text-gray-800 text-base font-semibold mb-3">
-                    {text.split(" ").filter((w) => w.trim()).length < 25
-                        ? `Enter at least 25 words (${
-                              text.split(" ").filter((w) => w.trim()).length
-                          }/25)`
-                        : "Grammar Check Results"}
-                </div>
-                <div className="flex items-center space-x-2">
-                    <button className="text-sm text-blue-900 px-3 py-1.5 font-medium flex items-center hover:bg-gray-100 rounded-lg transition">
-                        All{" "}
-                        <span className="text-xs bg-gray-200 rounded-full px-2 py-0.5 ml-2">
-                            0
-                        </span>
-                    </button>
-                    <button className="text-sm text-green-600 px-3 py-1.5 font-medium flex items-center hover:bg-gray-100 rounded-lg transition">
-                        Grammar{" "}
-                        <span className="text-xs bg-gray-200 rounded-full px-2 py-0.5 ml-2">
-                            0
-                        </span>
-                    </button>
-                </div>
-                <div className="border-b"></div>
-            </div>
-            <div className="space-y-3 px-4 py-8 flex-1 overflow-y-auto hide-scrollbar">
+            <div className="px-6 pt-4 pb-2 border-gray-200">
+                {/* Header */}
                 {isChecking ? (
-                    <div className="mt-12 text-center flex flex-col items-center justify-center min-h-[200px]">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-3"></div>
-                        <h5 className="text-base font-semibold text-gray-700 mb-2">
-                            Checking...
-                        </h5>
-                        <p className="text-sm text-gray-500">
-                            Comparing your text with the article
-                        </p>
+                    <div className="flex justify-between items-center border border-gray-200 rounded-xl px-4 py-2 bg-white shadow-sm animate-pulse mb-3">
+                        <div className="h-4 w-40 bg-slate-200 rounded"></div>
+                        <div className="h-6 w-20 bg-slate-300 rounded-full"></div>
                     </div>
                 ) : (
-                    <div className="mt-12 text-center flex flex-col items-center justify-center min-h-[200px]">
-                        <Check className="w-16 h-16 text-green-500 mb-3" />
-                        <h5 className="text-base font-semibold text-gray-700 mb-2">
-                            Great Job!
+                    <div className="flex items-center justify-between mb-3">
+                        {text.split(" ").filter((w) => w.trim()).length < 25
+                            ? `Enter at least 25 words (${
+                                  text.split(" ").filter((w) => w.trim()).length
+                              }/25)`
+                            : "Grammar Check Results"}
+                    </div>
+                )}
+
+                {/* Filter Buttons */}
+                {isChecking ? (
+                    <div className="flex items-center space-x-2 animate-pulse mb-1">
+                        <div className="h-8 w-20 bg-slate-200 rounded-lg"></div>
+                        <div className="h-8 w-28 bg-slate-200 rounded-lg"></div>
+                    </div>
+                ) : (
+                    <div className="flex items-center space-x-2">
+                        <button className="text-sm text-blue-900 px-3 py-1.5 font-medium flex items-center hover:bg-gray-100 rounded-lg transition">
+                            All{" "}
+                            <span className="text-xs bg-gray-200 rounded-full px-2 py-0.5 ml-2">
+                                0
+                            </span>
+                        </button>
+                        <button className="text-sm text-green-600 px-3 py-1.5 font-medium flex items-center hover:bg-gray-100 rounded-lg transition">
+                            Grammar{" "}
+                            <span className="text-xs bg-gray-200 rounded-full px-2 py-0.5 ml-2">
+                                0
+                            </span>
+                        </button>
+                    </div>
+                )}
+
+                <div className="border-b"></div>
+            </div>
+
+            <div className="space-y-2 px-4 py-0 mb-2 flex-1 overflow-y-auto hide-scrollbar">
+                {isChecking ? (
+                    // 🟦 Skeleton Loader (replaces spinner)
+                    <div className="space-y-4 animate-pulse">
+                        {/* Header Skeleton */}
+                        <div className="flex justify-between items-center border border-gray-200 rounded-xl px-4 py-2 bg-white shadow-sm">
+                            <div className="h-4 w-40 bg-slate-200 rounded"></div>
+                            <div className="h-6 w-20 bg-slate-300 rounded-full"></div>
+                        </div>
+
+                        {/* Repeated skeleton cards */}
+                        {[...Array(3)].map((_, i) => (
+                            <div
+                                key={i}
+                                className="bg-white rounded-xl p-3 border border-gray-200 shadow-sm"
+                            >
+                                <div className="h-3 w-24 bg-slate-200 rounded mb-3"></div>
+                                <div className="flex space-x-2 mb-4">
+                                    <div className="h-4 w-16 bg-slate-300 rounded"></div>
+                                    <div className="h-4 w-20 bg-slate-200 rounded"></div>
+                                </div>
+                                <div className="flex space-x-3">
+                                    <div className="h-6 w-20 bg-slate-300 rounded-full"></div>
+                                    <div className="h-6 w-20 bg-slate-200 rounded-full"></div>
+                                    <div className="h-6 w-20 bg-slate-200 rounded-full"></div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="text-center flex flex-col items-center justify-center h-full">
+                        <img
+                            src="/images/binoculars-see.svg"
+                            alt="Icon"
+                            className="w-16 h-16"
+                        />
+                        <h5 className="text-base font-semibold text-gray-700">
+                            Nothing to check yet!
                         </h5>
                         <p className="text-sm text-gray-500">
-                            No grammar or spelling issues detected in your text.
+                            Get started by adding text to the editor
                         </p>
                     </div>
                 )}
             </div>
-            <div className="flex px-6 py-3 mt-2 border-t border-gray-200 bg-gray-50 items-center justify-center"></div>
         </div>
     );
 }

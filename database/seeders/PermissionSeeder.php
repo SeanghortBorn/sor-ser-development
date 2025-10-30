@@ -24,16 +24,17 @@ class PermissionSeeder extends Seeder
             'user-edit',
             'user-block',
 
-            'category-list',
-            'category-create',
-            'category-edit',
-            'category-delete',
+            'student',
+
+            // 'category-list',
+            // 'category-create',
+            // 'category-edit',
+            // 'category-delete',
 
             'quiz-list',
             'quiz-create',
             'quiz-edit',
             'quiz-delete',
-            'do-quiz',
 
             'article-list',
             'article-create',

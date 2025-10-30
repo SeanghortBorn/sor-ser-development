@@ -604,19 +604,21 @@ export default function Index() {
 										</div>
 									</div>
 								) : (
-									<div className="w-64">
-										<input
-											type="text"
-											value={docTitle}
-											onChange={(e) => {
-												setDocTitle(e.target.value);
-												setSelectedArticle(null);
-												setAudioUrl(null);
-												setAudioError(null);
-											}}
-											className="w-full text-md font-medium text-gray-700 bg-white border border-gray-300 rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder-gray-500"
-											placeholder="Untitled document"
-										/>
+									// <div className="w-64">
+									// 	<input
+									// 		type="text"
+									// 		value={docTitle}
+									// 		onChange={(e) => {
+									// 			setDocTitle(e.target.value);
+									// 			setSelectedArticle(null);
+									// 			setAudioUrl(null);
+									// 			setAudioError(null);
+									// 		}}
+									// 		className="w-full text-md font-medium text-gray-700 bg-white border border-gray-300 rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder-gray-500"
+									// 		placeholder="Untitled document"
+									// 	/>
+									// </div>
+									<div>
 									</div>
 								)}
 

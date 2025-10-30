@@ -142,6 +142,8 @@ class UserActivityController extends Controller
         try {
             $userId = Auth::id();
             $sessionId = $request->query('session_id') ?? $request->input('session_id') ?? null;
+            $grammarCheckerId = $request->query('grammar_checker_id') ?? $request->input('grammar_checker_id') ?? null;
+            $articleId = $request->query('article_id') ?? $request->input('article_id') ?? null;
 
             // If not authenticated and no session_id provided, return empty object instead of 500
             if (!$userId && !$sessionId) {
@@ -149,12 +151,19 @@ class UserActivityController extends Controller
             }
 
             // Helper to build a base query for the given table scoped by user/session
-            $buildQuery = function (string $table) use ($userId, $sessionId) {
+            $buildQuery = function (string $table) use ($userId, $sessionId, $grammarCheckerId, $articleId) {
                 $q = DB::table($table);
                 if ($userId) {
                     $q->where('user_id', $userId);
                 } elseif ($sessionId) {
                     $q->where('session_id', $sessionId);
+                }
+                // Apply grammar checker & article filters if provided so counts are scoped to current check
+                if (!empty($grammarCheckerId)) {
+                    $q->where('grammar_checker_id', $grammarCheckerId);
+                }
+                if (!empty($articleId)) {
+                    $q->where('article_id', $articleId);
                 }
                 return $q;
             };
@@ -192,6 +201,8 @@ class UserActivityController extends Controller
                 'pause_count' => (int) $pause_count,
                 'avg_pause_duration' => $avg_pause_duration,
                 'session_id' => $sessionId ?? null,
+                'grammar_checker_id' => $grammarCheckerId ?? null,
+                'article_id' => $articleId ?? null,
             ];
 
             return response()->json($result);

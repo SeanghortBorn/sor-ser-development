@@ -2,9 +2,9 @@ import React, { useEffect, useRef, useState } from "react";
 import { Link, usePage } from "@inertiajs/react";
 
 export default function HeaderNavbar() {
-    const { auth } = usePage().props;
-    const currentUrl = usePage().url;
-
+    const page = usePage();
+    const { auth } = page.props || {};
+    const currentUrl = page.url || "";
     const dropdownRef = useRef(null);
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -33,6 +33,50 @@ export default function HeaderNavbar() {
         return () =>
             document.removeEventListener("mousedown", handleClickOutside);
     }, [dropdownOpen, mobileMenuOpen]);
+
+    const [canAccessLibrary, setCanAccessLibrary] = useState(() => {
+        if (auth?.can?.["student"]) return true;
+        if (
+            typeof window !== "undefined" &&
+            window.__canAccessLibrary !== undefined
+        )
+            return window.__canAccessLibrary;
+        return null;
+    });
+
+    useEffect(() => {
+        if (canAccessLibrary === true || !auth?.user) return;
+        let cancelled = false;
+        (async () => {
+            try {
+                const useAxios = typeof window !== "undefined" && window.axios;
+                const res = useAxios
+                    ? await window.axios.get("/library", {
+                          headers: { "X-Requested-With": "XMLHttpRequest" },
+                          validateStatus: () => true,
+                      })
+                    : await fetch("/library", {
+                          credentials: "same-origin",
+                          headers: { "X-Requested-With": "XMLHttpRequest" },
+                      });
+                const ok = useAxios ? res.status === 200 : res.ok;
+                if (!cancelled) {
+                    setCanAccessLibrary(ok);
+                    if (typeof window !== "undefined")
+                        window.__canAccessLibrary = ok;
+                }
+            } catch {
+                if (!cancelled) {
+                    setCanAccessLibrary(false);
+                    if (typeof window !== "undefined")
+                        window.__canAccessLibrary = false;
+                }
+            }
+        })();
+        return () => {
+            cancelled = true;
+        };
+    }, [auth?.user, canAccessLibrary]);
 
     const isActive = (path) =>
         currentUrl.startsWith(path)
@@ -78,7 +122,7 @@ export default function HeaderNavbar() {
                         >
                             Home
                         </Link>
-                        {auth.user && (
+                        {auth?.user && canAccessLibrary === true && (
                             <Link
                                 href="/library"
                                 className={`px-3 py-[1.3rem] font-medium transition ${isActive(
@@ -242,7 +286,7 @@ export default function HeaderNavbar() {
                             >
                                 Home
                             </Link>
-                            {auth.user && (
+                            {auth?.user && canAccessLibrary === true && (
                                 <Link
                                     href="/library"
                                     className={`py-2 px-3 rounded-lg ${isActive(
