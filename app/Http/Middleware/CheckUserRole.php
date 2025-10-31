@@ -16,7 +16,7 @@ class CheckUserRole
         $user = Auth::user();
         // If user has no roles, redirect to Welcome page
         if (!$user || ($user->roles()->count() === 0)) {
-            return redirect('/library');
+            return redirect('/');
         }
 
         return $next($request);

@@ -4,7 +4,7 @@ import Pagination from "@/Components/Pagination";
 import AdminLayout from "@/Layouts/AdminLayout";
 import { Head, Link, useForm, usePage, router } from "@inertiajs/react";
 import moment from "moment";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
     Search,
     Pencil,
@@ -12,10 +12,19 @@ import {
     RotateCcw,
     Ban,
     UserPlus,
-    CheckCircle
+    CheckCircle,
+    UsersRound,
+    UserCheck,
+    GraduationCap,
+    User,
 } from "lucide-react";
 
-export default function UserPage({ users, permissions = [], search: searchProp = "" }) {
+export default function UserPage({
+    users,
+    permissions = [],
+    search: searchProp = "",
+    userStats = {},
+}) {
     const { auth } = usePage().props;
     const can = auth?.can ?? {};
     const [showPermissionModal, setShowPermissionModal] = useState(false);
@@ -30,16 +39,101 @@ export default function UserPage({ users, permissions = [], search: searchProp =
     const [resetPassword, setResetPassword] = useState("");
     const [resetProcessing, setResetProcessing] = useState(false);
     const [resetError, setResetError] = useState("");
-    const [searchTerm, setSearchTerm] = useState(searchProp);
+    const [searchTerm, setSearchTerm] = useState(searchProp || "");
+
+    // Define stat card configurations
+    const STAT_CONFIG = [
+        {
+            id: "total",
+            label: "Total Users",
+            icon: "UsersRound", // optional: icon name or component reference
+            color: "text-blue-500",
+            borderColor: "border-blue-100",
+            bgColor: "bg-blue-50",
+            value: 0, // will be updated dynamically
+            description: "All users registered in the system",
+        },
+        {
+            id: "employees",
+            label: "Employees",
+            icon: "UserCheck",
+            color: "text-green-500",
+            borderColor: "border-green-100",
+            bgColor: "bg-green-50",
+            value: 0,
+            description: "All verified staff or employee accounts",
+        },
+        {
+            id: "students",
+            label: "Students",
+            icon: "GraduationCap",
+            color: "text-orange-500",
+            borderColor: "border-orange-100",
+            bgColor: "bg-orange-50",
+            value: 0,
+            description: "All student accounts currently active",
+        },
+        {
+            id: "normal",
+            label: "Regular Users",
+            icon: "User",
+            color: "text-purple-500",
+            borderColor: "border-purple-100",
+            bgColor: "bg-purple-50",
+            value: 0,
+            description: "All users without special roles",
+        },
+    ];
+
+    // Calculate stats from paginated results
+    const calculatePageStats = () => {
+        const allUsers = users.data || [];
+        return {
+            total: allUsers.length,
+            employees: allUsers.filter((u) => u.roles?.length > 0).length,
+            students: allUsers.filter(
+                (u) =>
+                    u.permissions?.length > 0 &&
+                    (!u.roles || u.roles.length === 0)
+            ).length,
+            normal: allUsers.filter(
+                (u) =>
+                    (!u.permissions || u.permissions.length === 0) &&
+                    (!u.roles || u.roles.length === 0)
+            ).length,
+        };
+    };
+
+    // Compute stats with memoization
+    const stats = useMemo(() => {
+        const data =
+            userStats && Object.keys(userStats).length > 0
+                ? userStats
+                : calculatePageStats();
+
+        return STAT_CONFIG.map((config) => ({
+            ...config,
+            value: data[config.id] ?? 0,
+        }));
+    }, [userStats, users.data]);
 
     useEffect(() => {
-        setSearchTerm(searchProp);
+        setSearchTerm(searchProp || "");
     }, [searchProp]);
 
     const openPermissionModal = (user) => {
         setSelectedUser(user);
+        const userPerms = user.permissions
+            ? user.permissions.map((p) => p.id)
+            : [];
+        // Auto-select 'student' permission if user has no permissions
+        const studentPermId = permissions.find((p) => p.name === "student")?.id;
         setUserPermissions(
-            user.permissions ? user.permissions.map((p) => p.id) : []
+            userPerms.length > 0
+                ? userPerms
+                : studentPermId
+                ? [studentPermId]
+                : []
         );
         setShowPermissionModal(true);
     };
@@ -55,7 +149,25 @@ export default function UserPage({ users, permissions = [], search: searchProp =
             .then(() => {
                 setPermProcessing(false);
                 setShowPermissionModal(false);
-                router.reload({ only: ['users'] });
+                // Reload entire page to recalculate stats
+                router.reload({ only: ["users", "userStats"] });
+            })
+            .catch(() => setPermProcessing(false));
+    };
+
+    const removePermission = (e) => {
+        e.preventDefault();
+        if (!selectedUser) return;
+        setPermProcessing(true);
+        window.axios
+            .patch(route("users.update-permissions", selectedUser.id), {
+                permissions: [],
+            })
+            .then(() => {
+                setPermProcessing(false);
+                setShowPermissionModal(false);
+                // Reload entire page to recalculate stats
+                router.reload({ only: ["users", "userStats"] });
             })
             .catch(() => setPermProcessing(false));
     };
@@ -75,7 +187,8 @@ export default function UserPage({ users, permissions = [], search: searchProp =
         window.axios
             .post(action)
             .then(() => {
-                router.reload({ only: ['users'] });
+                // Reload to recalculate stats
+                router.reload({ only: ["users", "userStats"] });
             })
             .finally(() => {
                 setBlockProcessing(false);
@@ -95,7 +208,7 @@ export default function UserPage({ users, permissions = [], search: searchProp =
     // Handle reset password submit
     const handleResetPassword = (e) => {
         e.preventDefault();
-        if (!resetTarget || !resetPassword) {
+        if (!resetTarget || !resetPassword.trim()) {
             setResetError("Password is required.");
             return;
         }
@@ -110,19 +223,18 @@ export default function UserPage({ users, permissions = [], search: searchProp =
                 setResetTarget(null);
                 setResetPassword("");
                 setResetProcessing(false);
-                router.reload({ only: ['users'] });
+                router.reload({ only: ["users"] });
             })
             .catch((err) => {
                 setResetProcessing(false);
                 setResetError(
-                    err?.response?.data?.message ||
-                        "Failed to reset password."
+                    err?.response?.data?.message || "Failed to reset password."
                 );
             });
     };
 
     const handleSearch = (e) => {
-        const term = e.target.value;
+        const term = e.target.value || "";
         setSearchTerm(term);
         router.get(
             route("users.index"),
@@ -147,6 +259,43 @@ export default function UserPage({ users, permissions = [], search: searchProp =
             <Head title={headWeb} />
             <section className="content">
                 <div className="container-fluid">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                        {stats.map((stat) => (
+                            <div
+                                key={stat.id}
+                                className={`bg-white px-3 pb-2 pt-3 border-l-4 ${stat.borderColor} shadow-sm rounded-xl flex flex-col hover:shadow-md transition-all duration-200`}
+                            >
+                                <div className="flex items-center justify-between">
+                                    <p className="text-gray-800 text-base font-semibold">
+                                        {stat.label}
+                                    </p>
+                                    <div className={`${stat.color}`}>
+                                        {stat.icon === "UsersRound" && (
+                                            <UsersRound className="w-7 h-7" />
+                                        )}
+                                        {stat.icon === "UserCheck" && (
+                                            <UserCheck className="w-7 h-7" />
+                                        )}
+                                        {stat.icon === "GraduationCap" && (
+                                            <GraduationCap className="w-7 h-7" />
+                                        )}
+                                        {stat.icon === "User" && (
+                                            <User className="w-7 h-7" />
+                                        )}
+                                    </div>
+                                </div>
+                                <div className="">
+                                    <h2 className="text-lg font-bold text-gray-900">
+                                        {stat.value}
+                                    </h2>
+                                    <p className="text-xs text-gray-500 mt-1">
+                                        {stat.description}
+                                    </p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
                     <div className="bg-white shadow-md rounded-xl overflow-hidden border border-gray-200 mb-12">
                         {/* Header */}
                         <div className="px-6 py-4 border-b flex flex-col md:flex-row justify-between items-center gap-3">
@@ -157,14 +306,17 @@ export default function UserPage({ users, permissions = [], search: searchProp =
 
                             {/* Right side (Search + Add User) */}
                             <div className="flex items-center gap-3 ml-auto">
-                                <form className="inline-block" onSubmit={e => e.preventDefault()}>
+                                <form
+                                    className="inline-block"
+                                    onSubmit={(e) => e.preventDefault()}
+                                >
                                     <div className="inline-flex items-center gap-2 px-3 rounded-xl border hover:shadow-lg transition text-sm bg-white">
                                         <Search className="w-4 h-4 text-gray-500" />
                                         <input
                                             type="text"
                                             placeholder="Search by name or email"
                                             className="px-2 outline-none border-none bg-transparent text-sm placeholder-gray-400 w-full min-w-[150px] focus:outline-none focus:ring-0"
-                                            value={searchTerm}
+                                            value={searchTerm ?? ""}
                                             onChange={handleSearch}
                                         />
                                     </div>
@@ -192,9 +344,6 @@ export default function UserPage({ users, permissions = [], search: searchProp =
                                         <th className="py-3 px-4">Email</th>
                                         <th className="py-3 px-4">Role</th>
                                         <th className="py-3 px-4">Blocked</th>
-                                        <th className="py-3 px-4">
-                                            Permissions
-                                        </th>
                                         <th className="py-3 px-4">
                                             Created At
                                         </th>
@@ -224,12 +373,23 @@ export default function UserPage({ users, permissions = [], search: searchProp =
                                                 </td>
                                                 <td className="py-3 px-4">
                                                     {item.roles?.length > 0 ? (
-                                                        <span className="badge bg-green-600 text-white text-xs">
+                                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-600 text-white">
                                                             {item.roles[0].name}
                                                         </span>
+                                                    ) : item.permissions
+                                                          ?.length > 0 ? (
+                                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-600 text-white">
+                                                            {/* {item.permissions
+                                                                .map(
+                                                                    (p) =>
+                                                                        p.name
+                                                                )
+                                                                .join(", ")} */}
+                                                            Student
+                                                        </span>
                                                     ) : (
-                                                        <span className="text-gray-500 text-xs">
-                                                            No Role
+                                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-400 text-white">
+                                                            No Access
                                                         </span>
                                                     )}
                                                 </td>
@@ -243,16 +403,6 @@ export default function UserPage({ users, permissions = [], search: searchProp =
                                                             Active
                                                         </span>
                                                     )}
-                                                </td>
-                                                <td className="py-3 px-4">
-                                                    {item.permissions?.length >
-                                                    0
-                                                        ? item.permissions
-                                                              .map(
-                                                                  (p) => p.name
-                                                              )
-                                                              .join(", ")
-                                                        : ""}
                                                 </td>
                                                 <td className="py-3 px-4">
                                                     {moment(
@@ -303,7 +453,8 @@ export default function UserPage({ users, permissions = [], search: searchProp =
                                                                         </button>
                                                                         <div className="absolute bottom-full mb-2 hidden group-hover:block bg-white text-gray-800 text-xs px-3 py-1 rounded-lg shadow-md border">
                                                                             Assign
-                                                                            Permissions
+                                                                            Student
+                                                                            Role
                                                                         </div>
                                                                     </div>
                                                                 )}
@@ -342,11 +493,15 @@ export default function UserPage({ users, permissions = [], search: searchProp =
                                                                                 ? "bg-green-500 hover:bg-green-600"
                                                                                 : "bg-red-500 hover:bg-red-400"
                                                                         } text-white transition`}
-                                                                        onClick={() => handleBlockClick(item)}
+                                                                        onClick={() =>
+                                                                            handleBlockClick(
+                                                                                item
+                                                                            )
+                                                                        }
                                                                     >
                                                                         {item.blocked ? (
                                                                             <>
-                                                                                <CheckCircle  className="w-4 h-4" />
+                                                                                <CheckCircle className="w-4 h-4" />
                                                                             </>
                                                                         ) : (
                                                                             <>
@@ -396,14 +551,16 @@ export default function UserPage({ users, permissions = [], search: searchProp =
                             maxWidth="lg"
                         >
                             <form
-                                onSubmit={e => {
+                                onSubmit={(e) => {
                                     e.preventDefault();
                                     if (!blockProcessing) confirmBlock();
                                 }}
                                 className="p-6"
                             >
                                 <h2 className="text-lg font-semibold text-gray-800 mb-2">
-                                    {blockTarget?.blocked ? "Unblock User" : "Block User"}
+                                    {blockTarget?.blocked
+                                        ? "Unblock User"
+                                        : "Block User"}
                                 </h2>
                                 <p className="text-gray-700 mb-4">
                                     {blockTarget?.blocked
@@ -435,8 +592,8 @@ export default function UserPage({ users, permissions = [], search: searchProp =
                                         {blockProcessing
                                             ? "Saving..."
                                             : blockTarget?.blocked
-                                                ? "Unblock"
-                                                : "Block"}
+                                            ? "Unblock"
+                                            : "Block"}
                                     </button>
                                 </div>
                             </form>
@@ -445,77 +602,157 @@ export default function UserPage({ users, permissions = [], search: searchProp =
                         {/* Permission Modal */}
                         <Modal
                             show={showPermissionModal}
-                            onClose={() => setShowPermissionModal(false)}
+                            onClose={() => {
+                                setShowPermissionModal(false);
+                                setUserPermissions([]);
+                                setSelectedUser(null);
+                            }}
                             maxWidth="xl"
                         >
-                            <form
-                                onSubmit={submitPermissions}
-                                className="p-6 space-y-3"
-                            >
-                                <h2 className="text-lg font-semibold text-gray-800">
-                                    Assign Permissions
-                                </h2>
-                                <p className="text-sm text-gray-600">
-                                    Select the permission you want to assign to{" "}
-                                    <span className="font-medium">
-                                        {selectedUser?.name}
-                                    </span>
-                                    .
-                                </p>
+                            {selectedUser &&
+                            selectedUser.permissions?.length === 0 &&
+                            selectedUser.roles?.length === 0 ? (
+                                <form
+                                    onSubmit={submitPermissions}
+                                    className="p-6 space-y-3"
+                                >
+                                    <h2 className="text-lg font-semibold text-gray-800">
+                                        Assign Student Permission
+                                    </h2>
 
-                                <div className="max-h-64 overflow-y-auto border rounded-lg p-3 bg-gray-50 hide-scrollbar">
-                                    {/* Option to remove permission (set to none) */}
-                                    {/* <label className="flex items-center gap-2 py-1 text-sm">
-                                        <input
-                                            type="radio"
-                                            name="permission"
-                                            className="rounded text-blue-600 focus:ring-0"
-                                            checked={userPermissions.length === 0}
-                                            onChange={() => setUserPermissions([])}
-                                        />
-                                        <span className="text-gray-500 italic">No Permission</span>
-                                    </label> */}
-                                    {permissions.map((perm) => (
-                                        <label
-                                            key={perm.id}
-                                            className="flex items-center gap-2 py-1 text-sm"
+                                    <p className="text-sm text-gray-600">
+                                        <span className="font-medium">
+                                            {selectedUser?.name}
+                                        </span>{" "}
+                                        has no role yet. Click{" "}
+                                        <strong>Save</strong> to give them the
+                                        default <strong>Student</strong> role.
+                                    </p>
+
+                                    {/* Admin-only hint – tiny badge */}
+                                    <div className="flex items-center gap-2">
+                                        <span className="inline-block px-2 py-0.5 text-xs font-medium text-green-800 bg-green-100 rounded">
+                                            Default: Student
+                                        </span>
+                                    </div>
+
+                                    <div className="flex justify-between gap-3 mt-3">
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setShowPermissionModal(false);
+                                                setUserPermissions([]);
+                                                setSelectedUser(null);
+                                            }}
+                                            className="rounded-[10px] border-2 border-gray-300 px-8 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold disabled:opacity-60"
                                         >
-                                            <input
-                                                type="radio"
-                                                name="permission"
-                                                className="rounded text-blue-600 focus:ring-0"
-                                                checked={userPermissions[0] === perm.id}
-                                                onClick={() =>
-                                                    setUserPermissions(
-                                                        userPermissions[0] === perm.id ? [] : [perm.id]
-                                                    )
-                                                }
-                                                readOnly
-                                            />
-                                            {perm.name}
-                                        </label>
-                                    ))}
-                                </div>
+                                            Cancel
+                                        </button>
 
-                                <div className="flex justify-between items-center pt-4">
-                                    <button
-                                        type="button"
-                                        onClick={() =>
-                                            setShowPermissionModal(false)
-                                        }
-                                        className="rounded-[10px] border-2 border-gray-300 px-8 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold disabled:opacity-60"
-                                    >
-                                        Cancel
-                                    </button>
-                                    <button
-                                        type="submit"
-                                        disabled={permProcessing}
-                                        className="rounded-[10px] px-9 py-1 bg-blue-600 text-white font-semibold hover:bg-blue-700 transition disabled:opacity-60"
-                                    >
-                                        {permProcessing ? "Saving..." : "Save"}
-                                    </button>
+                                        <button
+                                            type="submit"
+                                            disabled={permProcessing}
+                                            className="rounded-[10px] px-9 py-1 bg-blue-600 text-white font-semibold hover:bg-blue-700 transition disabled:opacity-60"
+                                        >
+                                            {permProcessing
+                                                ? "Saving…"
+                                                : "Save"}
+                                        </button>
+                                    </div>
+                                </form>
+                            ) : selectedUser?.roles?.length > 0 ? (
+                                <div className="p-6 space-y-3">
+                                    <h2 className="text-lg font-semibold text-gray-800">
+                                        User Role Information
+                                    </h2>
+
+                                    <p className="text-sm text-gray-600">
+                                        <span className="font-medium">
+                                            {selectedUser?.name}
+                                        </span>{" "}
+                                        is assigned the following role:
+                                    </p>
+
+                                    {/* Current role badge */}
+                                    <div className="flex items-center gap-2">
+                                        <span className="inline-block px-3 py-1 text-sm font-medium text-green-900 bg-green-100 rounded-full">
+                                            {selectedUser?.roles?.[0]?.name}
+                                        </span>
+                                    </div>
+
+                                    <p className="text-sm text-gray-500 italic">
+                                        This user has been assigned a role and
+                                        cannot be modified through this
+                                        interface.
+                                    </p>
+
+                                    <div className="flex justify-end gap-3">
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setShowPermissionModal(false);
+                                                setUserPermissions([]);
+                                                setSelectedUser(null);
+                                            }}
+                                            className="rounded-[10px] border-2 border-gray-300 px-8 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold"
+                                        >
+                                            Close
+                                        </button>
+                                    </div>
                                 </div>
-                            </form>
+                            ) : selectedUser?.permissions?.length > 0 ? (
+                                <form
+                                    onSubmit={removePermission}
+                                    className="p-6 space-y-3"
+                                >
+                                    <h2 className="text-lg font-semibold text-gray-800">
+                                        Remove Student Permission
+                                    </h2>
+
+                                    <p className="text-sm text-gray-600">
+                                        <span className="font-medium">
+                                            {selectedUser?.name}
+                                        </span>{" "}
+                                        currently has the following permission:
+                                    </p>
+
+                                    {/* Current permission badge */}
+                                    <div className="flex items-center gap-2">
+                                        <span className="inline-block px-3 py-1 text-sm font-medium text-blue-900 bg-blue-100 rounded-full">
+                                            Student
+                                        </span>
+                                    </div>
+
+                                    <p className="text-sm text-gray-600">
+                                        Click <strong>Remove</strong> to revoke
+                                        this permission.
+                                    </p>
+
+                                    <div className="flex justify-between gap-3">
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setShowPermissionModal(false);
+                                                setUserPermissions([]);
+                                                setSelectedUser(null);
+                                            }}
+                                            className="rounded-[10px] border-2 border-gray-300 px-8 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold disabled:opacity-60"
+                                        >
+                                            Cancel
+                                        </button>
+
+                                        <button
+                                            type="submit"
+                                            disabled={permProcessing}
+                                            className="rounded-[10px] px-9 py-1 bg-red-600 text-white font-semibold hover:bg-red-700 transition disabled:opacity-60"
+                                        >
+                                            {permProcessing
+                                                ? "Removing…"
+                                                : "Remove"}
+                                        </button>
+                                    </div>
+                                </form>
+                            ) : null}
                         </Modal>
 
                         {/* Reset Password Modal */}
@@ -551,9 +788,11 @@ export default function UserPage({ users, permissions = [], search: searchProp =
                                     <input
                                         type="password"
                                         placeholder="Enter new password"
-                                        className="w-full px-3 py-[12px] border border-gray-300 rounded-xl transition-colors text-gray-600 focus:ring-3 focus:ring-gray-100 focus:outline-none text-[18px] font-medium mb-2"
-                                        value={resetPassword}
-                                        onChange={e => setResetPassword(e.target.value)}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-xl transition-colors text-gray-600 focus:ring-3 focus:ring-gray-100 focus:outline-none text-[18px] font-medium"
+                                        value={resetPassword || ""}
+                                        onChange={(e) =>
+                                            setResetPassword(e.target.value)
+                                        }
                                         disabled={resetProcessing}
                                     />
                                     {resetError && (

@@ -15,23 +15,44 @@ class UserController extends Controller
 {
     public function index(Request $request)
     {
-        $query = User::with(['roles', 'permissions']);
+        $baseQuery = User::with(['roles', 'permissions']);
 
+        // Apply search filter to base query
         if ($request->filled('search')) {
             $search = $request->input('search');
-            $query->where(function ($q) use ($search) {
+            $baseQuery->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                   ->orWhere('email', 'like', "%{$search}%");
             });
         }
 
-        $users = $query->paginate(10)->appends($request->only('search'));
+        // Get paginated results
+        $users = $baseQuery->paginate(10)->appends($request->only('search'));
         $permissions = Permission::all();
+
+        // Calculate stats for TOTAL users in database (ignore search filter)
+        $studentCount = User::whereHas('permissions', function ($q) {
+            $q->where('name', 'student');
+        })->whereDoesntHave('roles')->count();
+
+        $employeeCount = User::whereHas('roles')->count();
+
+        $normalCount = User::whereDoesntHave('permissions')
+            ->whereDoesntHave('roles')
+            ->count();
+
+        $userStats = [
+            'total' => User::count(),
+            'employees' => $employeeCount,
+            'students' => $studentCount,
+            'normal' => $normalCount,
+        ];
 
         return Inertia::render('Users/Index', [
             'users' => $users,
             'permissions' => $permissions,
             'search' => $request->input('search', ''),
+            'userStats' => $userStats,
         ]);
     }
 
