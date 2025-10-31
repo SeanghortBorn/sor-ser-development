@@ -10,12 +10,23 @@ use App\Http\Controllers\Controller;
 
 class RolesController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $roles = Role::latest()->paginate(10)->appends(request()->query());
+        $search = $request->input('search');
+        $roles = Role::with('permissions')
+            ->when($search, function ($query, $search) {
+                $query->where('name', 'like', "%{$search}%")
+                    ->orWhereHas('permissions', function ($q) use ($search) {
+                        $q->where('name', 'like', "%{$search}%");
+                    });
+            })
+            ->orderBy('id', 'asc')
+            ->paginate(10)
+            ->appends(['search' => $search]);
 
         return Inertia::render('Roles/Index', [
-            'roles' => $roles
+            'roles' => $roles,
+            'search' => $search,
         ]);
     }
 
