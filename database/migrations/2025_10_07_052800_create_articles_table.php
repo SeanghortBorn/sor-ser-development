@@ -16,8 +16,8 @@ return new class extends Migration
                 $table->id();
                 $table->foreignId('user_id')->constrained()->onDelete('cascade');
                 $table->string('title');
-                $table->foreignId('file_id')->nullable()->constrained('files');
-                $table->foreignId('audios_id')->nullable()->constrained('audios');
+                $table->foreignId('file_id')->nullable()->constrained('files')->onDelete('cascade');
+                $table->foreignId('audios_id')->nullable()->constrained('audios')->onDelete('cascade');
                 $table->timestamps();
             });
         }

@@ -252,10 +252,31 @@ class ArticleController extends Controller
      */
     public function destroy(Article $article, $id)
     {
-        $rsDatasModel = Article::find($id);
-        $rsDatasModel->delete();
+        $article = Article::with(['file', 'audio'])->find($id);
+        
+        if (!$article) {
+            return back()->with('error', 'Article not found');
+        }
 
-        return back()->with('message', 'Deleted successfully');
+        // Delete physical files from storage
+        if ($article->file && $article->file->file_path) {
+            $path = str_replace('/storage/', 'public/', $article->file->file_path);
+            if (Storage::exists($path)) {
+                Storage::delete($path);
+            }
+        }
+
+        if ($article->audio && $article->audio->file_path) {
+            $path = str_replace('/storage/', 'public/', $article->audio->file_path);
+            if (Storage::exists($path)) {
+                Storage::delete($path);
+            }
+        }
+
+        // Delete database records (cascade will handle file/audio deletion)
+        $article->delete();
+
+        return back()->with('message', 'Article and related files deleted successfully');
     }
 
     /**

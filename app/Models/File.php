@@ -13,4 +13,9 @@ class File extends Model
         'file_type',
         'word_count',
     ];
+
+    public function articles()
+    {
+        return $this->hasMany(Article::class, 'file_id');
+    }
 }

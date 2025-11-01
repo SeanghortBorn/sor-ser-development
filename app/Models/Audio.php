@@ -14,4 +14,9 @@ class Audio extends Model
         'file_size',
         'duration',
     ];
+
+    public function articles()
+    {
+        return $this->hasMany(Article::class, 'audios_id');
+    }
 }
