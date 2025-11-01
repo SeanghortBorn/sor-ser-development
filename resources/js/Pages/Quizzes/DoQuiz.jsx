@@ -16,7 +16,7 @@ export default function Quiz() {
     const [reviewMode, setReviewMode] = useState(false);
     const [userAnswers, setUserAnswers] = useState([]);
     const [currentQuestionIdx, setCurrentQuestionIdx] = useState(0);
-    
+
     const [canAccessLibrary, setCanAccessLibrary] = useState(() => {
         if (auth?.can?.["student"]) return true;
         if (
@@ -178,11 +178,47 @@ export default function Quiz() {
                 <QuizzesSection />
 
                 {canAccessLibrary !== true ? (
-                    <></>
+                    <>
+                        <div className="flex justify-between items-center text-md">
+                            <span className="text-gray-500 text-md">
+                                Try it out above by using{" "}
+                                <span className="font-semibold">
+                                    handwritten notes.
+                                </span>
+                            </span>
+                            <span className="text-gray-500 text-md">
+                                Don't have any content? {""}
+                                <button className="text-blue-500 text-md hover:underline">
+                                    Create from scratch
+                                </button>
+                            </span>
+                        </div>
+                    </>
                 ) : (
                     <div className="max-w-7xl mx-auto px-2">
+                        {/* Welcome Screen */}
                         {!quizStarted && (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="text-center mb-12"
+                            >
+                                {/* <div className="inline-block p-4 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-full mb-6">
+                                    <BookOpen className="w-12 h-12 text-blue-600" />
+                                </div>
+                                <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+                                    Quiz Hub
+                                </h1>
+                                <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                                    Test your knowledge with interactive quizzes
+                                    and track your progress
+                                </p> */}
+                            </motion.div>
+                        )}
+
+                        {/* Quiz List */}
+                        {!quizStarted && (
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 {quizzes.map((quiz) => (
                                     <motion.div
                                         key={quiz.id}

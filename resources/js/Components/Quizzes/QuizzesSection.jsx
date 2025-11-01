@@ -254,7 +254,7 @@ export default function QuizzesSection() {
 
                     {/* Access Denied Modal Overlay */}
                     {canAccessLibrary === false && (
-                        <div className="absolute inset-0 bg-opacity-30 flex items-center justify-center z-50 rounded-2xl">
+                        <div className="absolute inset-0 bg-opacity-30 flex items-center justify-center z-10 rounded-2xl">
                             <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8 w-full max-w-xl mx-4">
                                 <div className="text-center">
                                     <h2 className="text-2xl font-semibold text-gray-900 mb-3">
