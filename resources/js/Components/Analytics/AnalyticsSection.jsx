@@ -3,6 +3,7 @@ import { usePage } from "@inertiajs/react";
 import Chart from "react-apexcharts";
 import { ArrowUpRight, FileText, CheckCircle2, Clock } from "lucide-react";
 import HomophonePieCharts from "./HomophonePieCharts";
+import RecentArticles from "./RecentArticles";
 
 const monthlyData = [
     { month: "Monday", shipment: 80, delivery: 90 },
@@ -311,6 +312,8 @@ export default function AnalyticsSection() {
                 </div>
             </div>
             <HomophonePieCharts />
+
+            <RecentArticles />
         </div>
     );
 }
