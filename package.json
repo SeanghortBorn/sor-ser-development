@@ -28,7 +28,7 @@
         "@nivo/radar": "^0.99.0",
         "@popperjs/core": "^2.11.8",
         "admin-lte": "^3.2.0",
-        "apexcharts": "^5.3.5",
+        "apexcharts": "^5.3.6",
         "bootstrap": "^4.3.1",
         "flag-icons": "^7.5.0",
         "framer-motion": "^12.23.22",

@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { BookOpen, CheckCircle, Award, Clock, BarChart3 } from "lucide-react";
 import QuizzesSection from "@/Components/Quizzes/QuizzesSection";
 import Footer from "@/Components/Footer/Footer";
+import QuizModal from "@/Components/Quizzes/QuizModal";
 
 export default function Quiz() {
     const { quizData, auth } = usePage().props;
@@ -172,9 +173,16 @@ export default function Quiz() {
     return (
         <>
             <Head title="Quiz" />
-            <HeaderNavbar />
 
-            <div className="min-h-screen w-full py-12 max-w-7xl mx-auto">
+            {/* show navbar only when not in-quiz modal */}
+            {!quizStarted && <HeaderNavbar />}
+
+            {/* Main page: hide while quizStarted (modal active) */}
+            <div
+                className={`min-h-screen w-full py-12 max-w-7xl mx-auto ${
+                    quizStarted ? "hidden" : ""
+                }`}
+            >
                 <QuizzesSection />
 
                 {canAccessLibrary !== true ? (
@@ -774,16 +782,22 @@ export default function Quiz() {
                                         Review Answers
                                     </button>
                                     <button
-                                        onClick={handleRestart}
+                                        onClick={() => {
+                                            handleRestart();
+                                            setTimeout(
+                                                () => handleStartQuiz(currentQuiz),
+                                                150
+                                            );
+                                        }}
                                         className="px-6 py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold transition-all shadow-md hover:shadow-lg"
                                     >
-                                        Try Another
+                                        Try Again
                                     </button>
                                     <button
                                         onClick={handleDone}
                                         className="px-6 py-3 rounded-lg bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-semibold transition-all shadow-md hover:shadow-lg"
                                     >
-                                        Done
+                                        Done (Exit Quiz)
                                     </button>
                                 </div>
                             </motion.div>
@@ -957,7 +971,33 @@ export default function Quiz() {
                 )}
             </div>
 
-            <Footer />
+            {/* Fullscreen quiz modal (no navbar/footer) - replaced by QuizModal component */}
+            {quizStarted && currentQuiz && (
+                <QuizModal
+                    currentQuiz={currentQuiz}
+                    currentQuestionIdx={currentQuestionIdx}
+                    userAnswers={userAnswers}
+                    showResult={showResult}
+                    reviewMode={reviewMode}
+                    score={score}
+                    onAnswerChange={handleAnswerChange}
+                    onNext={handleNextQuestion}
+                    onPrev={handlePrevQuestion}
+                    onSubmit={handleSubmitQuiz}
+                    onRestart={handleRestart}
+                    onDone={handleDone}
+                    onStartAgain={() => {
+                        handleRestart();
+                        setTimeout(() => handleStartQuiz(currentQuiz), 150);
+                    }}
+                    setCurrentQuestionIdx={setCurrentQuestionIdx}
+                    setReviewMode={setReviewMode}
+                    setQuizStarted={setQuizStarted}
+                />
+            )}
+
+            {/* show footer only when not in-quiz modal */}
+            {!quizStarted && <Footer />}
         </>
     );
 }
