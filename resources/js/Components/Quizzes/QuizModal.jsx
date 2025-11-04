@@ -471,157 +471,157 @@ export default function QuizModal({
             )}
 
             {showResult && reviewMode && (
-  <div className="min-h-screen bg-white overflow-y-auto">
-    {/* Sticky Header */}
-    <div className="sticky top-0 bg-white border-b z-10 p-4">
-      <div className="max-w-3xl mx-auto flex items-center justify-between">
-        <button onClick={() => setReviewMode(false)} className="text-gray-600 hover:text-gray-800">
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
-        <h2 className="text-xl font-bold text-gray-800">Answers Review</h2>
-        <button onClick={handleClose} className="text-gray-600 hover:text-gray-800">
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-      </div>
-    </div>
-
-    <div className="max-w-3xl mx-auto p-6 pb-20 space-y-6">
-      <div className="text-center mb-6">
-        <p className="text-lg text-gray-600">
-          Score: <span className="font-bold text-gray-800">{score}/{currentQuiz.questions.length}</span>
-        </p>
-      </div>
-
-      {currentQuiz.questions.map((cq, idx) => {
-        const user = userAnswers[idx] || {};
-        const isCorrect = !!user.isCorrect;
-
-        return (
-          <div key={idx} className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-            <div className={`p-4 ${isCorrect ? 'bg-green-50' : 'bg-white'}`}>
-              {/* Question Header */}
-              <div className="flex items-start gap-3 mb-3">
-                <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${isCorrect ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`}>
-                  {isCorrect ? '✓' : '✗'}
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-500 text-sm font-semibold">{idx + 1}.</span>
-                    <span className="text-xs font-semibold text-blue-500 bg-blue-100 px-2 py-0.5 rounded-full">
-                      {cq.type}
-                    </span>
-                  </div>
-                  <p className="text-gray-800 font-semibold text-base mt-1">{cq.text}</p>
-                </div>
-                {isCorrect ? (
-                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-green-500 text-white">Correct</span>
-                ) : (
-                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-red-500 text-white">Incorrect</span>
-                )}
-              </div>
-
-              {/* ANSWERS */}
-              <div className="pl-9 space-y-2 text-sm">
-                {/* True/False */}
-                {cq.type === "True/False" && (
-                  <div>
-                    <p>
-                      Your answer:{' '}
-                      <span className={`font-semibold ${user.answer === cq.correct_answer ? 'text-green-600' : 'text-red-600'}`}>
-                        {String(user.answer)}
-                      </span>
-                    </p>
-                    <p>
-                      Correct answer:{' '}
-                      <span className="font-semibold text-green-600">{String(cq.correct_answer)}</span>
-                    </p>
-                  </div>
-                )}
-
-                {/* Multiple Choice */}
-                {cq.type === "Multiple Choice" && cq.options?.map((opt, i) => {
-                  const isUserChoice = user.answer === opt;
-                  const isCorrectChoice = cq.correct_answer === opt;
-                  if (!isUserChoice && !isCorrectChoice) return null;
-                  return (
-                    <div key={i} className={`px-3 py-2 rounded-md border ${isCorrectChoice ? 'border-green-400 bg-green-50 text-green-700' : isUserChoice ? 'border-red-400 bg-red-50 text-red-700' : 'border-gray-200'}`}>
-                      {opt}
-                    </div>
-                  );
-                })}
-
-                {/* Checkbox / Checkboxes */}
-                {(cq.type === "Checkbox" || cq.type === "Checkboxes") && (
-                  <div className="space-y-1">
-                    <p className="font-semibold">Your answer:</p>
-                    <div className="flex flex-wrap gap-2">
-                      {(Array.isArray(user.answer) ? user.answer : []).map((opt, i) => (
-                        <span key={i} className="px-2 py-1 rounded-md bg-red-50 border border-red-400 text-red-700">{opt}</span>
-                      ))}
-                      {(!user.answer || user.answer.length === 0) && <span className="text-gray-400">—</span>}
-                    </div>
-                    <p className="font-semibold mt-1">Correct answer:</p>
-                    <div className="flex flex-wrap gap-2">
-                      {(Array.isArray(cq.correct_answer) ? cq.correct_answer : []).map((opt, i) => (
-                        <span key={i} className="px-2 py-1 rounded-md bg-green-50 border border-green-400 text-green-700">{opt}</span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Fill-in / Fill-in-the-blank */}
-                {(cq.type === "Fill-in" || cq.type === "Fill-in-the-blank") && (
-                  <div>
-                    <p>
-                      Your answer:{' '}
-                      <span className={`font-semibold ${user.answer?.toLowerCase() === cq.correct_answer?.toLowerCase() ? 'text-green-600' : 'text-red-600'}`}>
-                        {user.answer || '—'}
-                      </span>
-                    </p>
-                    <p>
-                      Correct answer:{' '}
-                      <span className="font-semibold text-green-600">{cq.correct_answer}</span>
-                    </p>
-                  </div>
-                )}
-
-                {/* Matching */}
-                {cq.type === "Matching" && (
-                  <div className="space-y-2">
-                    {user.answer && (
-                      <div className={`p-3 rounded-xl border ${isCorrect ? 'border-green-400 bg-green-50' : 'border-red-300 bg-red-50'}`}>
-                        <p className="font-semibold text-gray-700 mb-1">Your answer:</p>
-                        {Array.isArray(user.answer) && user.answer.map((pair, idx) => (
-                          <div key={idx} className="flex justify-between text-gray-700">
-                            <span>{pair.left}</span>
-                            <span>= {pair.right}</span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    <div className="p-3 rounded-xl border border-green-500 bg-green-50">
-                      <p className="font-semibold text-gray-700 mb-1">Correct answer:</p>
-                      {Array.isArray(cq.correct_answer) && cq.correct_answer.map((pair, idx) => (
-                        <div key={idx} className="flex justify-between text-gray-700">
-                          <span>{pair.left}</span>
-                          <span>= {pair.right}</span>
+                <div className="min-h-screen bg-white overflow-y-auto">
+                    {/* Sticky Header */}
+                    <div className="sticky top-0 bg-white border-b z-10 p-4">
+                        <div className="max-w-3xl mx-auto flex items-center justify-between">
+                            <button onClick={() => setReviewMode(false)} className="text-gray-600 hover:text-gray-800">
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                </svg>
+                            </button>
+                            <h2 className="text-xl font-bold text-gray-800">Answers Review</h2>
+                            <button onClick={handleClose} className="text-gray-600 hover:text-gray-800">
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
                         </div>
-                      ))}
                     </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  </div>
-)}
+
+                    <div className="max-w-3xl mx-auto p-6 pb-20 space-y-6">
+                        <div className="text-center mb-6">
+                            <p className="text-lg text-gray-600">
+                                Score: <span className="font-bold text-gray-800">{score}/{currentQuiz.questions.length}</span>
+                            </p>
+                        </div>
+
+                        {currentQuiz.questions.map((cq, idx) => {
+                            const user = userAnswers[idx] || {};
+                            const isCorrect = !!user.isCorrect;
+
+                            return (
+                                <div key={idx} className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+                                    <div className={`p-4 ${isCorrect ? 'bg-green-50' : 'bg-white'}`}>
+                                        {/* Question Header */}
+                                        <div className="flex items-start gap-3 mb-3">
+                                            <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${isCorrect ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`}>
+                                                {isCorrect ? '✓' : '✗'}
+                                            </div>
+                                            <div className="flex-1">
+                                                <div className="flex items-center justify-between">
+                                                    <span className="text-gray-500 text-sm font-semibold">{idx + 1}.</span>
+                                                    <span className="text-xs font-semibold text-blue-500 bg-blue-100 px-2 py-0.5 rounded-full">
+                                                        {cq.type}
+                                                    </span>
+                                                </div>
+                                                <p className="text-gray-800 font-semibold text-base mt-1">{cq.text}</p>
+                                            </div>
+                                            {isCorrect ? (
+                                                <span className="px-3 py-1 rounded-full text-xs font-bold bg-green-500 text-white">Correct</span>
+                                            ) : (
+                                                <span className="px-3 py-1 rounded-full text-xs font-bold bg-red-500 text-white">Incorrect</span>
+                                            )}
+                                        </div>
+
+                                        {/* ANSWERS */}
+                                        <div className="pl-9 space-y-2 text-sm">
+                                            {/* True/False */}
+                                            {cq.type === "True/False" && (
+                                                <div>
+                                                    <p>
+                                                        Your answer:{' '}
+                                                        <span className={`font-semibold ${user.answer === cq.correct_answer ? 'text-green-600' : 'text-red-600'}`}>
+                                                            {String(user.answer)}
+                                                        </span>
+                                                    </p>
+                                                    <p>
+                                                        Correct answer:{' '}
+                                                        <span className="font-semibold text-green-600">{String(cq.correct_answer)}</span>
+                                                    </p>
+                                                </div>
+                                            )}
+
+                                            {/* Multiple Choice */}
+                                            {cq.type === "Multiple Choice" && cq.options?.map((opt, i) => {
+                                                const isUserChoice = user.answer === opt;
+                                                const isCorrectChoice = cq.correct_answer === opt;
+                                                if (!isUserChoice && !isCorrectChoice) return null;
+                                                return (
+                                                    <div key={i} className={`px-3 py-2 rounded-md border ${isCorrectChoice ? 'border-green-400 bg-green-50 text-green-700' : isUserChoice ? 'border-red-400 bg-red-50 text-red-700' : 'border-gray-200'}`}>
+                                                        {opt}
+                                                    </div>
+                                                );
+                                            })}
+
+                                            {/* Checkbox / Checkboxes */}
+                                            {(cq.type === "Checkbox" || cq.type === "Checkboxes") && (
+                                                <div className="space-y-1">
+                                                    <p className="font-semibold">Your answer:</p>
+                                                    <div className="flex flex-wrap gap-2">
+                                                        {(Array.isArray(user.answer) ? user.answer : []).map((opt, i) => (
+                                                            <span key={i} className="px-2 py-1 rounded-md bg-red-50 border border-red-400 text-red-700">{opt}</span>
+                                                        ))}
+                                                        {(!user.answer || user.answer.length === 0) && <span className="text-gray-400">—</span>}
+                                                    </div>
+                                                    <p className="font-semibold mt-1">Correct answer:</p>
+                                                    <div className="flex flex-wrap gap-2">
+                                                        {(Array.isArray(cq.correct_answer) ? cq.correct_answer : []).map((opt, i) => (
+                                                            <span key={i} className="px-2 py-1 rounded-md bg-green-50 border border-green-400 text-green-700">{opt}</span>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* Fill-in / Fill-in-the-blank */}
+                                            {(cq.type === "Fill-in" || cq.type === "Fill-in-the-blank") && (
+                                                <div>
+                                                    <p>
+                                                        Your answer:{' '}
+                                                        <span className={`font-semibold ${user.answer?.toLowerCase() === cq.correct_answer?.toLowerCase() ? 'text-green-600' : 'text-red-600'}`}>
+                                                            {user.answer || '—'}
+                                                        </span>
+                                                    </p>
+                                                    <p>
+                                                        Correct answer:{' '}
+                                                        <span className="font-semibold text-green-600">{cq.correct_answer}</span>
+                                                    </p>
+                                                </div>
+                                            )}
+
+                                            {/* Matching */}
+                                            {cq.type === "Matching" && (
+                                                <div className="space-y-2">
+                                                    {user.answer && (
+                                                        <div className={`p-3 rounded-xl border ${isCorrect ? 'border-green-400 bg-green-50' : 'border-red-300 bg-red-50'}`}>
+                                                            <p className="font-semibold text-gray-700 mb-1">Your answer:</p>
+                                                            {Array.isArray(user.answer) && user.answer.map((pair, idx) => (
+                                                                <div key={idx} className="flex justify-between text-gray-700">
+                                                                    <span>{pair.left}</span>
+                                                                    <span>= {pair.right}</span>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                    <div className="p-3 rounded-xl border border-green-500 bg-green-50">
+                                                        <p className="font-semibold text-gray-700 mb-1">Correct answer:</p>
+                                                        {Array.isArray(cq.correct_answer) && cq.correct_answer.map((pair, idx) => (
+                                                            <div key={idx} className="flex justify-between text-gray-700">
+                                                                <span>{pair.left}</span>
+                                                                <span>= {pair.right}</span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
 
         </div>
     );
