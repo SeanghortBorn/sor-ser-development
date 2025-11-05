@@ -174,6 +174,31 @@ export default function Quiz() {
         <>
             <Head title="Quiz" />
 
+            {/* Fullscreen quiz modal at top for visibility */}
+            {quizStarted && currentQuiz && (
+                <QuizModal
+                    currentQuiz={currentQuiz}
+                    currentQuestionIdx={currentQuestionIdx}
+                    userAnswers={userAnswers}
+                    showResult={showResult}
+                    reviewMode={reviewMode}
+                    score={score}
+                    onAnswerChange={handleAnswerChange}
+                    onNext={handleNextQuestion}
+                    onPrev={handlePrevQuestion}
+                    onSubmit={handleSubmitQuiz}
+                    onRestart={handleRestart}
+                    onDone={handleDone}
+                    onStartAgain={() => {
+                        handleRestart();
+                        setTimeout(() => handleStartQuiz(currentQuiz), 150);
+                    }}
+                    setCurrentQuestionIdx={setCurrentQuestionIdx}
+                    setReviewMode={setReviewMode}
+                    setQuizStarted={setQuizStarted}
+                />
+            )}
+
             {/* show navbar only when not in-quiz modal */}
             {!quizStarted && <HeaderNavbar />}
 
@@ -971,30 +996,7 @@ export default function Quiz() {
                 )}
             </div>
 
-            {/* Fullscreen quiz modal (no navbar/footer) - replaced by QuizModal component */}
-            {quizStarted && currentQuiz && (
-                <QuizModal
-                    currentQuiz={currentQuiz}
-                    currentQuestionIdx={currentQuestionIdx}
-                    userAnswers={userAnswers}
-                    showResult={showResult}
-                    reviewMode={reviewMode}
-                    score={score}
-                    onAnswerChange={handleAnswerChange}
-                    onNext={handleNextQuestion}
-                    onPrev={handlePrevQuestion}
-                    onSubmit={handleSubmitQuiz}
-                    onRestart={handleRestart}
-                    onDone={handleDone}
-                    onStartAgain={() => {
-                        handleRestart();
-                        setTimeout(() => handleStartQuiz(currentQuiz), 150);
-                    }}
-                    setCurrentQuestionIdx={setCurrentQuestionIdx}
-                    setReviewMode={setReviewMode}
-                    setQuizStarted={setQuizStarted}
-                />
-            )}
+            
 
             {/* show footer only when not in-quiz modal */}
             {!quizStarted && <Footer />}

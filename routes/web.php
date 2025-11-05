@@ -12,6 +12,7 @@ use App\Http\Controllers\TagController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\GrammarCheckerController;
 use App\Http\Controllers\ArticleController;
+use App\Http\Controllers\DashboardController;
 use App\Models\Homophone;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -34,9 +35,7 @@ Route::get('/quiz-practice', [QuizController::class, 'landingPage'])->name('quiz
 
 // Route::middleware(['auth','verified', 'check.user.role'])->group(function () {
 Route::middleware(['auth', 'check.user.role'])->group(function () {
-    Route::get('/dashboard', function () {
-        return Inertia::render('Dashboards/Dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 });
 
 // Google Authentication Routes
