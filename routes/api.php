@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\UserActivityController;
+use App\Http\Controllers\UserAudioActivityController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -34,10 +35,16 @@ Route::get('/user-activity-stats', [UserActivityController::class, 'getStats']);
 Route::get('/user-activities/stats', [UserActivityController::class, 'getStats']);
 Route::post('/accuracy', [AccuracyController::class, 'store'])->name('accuracy.store');
 
+Route::get('/user-homophone-accuracies', [AccuracyController::class, 'index']);
+Route::get('/user-comparison-activities', [UserActivityController::class, 'listComparisonActivities']);
+
 
 // Or with auth
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/track/comparison-action', [UserActivityController::class, 'trackComparisonAction']);
     Route::post('/track/audio-activity', [UserActivityController::class, 'trackAudioActivity']);
     Route::get('/track/stats', [UserActivityController::class, 'getStats']);
+    
+    // User audio activities endpoint
+    Route::get('/user-audio-activities', [UserAudioActivityController::class, 'index']);
 });

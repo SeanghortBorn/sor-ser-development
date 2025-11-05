@@ -4,33 +4,11 @@ import Chart from "react-apexcharts";
 import { ArrowUpRight, FileText, CheckCircle2, Clock } from "lucide-react";
 import HomophonePieCharts from "./HomophonePieCharts";
 import RecentArticles from "./RecentArticles";
-
-const monthlyData = [
-    { month: "Monday", shipment: 80, delivery: 90 },
-    { month: "Tuesday", shipment: 60, delivery: 45 },
-    { month: "Wednesday", shipment: 70, delivery: 60 },
-    { month: "Thursday", shipment: 40, delivery: 40 },
-    { month: "Friday", shipment: 65, delivery: 80 },
-    { month: "Saturday", shipment: 45, delivery: 65 },
-    { month: "Sunday", shipment: 50, delivery: 70 },
-];
+import { ResponsivePie } from "@nivo/pie";
 
 export default function AnalyticsSection() {
     const { auth, quizAnalysis } = usePage().props; // quizAnalysis = array of user's attempts
     const user = auth?.user;
-
-    // Calculate quiz performance
-    const userAttempts =
-        quizAnalysis?.filter((a) => a.user_id === user?.id) || [];
-    const totalCorrect = userAttempts.reduce((sum, a) => sum + a.correct, 0);
-    const totalIncorrect = userAttempts.reduce(
-        (sum, a) => sum + a.incorrect,
-        0
-    );
-    const totalQuestions = totalCorrect + totalIncorrect;
-    const percentCorrect = totalQuestions
-        ? Math.round((totalCorrect / totalQuestions) * 100)
-        : 0;
 
     const data = [
         { day: "Monday", ignores: 80, accepts: 90 },
@@ -83,12 +61,39 @@ export default function AnalyticsSection() {
 
     const series = [
         {
-            name: "Accepts",
+            name: "Articles",
             data: data.map((d) => d.accepts),
         },
         {
-            name: "Ignores",
+            name: "Quizzes",
             data: data.map((d) => d.ignores),
+        },
+    ];
+
+    const lineData = [
+        {
+            id: "incorrect",
+            label: "Incorrect",
+            value: 544,
+            color: "hsl(232, 70%, 50%)",
+        },
+        {
+            id: "missing",
+            label: "Missing",
+            value: 167,
+            color: "hsl(121, 70%, 50%)",
+        },
+        {
+            id: "correct",
+            label: "Correct",
+            value: 289,
+            color: "hsl(245, 70%, 50%)",
+        },
+        {
+            id: "extra",
+            label: "Extra",
+            value: 345,
+            color: "hsl(314, 70%, 50%)",
         },
     ];
 
@@ -170,114 +175,15 @@ export default function AnalyticsSection() {
 
             {/* Grammar Checker Statistics Card */}
             <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
-                <div className="mt-6 mb-4 bg-white rounded-2xl shadow-sm border w-full h-[55vh] border-gray-100 p-6">
-                    {/* Header */}
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <h2 className="text-lg font-semibold text-gray-800">
-                                Homophone Statistics
-                            </h2>
-                            <p className="text-sm text-gray-500">
-                                Tracking total comparisons by Daily
-                            </p>
-                        </div>
-                    </div>
-
-                    {/* Legend */}
-                    <div className="flex items-center gap-6 mb-6">
-                        <div className="flex items-center gap-2">
-                            <span className="inline-block w-3 h-3 rounded-full bg-blue-600"></span>
-                            <span className="text-sm text-gray-600">
-                                Accepts
-                            </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <span className="inline-block w-3 h-3 rounded-full bg-blue-200"></span>
-                            <span className="text-sm text-gray-600">
-                                Ignores
-                            </span>
-                        </div>
-                    </div>
-
-                    {/* Chart */}
-                    <div className="flex h-60">
-                        {/* Y-axis */}
-                        <div className="w-10 h-full flex flex-col justify-between text-xs text-gray-400">
-                            {[100, 75, 50, 25, 0].map((val) => (
-                                <span key={val} className="leading-none">
-                                    {val}%
-                                </span>
-                            ))}
-                        </div>
-
-                        {/* Chart Bars + Labels */}
-                        <div className="flex-1 relative">
-                            {/* Grid lines */}
-                            <div className="absolute inset-0 flex flex-col justify-between">
-                                {[...Array(5)].map((_, i) => (
-                                    <div
-                                        key={i}
-                                        className="border-t border-gray-200"
-                                    ></div>
-                                ))}
-                            </div>
-
-                            {/* Bars */}
-                            <div className="relative flex items-end justify-between h-full px-2 z-10">
-                                {monthlyData.map((data) => (
-                                    <div
-                                        key={data.month}
-                                        className="flex flex-col items-center flex-1"
-                                    >
-                                        {/* Bars stacked side by side */}
-                                        <div className="flex items-end gap-1 h-48">
-                                            <div
-                                                className="w-3 rounded-t-xl bg-blue-200 transition-all duration-300 hover:opacity-80"
-                                                style={{
-                                                    height: `${
-                                                        data.shipment * 1.6
-                                                    }px`,
-                                                }}
-                                                title={`Shipment: ${data.shipment}%`}
-                                            ></div>
-                                            <div
-                                                className="w-3 rounded-t-xl bg-blue-600 transition-all duration-300 hover:opacity-80"
-                                                style={{
-                                                    height: `${
-                                                        data.delivery * 1.6
-                                                    }px`,
-                                                }}
-                                                title={`Delivery: ${data.delivery}%`}
-                                            ></div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-
-                            {/* X-axis labels (fixed under bars) */}
-                            <div className="flex justify-between mt-2 px-2">
-                                {monthlyData.map((data) => (
-                                    <span
-                                        key={data.month}
-                                        className="text-xs text-gray-500 flex-1 text-center"
-                                    >
-                                        {data.month}
-                                    </span>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
                 <div className="mt-6 mb-4 bg-white rounded-2xl shadow-sm border w-full border-gray-100 p-6">
                     {/* Header */}
                     <div className="flex items-center justify-between">
                         <div>
                             <h2 className="text-lg font-semibold text-gray-800">
-                                Graph Comparison Statistics
+                                Statistics Analytics
                             </h2>
                             <p className="text-sm text-gray-500">
-                                Tracking total comparisons by Daily
+                                Tracking total performance by Daily
                             </p>
                         </div>
                     </div>
@@ -287,31 +193,98 @@ export default function AnalyticsSection() {
                         <div className="flex items-center gap-2">
                             <span className="inline-block w-3 h-3 rounded-full bg-blue-600"></span>
                             <span className="text-sm text-gray-600">
-                                Accepts
+                                Articles
                             </span>
                         </div>
                         <div className="flex items-center gap-2">
                             <span className="inline-block w-3 h-3 rounded-full bg-blue-200"></span>
                             <span className="text-sm text-gray-600">
-                                Ignores
+                                Quizzes
                             </span>
                         </div>
                     </div>
 
                     {/* Chart */}
-                    <div className="w-full h-[280px] relative">
+                    <div className="w-full h-[370px] relative">
                         <div className="absolute inset-x-0 -left-4 -right-4">
                             <Chart
                                 options={options}
                                 series={series}
                                 type="line"
-                                height={280}
+                                height={370}
                             />
                         </div>
                     </div>
                 </div>
+
+                {/* === Donut Chart === */}
+                <div className="mt-6 mb-4 bg-white rounded-2xl shadow-sm border w-full border-gray-100 p-6">
+                    {/* Header */}
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h2 className="text-lg font-semibold text-gray-800">
+                                Overall Articles Accuracy
+                            </h2>
+                            <p className="text-sm text-gray-500">
+                                Comparison of detected mistake types
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Donut Chart */}
+                    <div className="flex flex-col items-center justify-center flex-1">
+                        <div className="w-full h-[400px]">
+                            <ResponsivePie
+                                data={lineData}
+                                margin={{
+                                    top: 30,
+                                    right: 80,
+                                    bottom: 80,
+                                    left: 80,
+                                }}
+                                innerRadius={0.5} // donut shape
+                                padAngle={0.6}
+                                cornerRadius={3}
+                                activeOuterRadiusOffset={8}
+                                arcLinkLabelsSkipAngle={10}
+                                arcLinkLabelsTextColor="#333333"
+                                arcLinkLabelsThickness={2}
+                                arcLinkLabelsColor="#93c5fd"
+                                arcLabelsSkipAngle={10}
+                                arcLabelsTextColor={{
+                                    from: "color",
+                                    modifiers: [["darker", 2]],
+                                }}
+                                legends={[
+                                    {
+                                        anchor: "bottom",
+                                        direction: "row",
+                                        justify: false,
+                                        translateX: 0,
+                                        translateY: 56,
+                                        itemsSpacing: 10,
+                                        itemWidth: 90,
+                                        itemHeight: 18,
+                                        itemTextColor: "#4B5563", // gray-700
+                                        symbolSize: 18,
+                                        symbolShape: "circle",
+                                    },
+                                ]}
+                            />
+                        </div>
+                        {/* Center label */}
+                        <div className="absolute flex -mt-12 flex-col items-center justify-center pointer-events-none">
+                            <span className="text-2xl font-bold text-gray-800">
+                                100%
+                            </span>
+                            <span className="text-xs text-gray-500 font-medium tracking-wide">
+                                Overall Accuracy
+                            </span>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <HomophonePieCharts />
+            {/* <HomophonePieCharts /> */}
 
             <RecentArticles />
         </div>

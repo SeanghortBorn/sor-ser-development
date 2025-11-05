@@ -211,4 +211,43 @@ class UserActivityController extends Controller
             return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
         }
     }
+
+    // Get user comparison activity list (recent)
+    public function listComparisonActivities(Request $request)
+    {
+        try {
+            $userId = Auth::id();
+            $sessionId = $request->query('session_id') ?? $request->input('session_id') ?? null;
+            $grammarCheckerId = $request->query('grammar_checker_id') ?? $request->input('grammar_checker_id') ?? null;
+            $articleId = $request->query('article_id') ?? $request->input('article_id') ?? null;
+            $limit = (int) ($request->query('limit') ?? 200);
+
+            // If unauthenticated and no session_id provided, return empty array
+            if (!$userId && !$sessionId) {
+                return response()->json([]);
+            }
+
+            $q = DB::table('user_comparison_activities')->orderBy('created_at', 'desc');
+
+            if ($userId) {
+                $q->where('user_id', $userId);
+            } elseif ($sessionId) {
+                $q->where('session_id', $sessionId);
+            }
+
+            if (!empty($grammarCheckerId)) {
+                $q->where('grammar_checker_id', $grammarCheckerId);
+            }
+            if (!empty($articleId)) {
+                $q->where('article_id', $articleId);
+            }
+
+            $items = $q->limit($limit)->get();
+
+            return response()->json($items);
+        } catch (\Exception $e) {
+            Log::error('List comparison activities error: ' . $e->getMessage(), ['request' => $request->all()]);
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+    }
 }

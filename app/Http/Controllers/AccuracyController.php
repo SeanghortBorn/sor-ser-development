@@ -101,4 +101,33 @@ class AccuracyController extends Controller
             return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
         }
     }
+
+    // Add index method to return accuracies (scoped to current user when available)
+    public function index(Request $request)
+    {
+        try {
+            $userId = Auth::id();
+            $query = UserHomophoneAccuracy::query();
+
+            // If authenticated, return only that user's records by default
+            if ($userId) {
+                $query->where('user_id', $userId);
+            }
+
+            // Optional filters
+            if ($request->filled('grammar_checker_id')) {
+                $query->where('grammar_checker_id', $request->input('grammar_checker_id'));
+            }
+            if ($request->filled('article_id')) {
+                $query->where('article_id', $request->input('article_id'));
+            }
+
+            $items = $query->get();
+
+            return response()->json($items);
+        } catch (\Exception $e) {
+            Log::error('Accuracy index error: ' . $e->getMessage());
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+    }
 }

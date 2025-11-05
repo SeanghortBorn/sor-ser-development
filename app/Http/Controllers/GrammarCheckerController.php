@@ -11,15 +11,21 @@ class GrammarCheckerController extends Controller
 {
     public function index(Request $request)
     {
+        $userId = Auth::id();
         $query = GrammarChecker::with('tags');
+
+        // Filter by authenticated user
+        if ($userId) {
+            $query->where('user_id', $userId);
+        }
 
         // Search by title if search term is provided
         if ($request->has('search') && $request->search) {
             $query->where('title', 'like', '%' . $request->search . '%');
         }
 
-        $checkers = $query->orderBy('id', 'asc')->paginate();
-        $checkers->appends($request->only('search'));
+        // Get all records ordered by ID descending (newest first: 22, 21, 20...)
+        $checkers = $query->orderBy('id', 'desc')->get();
 
         // For API/JS fetch, return JSON
         if ($request->wantsJson()) {
