@@ -256,7 +256,7 @@ export default function Library() {
     }, [showEditNameModal]);
 
     return (
-        <>
+        <div className="bg-[#f7f8fa]" >
             <Head title="Library" />
             <HeaderNavbar />
             <div className="min-h-screen w-full max-w-7xl mx-auto py-8">
@@ -659,6 +659,6 @@ export default function Library() {
 
             {/* Footer Section */}
             <Footer />
-        </>
+        </div>
     );
 }

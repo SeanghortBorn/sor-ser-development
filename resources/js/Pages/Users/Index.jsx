@@ -65,7 +65,7 @@ export default function UserPage({
         },
         {
             id: "students",
-            label: "Students",
+            label: "Experiment Group",
             icon: "GraduationCap",
             color: "text-orange-500",
             borderColor: "border-orange-100",
@@ -75,7 +75,7 @@ export default function UserPage({
         },
         {
             id: "normal",
-            label: "Regular Users",
+            label: "Control Group",
             icon: "User",
             color: "text-purple-500",
             borderColor: "border-purple-100",

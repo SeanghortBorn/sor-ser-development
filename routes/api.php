@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\UserActivityController;
 use App\Http\Controllers\UserAudioActivityController;
+use App\Models\QuizAttempt;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -37,6 +38,10 @@ Route::post('/accuracy', [AccuracyController::class, 'store'])->name('accuracy.s
 
 Route::get('/user-homophone-accuracies', [AccuracyController::class, 'index']);
 Route::get('/user-comparison-activities', [UserActivityController::class, 'listComparisonActivities']);
+
+Route::get('/quiz-attempts', function () {
+    return QuizAttempt::all();
+});
 
 
 // Or with auth
