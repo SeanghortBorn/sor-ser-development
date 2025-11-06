@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class QuizController extends Controller
 {
@@ -43,8 +44,119 @@ class QuizController extends Controller
             });
         });
 
+        // Dynamic metrics for QuizzesSection
+        $userId = Auth::id();
+        $totalQuizzes = $quizzes->count();
+
+        // Completed = distinct quizzes attempted by the user
+        $completedCount = $userId
+            ? QuizAttempt::where('user_id', $userId)->distinct('quiz_id')->count('quiz_id')
+            : 0;
+        // In progress = available - completed (best-effort approximation)
+        $inProgressCount = max(0, $totalQuizzes - $completedCount);
+
+        // 7-day series: completed per day; inProgress approximated per day
+        $days = collect(range(6, 0))->map(function ($i) {
+            return Carbon::now()->subDays($i)->startOfDay();
+        });
+        $quizDaily = $days->map(function (Carbon $day) use ($userId, $totalQuizzes) {
+            $end = $day->copy()->endOfDay();
+            $attemptsQ = $userId
+                ? QuizAttempt::where('user_id', $userId)->whereBetween('created_at', [$day, $end])
+                : QuizAttempt::whereRaw('1=0');
+            $completed = $userId ? (int) $attemptsQ->count() : 0;
+            $avgScore = $userId ? round((float) ($attemptsQ->avg('score') ?? 0), 2) : 0.0;
+            $inProg = max(0, $totalQuizzes - $completed);
+            return [
+                'day' => $day->format('D'),
+                'completed' => $completed,
+                'inProgress' => $inProg,
+                'avgScore' => $avgScore,
+            ];
+        })->values();
+
+        // Recent attempts
+        $recentQuizzes = $userId
+            ? QuizAttempt::with('quiz')
+                ->where('user_id', $userId)
+                ->latest()
+                ->take(5)
+                ->get()
+                ->map(function ($a) {
+                    return [
+                        'id' => '#' . str_pad((string) $a->id, 5, '0', STR_PAD_LEFT),
+                        'date' => optional($a->created_at)->format('M d, Y'),
+                        'status' => 'Complete',
+                        'color' => ($a->score ?? 0) >= 60 ? 'green' : 'yellow',
+                        'title' => $a->quiz->title ?? 'Quiz',
+                        'score' => (int) ($a->score ?? 0),
+                    ];
+                })
+            : [];
+
+        // Avg score over last 7 days
+        $since = Carbon::now()->subDays(6)->startOfDay();
+        $avgScore7d = $userId
+            ? round((float) (QuizAttempt::where('user_id', $userId)
+                ->where('created_at', '>=', $since)
+                ->avg('score') ?? 0), 2)
+            : 0.0;
+
+        // Per-quiz trends and changes over last 7 days
+        $today = Carbon::now()->startOfDay();
+        $yesterday = Carbon::now()->subDay()->startOfDay();
+        $quizChange = $quizzes->map(function ($q) use ($userId, $days, $today, $yesterday) {
+            // Build 7-day trend for this quiz
+            $trend = $days->map(function (Carbon $day) use ($q, $userId) {
+                $end = $day->copy()->endOfDay();
+                $count = $userId
+                    ? QuizAttempt::where('user_id', $userId)
+                        ->where('quiz_id', $q->id)
+                        ->whereBetween('created_at', [$day, $end])
+                        ->count()
+                    : 0;
+                return [
+                    'day' => $day->format('D'),
+                    'count' => (int) $count,
+                ];
+            })->values();
+
+            $first = $trend->first()['count'] ?? 0;
+            $last = $trend->last()['count'] ?? 0;
+            $den = max(1, $first);
+            $change7d = ($first === 0 && $last > 0) ? 100 : (int) round((($last - $first) / $den) * 100);
+
+            // Today / Yesterday counts
+            $todayCount = $userId ? QuizAttempt::where('user_id', $userId)
+                ->where('quiz_id', $q->id)
+                ->whereBetween('created_at', [$today, $today->copy()->endOfDay()])
+                ->count() : 0;
+            $yesterdayCount = $userId ? QuizAttempt::where('user_id', $userId)
+                ->where('quiz_id', $q->id)
+                ->whereBetween('created_at', [$yesterday, $yesterday->copy()->endOfDay()])
+                ->count() : 0;
+
+            return [
+                'quiz_id' => $q->id,
+                'title' => $q->title,
+                'today' => (int) $todayCount,
+                'yesterday' => (int) $yesterdayCount,
+                'changePercent7d' => $change7d,
+                'trend7d' => $trend,
+            ];
+        })->sortByDesc('changePercent7d')->values();
+
         return Inertia::render('Quizzes/DoQuiz', [
-            'quizData' => ['data' => $quizzes]
+            'quizData' => ['data' => $quizzes],
+            'quizSummary' => [
+                'total' => $totalQuizzes,
+                'completed' => $completedCount,
+                'inProgress' => $inProgressCount,
+                'avgScore7d' => $avgScore7d,
+            ],
+            'quizDaily' => $quizDaily,
+            'recentQuizzes' => $recentQuizzes,
+            'quizChange' => $quizChange,
         ]);
     }
 
