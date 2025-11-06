@@ -19,11 +19,13 @@ export default function AnalyticsSection() {
     const [scoreLoaded, setScoreLoaded] = useState(false);
     const [performanceGrowth, setPerformanceGrowth] = useState(null);
     const [performanceGrowthRecords, setPerformanceGrowthRecords] = useState(0);
-    const [performanceGrowthPrevAvg, setPerformanceGrowthPrevAvg] = useState(null);
+    const [performanceGrowthPrevAvg, setPerformanceGrowthPrevAvg] =
+        useState(null);
     const [growthLoaded, setGrowthLoaded] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [accuracyData, setAccuracyData] = useState([]);
     const [quizData, setQuizData] = useState([]);
+    const [comparisonActivities, setComparisonActivities] = useState([]);
 
     useEffect(() => {
         let cancelled = false;
@@ -36,8 +38,22 @@ export default function AnalyticsSection() {
                 const items = Array.isArray(res.data)
                     ? res.data
                     : res.data?.data ?? [];
-                setAccuracyData(items); // <-- ADD THIS LINE
-                const validAccuracies = items
+                setAccuracyData(items);
+
+                // Filter to current month only
+                const now = new Date();
+                const currentMonth = now.getMonth();
+                const currentYear = now.getFullYear();
+
+                const currentMonthItems = items.filter((item) => {
+                    const itemDate = new Date(item.created_at);
+                    return (
+                        itemDate.getMonth() === currentMonth &&
+                        itemDate.getFullYear() === currentYear
+                    );
+                });
+
+                const validAccuracies = currentMonthItems
                     .map((item) => {
                         if (
                             item.accuracy === null ||
@@ -64,7 +80,7 @@ export default function AnalyticsSection() {
             .catch(() => {
                 setAverageAccuracy(null);
                 setAccuracyCount(0);
-                setAccuracyData([]); // <-- ADD THIS LINE
+                setAccuracyData([]);
             })
             .finally(() => setAccuracyLoaded(true));
         return () => {
@@ -82,9 +98,25 @@ export default function AnalyticsSection() {
                 const items = Array.isArray(res.data)
                     ? res.data
                     : res.data?.data ?? [];
-                setQuizData(items); // <-- ADD THIS LINE
-                setQuizAttemptCount(items.length);
-                const validScores = items
+                setQuizData(items);
+
+                // Filter to current month only
+                const now = new Date();
+                const currentMonth = now.getMonth();
+                const currentYear = now.getFullYear();
+
+                const currentMonthItems = items
+                    .filter((item) => !userId || item.user_id === userId)
+                    .filter((item) => {
+                        const itemDate = new Date(item.created_at);
+                        return (
+                            itemDate.getMonth() === currentMonth &&
+                            itemDate.getFullYear() === currentYear
+                        );
+                    });
+
+                setQuizAttemptCount(currentMonthItems.length);
+                const validScores = currentMonthItems
                     .map((item) => {
                         const score =
                             typeof item.score === "number"
@@ -114,10 +146,10 @@ export default function AnalyticsSection() {
             .catch(() => {
                 setAverageScore(null);
                 setQuizAttemptCount(0);
-                setQuizData([]); // <-- ADD THIS LINE
+                setQuizData([]);
             })
             .finally(() => setScoreLoaded(true));
-    }, []);
+    }, [userId]);
 
     useEffect(() => {
         axios
@@ -129,7 +161,21 @@ export default function AnalyticsSection() {
                 const items = Array.isArray(res.data)
                     ? res.data
                     : res.data?.data ?? [];
-                const validItems = items.filter(
+
+                // Filter to current month only
+                const now = new Date();
+                const currentMonth = now.getMonth();
+                const currentYear = now.getFullYear();
+
+                const currentMonthItems = items.filter((item) => {
+                    const itemDate = new Date(item.created_at);
+                    return (
+                        itemDate.getMonth() === currentMonth &&
+                        itemDate.getFullYear() === currentYear
+                    );
+                });
+
+                const validItems = currentMonthItems.filter(
                     (item) =>
                         item.accuracy !== null &&
                         item.accuracy !== undefined &&
@@ -216,7 +262,15 @@ export default function AnalyticsSection() {
         const getDayAbbr = (dateString) => {
             const date = new Date(dateString);
             const dayIndex = date.getDay();
-            const dayAbbrMap = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+            const dayAbbrMap = [
+                "Sun",
+                "Mon",
+                "Tue",
+                "Wed",
+                "Thu",
+                "Fri",
+                "Sat",
+            ];
             return dayAbbrMap[dayIndex];
         };
 
@@ -303,69 +357,140 @@ export default function AnalyticsSection() {
         },
     ];
 
-    const lineData = [
-        {
-            id: "incorrect",
-            label: "Incorrect",
-            value: 544,
-            color: "hsl(232, 70%, 50%)",
-        },
-        {
-            id: "missing",
-            label: "Missing",
-            value: 167,
-            color: "hsl(121, 70%, 50%)",
-        },
-        {
-            id: "correct",
-            label: "Correct",
-            value: 289,
-            color: "hsl(245, 70%, 50%)",
-        },
-        {
-            id: "extra",
-            label: "Extra",
-            value: 345,
-            color: "hsl(314, 70%, 50%)",
-        },
-    ];
+    // Fetch comparison activities for the current user (current month only)
+    useEffect(() => {
+        axios
+            .get("/api/user-comparison-activities", {
+                headers: { Accept: "application/json" },
+                withCredentials: true,
+            })
+            .then((res) => {
+                const items = Array.isArray(res.data)
+                    ? res.data
+                    : res.data?.data ?? [];
+
+                // Filter by current user ID and current month
+                const now = new Date();
+                const currentMonth = now.getMonth();
+                const currentYear = now.getFullYear();
+
+                const userActivities = (
+                    userId
+                        ? items.filter((item) => item.user_id === userId)
+                        : items
+                ).filter((item) => {
+                    const itemDate = new Date(item.created_at);
+                    return (
+                        itemDate.getMonth() === currentMonth &&
+                        itemDate.getFullYear() === currentYear
+                    );
+                });
+
+                setComparisonActivities(userActivities);
+            })
+            .catch(() => {
+                setComparisonActivities([]);
+            });
+    }, [userId]);
+
+    // Build dynamic lineData from comparison activities
+    const buildDynamicLineData = () => {
+        const counts = {
+            incorrect: 0,
+            missing: 0,
+            correct: 0,
+            extra: 0,
+        };
+
+        // Count by comparison_type
+        comparisonActivities.forEach((activity) => {
+            if (activity.comparison_type === "replaced") {
+                counts.incorrect += 1;
+            } else if (activity.comparison_type === "missing") {
+                counts.missing += 1;
+            } else if (activity.comparison_type === "extra") {
+                counts.extra += 1;
+            }
+        });
+
+        // Assume "correct" is total comparisons minus errors
+        const totalComparisons = comparisonActivities.length;
+        counts.correct = Math.max(
+            0,
+            totalComparisons -
+                (counts.incorrect + counts.missing + counts.extra)
+        );
+
+        return [
+            {
+                id: "incorrect",
+                label: "Incorrect",
+                value: counts.incorrect,
+                color: "hsl(232, 70%, 50%)",
+            },
+            {
+                id: "missing",
+                label: "Missing",
+                value: counts.missing,
+                color: "hsl(121, 70%, 50%)",
+            },
+            {
+                id: "correct",
+                label: "Correct",
+                value: counts.correct,
+                color: "hsl(245, 70%, 50%)",
+            },
+            {
+                id: "extra",
+                label: "Extra",
+                value: counts.extra,
+                color: "hsl(314, 70%, 50%)",
+            },
+        ];
+    };
+
+    const lineData = buildDynamicLineData();
+
+    // Calculate overall accuracy percentage
+    const calculateAccuracyPercentage = () => {
+        const totalComparisons = comparisonActivities.length;
+        if (totalComparisons === 0) return "0";
+
+        const correctCount = comparisonActivities.filter((activity) => {
+            return (
+                activity.comparison_type !== "replaced" &&
+                activity.comparison_type !== "missing" &&
+                activity.comparison_type !== "extra"
+            );
+        }).length;
+
+        const accuracy = (correctCount / totalComparisons) * 100;
+        return accuracy.toFixed(1);
+    };
+
+    const hasData = comparisonActivities.length > 0;
 
     return (
         <div className="mb-8 mt-4">
             {/* Top Stats */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                {isLoading ? (
-                    // 🟦 Skeleton Loader - Matches card layout 1:1
-                    [...Array(4)].map((_, i) => (
-                        <div
-                            key={i}
-                            className="bg-white rounded-xl px-3 py-3 border-l-4 border-blue-100 shadow-sm flex flex-col justify-between hover:shadow-md transition-all duration-200 animate-pulse"
-                        >
-                            {/* Header: Title + Icon */}
-                            <div className="flex items-center justify-between mb-3">
-                                <div className="h-4 w-32 bg-slate-200 rounded"></div>
-                                <div className="h-7 w-7 bg-slate-300 rounded-lg"></div>
+                <>
+                    {/* Accuracy all homophone*/}
+                    <div className="bg-white px-3 pt-3 border-l-4 border-sky-100 shadow-sm rounded-xl flex flex-col hover:shadow-md transition-all duration-200">
+                        <div className="flex items-center justify-between">
+                            <p className="text-gray-800 text-base font-semibold">
+                                Homophone Accuracy
+                            </p>
+                            <div className="text-blue-500">
+                                <Radar className="w-7 h-7" />
                             </div>
-
-                            {/* Value */}
-                            <div className="h-6 w-20 bg-slate-300 rounded mb-2"></div>
-
-                            {/* Subtitle */}
-                            <div className="h-4 w-40 bg-slate-200 rounded"></div>
                         </div>
-                    ))
-                ) : (
-                    <>
-                        {/* Accuracy all homophone*/}
-                        <div className="bg-white px-3 pt-3 border-l-4 border-sky-100 shadow-sm rounded-xl flex flex-col hover:shadow-md transition-all duration-200">
-                            <div className="flex items-center justify-between">
-                                <p className="text-gray-800 text-base font-semibold">
-                                    Homophone Accuracy
-                                </p>
-                                <div className="text-blue-500">
-                                    <Radar className="w-7 h-7" />
-                                </div>
+                        {isLoading ? (
+                            <div className="space-y-2">
+                                <div className="h-6 w-24 bg-slate-300 rounded"></div>
+                                <div className="h-6 w-40 bg-slate-200 rounded mb-3"></div>
                             </div>
+                        ) : (
                             <div>
                                 <h2
                                     className={`text-lg font-bold ${
@@ -387,18 +512,25 @@ export default function AnalyticsSection() {
                                         : "No accuracy data"}
                                 </p>
                             </div>
-                        </div>
+                        )}
+                    </div>
 
-                        {/* Average Score (%) */}
-                        <div className="bg-white px-3 pt-3 border-l-4 border-amber-100 shadow-sm rounded-xl flex flex-col hover:shadow-md transition-all duration-200">
-                            <div className="flex items-center justify-between">
-                                <p className="text-gray-800 text-base font-semibold">
-                                    Average Score
-                                </p>
-                                <div className="text-blue-500">
-                                    <BarChart3 className="w-7 h-7" />
-                                </div>
+                    {/* Average Score (%) */}
+                    <div className="bg-white px-3 pt-3 border-l-4 border-amber-100 shadow-sm rounded-xl flex flex-col hover:shadow-md transition-all duration-200">
+                        <div className="flex items-center justify-between">
+                            <p className="text-gray-800 text-base font-semibold">
+                                Average Score
+                            </p>
+                            <div className="text-blue-500">
+                                <BarChart3 className="w-7 h-7" />
                             </div>
+                        </div>
+                        {isLoading ? (
+                            <div className="space-y-2">
+                                <div className="h-6 w-24 bg-slate-300 rounded"></div>
+                                <div className="h-6 w-40 bg-slate-200 rounded mb-3"></div>
+                            </div>
+                        ) : (
                             <div>
                                 <h2
                                     className={`text-lg font-bold ${
@@ -416,22 +548,33 @@ export default function AnalyticsSection() {
                                 </h2>
                                 <p className="text-xs text-gray-500 mt-1">
                                     {quizAttemptCount > 0
-                                        ? `Average of all completed quizzes`
+                                        ? `${quizAttemptCount} quiz${
+                                              quizAttemptCount !== 1
+                                                  ? "zes"
+                                                  : ""
+                                          } completed`
                                         : "No quiz attempts"}
                                 </p>
                             </div>
-                        </div>
+                        )}
+                    </div>
 
-                        {/* Performance Growth */}
-                        <div className="bg-white px-3 pt-3 border-l-4 border-emerald-100 shadow-sm rounded-xl flex flex-col hover:shadow-md transition-all duration-200">
-                            <div className="flex items-center justify-between">
-                                <p className="text-gray-800 text-base font-semibold">
-                                    Performance Growth
-                                </p>
-                                <div className="text-blue-500">
-                                    <TrendingUp className="w-7 h-7" />
-                                </div>
+                    {/* Performance Growth */}
+                    <div className="bg-white px-3 pt-3 border-l-4 border-emerald-100 shadow-sm rounded-xl flex flex-col hover:shadow-md transition-all duration-200">
+                        <div className="flex items-center justify-between">
+                            <p className="text-gray-800 text-base font-semibold">
+                                Performance Growth
+                            </p>
+                            <div className="text-blue-500">
+                                <TrendingUp className="w-7 h-7" />
                             </div>
+                        </div>
+                        {isLoading ? (
+                            <div className="space-y-2">
+                                <div className="h-6 w-24 bg-slate-300 rounded"></div>
+                                <div className="h-6 w-40 bg-slate-200 rounded mb-3"></div>
+                            </div>
+                        ) : (
                             <div>
                                 <h2
                                     className={`text-lg font-bold ${
@@ -451,18 +594,25 @@ export default function AnalyticsSection() {
                                     Updated Daily
                                 </p>
                             </div>
-                        </div>
+                        )}
+                    </div>
 
-                        {/* Study session*/}
-                        <div className="bg-white px-3 pt-3 border-l-4 border-indigo-300 shadow-sm rounded-xl flex flex-col hover:shadow-md transition-all duration-200">
-                            <div className="flex items-center justify-between">
-                                <p className="text-gray-800 text-base font-semibold">
-                                    Study Sessions
-                                </p>
-                                <div className="text-blue-500">
-                                    <BookOpen className="w-7 h-7" />
-                                </div>
+                    {/* Study session*/}
+                    <div className="bg-white px-3 pt-3 border-l-4 border-indigo-300 shadow-sm rounded-xl flex flex-col hover:shadow-md transition-all duration-200">
+                        <div className="flex items-center justify-between">
+                            <p className="text-gray-800 text-base font-semibold">
+                                Study Sessions
+                            </p>
+                            <div className="text-blue-500">
+                                <BookOpen className="w-7 h-7" />
                             </div>
+                        </div>
+                        {isLoading ? (
+                            <div className="space-y-2">
+                                <div className="h-6 w-24 bg-slate-300 rounded"></div>
+                                <div className="h-6 w-40 bg-slate-200 rounded mb-3"></div>
+                            </div>
+                        ) : (
                             <div>
                                 <h2 className="text-lg font-bold text-green-600">
                                     {accuracyCount + quizAttemptCount}
@@ -471,11 +621,11 @@ export default function AnalyticsSection() {
                                     Total Articles & Quizzes
                                 </p>
                             </div>
-                        </div>
-                    </>
-                )}
+                        )}
+                    </div>
+                </>
             </div>
-
+            
             {/* Grammar Checker Statistics Card */}
             <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
                 <div className="mt-6 mb-4 bg-white rounded-2xl shadow-sm border w-full border-gray-100 p-6">
@@ -490,7 +640,6 @@ export default function AnalyticsSection() {
                             </p>
                         </div>
                     </div>
-
                     {/* Legend */}
                     <div className="flex items-center gap-6">
                         <div className="flex items-center gap-2">
@@ -506,7 +655,6 @@ export default function AnalyticsSection() {
                             </span>
                         </div>
                     </div>
-
                     {/* Chart */}
                     <div className="w-full h-[370px] relative">
                         <div className="absolute inset-x-0 -left-4 -right-4">
@@ -519,75 +667,96 @@ export default function AnalyticsSection() {
                         </div>
                     </div>
                 </div>
-
                 {/* Donut Chart */}
                 <div className="mt-6 mb-4 bg-white rounded-2xl shadow-sm border w-full border-gray-100 p-6">
                     {/* Header */}
                     <div className="flex items-center justify-between">
                         <div>
                             <h2 className="text-lg font-semibold text-gray-800">
-                                Overall Homophone Pair
+                                Comparison Accuracy Breakdown
                             </h2>
                             <p className="text-sm text-gray-500">
-                                Comparison of detected mistake types
+                                Distribution of comparison types (this month)
                             </p>
                         </div>
                     </div>
-
-                    {/* Donut Chart */}
-                    <div className="flex flex-col items-center justify-center flex-1">
-                        <div className="w-full h-[400px]">
-                            <ResponsivePie
-                                data={lineData}
-                                margin={{
-                                    top: 30,
-                                    right: 80,
-                                    bottom: 80,
-                                    left: 80,
-                                }}
-                                innerRadius={0.5}
-                                padAngle={0.6}
-                                cornerRadius={3}
-                                activeOuterRadiusOffset={8}
-                                arcLinkLabelsSkipAngle={10}
-                                arcLinkLabelsTextColor="#333333"
-                                arcLinkLabelsThickness={2}
-                                arcLinkLabelsColor="#93c5fd"
-                                arcLabelsSkipAngle={10}
-                                arcLabelsTextColor={{
-                                    from: "color",
-                                    modifiers: [["darker", 2]],
-                                }}
-                                legends={[
-                                    {
-                                        anchor: "bottom",
-                                        direction: "row",
-                                        justify: false,
-                                        translateX: 0,
-                                        translateY: 56,
-                                        itemsSpacing: 10,
-                                        itemWidth: 90,
-                                        itemHeight: 18,
-                                        itemTextColor: "#4B5563",
-                                        symbolSize: 18,
-                                        symbolShape: "circle",
-                                    },
-                                ]}
-                            />
+                    {hasData ? (
+                        <div className="flex flex-col items-center justify-center flex-1">
+                            <div className="w-full h-[400px]">
+                                <ResponsivePie
+                                    data={lineData}
+                                    margin={{
+                                        top: 30,
+                                        right: 80,
+                                        bottom: 80,
+                                        left: 80,
+                                    }}
+                                    innerRadius={0.5}
+                                    padAngle={0.6}
+                                    cornerRadius={3}
+                                    activeOuterRadiusOffset={8}
+                                    arcLinkLabelsSkipAngle={10}
+                                    arcLinkLabelsTextColor="#333333"
+                                    arcLinkLabelsThickness={2}
+                                    arcLinkLabelsColor="#93c5fd"
+                                    arcLabelsSkipAngle={10}
+                                    arcLabelsTextColor={{
+                                        from: "color",
+                                        modifiers: [["darker", 2]],
+                                    }}
+                                    legends={[
+                                        {
+                                            anchor: "bottom",
+                                            direction: "row",
+                                            justify: false,
+                                            translateX: 0,
+                                            translateY: 56,
+                                            itemsSpacing: 10,
+                                            itemWidth: 90,
+                                            itemHeight: 18,
+                                            itemTextColor: "#4B5563",
+                                            symbolSize: 18,
+                                            symbolShape: "circle",
+                                        },
+                                    ]}
+                                />
+                            </div>
+                            {/* Center label */}
+                            <div className="absolute flex -mt-12 flex-col items-center justify-center pointer-events-none">
+                                <span className="text-2xl font-bold text-gray-800">
+                                    100%
+                                </span>
+                                <span className="text-xs text-gray-500 font-medium tracking-wide">
+                                    Overall Accuracy
+                                </span>
+                            </div>
                         </div>
-                        {/* Center label */}
-                        <div className="absolute flex -mt-12 flex-col items-center justify-center pointer-events-none">
-                            <span className="text-2xl font-bold text-gray-800">
-                                100%
-                            </span>
-                            <span className="text-xs text-gray-500 font-medium tracking-wide">
-                                Overall Accuracy
-                            </span>
+                    ) : (
+                        <div className="w-full h-[400px] flex flex-col items-center justify-center bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
+                            <svg
+                                className="w-12 h-12 text-gray-400 mb-3"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={1.5}
+                                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                                />
+                            </svg>
+                            <p className="text-gray-500 text-sm font-medium">
+                                No comparison data available
+                            </p>
+                            <p className="text-gray-400 text-xs mt-1">
+                                Complete some grammar checks to see accuracy
+                                breakdown
+                            </p>
                         </div>
-                    </div>
+                    )}
                 </div>
             </div>
-
             <RecentArticles />
         </div>
     );
