@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { CheckCircle2, TrendingUp, Target } from "lucide-react";
+import { CheckCircle2, TrendingUp, Target, Brain, Zap, Rocket } from "lucide-react";
 import { usePage, Link } from "@inertiajs/react";
 import Chart from "react-apexcharts";
 

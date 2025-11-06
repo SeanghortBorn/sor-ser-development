@@ -170,6 +170,25 @@ export default function Quiz() {
         return "from-red-500 to-red-600";
     };
 
+    // lightweight time-ago for subtitle (e.g., "1 month ago")
+    const timeAgo = (dateStr) => {
+        if (!dateStr) return "";
+        const then = new Date(dateStr);
+        const now = new Date();
+        const secs = Math.floor((now - then) / 1000);
+        const mins = Math.floor(secs / 60);
+        const hrs = Math.floor(mins / 60);
+        const days = Math.floor(hrs / 24);
+        const months = Math.floor(days / 30);
+        const years = Math.floor(days / 365);
+        if (years > 0) return `${years} year${years > 1 ? "s" : ""} ago`;
+        if (months > 0) return `${months} month${months > 1 ? "s" : ""} ago`;
+        if (days > 0) return `${days} day${days > 1 ? "s" : ""} ago`;
+        if (hrs > 0) return `${hrs} hour${hrs > 1 ? "s" : ""} ago`;
+        if (mins > 0) return `${mins} minute${mins > 1 ? "s" : ""} ago`;
+        return "just now";
+    };
+
     return (
         <>
             <Head title="Quiz" />
@@ -251,37 +270,43 @@ export default function Quiz() {
 
                         {/* Quiz List */}
                         {!quizStarted && (
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {quizzes.map((quiz) => (
                                     <motion.div
                                         key={quiz.id}
-                                        initial={{ opacity: 0, scale: 0.95 }}
+                                        initial={{ opacity: 0, scale: 0.98 }}
                                         animate={{ opacity: 1, scale: 1 }}
-                                        whileHover={{ translateY: -8 }}
-                                        className="bg-white rounded-2xl shadow-md hover:shadow-xl border border-gray-200 overflow-hidden transition-all"
+                                        whileHover={{ translateY: -6 }}
+                                        className="rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-md transition-all"
                                     >
-                                        <div className="p-6">
-                                            <div className="flex items-start justify-between mb-4">
-                                                <h2 className="text-xl font-bold text-gray-900 flex-1">
-                                                    {quiz.title}
-                                                </h2>
-                                                <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-semibold">
-                                                    {quiz.questions?.length ||
-                                                        0}{" "}
-                                                    Q's
-                                                </span>
+                                        <div className="p-5">
+                                            <div className="flex items-start justify-between">
+                                                <div className="min-w-0">
+                                                    <h3 className="text-gray-900 font-semibold text-lg truncate">{quiz.title}</h3>
+                                                    <p className="text-gray-500 text-sm mt-1 truncate">
+                                                        {`${quiz.questions?.length || 0} question${(quiz.questions?.length || 0) === 1 ? "" : "s"} • ${timeAgo(quiz.updated_at || quiz.created_at)}`}
+                                                    </p>
+                                                </div>
+                                                <button type="button" className="p-1.5 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100">
+                                                    <svg className="w-5 h-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 6a1.5 1.5 0 110-3 1.5 1.5 0 010 3zm0 5a1.5 1.5 0 110-3 1.5 1.5 0 010 3zm0 5a1.5 1.5 0 110-3 1.5 1.5 0 010 3z"/></svg>
+                                                </button>
                                             </div>
-                                            <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                                                {quiz.description}
-                                            </p>
-                                            <button
-                                                onClick={() =>
-                                                    handleStartQuiz(quiz)
-                                                }
-                                                className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-3 px-4 rounded-xl font-semibold transition-all shadow-md hover:shadow-lg"
-                                            >
-                                                Start Quiz
-                                            </button>
+                                            <div className="mt-4 flex items-center justify-end gap-3">
+                                                {auth?.can?.teacher && (
+                                                    <Link
+                                                        href={route("quizzes.edit", quiz.id)}
+                                                        className="px-4 py-2 rounded-xl border border-blue-500 text-blue-600 font-medium text-sm hover:bg-blue-50"
+                                                    >
+                                                        Edit
+                                                    </Link>
+                                                )}
+                                                <button
+                                                    onClick={() => handleStartQuiz(quiz)}
+                                                    className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm"
+                                                >
+                                                    Start
+                                                </button>
+                                            </div>
                                         </div>
                                     </motion.div>
                                 ))}
