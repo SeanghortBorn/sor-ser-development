@@ -168,7 +168,6 @@ export default function QuizList() {
                                     <tr>
                                         <th className="py-3 px-4">#ID</th>
                                         <th className="py-3 px-4">Title</th>
-                                        <th className="py-3 px-4">Groups</th>
                                         <th className="py-3 px-4">Questions</th>
                                         <th className="py-3 px-4">Status</th>
                                         <th className="py-3 px-4 text-center">Actions</th>
@@ -186,18 +185,6 @@ export default function QuizList() {
                                                 </td>
                                                 <td className="py-3 px-4">
                                                     <p className="font-medium text-gray-900">{quiz.title}</p>
-                                                </td>
-                                                <td className="py-3 px-4">
-                                                    <div className="flex flex-wrap gap-1">
-                                                        {Array.isArray(quiz.groups) && quiz.groups.length > 0
-                                                            ? quiz.groups.map((group, i) => (
-                                                                <span key={i} className="bg-purple-100 text-purple-800 px-2 py-0.5 rounded text-xs font-medium">
-                                                                    {group}
-                                                                </span>
-                                                            ))
-                                                            : <span className="text-gray-400 text-xs">—</span>
-                                                        }
-                                                    </div>
                                                 </td>
                                                 <td className="py-3 px-4">
                                                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
@@ -245,7 +232,7 @@ export default function QuizList() {
                                         ))
                                     ) : (
                                         <tr>
-                                            <td colSpan={6} className="py-8 text-center text-gray-500">
+                                            <td colSpan={5} className="py-8 text-center text-gray-500">
                                                 No quizzes found
                                             </td>
                                         </tr>
