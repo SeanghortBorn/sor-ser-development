@@ -217,6 +217,21 @@ class QuizController extends Controller
      */
     public function update(Request $request, $id)
     {
+        // Lightweight inline status update (from index) without altering other fields
+        if ($request->has('status') && !$request->has('title')) {
+            $data = $request->validate([
+                'status' => 'required|in:Draft,Published',
+            ]);
+
+            $quiz = Quiz::findOrFail($id);
+            $quiz->update([
+                'status' => $data['status'],
+            ]);
+
+            return back();
+        }
+
+        // Full update (from create/edit form)
         $data = $request->validate([
             'title' => 'required|max:255|min:2',
             'description' => 'nullable|string',

@@ -98,6 +98,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('/quizzes/{id}', [QuizController::class, 'update'])->name('quizzes.update');
     Route::get('/quizzes/{id}', [QuizController::class, 'edit'])->name('quizzes.edit');
     Route::delete('/quizzes/{id}', [QuizController::class, 'destroy'])->name('quizzes.destroy');
+    Route::resource('quizzes', QuizController::class);
     Route::middleware(['auth'])->group(function () {
         Route::post('/quizzes/submit', [QuizController::class, 'submitAttempt'])->name('quizzes.submit');
         Route::get('/quizzes/result/{attempt}', [QuizController::class, 'showResult'])->name('quizzes.result');

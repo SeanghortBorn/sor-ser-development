@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Head, usePage, router } from "@inertiajs/react";
 import AdminLayout from "@/Layouts/AdminLayout";
 import Breadcrumb from "@/Components/Breadcrumb";
-import { Trash2 } from "lucide-react";
+import { Trash2, ChevronUp, ChevronDown, Plus, Save } from "lucide-react";
 
 export default function QuizzesCreateEdit() {
     const { datas } = usePage().props;
@@ -281,15 +281,15 @@ export default function QuizzesCreateEdit() {
         <AdminLayout breadcrumb={<Breadcrumb header={title} links={breadcrumbLinks} />}>
             <Head title={title} />
             <form
-                className="min-h-screen w-full mx-auto space-y-4 mb-12"
+                className="min-h-screen w-full mx-auto space-y-6 mb-12"
                 onSubmit={handleSubmit}
             >
                 {/* Top Section */}
-                <div className="bg-white rounded-2xl shadow-sm px-8 py-6 relative">
-                    <div className="flex items-center justify-between gap-6">
+                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-6 md:px-8 py-6">
+                    <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 md:gap-6">
                         {/* Quiz Name */}
-                        <div className="w-1/3">
-                            <label className="block text-gray-700 mb-2 font-medium">
+                        <div className="w-full md:w-1/2">
+                            <label className="block text-gray-800 mb-2 font-medium">
                                 Quiz Name
                             </label>
                             <input
@@ -299,18 +299,18 @@ export default function QuizzesCreateEdit() {
                                     setQuiz({ ...quiz, title: e.target.value })
                                 }
                                 placeholder="Enter name"
-                                className="w-full py-2 px-3 rounded-[10px] border border-gray-200 bg-gray-50 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                                className="w-full py-2.5 px-3.5 rounded-xl border border-gray-200 bg-gray-50 focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 outline-none transition"
                                 required
                             />
                         </div>
 
                         {/* Status */}
-                        <div className="w-1/4">
-                            <label className="block text-gray-700 mb-2 font-medium">
+                        <div className="w-full md:w-1/3">
+                            <label className="block text-gray-800 mb-2 font-medium">
                                 Status
                             </label>
-                            <div className="flex gap-6">
-                                <label className="flex items-center gap-2 cursor-pointer">
+                            <div className="flex gap-4">
+                                <label className="flex items-center gap-2 cursor-pointer select-none">
                                     <input
                                         type="radio"
                                         name="status"
@@ -324,11 +324,11 @@ export default function QuizzesCreateEdit() {
                                         }
                                         className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500 accent-blue-600"
                                     />
-                                    <span className="text-sm font-medium text-blue-700 bg-blue-100 px-3 py-1.5 rounded-full">
+                                    <span className="text-sm font-medium text-blue-700 bg-blue-100/80 px-3 py-1.5 rounded-full">
                                         Publish
                                     </span>
                                 </label>
-                                <label className="flex items-center gap-2 cursor-pointer">
+                                <label className="flex items-center gap-2 cursor-pointer select-none">
                                     <input
                                         type="radio"
                                         name="status"
@@ -353,16 +353,16 @@ export default function QuizzesCreateEdit() {
                         <div className="flex items-end gap-2">
                             <button
                                 type="submit"
-                                className="px-6 w-36 py-2 text-white bg-blue-700 rounded-2xl hover:bg-blue-800 transition"
+                                className="inline-flex items-center justify-center gap-2 px-6 w-36 py-2.5 text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-sm transition-colors"
                             >
-                                {isEdit ? "Update" : "Create"}
+                                <Save className="w-4 h-4" /> {isEdit ? "Update" : "Create"}
                             </button>
                         </div>
                     </div>
 
                     {/* Description (Plain Textarea) */}
                     <div className="mt-6">
-                        <label className="block text-gray-700 mb-2 font-medium">
+                        <label className="block text-gray-800 mb-2 font-medium">
                             Description
                         </label>
                         <textarea
@@ -371,7 +371,7 @@ export default function QuizzesCreateEdit() {
                                 setQuiz({ ...quiz, description: e.target.value })
                             }
                             placeholder="Enter quiz description"
-                            className="w-full px-3 py-2 rounded-[10px] border border-gray-200 bg-gray-50 focus:ring-1 focus:ring-blue-400 focus:outline-none"
+                            className="w-full px-3.5 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 outline-none transition"
                             rows="3"
                         />
                     </div>
@@ -379,20 +379,20 @@ export default function QuizzesCreateEdit() {
 
 
                 {/* Question Builder Section */}
-                <div className="space-y-8">
+                <div className="space-y-6">
                     {questions.map((q, idx) => (
                         <div
                             key={idx}
-                            className="bg-white rounded-2xl shadow-md px-8 py-6 mb-4"
+                            className="bg-white rounded-2xl border border-gray-100 shadow-sm px-6 md:px-8 py-6"
                         >
-                            <div className="flex justify-between items-center mb-6">
-                                <h2 className="text-lg font-bold text-gray-800">
+                            <div className="flex justify-between items-center mb-5">
+                                <h2 className="text-lg font-semibold text-gray-900">
                                     Question {idx + 1}
                                 </h2>
                                 <div className="flex gap-2">
                                     <button
                                         type="button"
-                                        className="flex items-center justify-center w-10 h-10 text-red-500 border-2 border-red-400 rounded-xl hover:bg-red-100 transition"
+                                        className="flex items-center justify-center w-10 h-10 text-red-600 border border-red-200 rounded-xl hover:bg-red-50 transition-colors"
                                         aria-label="Delete"
                                         onClick={() => removeQuestion(idx)}
                                         disabled={questions.length === 1}
@@ -401,30 +401,30 @@ export default function QuizzesCreateEdit() {
                                     </button>
                                     <button
                                         type="button"
-                                        className="text-gray-400 px-2"
+                                        className="flex items-center justify-center w-10 h-10 text-gray-600 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors disabled:opacity-40"
                                         onClick={() =>
                                             moveQuestion(idx, idx - 1)
                                         }
                                         disabled={idx === 0}
                                     >
-                                        ↑
+                                        <ChevronUp className="w-5 h-5" />
                                     </button>
                                     <button
                                         type="button"
-                                        className="text-gray-400 px-2"
+                                        className="flex items-center justify-center w-10 h-10 text-gray-600 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors disabled:opacity-40"
                                         onClick={() =>
                                             moveQuestion(idx, idx + 1)
                                         }
                                         disabled={idx === questions.length - 1}
                                     >
-                                        ↓
+                                        <ChevronDown className="w-5 h-5" />
                                     </button>
                                 </div>
                             </div>
 
                             {/* Question Type */}
                             <div className="mb-4">
-                                <label className="block text-gray-700 mb-2 font-medium">
+                                <label className="block text-gray-800 mb-2 font-medium">
                                     Question Type
                                 </label>
                                 <select
@@ -436,7 +436,7 @@ export default function QuizzesCreateEdit() {
                                             e.target.value
                                         )
                                     }
-                                    className="w-1/3 py-2 px-3 rounded-[10px] border border-gray-200 bg-gray-50 focus:ring-1 focus:ring-blue-400 focus:outline-none"
+                                    className="w-full md:w-1/3 py-2.5 px-3.5 rounded-xl border border-gray-200 bg-gray-50 focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 outline-none transition"
                                 >
                                     <option value="Multiple Choice">
                                         Multiple Choice
@@ -452,7 +452,7 @@ export default function QuizzesCreateEdit() {
 
                             {/* Question Text */}
                             <div className="mb-4">
-                                <label className="block text-gray-700 mb-2 font-medium">
+                                <label className="block text-gray-800 mb-2 font-medium">
                                     Question
                                 </label>
                                 <input
@@ -466,14 +466,14 @@ export default function QuizzesCreateEdit() {
                                         )
                                     }
                                     placeholder="Enter your question"
-                                    className="w-full px-3 py-2 rounded-[10px] bg-gray-50 border border-gray-200 focus:ring-1 focus:ring-blue-400 focus:outline-none"
+                                    className="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 border border-gray-200 focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 outline-none transition"
                                 />
                             </div>
                             {/* Options (MCQ/Checkboxes) */}
                             {(q.type === "Multiple Choice" ||
                                 q.type === "Checkboxes") && (
                                     <div>
-                                        <h3 className="text-lg font-medium text-gray-700 mb-2">
+                                        <h3 className="text-base font-semibold text-gray-900 mb-2">
                                             Options
                                         </h3>
                                         {q.options.map((option, optIdx) => (
@@ -492,7 +492,7 @@ export default function QuizzesCreateEdit() {
                                                     onChange={() =>
                                                         setCorrectAnswer(idx, option)
                                                     }
-                                                    className="text-blue-500 focus:ring-blue-400 cursor-pointer"
+                                                    className="text-blue-600 focus:ring-blue-400 cursor-pointer"
                                                 />
                                                 <input
                                                     type="text"
@@ -505,7 +505,7 @@ export default function QuizzesCreateEdit() {
                                                             e.target.value
                                                         )
                                                     }
-                                                    className="flex-1 px-3 py-2 rounded-[10px] border border-gray-200 bg-gray-50 focus:ring-1 focus:ring-blue-400 focus:outline-none"
+                                                    className="flex-1 px-3.5 py-2.5 rounded-xl border border-gray-200 bg-gray-50 focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 outline-none transition"
                                                 />
                                                 <button
                                                     type="button"
@@ -518,7 +518,7 @@ export default function QuizzesCreateEdit() {
                                                             )
                                                         )
                                                     }
-                                                    className="text-red-400 hover:text-red-500 transition"
+                                                    className="text-red-500 hover:text-red-600 transition-colors"
                                                     disabled={q.options.length <= 2}
                                                 >
                                                     <Trash2 className="w-5 h-5" />
@@ -533,12 +533,12 @@ export default function QuizzesCreateEdit() {
                                                     "",
                                                 ])
                                             }
-                                            className="mt-3 text-blue-600 hover:underline"
+                                            className="mt-2 inline-flex items-center gap-2 text-blue-700 hover:text-blue-800"
                                         >
-                                            + Add Option
+                                            <Plus className="w-4 h-4" /> Add Option
                                         </button>
                                         {/* Show selected correct answer(s) */}
-                                        <div className="mt-2 text-sm text-green-600">
+                                        <div className="mt-2 text-sm text-green-700">
                                             {q.type === "Checkboxes" && Array.isArray(q.correct_answer) && q.correct_answer.length > 0 && (
                                                 <>Correct Answers: <strong>{q.correct_answer.join(", ")}</strong></>
                                             )}
@@ -559,7 +559,7 @@ export default function QuizzesCreateEdit() {
                                             value="True"
                                             checked={q.correct_answer === "True"}
                                             onChange={(e) => setCorrectAnswer(idx, e.target.value)}
-                                            className="cursor-pointer"
+                                            className="cursor-pointer text-blue-600 focus:ring-blue-400"
                                         />
                                         True
                                     </label>
@@ -570,12 +570,12 @@ export default function QuizzesCreateEdit() {
                                             value="False"
                                             checked={q.correct_answer === "False"}
                                             onChange={(e) => setCorrectAnswer(idx, e.target.value)}
-                                            className="cursor-pointer"
+                                            className="cursor-pointer text-blue-600 focus:ring-blue-400"
                                         />
                                         False
                                     </label>
                                     {/* Show selected correct answer */}
-                                    <div className="ml-4 text-sm text-green-600">
+                                    <div className="ml-4 text-sm text-green-700">
                                         {q.correct_answer && (
                                             <>Correct Answer: <strong>{q.correct_answer}</strong></>
                                         )}
@@ -585,7 +585,7 @@ export default function QuizzesCreateEdit() {
                             {/* Matching Questions */}
                             {q.type === "Matching" && (
                                 <div className="mt-4">
-                                    <h3 className="text-lg font-medium text-gray-700 mb-2">
+                                    <h3 className="text-base font-semibold text-gray-900 mb-2">
                                         Matching Pairs
                                     </h3>
                                     {/* Input pairs (Edit mode for teacher) */}
@@ -604,7 +604,7 @@ export default function QuizzesCreateEdit() {
                                                     updateQuestion(idx, "options", newPairs);
                                                 }}
                                                 placeholder={`Left item ${pIdx + 1}`}
-                                                className="w-1/3 px-3 py-2 rounded-[10px] border border-gray-200 bg-gray-50 focus:ring-1 focus:ring-blue-400 focus:outline-none"
+                                                className="w-1/3 px-3.5 py-2.5 rounded-xl border border-gray-200 bg-gray-50 focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 outline-none transition"
                                             />
 
                                             {/* Right side */}
@@ -617,7 +617,7 @@ export default function QuizzesCreateEdit() {
                                                     updateQuestion(idx, "options", newPairs);
                                                 }}
                                                 placeholder={`Right item ${pIdx + 1}`}
-                                                className="w-1/3 px-3 py-2 rounded-[10px] border border-gray-200 bg-gray-50 focus:ring-1 focus:ring-blue-400 focus:outline-none"
+                                                className="w-1/3 px-3.5 py-2.5 rounded-xl border border-gray-200 bg-gray-50 focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 outline-none transition"
                                             />
 
                                             {/* Delete pair */}
@@ -627,7 +627,7 @@ export default function QuizzesCreateEdit() {
                                                     const newOptions = q.options.filter((_, i) => i !== pIdx);
                                                     updateQuestion(idx, "options", newOptions);
                                                 }}
-                                                className="text-red-400 hover:text-red-500 transition"
+                                                className="text-red-500 hover:text-red-600 transition-colors"
                                                 disabled={(q.options || []).length <= 1}
                                             >
                                                 <Trash2 className="w-5 h-5" />
@@ -642,13 +642,13 @@ export default function QuizzesCreateEdit() {
                                             const newPairs = [...(q.options || []), { left: "", right: "" }];
                                             updateQuestion(idx, "options", newPairs);
                                         }}
-                                        className="mt-3 text-blue-600 hover:underline"
+                                        className="mt-2 inline-flex items-center gap-2 text-blue-700 hover:text-blue-800"
                                     >
-                                        Add matching pair
+                                        <Plus className="w-4 h-4" /> Add matching pair
                                     </button>
 
                                     {/* Note */}
-                                    <div className="text-sm text-gray-400 mt-2">
+                                    <div className="text-sm text-gray-500 mt-2">
                                         The matching pairs will be shuffled when taking the quiz
                                     </div>
                                 </div>
@@ -668,10 +668,10 @@ export default function QuizzesCreateEdit() {
                                                 e.target.value
                                             )
                                         }
-                                        className="w-1/2 px-3 py-2 rounded-[10px] border border-gray-200 bg-gray-50 focus:ring-1 focus:ring-blue-400 focus:outline-none"
+                                        className="w-full md:w-1/2 px-3.5 py-2.5 rounded-xl border border-gray-200 bg-gray-50 focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 outline-none transition"
                                     />
                                     {/* Show selected correct answer */}
-                                    <div className="mt-2 text-sm text-green-600">
+                                    <div className="mt-2 text-sm text-green-700">
                                         {q.correct_answer && (
                                             <>Correct Answer: <strong>{q.correct_answer}</strong></>
                                         )}
@@ -685,9 +685,9 @@ export default function QuizzesCreateEdit() {
                     <button
                         type="button"
                         onClick={addQuestion}
-                        className="px-6 py-2 text-blue-700 border-2 border-blue-500 rounded-2xl hover:bg-blue-100 transition"
+                        className="inline-flex items-center gap-2 px-5 py-2.5 text-blue-700 border border-blue-200 rounded-xl hover:bg-blue-50 transition-colors"
                     >
-                        + Add Question
+                        <Plus className="w-4 h-4" /> Add Question
                     </button>
                 </div>
             </form>

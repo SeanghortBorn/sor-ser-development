@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link, usePage } from "@inertiajs/react";
+import { Menu, X, ChevronDown, User, LogOut, Settings } from "lucide-react";
 
 export default function HeaderNavbar() {
     const page = usePage();
@@ -8,6 +9,8 @@ export default function HeaderNavbar() {
     const dropdownRef = useRef(null);
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [showHeader, setShowHeader] = useState(true);
+    const lastScrollY = useRef(0);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -17,7 +20,6 @@ export default function HeaderNavbar() {
             ) {
                 setDropdownOpen(false);
             }
-            // Close mobile menu if click outside
             if (
                 mobileMenuOpen &&
                 !event.target.closest("#mobile-menu") &&
@@ -52,13 +54,13 @@ export default function HeaderNavbar() {
                 const useAxios = typeof window !== "undefined" && window.axios;
                 const res = useAxios
                     ? await window.axios.get("/library", {
-                          headers: { "X-Requested-With": "XMLHttpRequest" },
-                          validateStatus: () => true,
-                      })
+                        headers: { "X-Requested-With": "XMLHttpRequest" },
+                        validateStatus: () => true,
+                    })
                     : await fetch("/library", {
-                          credentials: "same-origin",
-                          headers: { "X-Requested-With": "XMLHttpRequest" },
-                      });
+                        credentials: "same-origin",
+                        headers: { "X-Requested-With": "XMLHttpRequest" },
+                    });
                 const ok = useAxios ? res.status === 200 : res.ok;
                 if (!cancelled) {
                     setCanAccessLibrary(ok);
@@ -77,211 +79,209 @@ export default function HeaderNavbar() {
             cancelled = true;
         };
     }, [auth?.user, canAccessLibrary]);
+    useEffect(() => {
+        const handleScroll = () => {
+            if (window.scrollY > lastScrollY.current && window.scrollY > 100) {
+                setShowHeader(false); // hide header on scroll down
+            } else {
+                setShowHeader(true); // show header on scroll up
+            }
+            lastScrollY.current = window.scrollY;
+        };
+        window.addEventListener("scroll", handleScroll);
+        return () => window.removeEventListener("scroll", handleScroll);
+    }, []);
+
 
     const isActive = (path) =>
         currentUrl.startsWith(path)
-            ? "border-b-2 border-blue-600 text-blue-600"
-            : "text-blue-900 hover:text-blue-600";
+            ? "text-blue-600 font-semibold relative after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-blue-600"
+            : "text-gray-700 hover:text-blue-600";
 
     return (
-        <header className="sticky top-0 left-0 z-50 w-full bg-white shadow-sm">
-            <nav className="flex items-center justify-between px-6 sm:px-6 md:px-16 lg:px-28">
-                {/* Left: Logo + Links */}
-                <div className="flex items-center gap-6">
-                    {/* Logo */}
-                    <Link href="/" className="flex items-center gap-2">
-                        <svg
-                            width="32"
-                            height="32"
-                            viewBox="0 0 32 32"
-                            fill="none"
-                        >
-                            <rect
-                                width="32"
-                                height="32"
-                                rx="8"
-                                fill="#2563EB"
-                            />
-                            <path
-                                d="M16 10L22 13.5V19.5L16 23L10 19.5V13.5L16 10Z"
-                                fill="white"
-                            />
-                        </svg>
-                        <span className="text-xl font-bold text-blue-900">
+        <header className={`sticky top-0 left-0 z-50 w-full bg-white border-b border-gray-100 backdrop-blur-sm bg-opacity-95 transition-transform duration-300 ${showHeader ? "translate-y-0" : "-translate-y-full"}`}>
+            <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="flex items-center justify-between h-16">
+                    {/* Left: Logo */}
+                    <Link href="/" className="flex items-center gap-3 flex-shrink-0">
+                        <div className="relative">
+                            <div className="absolute inset-0 bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl blur-sm opacity-50"></div>
+                            <div className="relative bg-gradient-to-br from-blue-600 to-blue-700 p-2 rounded-2xl shadow-lg">
+                                <img
+                                    src="/images/So.png"
+                                    alt="Sor Ser logo"
+                                    className="h-7 w-7 brightness-0 invert"
+                                    width="28"
+                                    height="28"
+                                />
+                            </div>
+                        </div>
+                        <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
                             Sor Ser
                         </span>
                     </Link>
 
-                    {/* Desktop Nav Links */}
-                    <div className="hidden md:flex items-center gap-4">
+                    {/* Center: Desktop Nav Links */}
+                    <div className="hidden lg:flex items-center gap-1 flex-1 justify-center">
                         <Link
                             href="/home"
-                            className={`px-3 py-[1.3rem] font-medium transition ${isActive(
-                                "/home"
-                            )}`}
+                            className={`px-4 py-2 text-sm font-medium rounded-2xl transition-all duration-200 ${isActive("/home")}`}
                         >
                             Home
                         </Link>
                         {auth?.user && canAccessLibrary === true && (
                             <Link
                                 href="/library"
-                                className={`px-3 py-[1.3rem] font-medium transition ${isActive(
-                                    "/library"
-                                )}`}
+                                className={`px-4 py-2 text-sm font-medium rounded-2xl transition-all duration-200 ${isActive("/library")}`}
                             >
                                 Your History
                             </Link>
                         )}
                         <Link
                             href="/homophone-check"
-                            className={`px-3 py-[1.3rem] font-medium transition ${isActive(
-                                "/homophone-check"
-                            )}`}
+                            className={`px-4 py-2 text-sm font-medium rounded-2xl transition-all duration-200 ${isActive("/homophone-check")}`}
                         >
                             Homophone Check
                         </Link>
                         <Link
                             href="/quiz-practice"
-                            className={`px-3 py-[1.3rem] font-medium transition ${isActive(
-                                "/quiz-practice"
-                            )}`}
+                            className={`px-4 py-2 text-sm font-medium rounded-2xl transition-all duration-200 ${isActive("/quiz-practice")}`}
                         >
                             Quiz & Practice
                         </Link>
                         <Link
                             href="/contacts"
-                            className={`px-3 py-[1.3rem] font-medium transition ${isActive(
-                                "/contacts"
-                            )}`}
+                            className={`px-4 py-2 text-sm font-medium rounded-2xl transition-all duration-200 ${isActive("/contacts")}`}
                         >
                             Contacts
                         </Link>
                     </div>
-                </div>
-                
-                {/* Authentication & Mobile Hamburger */}
-                <div className="flex items-center gap-4">
-                    {auth.user ? (
-                        <>
-                            {(Array.isArray(auth.user.roles) &&
-                                auth.user.roles.length > 0) ||
-                            (Array.isArray(auth.user.roles_list) &&
-                                auth.user.roles_list.length > 0) ? (
-                                <Link
-                                    href={route("dashboard")}
-                                    className="bg-orange-500 hover:bg-orange-400 text-white font-bold py-2 px-6 rounded-full hidden md:inline-block"
-                                >
-                                    Dashboard
-                                </Link>
-                            ) : (
-                                <Link
-                                    href="/subscribe"
-                                    className="bg-orange-500 hover:bg-orange-400 text-white font-bold py-2 px-6 rounded-full hidden md:inline-block"
-                                >
-                                    Upgrade
-                                </Link>
-                            )}
 
-                            {/* User Dropdown */}
-                            <div className="relative" ref={dropdownRef}>
-                                <button
-                                    onClick={() =>
-                                        setDropdownOpen(!dropdownOpen)
-                                    }
-                                    className="flex items-center gap-2 text-blue-900 font-medium hover:text-blue-500 transition"
-                                >
-                                    <img
-                                        src="/images/person-icon.svg"
-                                        className="h-8 w-8 rounded-full"
-                                        alt="User avatar"
-                                    />
-                                    <span className="hidden md:inline">
-                                        {auth?.user?.name}
-                                    </span>
-                                </button>
+                    {/* Right: Authentication & Actions */}
+                    <div className="flex items-center gap-3">
+                        {auth.user ? (
+                            <>
+                                {/* Dashboard/Upgrade Button */}
+                                {(Array.isArray(auth.user.roles) &&
+                                    auth.user.roles.length > 0) ||
+                                    (Array.isArray(auth.user.roles_list) &&
+                                        auth.user.roles_list.length > 0) ? (
+                                    <Link
+                                        href={route("dashboard")}
+                                        className="hidden lg:inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold px-5 py-2 rounded-2xl shadow-sm hover:shadow-md transition-all duration-200"
+                                    >
+                                        Dashboard
+                                    </Link>
+                                ) : (
+                                    <Link
+                                        href="/subscribe"
+                                        className="hidden lg:inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold px-5 py-2 rounded-2xl shadow-sm hover:shadow-md transition-all duration-200"
+                                    >
+                                        Upgrade
+                                    </Link>
+                                )}
 
-                                {dropdownOpen && (
-                                    <div className="absolute right-0 mt-2 bg-white border mx-auto max-w-xl border-gray-100 rounded-xl shadow-lg z-50">
-                                        {/* User Info */}
-                                        <div className="px-4 py-3 border-b border-gray-200">
-                                            <div className="flex flex-col">
-                                                <span className="text-sm font-medium text-gray-800">
-                                                    {auth?.user?.name}
-                                                </span>
-                                                <span className="text-sm text-gray-500">
-                                                    {auth?.user?.email}
-                                                </span>
+                                {/* User Dropdown */}
+                                <div className="relative" ref={dropdownRef}>
+                                    <button
+                                        onClick={() => setDropdownOpen(!dropdownOpen)}
+                                        className="flex items-center gap-2 px-3 py-2 rounded-2xl hover:bg-gray-50 transition-all duration-200"
+                                    >
+                                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold text-sm shadow-sm">
+                                            {auth?.user?.name?.charAt(0).toUpperCase() || 'U'}
+                                        </div>
+                                        <span className="hidden md:inline text-sm font-medium text-gray-700">
+                                            {auth?.user?.name}
+                                        </span>
+                                        <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${dropdownOpen ? 'rotate-180' : ''}`} />
+                                    </button>
+
+                                    {dropdownOpen && (
+                                        <div className="absolute right-0 mt-2 w-64 bg-white border border-gray-100 rounded-2xl shadow-lg overflow-hidden z-50">
+                                            {/* User Info */}
+                                            <div className="px-4 py-3 bg-gradient-to-br from-blue-50 to-blue-100 border-b border-blue-100">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-bold shadow-sm">
+                                                        {auth?.user?.name?.charAt(0).toUpperCase() || 'U'}
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="text-sm font-semibold text-gray-900 truncate">
+                                                            {auth?.user?.name}
+                                                        </p>
+                                                        <p className="text-xs text-gray-600 truncate">
+                                                            {auth?.user?.email}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className="py-2">
+                                                <Link
+                                                    href={route("profile.edit")}
+                                                    onClick={() => setDropdownOpen(false)}
+                                                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 transition-colors duration-150"
+                                                >
+                                                    <Settings className="w-4 h-4 text-gray-500" />
+                                                    <span className="font-medium">My Account</span>
+                                                </Link>
+                                                <div className="my-1 border-t border-gray-100"></div>
+                                                <Link
+                                                    method="post"
+                                                    href={route("logout")}
+                                                    as="button"
+                                                    onClick={() => setDropdownOpen(false)}
+                                                    className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors duration-150"
+                                                >
+                                                    <LogOut className="w-4 h-4" />
+                                                    <span className="font-medium">Sign Out</span>
+                                                </Link>
                                             </div>
                                         </div>
+                                    )}
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                <Link
+                                    href={route("login")}
+                                    className="hidden lg:inline-flex items-center text-gray-700 font-medium px-4 py-2 rounded-2xl hover:bg-gray-50 transition-all duration-200 text-sm"
+                                >
+                                    Sign In
+                                </Link>
+                                <Link
+                                    href={route("register")}
+                                    className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold px-5 py-2 rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 text-sm"
+                                >
+                                    Get Started
+                                </Link>
+                            </>
+                        )}
 
-                                        <div className="flex flex-col py-2 px-2">
-                                            <Link
-                                                href={route("profile.edit")}
-                                                onClick={() =>
-                                                    setDropdownOpen(false)
-                                                }
-                                                className="flex items-center px-3 py-2 text-sm text-blue-900 hover:bg-gray-100 rounded-lg transition"
-                                            >
-                                                <i className="fas fa-user-circle w-4 mr-3 text-gray-500"></i>
-                                                My Account
-                                            </Link>
-                                            <hr className="my-1 border-gray-200" />
-                                            <Link
-                                                method="post"
-                                                href={route("logout")}
-                                                as="button"
-                                                onClick={() =>
-                                                    setDropdownOpen(false)
-                                                }
-                                                className="flex items-center w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition"
-                                            >
-                                                <i className="fas fa-sign-out-alt w-4 mr-3 text-red-500"></i>
-                                                Sign Out
-                                            </Link>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        </>
-                    ) : (
-                        <>
-                            <Link
-                                href={route("login")}
-                                className="text-blue-900 font-medium px-3 hover:text-secondary hidden md:inline-block"
-                            >
-                                Sign In
-                            </Link>
-                            <Link
-                                href={route("register")}
-                                className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-6 rounded-full flex items-center gap-2 md:inline-block"
-                            >
-                                Get Started
-                            </Link>
-                        </>
-                    )}
-
-                    {/* Mobile Hamburger */}
-                    <button
-                        className="md:hidden text-blue-900"
-                        id="mobile-menu-toggle"
-                        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                    >
-                        <i className="fas fa-bars text-2xl py-6"></i>
-                    </button>
+                        {/* Mobile Hamburger */}
+                        <button
+                            className="lg:hidden p-2 rounded-2xl hover:bg-gray-100 transition-colors duration-200"
+                            id="mobile-menu-toggle"
+                            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                        >
+                            {mobileMenuOpen ? (
+                                <X className="w-6 h-6 text-gray-700" />
+                            ) : (
+                                <Menu className="w-6 h-6 text-gray-700" />
+                            )}
+                        </button>
+                    </div>
                 </div>
 
                 {/* Mobile Menu */}
                 {mobileMenuOpen && (
                     <div
                         id="mobile-menu"
-                        className="absolute top-full left-0 w-full bg-white shadow-md md:hidden z-40"
+                        className="lg:hidden border-t border-gray-100 py-4"
                     >
-                        <div className="flex flex-col gap-1 py-4 px-4">
+                        <div className="flex flex-col gap-1">
                             <Link
                                 href="/home"
-                                className={`py-2 px-3 rounded-lg ${isActive(
-                                    "/home"
-                                )} hover:bg-gray-50`}
+                                className={`px-4 py-2.5 text-sm font-medium rounded-2xl transition-all duration-200 ${isActive("/home")}`}
                                 onClick={() => setMobileMenuOpen(false)}
                             >
                                 Home
@@ -289,9 +289,7 @@ export default function HeaderNavbar() {
                             {auth?.user && canAccessLibrary === true && (
                                 <Link
                                     href="/library"
-                                    className={`py-2 px-3 rounded-lg ${isActive(
-                                        "/library"
-                                    )} hover:bg-gray-50`}
+                                    className={`px-4 py-2.5 text-sm font-medium rounded-2xl transition-all duration-200 ${isActive("/library")}`}
                                     onClick={() => setMobileMenuOpen(false)}
                                 >
                                     Your History
@@ -299,94 +297,88 @@ export default function HeaderNavbar() {
                             )}
                             <Link
                                 href="/homophone-check"
-                                className={`py-2 px-3 rounded-lg ${isActive(
-                                    "/homophone-check"
-                                )} hover:bg-gray-50`}
+                                className={`px-4 py-2.5 text-sm font-medium rounded-2xl transition-all duration-200 ${isActive("/homophone-check")}`}
                                 onClick={() => setMobileMenuOpen(false)}
                             >
                                 Homophone Check
                             </Link>
                             <Link
                                 href="/quiz-practice"
-                                className={`py-2 px-3 rounded-lg ${isActive(
-                                    "/quiz-practice"
-                                )} hover:bg-gray-50`}
+                                className={`px-4 py-2.5 text-sm font-medium rounded-2xl transition-all duration-200 ${isActive("/quiz-practice")}`}
                                 onClick={() => setMobileMenuOpen(false)}
                             >
                                 Quiz & Practice
                             </Link>
                             <Link
                                 href="/contacts"
-                                className={`py-2 px-3 rounded-lg ${isActive(
-                                    "/contacts"
-                                )} hover:bg-gray-50`}
+                                className={`px-4 py-2.5 text-sm font-medium rounded-2xl transition-all duration-200 ${isActive("/contacts")}`}
                                 onClick={() => setMobileMenuOpen(false)}
                             >
                                 Contacts
                             </Link>
 
-                            {/* Authenticated User Actions */}
-                            {auth.user ? (
-                                <>
-                                    {(Array.isArray(auth.user.roles) &&
-                                        auth.user.roles.length > 0) ||
-                                    (Array.isArray(auth.user.roles_list) &&
-                                        auth.user.roles_list.length > 0) ? (
+                            {/* Mobile Auth Actions */}
+                            <div className="mt-3 pt-3 border-t border-gray-100">
+                                {auth.user ? (
+                                    <>
+                                        {(Array.isArray(auth.user.roles) &&
+                                            auth.user.roles.length > 0) ||
+                                            (Array.isArray(auth.user.roles_list) &&
+                                                auth.user.roles_list.length > 0) ? (
+                                            <Link
+                                                href={route("dashboard")}
+                                                className="flex items-center justify-center gap-2 px-4 py-2.5 mb-2 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold text-sm shadow-sm"
+                                                onClick={() => setMobileMenuOpen(false)}
+                                            >
+                                                Dashboard
+                                            </Link>
+                                        ) : (
+                                            <Link
+                                                href="/subscribe"
+                                                className="flex items-center justify-center gap-2 px-4 py-2.5 mb-2 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold text-sm shadow-sm"
+                                                onClick={() => setMobileMenuOpen(false)}
+                                            >
+                                                Upgrade
+                                            </Link>
+                                        )}
                                         <Link
-                                            href={route("dashboard")}
-                                            className="py-2 px-3 rounded-lg bg-orange-500 text-white text-center hover:bg-orange-400"
-                                            onClick={() =>
-                                                setMobileMenuOpen(false)
-                                            }
+                                            href={route("profile.edit")}
+                                            className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-2xl transition-colors"
+                                            onClick={() => setMobileMenuOpen(false)}
                                         >
-                                            Dashboard
+                                            <Settings className="w-4 h-4" />
+                                            My Account
                                         </Link>
-                                    ) : (
                                         <Link
-                                            href="/subscribe"
-                                            className="py-2 px-3 rounded-lg bg-orange-500 text-white text-center hover:bg-orange-400"
-                                            onClick={() =>
-                                                setMobileMenuOpen(false)
-                                            }
+                                            method="post"
+                                            href={route("logout")}
+                                            as="button"
+                                            className="flex items-center gap-3 w-full px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 rounded-2xl transition-colors"
+                                            onClick={() => setMobileMenuOpen(false)}
                                         >
-                                            Upgrade
+                                            <LogOut className="w-4 h-4" />
+                                            Sign Out
                                         </Link>
-                                    )}
-                                    <Link
-                                        href={route("profile.edit")}
-                                        className="py-2 px-3 rounded-lg text-blue-900 text-center hover:bg-gray-50"
-                                        onClick={() => setMobileMenuOpen(false)}
-                                    >
-                                        My Account
-                                    </Link>
-                                    <Link
-                                        method="post"
-                                        href={route("logout")}
-                                        as="button"
-                                        className="py-2 px-3 rounded-lg text-red-600 text-center hover:bg-red-50"
-                                        onClick={() => setMobileMenuOpen(false)}
-                                    >
-                                        Sign Out
-                                    </Link>
-                                </>
-                            ) : (
-                                <>
-                                    <Link
-                                        href={route("login")}
-                                        className="py-2 px-3 rounded-lg text-blue-900 text-center hover:bg-gray-50"
-                                        onClick={() => setMobileMenuOpen(false)}
-                                    >
-                                        Sign In
-                                    </Link>
-                                    <Link
-                                        href={route("register")}
-                                        className="py-2 px-3 rounded-lg bg-orange-500 text-white text-center hover:bg-orange-400"
-                                        onClick={() => setMobileMenuOpen(false)}
-                                    >
-                                        Get Started
-                                    </Link>
-                                </>
-                            )}
+                                    </>
+                                ) : (
+                                    <>
+                                        <Link
+                                            href={route("login")}
+                                            className="flex items-center justify-center px-4 py-2.5 mb-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-2xl transition-colors"
+                                            onClick={() => setMobileMenuOpen(false)}
+                                        >
+                                            Sign In
+                                        </Link>
+                                        <Link
+                                            href={route("register")}
+                                            className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold text-sm shadow-sm"
+                                            onClick={() => setMobileMenuOpen(false)}
+                                        >
+                                            Get Started
+                                        </Link>
+                                    </>
+                                )}
+                            </div>
                         </div>
                     </div>
                 )}

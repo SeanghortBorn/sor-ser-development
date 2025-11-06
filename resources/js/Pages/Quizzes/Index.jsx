@@ -4,8 +4,7 @@ import Modal from "@/Components/Modal";
 import Pagination from "@/Components/Pagination";
 import AdminLayout from "@/Layouts/AdminLayout";
 import { Head, Link, usePage, router } from "@inertiajs/react";
-import { Search, Edit2, Trash2, Plus, BookOpen, HelpCircle, FileText } from "lucide-react";
-import moment from "moment";
+import { Search, Edit2, Trash2, Plus, BookOpen, HelpCircle, FileText, RefreshCw } from "lucide-react";
 
 export default function QuizList() {
     const { quizData } = usePage().props;
@@ -13,15 +12,20 @@ export default function QuizList() {
     const [searchTerm, setSearchTerm] = useState("");
     const [statusFilter, setStatusFilter] = useState("");
     const [deleteTarget, setDeleteTarget] = useState(null);
+    const [statusTarget, setStatusTarget] = useState(null);
     const [deleteProcessing, setDeleteProcessing] = useState(false);
+    const [statusProcessing, setStatusProcessing] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [showStatusModal, setShowStatusModal] = useState(false);
 
+    // Filter quizzes
     const filteredQuizzes = quizzes.filter((q) => {
         const matchesTitle = q.title.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesStatus = statusFilter ? q.status === statusFilter : true;
         return matchesTitle && matchesStatus;
     });
 
+    // Delete modal
     const openDeleteModal = (quiz) => {
         setDeleteTarget(quiz);
         setShowDeleteModal(true);
@@ -39,13 +43,34 @@ export default function QuizList() {
         });
     };
 
+    // Status toggle modal
+    const openStatusModal = (quiz) => {
+        setStatusTarget(quiz);
+        setShowStatusModal(true);
+    };
+
+    const confirmStatusChange = () => {
+        if (!statusTarget) return;
+        setStatusProcessing(true);
+        const newStatus = statusTarget.status === "Published" ? "Draft" : "Published";
+
+        router.put(route("quizzes.update", statusTarget.id), { status: newStatus }, {
+            preserveScroll: true,
+            onFinish: () => {
+                setStatusProcessing(false);
+                setShowStatusModal(false);
+                setStatusTarget(null);
+            }
+        });
+    };
+
     const headWeb = "Quiz List";
     const linksBreadcrumb = [
         { title: "Home", url: "/" },
         { title: headWeb, url: "" },
     ];
 
-    // Stats cards configuration matching Users page style
+    // Stats cards
     const stats = [
         { 
             label: "Total Quizzes", 
@@ -81,7 +106,7 @@ export default function QuizList() {
             <Head title={headWeb} />
             <section className="content">
                 <div className="container-fluid">
-                    {/* Stats Cards matching Users page style */}
+                    {/* Stats Cards */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                         {stats.map((stat, idx) => {
                             const Icon = stat.icon;
@@ -111,28 +136,20 @@ export default function QuizList() {
                         })}
                     </div>
 
-                    {/* Table Card matching Users page style */}
+                    {/* Quiz Table */}
                     <div className="bg-white shadow-md rounded-xl overflow-hidden border border-gray-200 mb-12">
                         {/* Header */}
                         <div className="px-6 py-4 border-b flex flex-col md:flex-row justify-between items-center gap-3">
-                            {/* Left side (Title) */}
-                            <h3 className="text-xl font-semibold">
-                                Quiz Management
-                            </h3>
-
-                            {/* Right side (Search + Status Filter + Add Button) */}
+                            <h3 className="text-xl font-semibold">Quiz Management</h3>
                             <div className="flex items-center gap-3 ml-auto">
                                 {/* Search */}
-                                <form
-                                    className="inline-block"
-                                    onSubmit={(e) => e.preventDefault()}
-                                >
+                                <form className="inline-block" onSubmit={(e) => e.preventDefault()}>
                                     <div className="inline-flex items-center gap-2 px-3 rounded-xl border hover:shadow-lg transition text-sm bg-white">
                                         <Search className="w-4 h-4 text-gray-500" />
                                         <input
                                             type="text"
                                             placeholder="Search by title..."
-                                            className="px-2 outline-none border-none bg-transparent text-sm placeholder-gray-400 w-full min-w-[150px] focus:outline-none focus:ring-0"
+                                            className="px-2 outline-none border-none bg-transparent text-sm placeholder-gray-400 w-full min-w-[150px]"
                                             value={searchTerm}
                                             onChange={(e) => setSearchTerm(e.target.value)}
                                         />
@@ -141,7 +158,7 @@ export default function QuizList() {
 
                                 {/* Status Filter */}
                                 <select
-                                    className="px-3 py-2 rounded-xl border border-gray-300 bg-white hover:shadow-lg transition text-sm font-medium focus:outline-none focus:ring-0"
+                                    className="px-3 py-2 rounded-xl border border-gray-300 bg-white hover:shadow-lg transition text-sm font-medium"
                                     value={statusFilter}
                                     onChange={(e) => setStatusFilter(e.target.value)}
                                 >
@@ -150,7 +167,7 @@ export default function QuizList() {
                                     <option value="Draft">Draft</option>
                                 </select>
 
-                                {/* Add Quiz Button */}
+                                {/* Add Quiz */}
                                 <Link
                                     href={route("quizzes.create")}
                                     className="inline-flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm text-white bg-green-600 hover:bg-green-500 transition"
@@ -160,7 +177,6 @@ export default function QuizList() {
                                 </Link>
                             </div>
                         </div>
-
                         {/* Table */}
                         <div className="overflow-x-auto">
                             <table className="w-full text-left border-collapse">
@@ -180,9 +196,7 @@ export default function QuizList() {
                                                 key={quiz.id}
                                                 className="border-t hover:bg-gray-50 transition"
                                             >
-                                                <td className="py-3 px-4 font-semibold">
-                                                    {quiz.id}
-                                                </td>
+                                                <td className="py-3 px-4 font-semibold">{quiz.id}</td>
                                                 <td className="py-3 px-4">
                                                     <p className="font-medium text-gray-900">{quiz.title}</p>
                                                 </td>
@@ -204,6 +218,7 @@ export default function QuizList() {
                                                 </td>
                                                 <td className="py-3 px-4 text-center">
                                                     <div className="flex justify-center gap-2">
+                                                        {/* Edit */}
                                                         <div className="relative group">
                                                             <Link
                                                                 href={route("quizzes.edit", quiz.id)}
@@ -215,6 +230,21 @@ export default function QuizList() {
                                                                 Edit Quiz
                                                             </div>
                                                         </div>
+
+                                                        {/* Status toggle button */}
+                                                        <div className="relative group">
+                                                            <button
+                                                                onClick={() => openStatusModal(quiz)}
+                                                                className="inline-flex items-center gap-1.5 px-2 py-2 text-sm font-medium rounded-xl bg-purple-500 text-white hover:bg-purple-600 transition"
+                                                            >
+                                                                <RefreshCw className="w-4 h-4" />
+                                                            </button>
+                                                            <div className="absolute bottom-full mb-2 hidden group-hover:block bg-white text-gray-800 text-xs px-3 py-1 rounded-lg shadow-md border">
+                                                                Toggle Status
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Delete */}
                                                         <div className="relative group">
                                                             <button
                                                                 onClick={() => openDeleteModal(quiz)}
@@ -244,7 +274,11 @@ export default function QuizList() {
                         {/* Pagination */}
                         {quizData.total > 10 && (
                             <div className="px-6 py-3 border-t flex justify-center">
-                                <Pagination links={quizData.links} currentPage={quizData.current_page} perPage={quizData.per_page} />
+                                <Pagination
+                                    links={quizData.links}
+                                    currentPage={quizData.current_page}
+                                    perPage={quizData.per_page}
+                                />
                             </div>
                         )}
                     </div>
@@ -291,6 +325,53 @@ export default function QuizList() {
                                     disabled={deleteProcessing}
                                 >
                                     {deleteProcessing ? "Deleting..." : "Delete"}
+                                </button>
+                            </div>
+                        </form>
+                    </Modal>
+
+                    {/* Status Toggle Modal */}
+                    <Modal
+                        show={showStatusModal}
+                        onClose={() => {
+                            setShowStatusModal(false);
+                            setStatusTarget(null);
+                            setStatusProcessing(false);
+                        }}
+                        maxWidth="lg"
+                    >
+                        <form
+                            onSubmit={(e) => {
+                                e.preventDefault();
+                                if (!statusProcessing) confirmStatusChange();
+                            }}
+                            className="p-6"
+                        >
+                            <h2 className="text-lg font-semibold text-gray-800 mb-2">
+                                Change Quiz Status
+                            </h2>
+                            <p className="text-gray-700 mb-4">
+                                Are you sure you want to change status of <span className="font-semibold">"{statusTarget?.title}"</span> from <span className="font-semibold">{statusTarget?.status}</span>?
+                            </p>
+                            <div className="flex justify-between gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setShowStatusModal(false);
+                                        setStatusTarget(null);
+                                        setStatusProcessing(false);
+                                    }}
+                                    className="rounded-[10px] border-2 border-gray-300 px-8 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold"
+                                    disabled={statusProcessing}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="rounded-[10px] px-9 py-1 bg-purple-600 text-white font-semibold hover:bg-purple-700 transition"
+                                    disabled={statusProcessing}
+                                >
+                                    {statusProcessing ? "Processing..." : "Confirm"}
                                 </button>
                             </div>
                         </form>
