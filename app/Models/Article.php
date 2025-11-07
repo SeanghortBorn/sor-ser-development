@@ -39,24 +39,27 @@ class Article extends Model
         parent::boot();
 
         static::deleting(function ($article) {
-            // First, nullify the foreign keys to avoid constraint violations
-            $article->file_id = null;
-            $article->audios_id = null;
-            $article->save();
+            // Get file and audio before deletion
+            $file = $article->file;
+            $audio = $article->audio;
 
-            // Then delete file and audio records if they exist and have no other articles
-            if ($article->file) {
-                // Only delete if no other articles reference this file
-                $fileRefCount = Article::where('file_id', $article->file->id)->count();
+            // Delete file if no other articles reference it
+            if ($file) {
+                $fileRefCount = Article::where('file_id', $file->id)
+                    ->where('id', '!=', $article->id)
+                    ->count();
                 if ($fileRefCount === 0) {
-                    $article->file->delete();
+                    $file->delete();
                 }
             }
-            if ($article->audio) {
-                // Only delete if no other articles reference this audio
-                $audioRefCount = Article::where('audios_id', $article->audio->id)->count();
+
+            // Delete audio if no other articles reference it
+            if ($audio) {
+                $audioRefCount = Article::where('audios_id', $audio->id)
+                    ->where('id', '!=', $article->id)
+                    ->count();
                 if ($audioRefCount === 0) {
-                    $article->audio->delete();
+                    $audio->delete();
                 }
             }
         });
