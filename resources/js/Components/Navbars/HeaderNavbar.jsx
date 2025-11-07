@@ -95,32 +95,31 @@ export default function HeaderNavbar() {
 
     const isActive = (path) =>
         currentUrl.startsWith(path)
-            ? "text-blue-600 font-semibold relative after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-blue-600"
-            : "text-gray-700 hover:text-blue-600";
+            ? "text-[#0052CC] font-semibold relative after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-[#0052CC]"
+            : "text-gray-700 hover:text-[#0052CC]";
 
     return (
         <header className={`sticky top-0 left-0 z-50 w-full bg-white border-b border-gray-100 backdrop-blur-sm bg-opacity-95 transition-transform duration-300 ${showHeader ? "translate-y-0" : "-translate-y-full"}`}>
-            <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <nav className="max-w-7xl mx-auto px-6 sm:px-6 lg:px-6">
                 <div className="flex items-center justify-between h-16">
                     {/* Left: Logo */}
                     <Link href="/" className="flex items-center gap-3 flex-shrink-0">
                         <div className="relative">
-                            <div className="absolute inset-0 bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl blur-sm opacity-50"></div>
-                            <div className="relative bg-gradient-to-br from-blue-600 to-blue-700 p-2 rounded-2xl shadow-lg">
-                                <img
-                                    src="/images/So.png"
-                                    alt="Sor Ser logo"
-                                    className="h-7 w-7 brightness-0 invert"
-                                    width="28"
-                                    height="28"
-                                />
-                            </div>
+                            <img
+                                src="/images/sor-ser logo.png"
+                                alt="Sor-Ser logo"
+                                className="h-9 w-9"
+                                style={{
+                                    filter: "brightness(0) saturate(100%) invert(21%) sepia(94%) saturate(2783%) hue-rotate(210deg) brightness(96%) contrast(97%)"
+                                }}
+                                width="36"
+                                height="36"
+                            />
                         </div>
-                        <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
-                            Sor Ser
+                        <span className="text-xl font-bold text-[#0052CC]">
+                            Sor-Ser
                         </span>
                     </Link>
-
                     {/* Center: Desktop Nav Links */}
                     <div className="hidden lg:flex items-center gap-1 flex-1 justify-center">
                         <Link
@@ -187,7 +186,7 @@ export default function HeaderNavbar() {
                                         onClick={() => setDropdownOpen(!dropdownOpen)}
                                         className="flex items-center gap-2 px-3 py-2 rounded-2xl hover:bg-gray-50 transition-all duration-200"
                                     >
-                                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold text-sm shadow-sm">
+                                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#0052CC] to-[#0047B3] flex items-center justify-center text-white font-semibold text-sm shadow-sm">
                                             {auth?.user?.name?.charAt(0).toUpperCase() || 'U'}
                                         </div>
                                         <span className="hidden md:inline text-sm font-medium text-gray-700">
@@ -199,9 +198,9 @@ export default function HeaderNavbar() {
                                     {dropdownOpen && (
                                         <div className="absolute right-0 mt-2 w-64 bg-white border border-gray-100 rounded-2xl shadow-lg overflow-hidden z-50">
                                             {/* User Info */}
-                                            <div className="px-4 py-3 bg-gradient-to-br from-blue-50 to-blue-100 border-b border-blue-100">
+                                            <div className="px-4 py-3 bg-gradient-to-br from-[#0052CC]/5 to-[#0052CC]/10 border-b border-[#0052CC]/20">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-bold shadow-sm">
+                                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#0052CC] to-[#0047B3] flex items-center justify-center text-white font-bold shadow-sm">
                                                         {auth?.user?.name?.charAt(0).toUpperCase() || 'U'}
                                                     </div>
                                                     <div className="flex-1 min-w-0">
@@ -219,7 +218,7 @@ export default function HeaderNavbar() {
                                                 <Link
                                                     href={route("profile.edit")}
                                                     onClick={() => setDropdownOpen(false)}
-                                                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 transition-colors duration-150"
+                                                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-[#0052CC]/10 transition-colors duration-150"
                                                 >
                                                     <Settings className="w-4 h-4 text-gray-500" />
                                                     <span className="font-medium">My Account</span>
