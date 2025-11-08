@@ -236,7 +236,7 @@ export default function Index() {
 				setSaving(false);
 			}
 		}
-        console.log(payload);
+        // console.log(payload);
 	};
 
 	useEffect(() => {
