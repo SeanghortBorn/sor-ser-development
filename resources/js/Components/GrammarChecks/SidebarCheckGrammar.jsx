@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Check, Trash, Info } from "lucide-react";
+import { Check, Trash, Info, ArrowRight } from "lucide-react";
 import { Link, usePage } from "@inertiajs/react";
 import axios from "axios";
 import Modal from "@/Components/Modal";
@@ -910,35 +910,42 @@ export default function SidebarCheckGrammar({
                                 >
                                     <p className="text-xs text-gray-500 font-medium mb-2">
                                         {item.type === "missing" &&
-                                            "Missing Word"}
+                                            "Missing Word (Expected word is missing)"}
                                         {item.type === "replaced" &&
-                                            "Replaced Word"}
-                                        {item.type === "extra" && "Extra Word"}
+                                            "Incorrect Word"}
+                                        {item.type === "extra" && "Extra Word (Unmatched in the article)"}
                                     </p>
+                                    {/* <div className="mb-3 flex items-center gap-2"> */}
 
-                                    <div className="mb-3">
+                                    <div className={`${item.type !== "missing" ? "gap-2 " : ""} mb-3 flex items-center `}>
                                         <span
-                                            className={`line-through text-sm mr-2 ${
-                                                diffIndex === 0
-                                                    ? "text-red-500"
-                                                    : "text-gray-500"
+                                            className={`${item.type !== "missing" ? "line-through " : ""}text-base ${
+                                                diffIndex === 0 ? "text-red-500" : "text-gray-500"
                                             }`}
                                         >
                                             {typeof item.user_word
                                                 ?.user_word === "string" &&
                                             item.user_word.user_word !== ""
                                                 ? item.user_word.user_word
-                                                : "<missing>"}
+                                                : ""}
+                                        </span>
+
+                                        {/* <ArrowRight className="w-4 h-4 text-slate-500" /> */}
+
+                                        <span>
+                                            {item.type !== "missing" && (
+                                            <ArrowRight className="w-4 h-4 text-slate-500" />
+                                        )}
                                         </span>
                                         <span
-                                            className={`text-sm font-semibold mr-2 ${
+                                            className={`text-base font-semibold ${
                                                 diffIndex === 0
                                                     ? "text-green-600"
                                                     : "text-green-700"
                                             }`}
                                         >
                                             {item.article_word?.article_word ||
-                                                "<missing>"}
+                                                "Removed"}
                                         </span>
                                     </div>
 

@@ -13,19 +13,18 @@ class KhmerCompareController extends Controller
     public function compare(Request $request)
     {
         $articleId = $request->input('article_id');
-        $userInput = trim($request->input('userInput', ''));
+        $userInput = (string) $request->input('userInput', '');
 
         try {
             $articleText = '';
 
-            // Load article text from database or storage
+            // Load article text
             if ($articleId) {
                 try {
                     $article = Article::with('file')->find($articleId);
 
                     if ($article && $article->file) {
-                        // ensure file_path is a string and safe for parse_url
-                        $filePath = is_scalar($article->file->file_path) ? (string)$article->file->file_path : '';
+                        $filePath = (string) $article->file->file_path;
                         $parsedPath = parse_url($filePath, PHP_URL_PATH) ?? $filePath;
                         $storagePath = str_replace('/storage/', 'public/', $parsedPath);
 
@@ -35,90 +34,67 @@ class KhmerCompareController extends Controller
                             $alt1 = "public/uploads/files/" . basename($filePath);
                             $alt2 = "uploads/files/" . basename($filePath);
 
-                            if (!empty($alt1) && Storage::exists($alt1)) {
+                            if (Storage::exists($alt1)) {
                                 $articleText = Storage::get($alt1);
-                            } elseif (!empty($alt2) && Storage::exists($alt2)) {
+                            } elseif (Storage::exists($alt2)) {
                                 $articleText = Storage::get($alt2);
+                            } elseif (!empty($article->text)) {
+                                $articleText = $article->text;
                             } else {
-                                // fallback to article->text field if file not found
-                                if (!empty($article->text)) {
-                                    $articleText = $article->text;
-                                } else {
-                                    Log::warning("Article file not found and no text field", ['article_id' => $articleId]);
-                                }
+                                Log::warning("Article file not found", ['article_id' => $articleId]);
                             }
                         }
                     } elseif ($article && !empty($article->text)) {
-                        // fallback if no file but text exists
                         $articleText = $article->text;
-                    } else {
-                        Log::warning("Article or file not found", ['article_id' => $articleId]);
                     }
                 } catch (\Exception $e) {
-                    Log::error("Error loading article file", [
-                        'article_id' => $articleId,
-                        'error' => $e->getMessage(),
-                    ]);
+                    Log::error("Load article failed: " . $e->getMessage());
                 }
             }
 
-            // Ensure $articleText is a string
+            // Always ensure string
             if (!is_string($articleText)) {
                 $articleText = '';
             }
 
-            // Use external Khmer segmentation API to tokenize input and article text.
-            // Fallback to preg_split if segmentation fails or returns unexpected shape.
-            $userWords = $this->segmentText($userInput);
-            $articleWords = $this->segmentText($articleText);
+            // Here is the important part
+            $userWords = $this->segmentText($userInput, true);     // keep space
+            $articleWords = $this->segmentText($articleText, false); // remove space from article
 
-            // Quick match if exactly equal
-            if (implode(' ', $userWords) === implode(' ', $articleWords)) {
-                $comparison = [];
-                foreach ($userWords as $index => $word) {
-                    $comparison[] = [
-                        'index_compared' => $index,
-                        'type' => 'same',
-                        'user_word' => ['user_word' => $word, 'user_index' => $index],
-                        'article_word' => ['article_word' => $word, 'article_index' => $index],
-                        'actions' => [
-                            'accept' => ['result' => $word],
-                            'dismiss' => ['result' => $word],
-                        ],
-                    ];
-                }
-
-                return response()->json([
-                    'user_words' => $userWords,
-                    'article_words' => $articleWords,
-                    'comparison' => $comparison,
-                    'stats' => [
-                        'same' => count($comparison),
-                        'missing' => 0,
-                        'extra' => 0,
-                        'replaced' => 0,
-                    ],
-                ]);
-            }
-
-            // Word-by-word comparison (defensive accesses only)
             $m = count($userWords);
             $n = count($articleWords);
+
             $result = [];
             $indexCompared = 0;
             $i = 0;
             $j = 0;
 
-            // maximum lookahead to try to align sequences (tuneable)
             $maxLookahead = 5;
 
             while ($i < $m || $j < $n) {
+
                 $userWord = $userWords[$i] ?? null;
                 $articleWord = $articleWords[$j] ?? null;
                 $nextUser = $userWords[$i + 1] ?? null;
                 $nextArticle = $articleWords[$j + 1] ?? null;
 
-                // Same words
+                // Detect space from user input
+                if ($userWord === ' ') {
+                    $result[] = [
+                        'index_compared' => $indexCompared++,
+                        'type' => 'space',
+                        'user_word' => ['user_word' => ' ', 'user_index' => $i],
+                        'article_word' => ['article_word' => '', 'article_index' => null],
+                        'actions' => [
+                            'accept' => ['result' => ' '],
+                            'dismiss' => ['result' => ''],
+                        ],
+                    ];
+                    $i++;
+                    continue;
+                }
+
+                // Same
                 if ($i < $m && $j < $n && $userWord === $articleWord) {
                     $result[] = [
                         'index_compared' => $indexCompared++,
@@ -130,16 +106,16 @@ class KhmerCompareController extends Controller
                             'dismiss' => ['result' => $userWord],
                         ],
                     ];
-                    $i++; $j++;
+                    $i++; 
+                    $j++;
                     continue;
                 }
 
-                // Try multi-word missing (article has extra words not present in user)
+                // Missing words in user (article has extra)
                 $foundMissing = false;
                 if ($i < $m && $j < $n) {
                     for ($k = 1; $k <= $maxLookahead && ($j + $k) < $n; $k++) {
-                        if ($userWord !== null && $userWord === $articleWords[$j + $k]) {
-                            // $k article words are missing from user (positions j .. j+k-1)
+                        if ($userWord === $articleWords[$j + $k]) {
                             for ($t = 0; $t < $k; $t++) {
                                 $result[] = [
                                     'index_compared' => $indexCompared++,
@@ -157,18 +133,18 @@ class KhmerCompareController extends Controller
                             break;
                         }
                     }
-                    if ($foundMissing) {
-                        continue;
-                    }
                 }
 
-                // Try multi-word extra (user has extra words not present in article)
+                if ($foundMissing) continue;
+
+                // Extra words in user
                 $foundExtra = false;
                 if ($i < $m && $j < $n) {
                     for ($k = 1; $k <= $maxLookahead && ($i + $k) < $m; $k++) {
-                        if ($articleWord !== null && $articleWord === $userWords[$i + $k]) {
-                            // $k user words are extra (positions i .. i+k-1)
+                        if ($articleWord === $userWords[$i + $k]) {
                             for ($t = 0; $t < $k; $t++) {
+                                if ($userWords[$i + $t] === ' ') continue;
+
                                 $result[] = [
                                     'index_compared' => $indexCompared++,
                                     'type' => 'extra',
@@ -185,13 +161,12 @@ class KhmerCompareController extends Controller
                             break;
                         }
                     }
-                    if ($foundExtra) {
-                        continue;
-                    }
                 }
 
-                // Missing in user (article has extra at j) - single lookahead fallback
-                if ($j < $n && ($userWord ?? null) === $nextArticle) {
+                if ($foundExtra) continue;
+
+                // Missing (single)
+                if ($userWord !== null && $nextArticle === $userWord) {
                     $result[] = [
                         'index_compared' => $indexCompared++,
                         'type' => 'missing',
@@ -206,50 +181,61 @@ class KhmerCompareController extends Controller
                     continue;
                 }
 
-                // Extra in user (user has an extra word at i) - single lookahead fallback
-                if ($i < $m && $nextUser === $articleWord) {
-                    $result[] = [
-                        'index_compared' => $indexCompared++,
-                        'type' => 'extra',
-                        'user_word' => ['user_word' => $userWords[$i], 'user_index' => $i],
-                        'article_word' => ['article_word' => '', 'article_index' => null],
-                        'actions' => [
-                            'accept' => ['result' => ''],
-                            'dismiss' => ['result' => $userWords[$i]],
-                        ],
-                    ];
+                // Extra (single)
+                if ($articleWord !== null && $nextUser === $articleWord) {
+                    if ($userWord !== ' ') {
+                        $result[] = [
+                            'index_compared' => $indexCompared++,
+                            'type' => 'extra',
+                            'user_word' => ['user_word' => $userWords[$i], 'user_index' => $i],
+                            'article_word' => ['article_word' => '', 'article_index' => null],
+                            'actions' => [
+                                'accept' => ['result' => ''],
+                                'dismiss' => ['result' => $userWords[$i]],
+                            ],
+                        ];
+                    }
                     $i++;
                     continue;
                 }
 
-                // Replaced / fallback
+                // Replace
                 if ($i < $m && $j < $n) {
                     $result[] = [
                         'index_compared' => $indexCompared++,
                         'type' => 'replaced',
-                        'user_word' => ['user_word' => $userWords[$i], 'user_index' => $i],
-                        'article_word' => ['article_word' => $articleWords[$j], 'article_index' => $j],
+                        'user_word' => ['user_word' => $userWord, 'user_index' => $i],
+                        'article_word' => ['article_word' => $articleWord, 'article_index' => $j],
                         'actions' => [
-                            'accept' => ['result' => $articleWords[$j]],
-                            'dismiss' => ['result' => $userWords[$i]],
+                            'accept' => ['result' => $articleWord],
+                            'dismiss' => ['result' => $userWord],
                         ],
                     ];
-                    $i++; $j++;
-                } elseif ($i < $m) {
-                    // remaining user extras
-                    $result[] = [
-                        'index_compared' => $indexCompared++,
-                        'type' => 'extra',
-                        'user_word' => ['user_word' => $userWords[$i], 'user_index' => $i],
-                        'article_word' => ['article_word' => '', 'article_index' => null],
-                        'actions' => [
-                            'accept' => ['result' => ''],
-                            'dismiss' => ['result' => $userWords[$i]],
-                        ],
-                    ];
+                    $i++; 
+                    $j++;
+                    continue;
+                }
+
+                // Remaining user extras
+                if ($i < $m) {
+                    if ($userWords[$i] !== ' ') {
+                        $result[] = [
+                            'index_compared' => $indexCompared++,
+                            'type' => 'extra',
+                            'user_word' => ['user_word' => $userWords[$i], 'user_index' => $i],
+                            'article_word' => ['article_word' => '', 'article_index' => null],
+                            'actions' => [
+                                'accept' => ['result' => ''],
+                                'dismiss' => ['result' => $userWords[$i]],
+                            ],
+                        ];
+                    }
                     $i++;
-                } elseif ($j < $n) {
-                    // remaining article missings
+                    continue;
+                }
+
+                // Remaining article missing
+                if ($j < $n) {
                     $result[] = [
                         'index_compared' => $indexCompared++,
                         'type' => 'missing',
@@ -261,10 +247,10 @@ class KhmerCompareController extends Controller
                         ],
                     ];
                     $j++;
+                    continue;
                 }
             }
 
-            // Return structured JSON response
             return response()->json([
                 'user_words' => $userWords,
                 'article_words' => $articleWords,
@@ -274,50 +260,67 @@ class KhmerCompareController extends Controller
                     'missing' => count(array_filter($result, fn($r) => $r['type'] === 'missing')),
                     'extra' => count(array_filter($result, fn($r) => $r['type'] === 'extra')),
                     'replaced' => count(array_filter($result, fn($r) => $r['type'] === 'replaced')),
+                    'space' => count(array_filter($result, fn($r) => $r['type'] === 'space')),
                 ],
             ]);
+
         } catch (\Throwable $e) {
-            Log::error('Compare error: ' . $e->getMessage(), ['trace' => $e->getTraceAsString(), 'request' => $request->all()]);
+            Log::error("Compare failed: " . $e->getMessage());
             return response()->json([
                 'error' => true,
-                'message' => 'Failed to compare texts on server',
+                'message' => 'Comparison failed',
             ], 500);
         }
     }
 
-    // Helper: call external Khmer segmentation API and return tokens array.
-    // Fallback: use preg_split to approximate tokens when API is unavailable.
-    private function segmentText(?string $text): array
+    // Segment text: keep space for user, remove space in article
+    private function segmentText(?string $text, bool $keepSpace = false): array
     {
         $text = (string) ($text ?? '');
-        $trimmed = trim($text);
-        if ($trimmed === '') return [];
+        if ($text === '') return [];
 
-        $apiUrl = env('KHMER_SEGMENT_API_URL') ? rtrim(env('KHMER_SEGMENT_API_URL'), '/') . '/segment' : null;
+        $apiUrl = env('KHMER_SEGMENT_API_URL') 
+                    ? rtrim(env('KHMER_SEGMENT_API_URL'), '/') . '/segment'
+                    : null;
 
         if ($apiUrl) {
             try {
-                // short timeout and handle failures gracefully
                 $res = Http::timeout(3)->post($apiUrl, ['text' => $text]);
                 if ($res->successful()) {
                     $json = $res->json();
-                    // support 'tokens' or 'data.tokens' shapes
-                    if (!empty($json['tokens']) && is_array($json['tokens'])) {
-                        return array_values(array_filter($json['tokens'], fn($t) => $t !== null && $t !== ''));
+                    $tokens = $json['tokens'] ?? ($json['data']['tokens'] ?? []);
+
+                    if (!is_array($tokens)) $tokens = [];
+
+                    if ($keepSpace) {
+                        return array_map(fn($t) => $t === '' ? ' ' : $t, $tokens);
                     }
-                    if (!empty($json['data']['tokens']) && is_array($json['data']['tokens'])) {
-                        return array_values(array_filter($json['data']['tokens'], fn($t) => $t !== null && $t !== ''));
-                    }
+
+                    // Article: remove spaces & empty tokens
+                    return array_values(array_filter($tokens, fn($t) => trim($t) !== ''));
                 }
             } catch (\Throwable $e) {
-                // log at debug level and fallback to preg_split
-                Log::debug('Khmer segment API failed: ' . $e->getMessage(), ['url' => $apiUrl]);
+                Log::debug("Segmentation API failed");
             }
         }
 
-        // Final fallback: whitespace split (best-effort)
-        $tokens = preg_split('/\s+/', $trimmed, -1, PREG_SPLIT_NO_EMPTY);
-        if ($tokens === false) return [];
+        // Fallback tokenizer
+        $tokens = [];
+        $len = mb_strlen($text);
+
+        for ($i = 0; $i < $len; $i++) {
+            $char = mb_substr($text, $i, 1);
+
+            if ($char === ' ') {
+                if ($keepSpace) {
+                    $tokens[] = ' ';
+                }
+                continue;
+            }
+
+            $tokens[] = $char;
+        }
+
         return $tokens;
     }
 }

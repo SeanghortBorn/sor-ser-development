@@ -303,6 +303,18 @@ class ArticleController extends Controller
         $articles = Article::with(['audio', 'file'])
             ->orderBy('id', 'desc')
             ->get();
+
+        // Ensure file_path sent to frontend is a public URL (prefixed with /storage/...)
+        $articles->transform(function ($article) {
+            if ($article->audio && !empty($article->audio->file_path)) {
+                $article->audio->file_path = asset('storage/' . ltrim($article->audio->file_path, '/'));
+            }
+            if ($article->file && !empty($article->file->file_path)) {
+                $article->file->file_path = asset('storage/' . ltrim($article->file->file_path, '/'));
+            }
+            return $article;
+        });
+
         return response()->json($articles);
     }
 
@@ -312,11 +324,17 @@ class ArticleController extends Controller
     public function getAudio($id)
     {
         $audio = Audio::findOrFail($id);
+
+        // Provide a public URL so frontend audio src resolves to /storage/uploads/...
+        $publicPath = $audio->file_path
+            ? asset('storage/' . ltrim($audio->file_path, '/'))
+            : null;
+
         return response()->json([
             'data' => [
                 'id' => $audio->id,
                 'title' => $audio->title,
-                'file_path' => $audio->file_path,
+                'file_path' => $publicPath,
                 'duration' => $audio->duration
             ]
         ]);
