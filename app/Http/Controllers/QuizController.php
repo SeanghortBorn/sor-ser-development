@@ -400,7 +400,9 @@ class QuizController extends Controller
                     break;
 
                 case 'True/False':
-                    $correct = ($q['correct_answer'] === "True" || $q['correct_answer'] === true) ? "True" : "False";
+                    // Store as boolean JSON true/false
+                    $correctBool = ($q['correct_answer'] === "True" || $q['correct_answer'] === true);
+                    $correct = json_encode($correctBool);
                     $options = json_encode($options);
                     break;
 
@@ -412,7 +414,10 @@ class QuizController extends Controller
                     break;
 
                 default:
-                    $correct = $q['correct_answer'] ? (string)$q['correct_answer'] : null;
+                    // Store string (or null) as JSON
+                    $correct = array_key_exists('correct_answer', $q) && $q['correct_answer'] !== null && $q['correct_answer'] !== ''
+                        ? json_encode((string)$q['correct_answer'])
+                        : null;
                     $options = json_encode($options);
             }
 
