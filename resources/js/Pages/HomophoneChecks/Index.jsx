@@ -82,6 +82,49 @@ export default function Index() {
     // Track last saved time for minimal UI feedback
     const [lastSavedAt, setLastSavedAt] = useState(null);
 
+    // Best possible initial value
+    const [canAccessLibrary, setCanAccessLibrary] = useState(() => {
+        // 1. If Laravel already gave us the permission → use it
+        if (auth?.can?.student === true) return true;
+        if (auth?.can?.student === false) return false;
+
+        // 2. If we have it cached from previous session
+        if (
+            typeof window !== "undefined" &&
+            window.__canAccessLibrary !== undefined
+        ) {
+            return window.__canAccessLibrary;
+        }
+
+        // 3. Default = null (still loading)
+        return null;
+    });
+
+    // Only call API when we really don't know yet
+    useEffect(() => {
+        if (canAccessLibrary !== null || !auth?.user) return;
+
+        let cancelled = false;
+        (async () => {
+            try {
+                const res = await fetch(route("api.user.can-access-library"), {
+                    headers: { "X-Requested-With": "XMLHttpRequest" },
+                });
+                const allowed = res.ok;
+                if (!cancelled) {
+                    setCanAccessLibrary(allowed);
+                    if (typeof window !== "undefined") {
+                        window.__canAccessLibrary = allowed;
+                    }
+                }
+            } catch (err) {
+                if (!cancelled) setCanAccessLibrary(false);
+            }
+        })();
+
+        return () => (cancelled = true);
+    }, [auth?.user, canAccessLibrary]);
+
     useEffect(() => {
         // Generate session ID on mount
         const id = `session-${Date.now()}-${Math.random()
@@ -136,11 +179,11 @@ export default function Index() {
                     });
                     const data = res.data?.data ?? res.data ?? null;
                     if (data && typeof data === "object") {
-                        console.log(
-                            "Activity stats loaded from",
-                            endpoint,
-                            data
-                        );
+                        // console.log(
+                        //     "Activity stats loaded from",
+                        //     endpoint,
+                        //     data
+                        // );
                         setActivityStats(data);
                         setLoadingActivityStats(false);
                         return;
@@ -180,11 +223,11 @@ export default function Index() {
                         // Handle both single object and array responses
                         const accuracy = Array.isArray(data) ? data[0] : data;
                         if (accuracy) {
-                            console.log(
-                                "Accuracy stats loaded from",
-                                endpoint,
-                                accuracy
-                            );
+                            // console.log(
+                            //     "Accuracy stats loaded from",
+                            //     endpoint,
+                            //     accuracy
+                            // );
                             setAccuracyStats(accuracy);
                             setLoadingAccuracyStats(false);
                             return;
@@ -207,44 +250,17 @@ export default function Index() {
         if (!grammarCheckerId) return;
         setLoadingComparisonActivities(true);
         try {
-            const endpoints = [
-                `/api/comparison-actions`,
-                `/api/user-comparison-activities`,
-            ];
-
-            for (const endpoint of endpoints) {
-                try {
-                    const res = await axios.get(endpoint, {
-                        params: {
-                            grammar_checker_id: grammarCheckerId,
-                            limit: 50,
-                        },
-                        headers: { Accept: "application/json" },
-                    });
-                    const data = Array.isArray(res.data)
-                        ? res.data
-                        : res.data?.data ?? [];
-                    if (data && Array.isArray(data) && data.length > 0) {
-                        console.log(
-                            "Comparison activities loaded from",
-                            endpoint,
-                            data
-                        );
-                        setComparisonActivities(data);
-                        setLoadingComparisonActivities(false);
-                        return;
-                    }
-                } catch (e) {
-                    console.log(
-                        "Endpoint",
-                        endpoint,
-                        "failed, trying next...",
-                        e.message
-                    );
-                    continue;
-                }
-            }
-            setComparisonActivities([]);
+            const res = await axios.get(`/api/user-comparison-activities`, {
+                params: {
+                    grammar_checker_id: grammarCheckerId,
+                    limit: 50,
+                },
+                headers: { Accept: "application/json" },
+            });
+            const data = Array.isArray(res.data)
+                ? res.data
+                : res.data?.data ?? [];
+            setComparisonActivities(data);
         } catch (err) {
             console.error("Error fetching comparison activities:", err);
             setComparisonActivities([]);
@@ -255,6 +271,14 @@ export default function Index() {
 
     // Handle save button click - shows appropriate modal based on permissions
     const handleSaveClick = async () => {
+        // If permission check is still pending (null), don't proceed
+        if (canAccessLibrary === null) {
+            console.warn(
+                "Permission check still in progress, please try again"
+            );
+            return;
+        }
+
         // Ensure document is saved first
         if (!checkerId) {
             // Document not yet created, trigger save
@@ -262,11 +286,21 @@ export default function Index() {
             try {
                 await autoSave(docTitle, paragraph);
                 // After auto-save creates the document, show modal
-                const isStudent =
-                    auth?.can?.["student"] || auth?.can?.["view_details"];
-                if (isStudent) {
+                if (canAccessLibrary === true) {
+                    // Student with library access: show details modal
                     setShowDetailsModal(true);
+                    // Fetch stats with the newly created checkerId
+                    setTimeout(async () => {
+                        if (checkerId) {
+                            await Promise.all([
+                                fetchActivityStatsForModal(checkerId),
+                                fetchComparisonActivitiesForModal(checkerId),
+                                fetchAccuracyStatsForModal(checkerId),
+                            ]);
+                        }
+                    }, 0);
                 } else {
+                    // No student permission: show history modal
                     setShowHistoryModal(true);
                     await loadHistoryItems();
                 }
@@ -276,11 +310,8 @@ export default function Index() {
             }
         } else {
             // Document already saved, just show modal
-            const isStudent =
-                auth?.can?.["student"] || auth?.can?.["view_details"];
-
-            if (isStudent) {
-                // Show details modal for students
+            if (canAccessLibrary === true) {
+                // Student with library access: show details modal
                 setShowDetailsModal(true);
                 await Promise.all([
                     fetchActivityStatsForModal(checkerId),
@@ -288,7 +319,7 @@ export default function Index() {
                     fetchAccuracyStatsForModal(checkerId),
                 ]);
             } else {
-                // Show history modal for non-students
+                // No student permission: show history modal
                 setShowHistoryModal(true);
                 await loadHistoryItems();
             }
@@ -327,24 +358,13 @@ export default function Index() {
         if (!grammarCheckerId) return;
         setLoadingHistoryDetailActivities(true);
         try {
-            // Try multiple endpoints to find comparison activities
-            let res;
-            try {
-                res = await axios.get(`/api/comparison-actions`, {
-                    params: { grammar_checker_id: grammarCheckerId, limit: 50 },
-                    headers: { Accept: "application/json" },
-                });
-            } catch (err) {
-                // Fallback to alternative endpoint
-                res = await axios.get(`/api/user-comparison-activities`, {
-                    params: { grammar_checker_id: grammarCheckerId, limit: 50 },
-                    headers: { Accept: "application/json" },
-                });
-            }
+            const res = await axios.get(`/api/user-comparison-activities`, {
+                params: { grammar_checker_id: grammarCheckerId, limit: 50 },
+                headers: { Accept: "application/json" },
+            });
             const data = Array.isArray(res.data)
                 ? res.data
                 : res.data?.data ?? [];
-            console.log("Comparison activities loaded:", data);
             setHistoryDetailComparisonActivities(data);
         } catch (err) {
             console.error("Error fetching history comparison activities:", err);
@@ -359,24 +379,31 @@ export default function Index() {
         if (!grammarCheckerId) return;
         setLoadingHistoryDetailAudio(true);
         try {
-            // Try multiple endpoints
-            let res;
-            try {
-                res = await axios.get(`/api/user-audio-activities`, {
-                    params: { grammar_checker_id: grammarCheckerId },
-                    headers: { Accept: "application/json" },
-                });
-            } catch (err) {
-                res = await axios.get(`/api/audio-activities`, {
-                    params: { grammar_checker_id: grammarCheckerId },
-                    headers: { Accept: "application/json" },
-                });
+            const endpoints = [
+                `/api/user-audio-activities`,
+                `/api/audio-activities`,
+            ];
+
+            for (const endpoint of endpoints) {
+                try {
+                    const res = await axios.get(endpoint, {
+                        params: { grammar_checker_id: grammarCheckerId },
+                        headers: { Accept: "application/json" },
+                        validateStatus: (status) => status < 500, // Don't throw on 4xx
+                    });
+                    const data = Array.isArray(res.data)
+                        ? res.data
+                        : res.data?.data ?? [];
+                    if (res.status === 200) {
+                        // console.log("Audio activities loaded:", data);
+                        setHistoryDetailAudioActivities(data);
+                        return;
+                    }
+                } catch (err) {
+                    continue;
+                }
             }
-            const data = Array.isArray(res.data)
-                ? res.data
-                : res.data?.data ?? [];
-            console.log("Audio activities loaded:", data);
-            setHistoryDetailAudioActivities(data);
+            setHistoryDetailAudioActivities([]);
         } catch (err) {
             console.error("Error fetching history audio activities:", err);
             setHistoryDetailAudioActivities([]);
@@ -407,7 +434,7 @@ export default function Index() {
                         // Handle both single object and array responses
                         const accuracy = Array.isArray(data) ? data[0] : data;
                         if (accuracy && accuracy.accuracy != null) {
-                            console.log("Accuracy loaded:", accuracy);
+                            // console.log("Accuracy loaded:", accuracy);
                             setHistoryDetailAccuracy(accuracy);
                             return;
                         }
@@ -446,7 +473,7 @@ export default function Index() {
                     });
                     const data = res.data?.data ?? res.data ?? null;
                     if (data && typeof data === "object") {
-                        console.log("Activity stats loaded:", data);
+                        // console.log("Activity stats loaded:", data);
                         setHistoryDetailStats(data);
                         return;
                     }
@@ -1144,19 +1171,19 @@ export default function Index() {
                                     disabled={
                                         saving ||
                                         isChecking ||
-                                        !paragraph.trim()
+                                        !paragraph.trim() ||
+                                        canAccessLibrary === null
                                     }
                                     className={`px-6 py-2 rounded-xl font-medium transition ${
                                         saving ||
                                         isChecking ||
-                                        !paragraph.trim()
+                                        !paragraph.trim() ||
+                                        canAccessLibrary === null
                                             ? "bg-gray-200 text-gray-500 cursor-not-allowed"
                                             : "bg-blue-600 text-white hover:bg-blue-700"
                                     }`}
                                 >
-                                    {saving
-                                        ? "Checking..."
-                                        : isChecking
+                                    {saving || isChecking
                                         ? "Checking..."
                                         : "Save"}
                                 </button>
@@ -1176,7 +1203,6 @@ export default function Index() {
                     </div>
                 </div>
 
-
                 {/* Details Modal - For Student Users */}
                 <Modal
                     show={showDetailsModal}
@@ -1185,9 +1211,10 @@ export default function Index() {
                 >
                     <div className="p-6">
                         <h2 className="text-lg font-semibold text-gray-800 mb-2">
-                            {docTitle || "Untitled document"}
+                            Article Name: {docTitle || "Untitled document"}
                         </h2>
                         <p className="text-sm text-gray-500 mb-4">
+                            Date:{" "}
                             {lastSavedAt
                                 ? new Date(lastSavedAt).toLocaleDateString()
                                 : "—"}
@@ -1309,10 +1336,7 @@ export default function Index() {
                                             ).length
                                         }
                                     </span>
-                                    <span className="text-gray-400">
-                                        {" "}
-                                        (d){" "}
-                                    </span>
+                                    <span className="text-gray-400"> (d) </span>
                                 </div>
 
                                 {/* Missing Count - show accepted/dismissed */}
@@ -1342,10 +1366,7 @@ export default function Index() {
                                             ).length
                                         }
                                     </span>
-                                    <span className="text-gray-400">
-                                        {" "}
-                                        (d){" "}
-                                    </span>
+                                    <span className="text-gray-400"> (d) </span>
                                 </div>
 
                                 {/* Extra Count - show accepted/dismissed */}
@@ -1375,10 +1396,7 @@ export default function Index() {
                                             ).length
                                         }
                                     </span>
-                                    <span className="text-gray-400">
-                                        {" "}
-                                        (d){" "}
-                                    </span>
+                                    <span className="text-gray-400"> (d) </span>
                                 </div>
 
                                 {/* Accuracy from user_homophone_accuracies table */}
@@ -1387,8 +1405,7 @@ export default function Index() {
                                     <span className="font-medium text-gray-800">
                                         {loadingAccuracyStats
                                             ? "…"
-                                            : accuracyStats?.accuracy !=
-                                              null
+                                            : accuracyStats?.accuracy != null
                                             ? `${Number(
                                                   accuracyStats.accuracy
                                               ).toFixed(2)}%`

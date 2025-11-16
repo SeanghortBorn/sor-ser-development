@@ -421,10 +421,10 @@ export default function AnalyticsSection() {
                 >
                     <div className="p-6">
                         <h2 className="text-lg font-semibold text-gray-800 mb-2">
-                            {modalItem.title}
+                           Article Name: {modalItem.title}
                         </h2>
                         <p className="text-sm text-gray-500 mb-4">
-                            {modalItem.date}
+                            Date: {modalItem.date}
                         </p>
 
                         {/* Article details from raw record */}

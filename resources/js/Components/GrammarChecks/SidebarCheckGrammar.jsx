@@ -34,48 +34,6 @@ export default function SidebarCheckGrammar({
     const page = usePage();
     const { auth } = page.props || {};
 
-    const foundCorrections = [];
-
-    const [canAccessLibrary, setCanAccessLibrary] = useState(() => {
-        if (auth?.can?.["student"]) return true;
-        if (
-            typeof window !== "undefined" &&
-            window.__canAccessLibrary !== undefined
-        )
-            return window.__canAccessLibrary;
-        return null;
-    });
-
-    useEffect(() => {
-        if (canAccessLibrary === true || !auth?.user) return;
-        let cancelled = false;
-        (async () => {
-            try {
-                const response = await fetch(
-                    route("api.user.can-access-library"),
-                    {
-                        headers: { "X-Requested-With": "XMLHttpRequest" },
-                    }
-                );
-                const ok = response.ok;
-                if (!cancelled) {
-                    setCanAccessLibrary(ok);
-                    if (typeof window !== "undefined")
-                        window.__canAccessLibrary = ok;
-                }
-            } catch {
-                if (!cancelled) {
-                    setCanAccessLibrary(false);
-                    if (typeof window !== "undefined")
-                        window.__canAccessLibrary = false;
-                }
-            }
-        })();
-        return () => {
-            cancelled = true;
-        };
-    }, [auth?.user, canAccessLibrary]);
-
     const handleCardClick = (idx) => {
         if (idx === 0 || !comparisonResult) return;
         const differences = comparisonResult.comparison.filter(
@@ -294,10 +252,18 @@ export default function SidebarCheckGrammar({
         }
     };
 
-    const handleAcceptAll = () => {
+    const handleAcceptAll = async () => {
         if (!comparisonResult) return;
 
-        // Determine the last non-missing index to avoid appending article-only tails
+        // Use the same filtering logic as the display
+        const differences = comparisonResult.comparison.filter(
+            (item) =>
+                item.type === "missing" ||
+                item.type === "replaced" ||
+                item.type === "extra"
+        );
+
+        // Find the last same, replaced, or extra word's index_compared
         const lastNonMissingIndex = Math.max(
             ...comparisonResult.comparison
                 .filter(
@@ -310,23 +276,61 @@ export default function SidebarCheckGrammar({
             -1
         );
 
+        // Include missing words only up to lastNonMissingIndex (same as display)
+        const filteredDifferences = differences.filter(
+            (item) =>
+                item.type !== "missing" ||
+                item.index_compared <= lastNonMissingIndex
+        );
+
         const finalWords = [];
+        const itemsToTrack = [];
+        
+        // Process all comparison items to build final text
         for (const comp of comparisonResult.comparison) {
-            // Skip extras (user had extra words -> remove them)
+            if (comp.type === "same") {
+                const pushWord = comp.article_word?.article_word || comp.user_word?.user_word || "";
+                if (pushWord !== "") finalWords.push(pushWord);
+                continue;
+            }
+
+            // Skip items not in filteredDifferences (not displayed on screen)
+            const isFiltered = !filteredDifferences.includes(comp);
+            if (isFiltered) continue;
+
+            // Track only filtered/displayed items
             if (comp.type === "extra") {
+                itemsToTrack.push({
+                    action: "accept",
+                    comparison_type: comp.type,
+                    user_word: comp.user_word?.user_word || "",
+                    article_word: comp.article_word?.article_word || "",
+                    word_position: comp.user_word?.user_index || comp.article_word?.article_index,
+                });
                 continue;
             }
 
-            // For missing entries, only include those up to lastNonMissingIndex
-            if (
-                comp.type === "missing" &&
-                comp.index_compared > lastNonMissingIndex
-            ) {
-                // skip article-only trailing words beyond meaningful diff window
-                continue;
+            if (comp.type === "missing") {
+                itemsToTrack.push({
+                    action: "accept",
+                    comparison_type: comp.type,
+                    user_word: comp.user_word?.user_word || "",
+                    article_word: comp.article_word?.article_word || "",
+                    word_position: comp.user_word?.user_index || comp.article_word?.article_index,
+                });
             }
 
-            // For same / replaced / missing (within window), prefer the accepted result,
+            if (comp.type === "replaced") {
+                itemsToTrack.push({
+                    action: "accept",
+                    comparison_type: comp.type,
+                    user_word: comp.user_word?.user_word || "",
+                    article_word: comp.article_word?.article_word || "",
+                    word_position: comp.user_word?.user_index || comp.article_word?.article_index,
+                });
+            }
+
+            // For replaced / missing (within window), prefer the accepted result,
             // then fallback to article word, then user's word.
             const pushWord =
                 (comp.actions &&
@@ -337,6 +341,24 @@ export default function SidebarCheckGrammar({
                 "";
 
             if (pushWord !== "") finalWords.push(pushWord);
+        }
+
+        // Track items sequentially to avoid race conditions
+        for (const item of itemsToTrack) {
+            try {
+                await axios.post("/api/track/comparison-action", {
+                    grammar_checker_id: checkerId,
+                    article_id: articleId ?? null,
+                    action: item.action,
+                    comparison_type: item.comparison_type,
+                    user_word: item.user_word,
+                    article_word: item.article_word,
+                    word_position: item.word_position,
+                    session_id: sessionStorage.getItem("sessionId"),
+                });
+            } catch (err) {
+                console.error("Track comparison action error:", err.response?.data ?? err.message);
+            }
         }
 
         // Apply merged result with proper spacing and clear UI
@@ -964,7 +986,7 @@ export default function SidebarCheckGrammar({
                                             Ignore
                                         </button>
 
-                                        {canAccessLibrary === true && (
+                                        {auth?.can?.["student"] && (
                                             <button
                                                 onClick={(e) => {
                                                     e.stopPropagation();

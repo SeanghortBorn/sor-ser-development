@@ -47,12 +47,17 @@ class HandleInertiaRequests extends Middleware
                         })->values(),
                     ]
                 ) : null,
-                'can' => $request->user()?->loadMissing('roles.permissions')
-                    ->roles->flatMap(function ($role) {
-                        return $role->permissions;
-                    })->mapWithKeys(function ($permission) use ($request) {
-                        return [$permission['name'] => $request->user()->can($permission['name'])];
-                    })->all(),
+                'can' => array_merge(
+                    $request->user()?->loadMissing('roles.permissions')
+                        ->roles->flatMap(function ($role) {
+                            return $role->permissions;
+                        })->mapWithKeys(function ($permission) use ($request) {
+                            return [$permission['name'] => $request->user()->can($permission['name'])];
+                        })->all() ?? [],
+                    [
+                        'student' => $request->user()?->can('student') ?? false,
+                    ]
+                )
             ],
             'flash' => [
                 'success' => fn() => $request->session()->get('success'),
