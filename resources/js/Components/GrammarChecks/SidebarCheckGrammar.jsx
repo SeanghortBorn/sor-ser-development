@@ -760,11 +760,6 @@ export default function SidebarCheckGrammar({
     }
 
     if (comparisonResult) {
-        // computeMetrics still available as fallback; prefer computedMetrics state
-        const metrics = computedMetrics ?? computeMetrics(comparisonResult);
-        // use segmented stats if available (accurate Khmer count), otherwise fast sync stats for immediate UI
-        const textStats = segmentedTextStats ?? computeTextStatsSync(text);
-
         // Filter differences to include only replaced, extra, and missing words up to the last same, replaced, or extra
         const differences = comparisonResult.comparison.filter(
             (item) =>
@@ -807,15 +802,6 @@ export default function SidebarCheckGrammar({
                             <div className="text-gray-800 text-base font-semibold">
                                 Comparison Results
                             </div>
-                            {canAccessLibrary === true && (
-                                <button
-                                    type="button"
-                                    onClick={() => setShowDetailsModal(true)}
-                                    className="inline-flex items-center px-3 py-1 border-2 rounded-full text-sm font-medium text-gray-600 hover:bg-gray-100 transition"
-                                >
-                                    View details
-                                </button>
-                            )}
                         </div>
                     )}
 
@@ -978,16 +964,18 @@ export default function SidebarCheckGrammar({
                                             Ignore
                                         </button>
 
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                openExplain(item);
-                                            }}
-                                            className="flex items-center text-gray-700 hover:text-blue-600 px-3 py-1 rounded-full border-2 border-gray-300 hover:bg-blue-50 text-xs font-medium transition-colors duration-200 ease-in-out"
-                                        >
-                                            <Info className="w-4 h-4 mr-1" />{" "}
-                                            Explain
-                                        </button>
+                                        {canAccessLibrary === true && (
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    openExplain(item);
+                                                }}
+                                                className="flex items-center text-gray-700 hover:text-blue-600 px-3 py-1 rounded-full border-2 border-gray-300 hover:bg-blue-50 text-xs font-medium transition-colors duration-200 ease-in-out"
+                                            >
+                                                <Info className="w-4 h-4 mr-1" />{" "}
+                                                Explain
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             ))}
@@ -1145,222 +1133,6 @@ export default function SidebarCheckGrammar({
                         <div className="mt-6 flex justify-end">
                             <button
                                 onClick={closeExplain}
-                                className="rounded-[10px] border-2 border-gray-300 px-6 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold"
-                            >
-                                Close
-                            </button>
-                        </div>
-                    </div>
-                </Modal>
-
-                {/* Details Modal (metrics) */}
-                <Modal
-                    show={showDetailsModal}
-                    onClose={() => setShowDetailsModal(false)}
-                    maxWidth="2xl"
-                >
-                    <div className="p-6">
-                        <div className="flex justify-between items-center mb-2">
-                            <h3 className="text-lg font-semibold text-gray-800">
-                                Comparison Details
-                            </h3>
-                            <button
-                                className="text-gray-500 hover:text-gray-700"
-                                onClick={() => setShowDetailsModal(false)}
-                            >
-                                ✕
-                            </button>
-                        </div>
-
-                        <div className="space-y-2 text-sm text-gray-700 max-h-[50vh] overflow-y-auto pr-2">
-                            <div className="mt-1">
-                                <div className="text-md text-slate-500 mb-2">
-                                    Writing score
-                                </div>
-
-                                {loadingActivityStats ? (
-                                    // Skeleton loader
-                                    <div className="grid grid-cols-2 gap-4 bg-slate-50 border border-slate-100 rounded-xl p-3 animate-pulse">
-                                        {[...Array(6)].map((_, i) => (
-                                            <div key={i}>
-                                                <div className="h-3 w-20 bg-slate-200 rounded mb-2"></div>
-                                                <div className="h-4 w-12 bg-slate-300 rounded"></div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                ) : activityStats ? (
-                                    <div className="grid grid-cols-2 gap-4 bg-slate-50 border border-slate-100 rounded-xl p-3">
-                                        <div>
-                                            <div className="text-sm font-medium text-slate-500">
-                                                Accuracy
-                                            </div>
-                                            <div className="text-md font-semibold">
-                                                {metrics.accuracy != null
-                                                    ? `${metrics.accuracy}%`
-                                                    : "0%"}
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <div className="text-sm font-medium text-slate-500">
-                                                Words/Article
-                                            </div>
-                                            <div className="text-md font-semibold">
-                                                {textStats.words}/
-                                                {metrics.total}
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <div className="text-sm font-medium text-slate-500">
-                                                Incorrect Words
-                                            </div>
-                                            <div className="text-md font-semibold">
-                                                {metrics.replaced}
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <div className="text-sm font-medium text-slate-500">
-                                                Missing Words
-                                            </div>
-                                            <div className="text-md font-semibold">
-                                                {metrics.missing}
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <div className="text-sm font-medium text-slate-500">
-                                                Extra Words
-                                            </div>
-                                            <div className="text-md font-semibold">
-                                                {metrics.extra}
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <div className="text-sm font-medium text-slate-500">
-                                                Reading Time
-                                            </div>
-                                            <div className="text-md font-semibold">
-                                                {textStats.readingTime}
-                                            </div>
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <div className="text-sm text-gray-500 mt-2">
-                                        No activity data available.
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* User Activity */}
-                            <div className="mt-3">
-                                <div className="text-md text-slate-500 mb-2">
-                                    User Activity
-                                </div>
-                                {loadingActivityStats ? (
-                                    <div className="grid grid-cols-2 gap-4 bg-slate-50 border border-slate-100 rounded-xl p-3 animate-pulse">
-                                        {[...Array(6)].map((_, i) => (
-                                            <div key={i}>
-                                                <div className="h-3 w-20 bg-slate-200 rounded mb-2"></div>
-                                                <div className="h-4 w-12 bg-slate-300 rounded"></div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                ) : activityStats ? (
-                                    <div className="grid grid-cols-2 gap-4 bg-slate-50 border border-slate-100 rounded-xl p-3">
-                                        <div>
-                                            <div className="text-sm font-medium text-slate-500">
-                                                Pauses
-                                            </div>
-                                            <div className="text-md font-semibold">
-                                                {activityStats.pause_count ??
-                                                    "0"}
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <div className="text-sm font-medium text-slate-500">
-                                                Avg Pause (s)
-                                            </div>
-                                            <div className="text-md font-semibold">
-                                                {activityStats?.avg_pause_duration !=
-                                                null
-                                                    ? formatNumber(
-                                                          activityStats.avg_pause_duration,
-                                                          2
-                                                      )
-                                                    : metrics?.avgPause != null
-                                                    ? formatNumber(
-                                                          metrics.avgPause,
-                                                          2
-                                                      )
-                                                    : "0"}
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <div className="text-sm font-medium text-slate-500">
-                                                Accepts
-                                            </div>
-                                            <div className="text-md font-semibold">
-                                                {activityStats.accepts ?? "0"}
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <div className="text-sm font-medium text-slate-500">
-                                                Dismisses
-                                            </div>
-                                            <div className="text-md font-semibold">
-                                                {activityStats.dismisses ?? "0"}
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <div className="text-sm font-medium text-slate-500">
-                                                Incorrect
-                                            </div>
-                                            <div className="text-md font-semibold">
-                                                {activityStats.replaced_count ??
-                                                    "0"}
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <div className="text-sm font-medium text-slate-500">
-                                                Missing
-                                            </div>
-                                            <div className="text-md font-semibold">
-                                                {activityStats.missing_count ??
-                                                    "0"}
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <div className="text-sm font-medium text-slate-500">
-                                                Extra
-                                            </div>
-                                            <div className="text-md font-semibold">
-                                                {activityStats.extra_count ??
-                                                    "0"}
-                                            </div>
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <div className="text-sm text-gray-500 mt-2">
-                                        No activity data available.
-                                    </div>
-                                )}
-                            </div>
-
-                            <div className="mt-3">
-                                <div className="text-sm font-medium text-slate-500">
-                                    Notes
-                                </div>
-                                <div className="text-sm text-gray-600">
-                                    This summary is derived from the current
-                                    comparison result and recent activity
-                                    events. Accept/dismiss counts and pause
-                                    metrics are fetched from server activity
-                                    logs when available.
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="mt-6 flex justify-end">
-                            <button
-                                onClick={() => setShowDetailsModal(false)}
                                 className="rounded-[10px] border-2 border-gray-300 px-6 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold"
                             >
                                 Close
