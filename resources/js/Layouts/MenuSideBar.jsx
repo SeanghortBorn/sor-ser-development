@@ -248,17 +248,27 @@ export default function MenuSideBar({ lang, setLang }) {
              * ---------------------------- */}
             <div className="px-4 py-3 border-b border-gray-100 mt-2">
                 <div className="flex items-center gap-3">
-                    <img
-                        src="/images/person-icon.svg"
-                        className="w-5 h-5 rounded-lg object-contain scale-150"
-                        alt="Logo"
-                    />
+                    <Link
+                        href="/"
+                        className="flex items-center gap-2 flex-shrink-0"
+                    >
+                        <div className="relative -mt-2">
+                            <img
+                                src="/images/sor-ser logo.png"
+                                alt="Sor-Ser logo"
+                                className="h-9 w-9"
+                                style={{
+                                    filter: "brightness(0) saturate(100%) invert(21%) sepia(94%) saturate(2783%) hue-rotate(210deg) brightness(96%) contrast(97%)",
+                                }}
+                            />
+                        </div>
+                    </Link>
                     <div className="flex-1">
-                        <div className="text-base font-semibold text-gray-900 leading-tight">
-                            Sor Ser
+                        <div className="text-base font-semibold text-blue-700 leading-tight">
+                            Sor-Ser
                         </div>
                         <div className="text-xs text-gray-500 leading-tight">
-                            Homo Phone
+                            Application
                         </div>
                     </div>
                 </div>
@@ -410,12 +420,12 @@ export default function MenuSideBar({ lang, setLang }) {
                     )}
 
                     {/* Feedback Section */}
-                    <MenuItem
+                    {/* <MenuItem
                         href={route("feedback.index")}
                         icon={icons.feedback}
                         label={"Feedback"}
                         active={routeName === "feedback.index"}
-                    />
+                    /> */}
                 </nav>
             </div>
         </aside>

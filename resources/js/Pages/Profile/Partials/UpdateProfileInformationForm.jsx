@@ -127,7 +127,7 @@ export default function UpdateProfileInformation({
                             Full Name
                         </div>
                         <div className="text-gray-900 font-medium">
-                            {user.name}
+                            {user.name ? user.name : "N/A"}
                         </div>
                     </div>
                     <div>
@@ -135,15 +135,13 @@ export default function UpdateProfileInformation({
                             Email Address
                         </div>
                         <div className="text-gray-900 font-medium">
-                            {user.email}
+                            {user.email ? user.email : "N/A"}
                         </div>
                     </div>
                     <div>
-                        <div className="text-sm text-gray-500 mb-1">
-                            Age
-                        </div>
+                        <div className="text-sm text-gray-500 mb-1">Age</div>
                         <div className="text-gray-900 font-medium">
-                            {user.age}
+                            {user.age ? user.age : "N/A"}
                         </div>
                     </div>
                     <div>
@@ -151,7 +149,9 @@ export default function UpdateProfileInformation({
                             Education Level
                         </div>
                         <div className="text-gray-900 font-medium">
-                            {user.education_level}
+                            {user.education_level
+                                ? user.education_level
+                                : "N/A"}
                         </div>
                     </div>
                     <div>
@@ -159,7 +159,9 @@ export default function UpdateProfileInformation({
                             Khmer Writing Experience
                         </div>
                         <div className="text-gray-900 font-medium">
-                            {user.khmer_experience}
+                            {user.khmer_experience
+                                ? user.khmer_experience
+                                : "N/A"}
                         </div>
                     </div>
                 </div>
@@ -179,8 +181,7 @@ export default function UpdateProfileInformation({
                             Edit Personal Information
                         </h2>
                         <p className="text-gray-500 mb-6 text-sm">
-                            Update your details to keep your profile
-                            up-to-date.
+                            Update your details to keep your profile up-to-date.
                         </p>
 
                         <div className="space-y-4">
@@ -209,59 +210,59 @@ export default function UpdateProfileInformation({
                                 />
                             </div>
                             <div className="grid grid-cols-2 gap-4">
-                             {/* Full Name */}
-                            <div>
-                                <InputLabel
-                                    htmlFor="name"
-                                    value="Full Name"
-                                />
-                                <TextInput
-                                    id="name"
-                                    value={infoForm.data.name}
-                                    placeholder="Enter your full name"
-                                    onChange={(e) =>
-                                        infoForm.setData(
-                                            "name",
-                                            e.target.value
-                                        )
-                                    }
-                                    className="mt-1 block w-full rounded-xl border border-gray-300 shadow-sm"
-                                />
-                                <InputError
-                                    className="mt-1 text-sm text-red-500"
-                                    message={infoForm.errors.name}
-                                />
-                            </div>
-                            {/* Age field below dropdowns for 2-col layout */}
-                            <div>
-                                <InputLabel
-                                    htmlFor="age"
-                                    value="Age"
-                                />
-                                <TextInput
-                                    id="age"
-                                    type="number"
-                                    value={infoForm.data.age}
-                                    placeholder="Enter your age"
-                                    onChange={(e) =>
-                                        infoForm.setData(
-                                            "age",
-                                            e.target.value
-                                        )
-                                    }
-                                    className="mt-1 block w-full rounded-xl border border-gray-300 shadow-sm"
-                                />
-                                <InputError
-                                    className="mt-1 text-sm text-red-500"
-                                    message={infoForm.errors.age}
-                                />
-                            </div>
+                                {/* Full Name */}
+                                <div>
+                                    <InputLabel
+                                        htmlFor="name"
+                                        value="Full Name"
+                                    />
+                                    <TextInput
+                                        id="name"
+                                        value={infoForm.data.name}
+                                        placeholder="Enter your full name"
+                                        onChange={(e) =>
+                                            infoForm.setData(
+                                                "name",
+                                                e.target.value
+                                            )
+                                        }
+                                        className="mt-1 block w-full rounded-xl border border-gray-300 shadow-sm"
+                                    />
+                                    <InputError
+                                        className="mt-1 text-sm text-red-500"
+                                        message={infoForm.errors.name}
+                                    />
+                                </div>
+                                {/* Age field below dropdowns for 2-col layout */}
+                                <div>
+                                    <InputLabel htmlFor="age" value="Age" />
+                                    <TextInput
+                                        id="age"
+                                        type="number"
+                                        value={infoForm.data.age}
+                                        placeholder="Enter your age"
+                                        onChange={(e) =>
+                                            infoForm.setData(
+                                                "age",
+                                                e.target.value
+                                            )
+                                        }
+                                        className="mt-1 block w-full rounded-xl border border-gray-300 shadow-sm"
+                                    />
+                                    <InputError
+                                        className="mt-1 text-sm text-red-500"
+                                        message={infoForm.errors.age}
+                                    />
+                                </div>
                             </div>
 
                             {/* Age, Education Level, Khmer Writing Experience in two columns */}
                             <div className="grid grid-cols-2 gap-4">
                                 {/* Khmer Experience Dropdown (dropup) */}
-                                <div className="relative" ref={khmerDropdownRef}>
+                                <div
+                                    className="relative"
+                                    ref={khmerDropdownRef}
+                                >
                                     <label
                                         htmlFor="khmer_experience"
                                         className="block text-md text-[#222a54] font-semibold mb-2"
@@ -282,13 +283,11 @@ export default function UpdateProfileInformation({
                                             setEducationDropdownOpen(false); // close other dropdown
                                         }}
                                     >
-                                        {
-                                            khmerOptions.find(
-                                                (opt) =>
-                                                    opt.value ===
-                                                    infoForm.data.khmer_experience
-                                            )?.label || "Select Experience Level"
-                                        }
+                                        {khmerOptions.find(
+                                            (opt) =>
+                                                opt.value ===
+                                                infoForm.data.khmer_experience
+                                        )?.label || "Select Experience Level"}
                                         <svg
                                             className={`w-4 h-4 ml-2 transition-transform ${
                                                 khmerDropdownOpen
@@ -316,7 +315,8 @@ export default function UpdateProfileInformation({
                                                         key={opt.value}
                                                         type="button"
                                                         className={`flex items-center w-full text-left px-4 py-2 text-[16px] rounded-lg transition ${
-                                                            infoForm.data.khmer_experience ===
+                                                            infoForm.data
+                                                                .khmer_experience ===
                                                             opt.value
                                                                 ? "bg-blue-100 text-blue-700 font-bold"
                                                                 : "hover:bg-gray-100 text-gray-700"
@@ -338,13 +338,18 @@ export default function UpdateProfileInformation({
                                         </div>
                                     )}
                                     <InputError
-                                        message={infoForm.errors.khmer_experience}
+                                        message={
+                                            infoForm.errors.khmer_experience
+                                        }
                                         className="mt-1"
                                     />
                                 </div>
 
                                 {/* Education Level Dropdown (dropup) */}
-                                <div className="relative" ref={educationDropdownRef}>
+                                <div
+                                    className="relative"
+                                    ref={educationDropdownRef}
+                                >
                                     <label
                                         htmlFor="education_level"
                                         className="block text-md text-[#222a54] font-semibold mb-2"
@@ -365,12 +370,11 @@ export default function UpdateProfileInformation({
                                             setKhmerDropdownOpen(false); // close other dropdown
                                         }}
                                     >
-                                        {
-                                            educationOptions.find(
-                                                (opt) => opt.value ===
-                                                    infoForm.data.education_level
-                                            )?.label || "Select Education Level"
-                                        }
+                                        {educationOptions.find(
+                                            (opt) =>
+                                                opt.value ===
+                                                infoForm.data.education_level
+                                        )?.label || "Select Education Level"}
                                         <svg
                                             className={`w-4 h-4 ml-2 transition-transform ${
                                                 educationDropdownOpen
@@ -398,7 +402,8 @@ export default function UpdateProfileInformation({
                                                         key={opt.value}
                                                         type="button"
                                                         className={`flex items-center w-full text-left px-4 py-2 text-[16px] rounded-lg transition ${
-                                                            infoForm.data.education_level ===
+                                                            infoForm.data
+                                                                .education_level ===
                                                             opt.value
                                                                 ? "bg-blue-100 text-blue-700 font-bold"
                                                                 : "hover:bg-gray-100 text-gray-700"
@@ -420,7 +425,9 @@ export default function UpdateProfileInformation({
                                         </div>
                                     )}
                                     <InputError
-                                        message={infoForm.errors.education_level}
+                                        message={
+                                            infoForm.errors.education_level
+                                        }
                                         className="mt-1"
                                     />
                                 </div>
@@ -428,32 +435,27 @@ export default function UpdateProfileInformation({
                         </div>
 
                         {/* Email Verification Notice */}
-                        {mustVerifyEmail &&
-                            user.email_verified_at === null && (
-                                <div className="text-sm mt-2">
-                                    <p className="text-blue-700">
-                                        Your email address is unverified.{" "}
-                                        <Link
-                                            href={route(
-                                                "verification.send"
-                                            )}
-                                            method="post"
-                                            as="button"
-                                            className="font-medium underline hover:text-blue-900"
-                                        >
-                                            Click here to re-send the
-                                            verification email.
-                                        </Link>
+                        {mustVerifyEmail && user.email_verified_at === null && (
+                            <div className="text-sm mt-2">
+                                <p className="text-blue-700">
+                                    Your email address is unverified.{" "}
+                                    <Link
+                                        href={route("verification.send")}
+                                        method="post"
+                                        as="button"
+                                        className="font-medium underline hover:text-blue-900"
+                                    >
+                                        Click here to re-send the verification
+                                        email.
+                                    </Link>
+                                </p>
+                                {status === "verification-link-sent" && (
+                                    <p className=" font-medium text-green-600">
+                                        A new verification link has been sent.
                                     </p>
-                                    {status ===
-                                        "verification-link-sent" && (
-                                        <p className=" font-medium text-green-600">
-                                            A new verification link has been
-                                            sent.
-                                        </p>
-                                    )}
-                                </div>
-                            )}
+                                )}
+                            </div>
+                        )}
 
                         {/* Buttons */}
                         <div className="flex justify-between items-center pt-4">
