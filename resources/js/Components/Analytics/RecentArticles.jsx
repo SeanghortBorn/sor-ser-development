@@ -235,21 +235,13 @@ export default function AnalyticsSection() {
         .filter((g) => {
             // always keep items when no authenticated user (guest view)
             if (!userId) return true;
-            // show items belonging to the current user
+            // show items belonging to the current user only
             if (Number(g.user_id) === Number(userId)) return true;
-            // also include items that are linked to the current article (helpful for "recent article" view)
-            if (
-                currentArticleId &&
-                (Number(g.article_id) === Number(currentArticleId) ||
-                    Number(g.articleId) === Number(currentArticleId))
-            )
-                return true;
             return false;
         })
         .sort((a, b) => {
-            const ta = a?.created_at ? new Date(a.created_at).getTime() : 0;
-            const tb = b?.created_at ? new Date(b.created_at).getTime() : 0;
-            return tb - ta;
+            // Sort by ID in descending order (highest ID first = newest first)
+            return Number(b.id) - Number(a.id);
         });
 
     const recentArticles = sorted.map((g) => {
@@ -342,6 +334,9 @@ export default function AnalyticsSection() {
                             <thead className="bg-gray-50 border-b border-gray-200">
                                 <tr>
                                     <th className="px-4 py-3 text-left font-semibold text-gray-700">
+                                        No.
+                                    </th>
+                                    <th className="px-4 py-3 text-left font-semibold text-gray-700">
                                         Title
                                     </th>
                                     <th className="px-4 py-3 text-left font-semibold text-gray-700">
@@ -375,11 +370,14 @@ export default function AnalyticsSection() {
                                         </td>
                                     </tr>
                                 ) : (
-                                    itemsToRender.map((item) => (
+                                    itemsToRender.map((item, index) => (
                                         <tr
                                             key={item.id}
                                             className="hover:bg-gray-50 transition-colors"
                                         >
+                                            <td className="px-4 py-3 font-medium text-gray-800">
+                                                {recentArticles.length - (startIndex + index)}
+                                            </td>
                                             <td className="px-4 py-3 font-medium text-gray-800">
                                                 {item.title ||
                                                     "Untitled document"}
