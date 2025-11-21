@@ -1,0 +1,53 @@
+name: Deploy to Hostinger
+
+on:
+  push:
+    branches:
+      - main        # Auto-deploy to STAGING (dev.sor-ser.com)
+      - production  # Auto-deploy to PRODUCTION (sor-ser.com)
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 🚚 Checkout code
+        uses: actions/checkout@v3
+      
+      # If you need to build (React, Vue, etc.)
+      # Uncomment and adjust these steps:
+      
+      # - name: 📦 Setup Node.js
+      #   uses: actions/setup-node@v3
+      #   with:
+      #     node-version: '18'
+      
+      # - name: 📥 Install dependencies
+      #   run: npm ci
+      
+      # - name: 🔨 Build project
+      #   run: npm run build
+      
+      # Deploy to STAGING (dev.sor-ser.com)
+      - name: 🚀 Deploy to Staging
+        if: github.ref == 'refs/heads/main'
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: /public_html/dev/
+          # If you build your project, change to:
+          # local-dir: ./dist/
+          
+      # Deploy to PRODUCTION (sor-ser.com)
+      - name: 🚀 Deploy to Production
+        if: github.ref == 'refs/heads/production'
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: /public_html/
+          # If you build your project, change to:
+          # local-dir: ./dist/
