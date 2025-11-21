@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - production
 
 jobs:
   deploy:
@@ -14,40 +13,9 @@ jobs:
       - name: 🚚 Checkout code
         uses: actions/checkout@v3
       
-      - name: 🔍 Debug - Check if secrets exist
+      - name: 🔍 Debug - Show server value (first 10 chars)
         run: |
-          if [ -z "${{ secrets.FTP_SERVER }}" ]; then
-            echo "❌ FTP_SERVER is empty or not set!"
-          else
-            echo "✅ FTP_SERVER is set"
-          fi
-          
-          if [ -z "${{ secrets.FTP_USERNAME }}" ]; then
-            echo "❌ FTP_USERNAME is empty or not set!"
-          else
-            echo "✅ FTP_USERNAME is set"
-          fi
-          
-          if [ -z "${{ secrets.FTP_PASSWORD }}" ]; then
-            echo "❌ FTP_PASSWORD is empty or not set!"
-          else
-            echo "✅ FTP_PASSWORD is set"
-          fi
-      
-      - name: 🚀 Deploy to Staging
-        if: github.ref == 'refs/heads/main'
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
-        with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: /public_html/dev/
-          
-      - name: 🚀 Deploy to Production
-        if: github.ref == 'refs/heads/production'
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
-        with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: /public_html/
+          SERVER="${{ secrets.FTP_SERVER }}"
+          echo "Server length: ${#SERVER}"
+          echo "First 10 chars: ${SERVER:0:10}"
+          echo "Last char code: $(printf '%d' "'${SERVER: -1}")"
