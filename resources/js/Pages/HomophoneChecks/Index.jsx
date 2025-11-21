@@ -1156,7 +1156,7 @@ export default function Index() {
                                         setParagraph(e.target.value)
                                     }
                                     onDoubleClick={() => setIsZoomed(!isZoomed)}
-                                    disabled={!selectedArticle} // <-- disable until article is selected
+                                    disabled={!selectedArticle}
                                     // onCopy={handleBlock}
                                     // onPaste={handleBlock}
                                     // onCut={handleBlock}
@@ -1968,6 +1968,42 @@ export default function Index() {
                         </div>
                     </div>
                 )}
+
+                {/* Block Modal - Prevent Copy/Paste/Cut */}
+                <Modal
+                    show={showBlockModal}
+                    onClose={() => setShowBlockModal(false)}
+                    maxWidth="xl"
+                >
+                    <form
+                        onSubmit={(e) => {
+                            e.preventDefault();
+                            setShowBlockModal(false);
+                        }}
+                        className="p-6 space-y-3"
+                    >
+                        <h2 className="text-lg font-semibold text-gray-800">
+                            Action Not Allowed
+                        </h2>
+                        <p className="text-sm text-gray-600">
+                            Copy, paste, and cut actions are disabled while typing in this field.
+                        </p>
+                        <div className="flex items-center gap-2">
+                            <span className="inline-block px-2 py-0.5 text-xs font-medium text-red-800 bg-red-100 rounded">
+                                Please type manually.
+                            </span>
+                        </div>
+                        <div className="flex justify-end gap-3 mt-3">
+                            <button
+                                type="button"
+                                onClick={() => setShowBlockModal(false)}
+                                className="rounded-[10px] border-2 border-gray-300 px-8 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold"
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </form>
+                </Modal>
             </section>
 
             <GrammarCheckHeader />

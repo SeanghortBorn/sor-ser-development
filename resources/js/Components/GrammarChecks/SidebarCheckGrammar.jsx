@@ -34,6 +34,9 @@ export default function SidebarCheckGrammar({
     const page = usePage();
     const { auth } = page.props || {};
 
+    const [explainAction, setExplainAction] = useState(null);
+    const [explainItem, setExplainItem] = useState(null);
+
     const handleCardClick = (idx) => {
         if (idx === 0 || !comparisonResult) return;
         const differences = comparisonResult.comparison.filter(
@@ -422,9 +425,10 @@ export default function SidebarCheckGrammar({
     };
 
     // 3. OPEN EXPLAIN – Exact → Homophone → Not Found
-    const openExplain = async (item) => {
+    const openExplain = async (item, actionType = null) => {
         if (!item) return;
-
+        setExplainAction(actionType); // "accept" or "dismiss"
+        setExplainItem(item);
         setExplainData(null);
         setShowExplainModal(true);
         setExplainLoading(true);
@@ -442,24 +446,18 @@ export default function SidebarCheckGrammar({
 
         try {
             const map = await fetchHomophones();
-
-            // 1. Try exact match
             if (map[raw]) {
                 setExplainData({ ...map[raw], displayedWord: raw });
                 setExplainLoading(false);
                 return;
             }
-
-            // 2. Try normalized (homophone)
             const norm = normalizeWord(raw);
             const baseEntry = norm ? map[norm] : null;
-
             if (baseEntry) {
                 const homophones = Array.isArray(baseEntry.homophone)
                     ? baseEntry.homophone
                     : [];
                 const isHomophone = homophones.includes(raw);
-
                 if (isHomophone) {
                     setExplainData({
                         ...baseEntry,
@@ -473,7 +471,6 @@ export default function SidebarCheckGrammar({
                 setExplainData({ word: raw, notFound: true });
             }
         } catch (err) {
-            console.error("openExplain error:", err);
             setExplainData({ word: raw, notFound: true });
         } finally {
             setExplainLoading(false);
@@ -483,6 +480,16 @@ export default function SidebarCheckGrammar({
     const closeExplain = () => {
         setShowExplainModal(false);
         setExplainData(null);
+        setExplainAction(null);
+        setExplainItem(null);
+    };
+
+    // Handler for Accept/Dismiss inside modal
+    const handleExplainAction = () => {
+        if (explainItem && explainAction) {
+            handleComparisonAction(explainItem, explainAction);
+        }
+        closeExplain();
     };
 
     const computeMetrics = (res) => {
@@ -962,42 +969,22 @@ export default function SidebarCheckGrammar({
                                             className="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-full flex items-center text-xs font-medium transition"
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                handleComparisonAction(
-                                                    item,
-                                                    "accept"
-                                                );
+                                                openExplain(item, "accept");
                                             }}
                                         >
                                             <Check className="w-3.5 h-3.5 mr-1" />{" "}
                                             Accept
                                         </button>
-
                                         <button
                                             className="flex items-center text-gray-700 hover:text-red-600 px-3 rounded-full border-2 hover:bg-red-50 text-xs font-medium transition"
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                handleComparisonAction(
-                                                    item,
-                                                    "dismiss"
-                                                );
+                                                openExplain(item, "dismiss");
                                             }}
                                         >
                                             <Trash className="w-3.5 h-3.5 mr-1" />{" "}
                                             Ignore
                                         </button>
-
-                                        {auth?.can?.["student"] && (
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    openExplain(item);
-                                                }}
-                                                className="flex items-center text-gray-700 hover:text-blue-600 px-3 py-1 rounded-full border-2 border-gray-300 hover:bg-blue-50 text-xs font-medium transition-colors duration-200 ease-in-out"
-                                            >
-                                                <Info className="w-4 h-4 mr-1" />{" "}
-                                                Explain
-                                            </button>
-                                        )}
                                     </div>
                                 </div>
                             ))}
@@ -1042,124 +1029,178 @@ export default function SidebarCheckGrammar({
                         {explainLoading ? (
                             <div className="py-8 text-center">Loading…</div>
                         ) : explainData ? (
-                            explainData.notFound ? (
-                                <div className="text-sm text-gray-700">
-                                    No entry found for{" "}
-                                    <span className="font-mono">
-                                        {explainData.word}
-                                    </span>
-                                    .
-                                </div>
-                            ) : (
-                                <div className="space-y-3 text-sm text-gray-700">
-                                    {/* Displayed Word + Homophone Note */}
-                                    {explainData.displayedWord && (
-                                        <div>
-                                            <p>
-                                                <span className="font-semibold text-lg">
-                                                    {explainData.displayedWord}
-                                                </span>
-                                                {explainData.isHomophone && (
-                                                    <span className="ml-2 text-xs text-gray-500">
-                                                        (homophone of{" "}
-                                                        <strong>
-                                                            {explainData.word}
-                                                        </strong>
-                                                        )
+                            <div className="space-y-3 text-sm text-gray-700">
+                                {explainData.notFound ? (
+                                    <div>
+                                        <div className="text-sm text-gray-700 mb-4">
+                                            No entry found for{" "}
+                                            <span className="font-mono">
+                                                {explainData.word}
+                                            </span>
+                                            .
+                                        </div>
+                                        {/* Accept/Dismiss buttons for not found */}
+                                        <div className="flex justify-between items-center pt-4 gap-3">
+                                            <button
+                                                type="button"
+                                                onClick={closeExplain}
+                                                className="rounded-[10px] border-2 border-gray-300 px-8 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold"
+                                            >
+                                                Close
+                                            </button>
+
+                                            {explainAction === "accept" && (
+                                                <button
+                                                    type="button"
+                                                    onClick={handleExplainAction}
+                                                    className="rounded-[10px] px-9 py-1 bg-green-600 text-white font-semibold hover:bg-green-700 transition"
+                                                >
+                                                    Accept
+                                                </button>
+                                            )}
+                                            {explainAction === "dismiss" && (
+                                                <button
+                                                    type="button"
+                                                    onClick={handleExplainAction}
+                                                    className="rounded-[10px] px-9 py-1 bg-red-600 text-white font-semibold hover:bg-red-700 transition"
+                                                >
+                                                    Ignore
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <>
+                                        {/* Displayed Word + Homophone Note */}
+                                        {explainData.displayedWord && (
+                                            <div>
+                                                <p>
+                                                    <span className="font-semibold text-lg">
+                                                        {explainData.displayedWord}
                                                     </span>
-                                                )}
-                                                {" — "}
-                                                {explainData.shortDescription ||
-                                                    `This word is commonly used to describe or refer to ${explainData.word}.`}
-                                            </p>
+                                                    {explainData.isHomophone && (
+                                                        <span className="ml-2 text-xs text-gray-500">
+                                                            (homophone of{" "}
+                                                            <strong>
+                                                                {explainData.word}
+                                                            </strong>
+                                                            )
+                                                        </span>
+                                                    )}
+                                                    {" — "}
+                                                    {explainData.shortDescription ||
+                                                        `This word is commonly used to describe or refer to ${explainData.word}.`}
+                                                </p>
+                                            </div>
+                                        )}
+                                        <div className="flex flex-row gap-4">
+                                            <div className="flex-1">
+                                                <div className="text-base font-medium text-slate-500">
+                                                    Part of Speech
+                                                </div>
+                                                <div className="text-sm">
+                                                    {explainData.pos || "—"}
+                                                </div>
+                                            </div>
+                                            <div className="flex-1">
+                                                <div className="text-base font-medium text-slate-500">
+                                                    Pronunciation
+                                                </div>
+                                                <div className="text-sm">
+                                                    {explainData.pro ||
+                                                        explainData.phoneme ||
+                                                        "—"}
+                                                </div>
+                                            </div>
                                         </div>
-                                    )}
-                                    <div className="flex flex-row gap-4">
-                                        <div className="flex-1">
+                                        <div className="flex flex-row gap-4">
+                                            <div className="flex-1">
+                                                <div className="text-base font-medium text-slate-500">
+                                                    Homophones
+                                                </div>
+                                                <div className="text-sm">
+                                                    {Array.isArray(
+                                                        explainData.homophone
+                                                    )
+                                                        ? explainData.homophone.join(
+                                                              ", "
+                                                          )
+                                                        : "—"}
+                                                </div>
+                                            </div>
+                                            <div className="flex-1">
+                                                <div className="text-base font-medium text-slate-500">
+                                                    phoneme
+                                                </div>
+                                                <div className="text-sm">
+                                                    {typeof explainData.phoneme ===
+                                                        "string" &&
+                                                    explainData.phoneme.trim()
+                                                        ? explainData.phoneme
+                                                        : Array.isArray(
+                                                              explainData.phoneme
+                                                          ) &&
+                                                          explainData.phoneme.length
+                                                        ? explainData.phoneme.join(
+                                                              ", "
+                                                          )
+                                                        : "—"}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div>
                                             <div className="text-base font-medium text-slate-500">
-                                                Part of Speech
+                                                Definition
                                             </div>
                                             <div className="text-sm">
-                                                {explainData.pos || "—"}
+                                                {explainData.definition || "—"}
                                             </div>
                                         </div>
-                                        <div className="flex-1">
+                                        <div>
                                             <div className="text-base font-medium text-slate-500">
-                                                Pronunciation
+                                                Example
                                             </div>
                                             <div className="text-sm">
-                                                {explainData.pro ||
-                                                    explainData.phoneme ||
-                                                    "—"}
+                                                {explainData.example || "—"}
                                             </div>
                                         </div>
-                                    </div>
-                                    <div className="flex flex-row gap-4">
-                                        <div className="flex-1">
-                                            <div className="text-base font-medium text-slate-500">
-                                                Homophones
-                                            </div>
-                                            <div className="text-sm">
-                                                {Array.isArray(
-                                                    explainData.homophone
-                                                )
-                                                    ? explainData.homophone.join(
-                                                          ", "
-                                                      )
-                                                    : "—"}
-                                            </div>
+
+                                        {/* Accept/Dismiss buttons for explained word */}
+                                        <div className="flex justify-between items-center pt-4 gap-3">
+                                            <button
+                                                type="button"
+                                                onClick={closeExplain}
+                                                className="rounded-[10px] border-2 border-gray-300 px-8 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold"
+                                            >
+                                                Close
+                                            </button>
+                                            {explainAction === "accept" && (
+                                                <button
+                                                    type="button"
+                                                    onClick={handleExplainAction}
+                                                    className="rounded-[10px] px-9 py-1 bg-green-600 text-white font-semibold hover:bg-green-700 transition disabled:opacity-60"
+                                                >
+                                                    Accept
+                                                </button>
+                                            )}
+                                            {explainAction === "dismiss" && (
+                                                <button
+                                                    type="button"
+                                                    onClick={handleExplainAction}
+                                                    className="rounded-[10px] px-9 py-1 bg-red-600 text-white font-semibold hover:bg-red-700 transition"
+                                                >
+                                                    Ignore
+                                                </button>
+                                            )}
                                         </div>
-                                        <div className="flex-1">
-                                            <div className="text-base font-medium text-slate-500">
-                                                phoneme
-                                            </div>
-                                            <div className="text-sm">
-                                                {typeof explainData.phoneme ===
-                                                    "string" &&
-                                                explainData.phoneme.trim()
-                                                    ? explainData.phoneme
-                                                    : Array.isArray(
-                                                          explainData.phoneme
-                                                      ) &&
-                                                      explainData.phoneme.length
-                                                    ? explainData.phoneme.join(
-                                                          ", "
-                                                      )
-                                                    : "—"}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <div className="text-base font-medium text-slate-500">
-                                            Definition
-                                        </div>
-                                        <div className="text-sm">
-                                            {explainData.definition || "—"}
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <div className="text-base font-medium text-slate-500">
-                                            Example
-                                        </div>
-                                        <div className="text-sm">
-                                            {explainData.example || "—"}
-                                        </div>
-                                    </div>
-                                </div>
-                            )
+                                    </>
+                                )}
+                            </div>
                         ) : (
                             <div className="py-6 text-center text-sm text-gray-500">
                                 No data available.
                             </div>
                         )}
-                        <div className="mt-6 flex justify-end">
-                            <button
-                                onClick={closeExplain}
-                                className="rounded-[10px] border-2 border-gray-300 px-6 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold"
-                            >
-                                Close
-                            </button>
-                        </div>
                     </div>
                 </Modal>
             </div>
