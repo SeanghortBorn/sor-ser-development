@@ -51,11 +51,11 @@ export default function Footer() {
                         href="/"
                         className="flex items-center gap-2 flex-shrink-0"
                     >
-                        <div class="relative -mt-2">
+                        <div className="relative -mt-2">
                             <img
                                 src="/images/sor-ser logo.png"
                                 alt="Sor-Ser logo"
-                                class="h-20 w-20 invert brightness-0"
+                                className="h-20 w-20 invert brightness-0"
                             />
                         </div>
                     </Link>
