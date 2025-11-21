@@ -1,0 +1,17 @@
+.git/
+.gitignore
+.gitattributes
+node_modules/
+vendor/
+storage/logs/
+storage/framework/cache/
+storage/framework/sessions/
+storage/framework/views/
+.env
+.env.*
+tests/
+.editorconfig
+.phpunit.result.cache
+phpunit.xml
+README.md
+.DS_Store
