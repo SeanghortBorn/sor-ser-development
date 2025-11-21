@@ -26,7 +26,17 @@ jobs:
             **/.git*
             **/.git*/**
             **/node_modules/**
+            **/vendor/**
+            **/storage/logs/**
+            **/storage/framework/cache/**
+            **/storage/framework/sessions/**
+            **/storage/framework/views/**
             .env
+            .env.*
+            tests/**
+            .editorconfig
+            .phpunit.result.cache
+            phpunit.xml
             
       - name: 🚀 Deploy to Production
         if: github.ref == 'refs/heads/production'
@@ -40,4 +50,14 @@ jobs:
             **/.git*
             **/.git*/**
             **/node_modules/**
+            **/vendor/**
+            **/storage/logs/**
+            **/storage/framework/cache/**
+            **/storage/framework/sessions/**
+            **/storage/framework/views/**
             .env
+            .env.*
+            tests/**
+            .editorconfig
+            .phpunit.result.cache
+            phpunit.xml
