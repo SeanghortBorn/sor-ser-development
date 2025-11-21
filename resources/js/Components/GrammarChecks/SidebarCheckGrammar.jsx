@@ -492,6 +492,15 @@ export default function SidebarCheckGrammar({
         closeExplain();
     };
 
+    // Only show explain modal for student permission
+    const handleAcceptOrDismiss = (item, actionType) => {
+        if (auth?.can?.student === true) {
+            openExplain(item, actionType);
+        } else {
+            handleComparisonAction(item, actionType);
+        }
+    };
+
     const computeMetrics = (res) => {
         if (!res || !Array.isArray(res.comparison)) {
             return {
@@ -969,7 +978,7 @@ export default function SidebarCheckGrammar({
                                             className="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-full flex items-center text-xs font-medium transition"
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                openExplain(item, "accept");
+                                                handleAcceptOrDismiss(item, "accept");
                                             }}
                                         >
                                             <Check className="w-3.5 h-3.5 mr-1" />{" "}
@@ -979,7 +988,7 @@ export default function SidebarCheckGrammar({
                                             className="flex items-center text-gray-700 hover:text-red-600 px-3 rounded-full border-2 hover:bg-red-50 text-xs font-medium transition"
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                openExplain(item, "dismiss");
+                                                handleAcceptOrDismiss(item, "dismiss");
                                             }}
                                         >
                                             <Trash className="w-3.5 h-3.5 mr-1" />{" "}
