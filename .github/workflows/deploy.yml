@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - production
 
 jobs:
   deploy:
@@ -13,9 +14,20 @@ jobs:
       - name: 🚚 Checkout code
         uses: actions/checkout@v3
       
-      - name: 🔍 Debug - Show server value (first 10 chars)
-        run: |
-          SERVER="${{ secrets.FTP_SERVER }}"
-          echo "Server length: ${#SERVER}"
-          echo "First 10 chars: ${SERVER:0:10}"
-          echo "Last char code: $(printf '%d' "'${SERVER: -1}")"
+      - name: 🚀 Deploy to Staging
+        if: github.ref == 'refs/heads/main'
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: /domains/sor-ser.com/public_html/dev/
+          
+      - name: 🚀 Deploy to Production
+        if: github.ref == 'refs/heads/production'
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: /domains/sor-ser.com/public_html/
