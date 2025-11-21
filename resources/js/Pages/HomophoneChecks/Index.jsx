@@ -7,6 +7,7 @@ import GrammarCheckHeader from "@/Components/GrammarChecks/GrammarCheckHeader";
 import SidebarCheckGrammar from "@/Components/GrammarChecks/SidebarCheckGrammar";
 import Modal from "@/Components/Modal";
 import axios from "axios";
+import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from "recharts";
 
 export default function Index() {
     const { auth } = usePage().props;
@@ -897,6 +898,46 @@ export default function Index() {
         }
     }, [paragraph, selectedArticle]);
 
+    // Prepare distribution data for Pie chart
+    const getDistributionData = () => {
+        const types = ["replaced", "missing", "extra"];
+        const colors = {
+            replaced_accept: "#34d399", // green
+            replaced_dismiss: "#f87171", // red
+            missing_accept: "#60a5fa", // blue
+            missing_dismiss: "#fbbf24", // yellow
+            extra_accept: "#a78bfa", // purple
+            extra_dismiss: "#f472b6", // pink
+        };
+        const result = [];
+        types.forEach((type) => {
+            const acceptCount = comparisonActivities.filter(
+                (act) => act.comparison_type === type && act.action === "accept"
+            ).length;
+            const dismissCount = comparisonActivities.filter(
+                (act) => act.comparison_type === type && act.action === "dismiss"
+            ).length;
+            // Use custom label for replaced
+            result.push({
+                name:
+                    type === "replaced"
+                        ? "Incorrect Accept"
+                        : `${type.charAt(0).toUpperCase() + type.slice(1)} Accept`,
+                value: acceptCount,
+                color: colors[`${type}_accept`],
+            });
+            result.push({
+                name:
+                    type === "replaced"
+                        ? "Incorrect Dismiss"
+                        : `${type.charAt(0).toUpperCase() + type.slice(1)} Dismiss`,
+                value: dismissCount,
+                color: colors[`${type}_dismiss`],
+            });
+        });
+        return result.filter((d) => d.value > 0); // Only show non-zero
+    };
+
     return (
         <>
             <Head title="Homophone Check" />
@@ -1209,7 +1250,8 @@ export default function Index() {
                     onClose={() => setShowDetailsModal(false)}
                     maxWidth="2xl"
                 >
-                    <div className="p-6">
+                    <div className="p-6 flex flex-col" style={{ maxHeight: "80vh" }}>
+                        {/* Header */}
                         <h2 className="text-lg font-semibold text-gray-800 mb-2">
                             Article Name: {docTitle || "Untitled document"}
                         </h2>
@@ -1219,245 +1261,213 @@ export default function Index() {
                                 ? new Date(lastSavedAt).toLocaleDateString()
                                 : "—"}
                         </p>
-
-                        {/* Article details from raw record */}
-                        <div className="grid grid-cols-1 md:grid-cols-1 gap-4 mb-4 text-sm text-gray-700">
-                            <div>
-                                <div className="font-medium text-slate-500">
-                                    Paragraph
+                        {/* Scrollable content */}
+                        <div className="flex-1 overflow-y-auto">
+                            {/* Article details from raw record */}
+                            <div className="grid grid-cols-1 md:grid-cols-1 gap-4 mb-4 text-sm text-gray-700">
+                                <div>
+                                    <div className="font-medium text-slate-500">
+                                        Your Article
+                                    </div>
+                                    {/* Constrain long paragraphs and allow scrolling; preserve newlines */}
+                                    <div className="mt-1 bg-slate-50 p-3 rounded text-sm leading-relaxed whitespace-pre-wrap break-words max-h-60 overflow-auto">
+                                        {paragraph ?? ""}
+                                    </div>
                                 </div>
-                                {/* Constrain long paragraphs and allow scrolling; preserve newlines */}
-                                <div className="mt-1 bg-slate-50 p-3 rounded text-sm leading-relaxed whitespace-pre-wrap break-words max-h-60 overflow-auto">
-                                    {paragraph ?? "—"}
+                            </div>
+                            {/* Matched accuracy record details if available */}
+                            <div className="mb-4">
+                                <div className="bg-white rounded-xl p-6 border border-gray-200">
+                                    <div className="mb-4">
+                                        <h2 className="text-lg font-bold text-gray-900">
+                                            Distribution Actions
+                                        </h2>
+                                        <p className="text-gray-600 text-sm mt-1">
+                                            Share of action by group
+                                        </p>
+                                    </div>
+                                    <ResponsiveContainer width="100%" height={280}>
+                                        <PieChart>
+                                            <Pie
+                                                data={getDistributionData()}
+                                                cx="50%"
+                                                cy="50%"
+                                                outerRadius={90}
+                                                dataKey="value"
+                                                labelLine={false}
+                                                // label={({ name, value }) =>
+                                                //     `${name}: ${value}`
+                                                // }
+                                            >
+                                                {getDistributionData().map((entry, index) => (
+                                                    <Cell
+                                                        key={`cmp-${index}`}
+                                                        fill={entry.color}
+                                                    />
+                                                ))}
+                                            </Pie>
+                                            <Tooltip
+                                                formatter={(value, name) => [
+                                                    `${value}`,
+                                                    name,
+                                                ]}
+                                            />
+                                            <Legend />
+                                        </PieChart>
+                                    </ResponsiveContainer>
+                                </div>
+
+                                {/* Stats Row - showing accuracy data with calculated counts */}
+                                <div className="grid grid-cols-4 gap-4 text-sm text-slate-600 mt-4">
+                                    {/* Replaced Count - show accepted/dismissed */}
+                                    <div>
+                                        Replaced:{" "}
+                                        <span className="font-medium text-green-700">
+                                            {
+                                                comparisonActivities.filter(
+                                                    (act) =>
+                                                        act.comparison_type ===
+                                                            "replaced" &&
+                                                        act.action === "accept"
+                                                ).length
+                                            }
+                                        </span>
+                                        <span className="text-gray-400">
+                                            {" "}
+                                            (a) /{" "}
+                                        </span>
+                                        <span className="font-medium text-red-700">
+                                            {
+                                                comparisonActivities.filter(
+                                                    (act) =>
+                                                        act.comparison_type ===
+                                                            "replaced" &&
+                                                        act.action === "dismiss"
+                                                ).length
+                                            }
+                                        </span>
+                                        <span className="text-gray-400"> (d) </span>
+                                    </div>
+
+                                    {/* Missing Count - show accepted/dismissed */}
+                                    <div>
+                                        Missing:{" "}
+                                        <span className="font-medium text-green-700">
+                                            {
+                                                comparisonActivities.filter(
+                                                    (act) =>
+                                                        act.comparison_type ===
+                                                            "missing" &&
+                                                        act.action === "accept"
+                                                ).length
+                                            }
+                                        </span>
+                                        <span className="text-gray-400">
+                                            {" "}
+                                            (a) /{" "}
+                                        </span>
+                                        <span className="font-medium text-red-700">
+                                            {
+                                                comparisonActivities.filter(
+                                                    (act) =>
+                                                        act.comparison_type ===
+                                                            "missing" &&
+                                                        act.action === "dismiss"
+                                                ).length
+                                            }
+                                        </span>
+                                        <span className="text-gray-400"> (d) </span>
+                                    </div>
+
+                                    {/* Extra Count - show accepted/dismissed */}
+                                    <div>
+                                        Extra:{" "}
+                                        <span className="font-medium text-green-700">
+                                            {
+                                                comparisonActivities.filter(
+                                                    (act) =>
+                                                        act.comparison_type ===
+                                                            "extra" &&
+                                                        act.action === "accept"
+                                                ).length
+                                            }
+                                        </span>
+                                        <span className="text-gray-400">
+                                            {" "}
+                                            (a) /{" "}
+                                        </span>
+                                        <span className="font-medium text-red-700">
+                                            {
+                                                comparisonActivities.filter(
+                                                    (act) =>
+                                                        act.comparison_type ===
+                                                            "extra" &&
+                                                        act.action === "dismiss"
+                                                ).length
+                                            }
+                                        </span>
+                                        <span className="text-gray-400"> (d) </span>
+                                    </div>
+
+                                    {/* Accuracy from user_homophone_accuracies table */}
+                                    <div>
+                                        Accuracy:{" "}
+                                        <span className="font-medium text-gray-800">
+                                            {loadingAccuracyStats
+                                                ? "…"
+                                                : accuracyStats?.accuracy != null
+                                                ? `${Number(
+                                                    accuracyStats.accuracy
+                                                ).toFixed(2)}%`
+                                                : "0%"}
+                                        </span>
+                                    </div>
+                                </div>
+                                {/* Additional Stats Row */}
+                                <div className="grid grid-cols-4 gap-4 text-sm text-slate-600 mt-4">
+                                    {/* Avg Pause */}
+                                    <div>
+                                        Avg Pause (s):{" "}
+                                        <span className="font-medium text-gray-800">
+                                            {loadingActivityStats
+                                                ? "…"
+                                                : activityStats?.avg_pause_duration !=
+                                                null
+                                                ? Number(
+                                                    activityStats.avg_pause_duration
+                                                ).toFixed(2)
+                                                : "0"}
+                                        </span>
+                                    </div>
+
+                                    {/* Audio Play Count */}
+                                    <div>
+                                        Audio Plays:{" "}
+                                        <span className="font-medium text-blue-700">
+                                            0
+                                        </span>
+                                    </div>
+
+                                    {/* Audio Pause Count */}
+                                    <div>
+                                        Audio Pauses:{" "}
+                                        <span className="font-medium text-orange-700">
+                                            0
+                                        </span>
+                                    </div>
+
+                                    {/* Reading Time */}
+                                    <div>
+                                        Reading Time (s):{" "}
+                                        <span className="font-medium text-gray-800">
+                                            {accuracyStats?.reading_time_seconds ??
+                                                "0"}
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-
-                        {/* Matched accuracy record details if available */}
-                        <div className="mb-4">
-                            <div className="font-medium text-slate-500 mb-2">
-                                Recent Events
-                            </div>
-                            <div className="w-full bg-white border rounded-lg">
-                                {loadingComparisonActivities ? (
-                                    <div className="p-3 text-sm text-gray-500">
-                                        Loading recent events…
-                                    </div>
-                                ) : comparisonActivities.length === 0 ? (
-                                    <div className="p-3 text-sm text-gray-500">
-                                        No recent events.
-                                    </div>
-                                ) : (
-                                    <div className="max-h-40 overflow-y-auto hide-scrollbar">
-                                        <table className="w-full text-sm divide-y">
-                                            <thead className="bg-gray-50 sticky top-0">
-                                                <tr>
-                                                    <th className="text-left px-3 py-2 text-xs text-gray-500">
-                                                        Type
-                                                    </th>
-                                                    <th className="text-left px-3 py-2 text-xs text-gray-500">
-                                                        Action
-                                                    </th>
-                                                    <th className="text-left px-3 py-2 text-xs text-gray-500">
-                                                        User word
-                                                    </th>
-                                                    <th className="text-left px-3 py-2 text-xs text-gray-500">
-                                                        Article word
-                                                    </th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {comparisonActivities.map(
-                                                    (act) => (
-                                                        <tr
-                                                            key={act.id}
-                                                            className="odd:bg-white even:bg-gray-50"
-                                                        >
-                                                            <td className="px-3 py-2 text-xs text-gray-600">
-                                                                {act.comparison_type ??
-                                                                    " "}
-                                                            </td>
-                                                            <td className="px-3 py-2 text-xs">
-                                                                <span
-                                                                    className={`px-2 py-0.5 rounded-full text-xs ${
-                                                                        act.action ===
-                                                                        "accept"
-                                                                            ? "bg-green-100 text-green-800"
-                                                                            : "bg-red-100 text-red-800"
-                                                                    }`}
-                                                                >
-                                                                    {act.action ??
-                                                                        " "}
-                                                                </span>
-                                                            </td>
-                                                            <td className="px-3 py-2 text-xs text-gray-700">
-                                                                {act.user_word ??
-                                                                    " "}
-                                                            </td>
-                                                            <td className="px-3 py-2 text-xs text-gray-700">
-                                                                {act.article_word ??
-                                                                    " "}
-                                                            </td>
-                                                        </tr>
-                                                    )
-                                                )}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Stats Row - showing accuracy data with calculated counts */}
-                            <div className="grid grid-cols-4 gap-4 text-sm text-slate-600 mt-4">
-                                {/* Replaced Count - show accepted/dismissed */}
-                                <div>
-                                    Replaced:{" "}
-                                    <span className="font-medium text-green-700">
-                                        {
-                                            comparisonActivities.filter(
-                                                (act) =>
-                                                    act.comparison_type ===
-                                                        "replaced" &&
-                                                    act.action === "accept"
-                                            ).length
-                                        }
-                                    </span>
-                                    <span className="text-gray-400">
-                                        {" "}
-                                        (a) /{" "}
-                                    </span>
-                                    <span className="font-medium text-red-700">
-                                        {
-                                            comparisonActivities.filter(
-                                                (act) =>
-                                                    act.comparison_type ===
-                                                        "replaced" &&
-                                                    act.action === "dismiss"
-                                            ).length
-                                        }
-                                    </span>
-                                    <span className="text-gray-400"> (d) </span>
-                                </div>
-
-                                {/* Missing Count - show accepted/dismissed */}
-                                <div>
-                                    Missing:{" "}
-                                    <span className="font-medium text-green-700">
-                                        {
-                                            comparisonActivities.filter(
-                                                (act) =>
-                                                    act.comparison_type ===
-                                                        "missing" &&
-                                                    act.action === "accept"
-                                            ).length
-                                        }
-                                    </span>
-                                    <span className="text-gray-400">
-                                        {" "}
-                                        (a) /{" "}
-                                    </span>
-                                    <span className="font-medium text-red-700">
-                                        {
-                                            comparisonActivities.filter(
-                                                (act) =>
-                                                    act.comparison_type ===
-                                                        "missing" &&
-                                                    act.action === "dismiss"
-                                            ).length
-                                        }
-                                    </span>
-                                    <span className="text-gray-400"> (d) </span>
-                                </div>
-
-                                {/* Extra Count - show accepted/dismissed */}
-                                <div>
-                                    Extra:{" "}
-                                    <span className="font-medium text-green-700">
-                                        {
-                                            comparisonActivities.filter(
-                                                (act) =>
-                                                    act.comparison_type ===
-                                                        "extra" &&
-                                                    act.action === "accept"
-                                            ).length
-                                        }
-                                    </span>
-                                    <span className="text-gray-400">
-                                        {" "}
-                                        (a) /{" "}
-                                    </span>
-                                    <span className="font-medium text-red-700">
-                                        {
-                                            comparisonActivities.filter(
-                                                (act) =>
-                                                    act.comparison_type ===
-                                                        "extra" &&
-                                                    act.action === "dismiss"
-                                            ).length
-                                        }
-                                    </span>
-                                    <span className="text-gray-400"> (d) </span>
-                                </div>
-
-                                {/* Accuracy from user_homophone_accuracies table */}
-                                <div>
-                                    Accuracy:{" "}
-                                    <span className="font-medium text-gray-800">
-                                        {loadingAccuracyStats
-                                            ? "…"
-                                            : accuracyStats?.accuracy != null
-                                            ? `${Number(
-                                                  accuracyStats.accuracy
-                                              ).toFixed(2)}%`
-                                            : "—"}
-                                    </span>
-                                </div>
-                            </div>
-
-                            {/* Additional Stats Row */}
-                            <div className="grid grid-cols-4 gap-4 text-sm text-slate-600 mt-4">
-                                {/* Avg Pause */}
-                                <div>
-                                    Avg Pause (s):{" "}
-                                    <span className="font-medium text-gray-800">
-                                        {loadingActivityStats
-                                            ? "…"
-                                            : activityStats?.avg_pause_duration !=
-                                              null
-                                            ? Number(
-                                                  activityStats.avg_pause_duration
-                                              ).toFixed(2)
-                                            : "—"}
-                                    </span>
-                                </div>
-
-                                {/* Audio Play Count */}
-                                <div>
-                                    Audio Plays:{" "}
-                                    <span className="font-medium text-blue-700">
-                                        0
-                                    </span>
-                                </div>
-
-                                {/* Audio Pause Count */}
-                                <div>
-                                    Audio Pauses:{" "}
-                                    <span className="font-medium text-orange-700">
-                                        0
-                                    </span>
-                                </div>
-
-                                {/* Reading Time */}
-                                <div>
-                                    Reading Time (s):{" "}
-                                    <span className="font-medium text-gray-800">
-                                        {accuracyStats?.reading_time_seconds ??
-                                            "—"}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-
+                        {/* Footer/Close button */}
                         <div className="flex justify-end mt-4">
                             <button
                                 onClick={() => setShowDetailsModal(false)}
@@ -1632,61 +1642,44 @@ export default function Index() {
                                             No recent events.
                                         </div>
                                     ) : (
-                                        <div className="max-h-40 overflow-y-auto hide-scrollbar">
-                                            <table className="w-full text-sm divide-y">
-                                                <thead className="bg-gray-50 sticky top-0">
-                                                    <tr>
-                                                        <th className="text-left px-3 py-2 text-xs text-gray-500">
-                                                            Type
-                                                        </th>
-                                                        <th className="text-left px-3 py-2 text-xs text-gray-500">
-                                                            Action
-                                                        </th>
-                                                        <th className="text-left px-3 py-2 text-xs text-gray-500">
-                                                            User word
-                                                        </th>
-                                                        <th className="text-left px-3 py-2 text-xs text-gray-500">
-                                                            Article word
-                                                        </th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {historyDetailComparisonActivities.map(
-                                                        (act) => (
-                                                            <tr
-                                                                key={act.id}
-                                                                className="odd:bg-white even:bg-gray-50"
-                                                            >
-                                                                <td className="px-3 py-2 text-xs text-gray-600">
-                                                                    {act.comparison_type ??
-                                                                        " "}
-                                                                </td>
-                                                                <td className="px-3 py-2 text-xs">
-                                                                    <span
-                                                                        className={`px-2 py-0.5 rounded-full text-xs ${
-                                                                            act.action ===
-                                                                            "accept"
-                                                                                ? "bg-green-100 text-green-800"
-                                                                                : "bg-red-100 text-red-800"
-                                                                        }`}
-                                                                    >
-                                                                        {act.action ??
-                                                                            " "}
-                                                                    </span>
-                                                                </td>
-                                                                <td className="px-3 py-2 text-xs text-gray-700">
-                                                                    {act.user_word ??
-                                                                        " "}
-                                                                </td>
-                                                                <td className="px-3 py-2 text-xs text-gray-700">
-                                                                    {act.article_word ??
-                                                                        " "}
-                                                                </td>
-                                                            </tr>
-                                                        )
-                                                    )}
-                                                </tbody>
-                                            </table>
+                                        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
+                                            <div className="mb-4">
+                                                <h2 className="text-lg font-bold text-gray-900">
+                                                    Checks Distribution
+                                                </h2>
+                                                <p className="text-gray-600 text-sm mt-1">
+                                                    Share of checks by group
+                                                </p>
+                                            </div>
+                                            <ResponsiveContainer width="100%" height={280}>
+                                                <PieChart>
+                                                    <Pie
+                                                        data={getDistributionData()}
+                                                        cx="50%"
+                                                        cy="50%"
+                                                        outerRadius={90}
+                                                        dataKey="value"
+                                                        labelLine={false}
+                                                        label={({ name, value }) =>
+                                                            `${name}: ${value}`
+                                                        }
+                                                    >
+                                                        {getDistributionData().map((entry, index) => (
+                                                            <Cell
+                                                                key={`cmp-${index}`}
+                                                                fill={entry.color}
+                                                            />
+                                                        ))}
+                                                    </Pie>
+                                                    <Tooltip
+                                                        formatter={(value, name) => [
+                                                            `${value}`,
+                                                            name,
+                                                        ]}
+                                                    />
+                                                    <Legend />
+                                                </PieChart>
+                                            </ResponsiveContainer>
                                         </div>
                                     )}
                                 </div>
