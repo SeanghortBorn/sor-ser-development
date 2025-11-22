@@ -689,6 +689,52 @@ export default function Index() {
         return article?.audio?.file_path || null;
     };
 
+    const lastTypedValueRef = useRef("");
+    const handleTypingTrack = (e) => {
+        const newValue = e.target.value;
+        if (!userId || !checkerId) return;
+
+        const prevValue = lastTypedValueRef.current;
+        const prevLen = prevValue.length;
+        const currLen = newValue.length
+
+        // === TYPING NEW CHARACTERS (including space!) ===
+        if (currLen > prevLen) {
+            const addedChars = newValue.slice(prevLen);
+
+            setTimeout(() => {
+                addedChars.split('').forEach(char => {
+                    axios.post("/api/track/typing", {
+                        grammar_checker_id: Number(checkerId),
+                        user_id: Number(userId),
+                        character: char,     // " ", "a", "!", emoji — ALL work
+                        status: 1
+                    }).catch(() => {});
+                });
+            }, 80);
+        }
+
+        // === DELETING CHARACTERS (records real deleted char) ===
+        else if (currLen < prevLen) {
+            const deletedCount = prevLen - currLen;
+            const deletedChars = prevValue.slice(-deletedCount);
+
+            setTimeout(() => {
+                deletedChars.split('').forEach(char => {
+                    axios.post("/api/track/typing", {
+                        grammar_checker_id: Number(checkerId),
+                        user_id: Number(userId),
+                        character: char,     // the real deleted character!
+                        status: 0
+                    }).catch(() => {});
+                });
+            }, 80);
+        }
+
+        // Always update the reference
+        lastTypedValueRef.current = newValue;
+    };
+
     // Select article
     const handleSelectArticle = async (article) => {
         setSelectedArticle(article);
@@ -1193,9 +1239,11 @@ export default function Index() {
                                     }`}
                                     placeholder="Type your text here..."
                                     value={paragraph}
-                                    onChange={(e) =>
-                                        setParagraph(e.target.value)
-                                    }
+                                    onChange={(e) => {
+                                        setParagraph(e.target.value);
+                                        handleTypingTrack(e);
+                                    }}
+                                    onInput={handleTypingTrack}
                                     onDoubleClick={() => setIsZoomed(!isZoomed)}
                                     disabled={!selectedArticle}
                                     // onCopy={handleBlock}

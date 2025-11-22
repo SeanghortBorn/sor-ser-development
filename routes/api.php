@@ -3,6 +3,7 @@
 use App\Http\Controllers\AccuracyController;
 use App\Http\Controllers\KhmerCompareController;
 use App\Http\Controllers\KhmerSegmentController;
+use App\Http\Controllers\UserTypingActivityController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
@@ -35,6 +36,8 @@ Route::get('/track/stats', [UserActivityController::class, 'getStats']);
 Route::get('/user-activity-stats', [UserActivityController::class, 'getStats']);
 Route::get('/user-activities/stats', [UserActivityController::class, 'getStats']);
 Route::post('/accuracy', [AccuracyController::class, 'store'])->name('accuracy.store');
+
+Route::post('/track/typing', [UserTypingActivityController::class, 'store']);
 
 Route::get('/user-homophone-accuracies', [AccuracyController::class, 'index']);
 Route::get('/user-comparison-activities', [UserActivityController::class, 'listComparisonActivities']);
