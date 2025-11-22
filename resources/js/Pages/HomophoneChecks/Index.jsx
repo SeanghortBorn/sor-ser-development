@@ -1246,9 +1246,9 @@ export default function Index() {
                                     onInput={handleTypingTrack}
                                     onDoubleClick={() => setIsZoomed(!isZoomed)}
                                     disabled={!selectedArticle}
-                                    // onCopy={handleBlock}
-                                    // onPaste={handleBlock}
-                                    // onCut={handleBlock}
+                                    onCopy={handleBlock}
+                                    onPaste={handleBlock}
+                                    onCut={handleBlock}
                                 />
                             </div>
 
