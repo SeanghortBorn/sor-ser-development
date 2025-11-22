@@ -53,13 +53,56 @@ export default function ArticlesPage({ articles, search = "" }) {
         );
     };
 
-    // Helper to resolve file/audio URL
+    // FIXED: Helper to resolve file/audio URL
     const resolveUrl = (media, bucket) => {
         if (!media) return null;
+        
+        // If it's already a full URL, return it
         if (typeof media === "string") {
-            if (media.startsWith("http") || media.startsWith("/")) return media;
+            if (media.startsWith("http://") || media.startsWith("https://")) {
+                return media;
+            }
+            if (media.startsWith("/storage/")) {
+                return media;
+            }
+            // Otherwise treat it as just a filename
             return `/storage/uploads/${bucket}/${media}`;
         }
+
+        // Handle object with file_path
+        if (media.file_path) {
+            const filePath = String(media.file_path);
+            
+            // If it starts with http, return as is
+            if (filePath.startsWith("http://") || filePath.startsWith("https://")) {
+                return filePath;
+            }
+            
+            // If it already has /storage/, return as is
+            if (filePath.startsWith("/storage/")) {
+                return filePath;
+            }
+            
+            // If it starts with storage/, add leading slash
+            if (filePath.startsWith("storage/")) {
+                return `/${filePath}`;
+            }
+            
+            // If it starts with uploads/, prepend /storage/
+            if (filePath.startsWith("uploads/")) {
+                return `/storage/${filePath}`;
+            }
+            
+            // If it starts with public/, convert to /storage/
+            if (filePath.startsWith("public/")) {
+                return `/storage/${filePath.replace(/^public\//, "")}`;
+            }
+            
+            // Default: assume it's just a filename
+            return `/storage/uploads/${bucket}/${filePath}`;
+        }
+
+        // Fallback to other properties
         if (media.url) return media.url;
         if (media.path) {
             const p = media.path.replace(/^public\//, "");
@@ -67,16 +110,9 @@ export default function ArticlesPage({ articles, search = "" }) {
                 ? media.path
                 : `/storage/${p}`;
         }
-        if (media.file_path) {
-            const fp = String(media.file_path);
-            if (fp.startsWith("http") || fp.startsWith("/")) return fp;
-            if (fp.startsWith("public/"))
-                return `/storage/${fp.replace(/^public\//, "")}`;
-            return `/storage/${fp}`;
-        }
-        if (media.filename)
-            return `/storage/uploads/${bucket}/${media.filename}`;
+        if (media.filename) return `/storage/uploads/${bucket}/${media.filename}`;
         if (media.name) return `/storage/uploads/${bucket}/${media.name}`;
+        
         return null;
     };
 
@@ -93,23 +129,12 @@ export default function ArticlesPage({ articles, search = "" }) {
         setShowViewModal(true);
         setFileLoading(true);
 
-        // Get file extension from title for display, but use file_path for preview
+        // Get file extension from title for display
         const fileTitle = item.file?.title || item.file?.filename || "";
         const fileExt = getFileExt(fileTitle);
 
-        // Extract filename from file_path for preview
-        let previewFilename = "";
-        if (item.file?.file_path) {
-            // file_path: "/storage/uploads/files/path_filename.txt"
-            const parts = item.file.file_path.split("/");
-            previewFilename = parts[parts.length - 1];
-        }
-
-        // Use route for .txt files with correct filename
-        const fileUrl =
-            fileExt === "txt" && previewFilename
-                ? `/storage/uploads/files/${previewFilename}`
-                : resolveUrl(item.file, "files");
+        // Get the resolved URL for preview
+        const fileUrl = resolveUrl(item.file, "files");
 
         if (fileUrl && fileExt === "txt") {
             try {
@@ -147,8 +172,8 @@ export default function ArticlesPage({ articles, search = "" }) {
                                         type="text"
                                         className="px-2 w-[250px] py-2 rounded-[10px] border-none border-gray-300 text-sm  focus:outline-none focus:ring-0"
                                         placeholder="Search Title or File"
-                                    value={searchTerm}
-                                    onChange={handleSearch}
+                                        value={searchTerm}
+                                        onChange={handleSearch}
                                     />
                                 </div>
                                 {can["article-create"] && can["article-list"] && (
@@ -284,7 +309,7 @@ export default function ArticlesPage({ articles, search = "" }) {
                             </table>
                         </div>
 
-                        {/* + Delete confirmation modal */}
+                        {/* Delete confirmation modal */}
                         <Modal
                             show={showDeleteModal}
                             onClose={() => {
@@ -352,9 +377,9 @@ export default function ArticlesPage({ articles, search = "" }) {
                                             <div className="font-bold text-gray-700 mb-1">
                                                 File Name:{" "}
                                                 <span className="text-gray-600">
-                                                    {viewTarget.file.title ||
+                                                    {viewTarget.file?.title ||
                                                         viewTarget.file
-                                                            .filename ||
+                                                            ?.filename ||
                                                         "File"}
                                                 </span>
                                             </div>
@@ -414,10 +439,13 @@ export default function ArticlesPage({ articles, search = "" }) {
                                                         viewTarget.audio,
                                                         "audios"
                                                     );
+                                                    console.log("Audio URL:", audioUrl); // Debug log
                                                     return (
                                                         <audio
+                                                            key={audioUrl}
                                                             src={audioUrl}
                                                             controls
+                                                            preload="metadata"
                                                             className="w-full rounded-lg"
                                                         />
                                                     );
