@@ -9,11 +9,12 @@ use Tymon\JWTAuth\Exceptions\JWTException;
 use App\Models\User;
 use HasApiTokens;
 use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Artisan;
+use Spatie\Permission\Models\Permission;
 
 class AuthController extends Controller
 {
@@ -70,7 +71,7 @@ class AuthController extends Controller
     }
 
     public function register(Request $request)
-    { 
+    {
         try {
             $validated = Validator::make($request->all(), [
                 'name' => ['required', 'string', 'max:255'],
@@ -95,6 +96,25 @@ class AuthController extends Controller
             // Assign the role(s) if provided
             if (!empty($validated['roles'])) {
                 $user->assignRole($validated['roles']);
+            } else {
+                // If no role provided and this is the very first user, make Admin
+                if (User::count() === 1) {
+                    if (Permission::count() === 0) {
+                        try {
+                            Artisan::call('db:seed', ['--class' => \Database\Seeders\PermissionSeeder::class]);
+                            Artisan::call('permission:cache-reset');
+                        } catch (\Throwable $e) {
+                            // ignore
+                        }
+                    }
+
+                    $role = Role::firstOrCreate(['name' => 'Admin']);
+                    $permissions = Permission::pluck('name')->toArray();
+                    if (!empty($permissions)) {
+                        $role->syncPermissions($permissions);
+                    }
+                    $user->assignRole($role->name);
+                }
             }
 
             // Send email verification notification
