@@ -5,7 +5,7 @@ import Breadcrumb from "@/Components/Breadcrumb";
 import Pagination from "@/Components/Pagination";
 import { ClipboardPlus, Search } from "lucide-react";
 import Modal from "@/Components/Modal";
-import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
 
 export default function HomophonesPage({ homophones, search = "" }) {
     const { auth } = usePage().props;
@@ -86,11 +86,12 @@ export default function HomophonesPage({ homophones, search = "" }) {
                 file.name.endsWith(".xls")
             ) {
                 const data = await file.arrayBuffer();
-                const workbook = XLSX.read(data, { type: "array" });
-                const sheetName = workbook.SheetNames[0];
-                const sheet = workbook.Sheets[sheetName];
-                let importedData = XLSX.utils.sheet_to_json(sheet, {
-                    defval: "",
+                const workbook = new ExcelJS.Workbook();
+                await workbook.xlsx.load(data);
+                const worksheet = workbook.worksheets[0];
+                let importedData = [];
+                worksheet.eachRow({ includeEmpty: false }, (row) => {
+                    importedData.push(row.values.slice(1)); // drop 0 index
                 });
                 importedData = importedData.map((row) => ({
                     ...row,

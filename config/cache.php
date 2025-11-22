@@ -3,7 +3,6 @@
 use Illuminate\Support\Str;
 
 return [
-
     /*
     |--------------------------------------------------------------------------
     | Default Cache Store
@@ -32,7 +31,6 @@ return [
     */
 
     'stores' => [
-
         'array' => [
             'driver' => 'array',
             'serialize' => false,
@@ -49,7 +47,6 @@ return [
         'file' => [
             'driver' => 'file',
             'path' => storage_path('framework/cache/data'),
-            'lock_path' => storage_path('framework/cache/data'),
         ],
 
         'memcached' => [
@@ -89,7 +86,6 @@ return [
         'octane' => [
             'driver' => 'octane',
         ],
-
     ],
 
     /*
@@ -104,5 +100,4 @@ return [
     */
 
     'prefix' => env('CACHE_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_').'_cache_'),
-
 ];

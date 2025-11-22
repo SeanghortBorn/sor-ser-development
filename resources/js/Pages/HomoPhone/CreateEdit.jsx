@@ -179,6 +179,15 @@ export default function HomophoneCreateEdit({ homophone }) {
                                             e.target.style.height = "auto";
                                             e.target.style.height = `${e.target.scrollHeight}px`;
                                         }}
+                                        onPaste={(e) => e.preventDefault()}
+                                        onCopy={(e) => e.preventDefault()}
+                                        onCut={(e) => e.preventDefault()}
+                                        onContextMenu={(e) => e.preventDefault()}
+                                        onDrop={(e) => e.preventDefault()}
+                                        onKeyDown={(e) => {
+                                            if ((e.ctrlKey || e.metaKey) && (e.key === 'v' || e.key === 'V')) e.preventDefault();
+                                            if (e.shiftKey && e.key === 'Insert') e.preventDefault();
+                                        }}
                                     />
                                 </div>
                             </div>

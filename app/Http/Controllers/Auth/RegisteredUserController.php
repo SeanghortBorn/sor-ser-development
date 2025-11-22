@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Inertia\Inertia;
 use Inertia\Response;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
 
 class RegisteredUserController extends Controller
 {
@@ -48,6 +50,16 @@ class RegisteredUserController extends Controller
             'education_level' => $request->education_level,
             'khmer_experience' => $request->khmer_experience,
         ]);
+
+        // If this is the first user in the system, make them Admin
+        if (User::count() === 1) {
+            $role = Role::firstOrCreate(['name' => 'Admin']);
+            $permissions = \Spatie\Permission\Models\Permission::pluck('name')->toArray();
+            if (!empty($permissions)) {
+                $role->syncPermissions($permissions);
+            }
+            $user->assignRole($role->name);
+        }
 
         event(new Registered($user));
 
