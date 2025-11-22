@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\TwoFactorLoginController;
 use App\Http\Controllers\HomophoneController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\StudentAnalyticsController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\GoogleController;
 use App\Http\Controllers\QuizController;
@@ -75,6 +76,10 @@ Route::middleware('auth')->group(function () {
             ->name('two-factor.regenerate-recovery-codes')
             ->middleware('password.confirm');
     });
+
+    Route::get('/student-analytics', [StudentAnalyticsController::class, 'index'])->name('student.analytics')->middleware(['check:user-list']);
+
+    // Route::get('/student-analytics', 'StudentAnalytics/index')->name('student.analytics');
 
     Route::get('/api/articles', [ArticleController::class, 'apiList']);
     Route::get('/api/audios/{id}', [ArticleController::class, 'getAudio']); // Add this line

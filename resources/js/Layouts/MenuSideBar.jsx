@@ -280,12 +280,33 @@ export default function MenuSideBar({ lang, setLang }) {
             <div className="sidebar">
                 <nav className="flex-1 px-2 py-3 space-y-2">
                     {/* Dashboard */}
-                    <MenuItem
+                    {/* <MenuItem
                         href={route("dashboard")}
                         icon={icons.dashboard}
                         label={"Dashboard"}
                         active={isActive("dashboard")}
-                    />
+                    /> */}
+
+                    <MenuGroup
+                        label={"Dashboard"}
+                        icon={icons.dashboard}
+                        active={
+                            route().current("dashboard") ||
+                            route().current("student.analytics")
+                        }
+                    >
+                        <MenuItem
+                            href={route("dashboard")}
+                            label={"Dashboard Analytics"}
+                            active={route().current("dashboard")}
+                        />
+
+                        <MenuItem
+                            href={route("student.analytics")}
+                            label={"Student Analytics"}
+                            active={route().current("student.analytics")}
+                        />
+                    </MenuGroup>
 
                     {(can["article-list"] || can["article-create"]) && (
                         <MenuGroup
