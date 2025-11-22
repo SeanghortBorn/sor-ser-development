@@ -2,7 +2,8 @@ import React, { useState, useRef, useEffect } from "react";
 import { Head, usePage } from "@inertiajs/react";
 import AdminLayout from "@/Layouts/AdminLayout";
 import Breadcrumb from "@/Components/Breadcrumb";
-import { Search, UserPlus } from "lucide-react";
+import { Search, FileUp } from "lucide-react";
+import Modal from "@/Components/Modal";
 
 export default function IndexPage() {
     const { analytics = [] } = usePage().props;
@@ -32,13 +33,18 @@ export default function IndexPage() {
     const [selectedEducation, setSelectedEducation] = useState("");
     const [khmerOpen, setKhmerOpen] = useState(false);
     const [eduOpen, setEduOpen] = useState(false);
+    const [modalOpen, setModalOpen] = useState(false);
+    const [fileName, setFileName] = useState("Student_Analytics");
+    const [fileType, setFileType] = useState("json");
     const khmerRef = useRef(null);
     const eduRef = useRef(null);
 
     useEffect(() => {
         const onDoc = (e) => {
-            if (khmerRef.current && !khmerRef.current.contains(e.target)) setKhmerOpen(false);
-            if (eduRef.current && !eduRef.current.contains(e.target)) setEduOpen(false);
+            if (khmerRef.current && !khmerRef.current.contains(e.target))
+                setKhmerOpen(false);
+            if (eduRef.current && !eduRef.current.contains(e.target))
+                setEduOpen(false);
         };
         document.addEventListener("click", onDoc);
         return () => document.removeEventListener("click", onDoc);
@@ -47,12 +53,24 @@ export default function IndexPage() {
     const filtered = analytics.filter((u) => {
         const q = searchTerm.trim().toLowerCase();
         if (q) {
-            const inName = String(u.name || "").toLowerCase().includes(q);
-            const inEmail = String(u.email || "").toLowerCase().includes(q);
+            const inName = String(u.name || "")
+                .toLowerCase()
+                .includes(q);
+            const inEmail = String(u.email || "")
+                .toLowerCase()
+                .includes(q);
             if (!inName && !inEmail) return false;
         }
-        if (selectedKhmer && String(u.experience || "") !== String(selectedKhmer)) return false;
-        if (selectedEducation && String(u.education || "") !== String(selectedEducation)) return false;
+        if (
+            selectedKhmer &&
+            String(u.experience || "") !== String(selectedKhmer)
+        )
+            return false;
+        if (
+            selectedEducation &&
+            String(u.education || "") !== String(selectedEducation)
+        )
+            return false;
         return true;
     });
 
@@ -62,10 +80,88 @@ export default function IndexPage() {
     const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
     const pageItems = filtered.slice((page - 1) * perPage, page * perPage);
 
+    const downloadFile = (content, fileName, fileType) => {
+        try {
+            const mime = fileType || "application/octet-stream";
+            const blob = new Blob([content], { type: mime });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.style.display = "none";
+            a.href = url;
+            a.download = fileName || "download";
+            document.body.appendChild(a);
+            a.click();
+            // remove anchor and revoke URL after a small delay to ensure the download starts
+            setTimeout(() => {
+                try {
+                    document.body.removeChild(a);
+                } catch (e) {
+                    // ignore
+                }
+                URL.revokeObjectURL(url);
+            }, 150);
+        } catch (err) {
+            // provide some debugging info in console if download fails
+            // eslint-disable-next-line no-console
+            console.error("downloadFile failed:", err);
+        }
+    };
+
+    const handleExport = () => {
+        let content;
+        const fileExt = fileType === "json" ? "json" : "xml";
+        const fileNameWithExt = `${fileName}.${fileExt}`;
+
+        if (fileType === "json") {
+            // Export all filtered items across pagination
+            content = JSON.stringify(filtered, null, 2);
+        } else {
+            const xmlItems = filtered
+                .map((item) => {
+                    return `<Student>
+                        <id>${item.id}</id>
+                        <name>${item.name}</name>
+                        <email>${item.email}</email>
+                        <role>${item.role}</role>
+                        <age>${item.age}</age>
+                        <education>${item.education}</education>
+                        <experience>${item.experience}</experience>
+                        <total_articles>${item.total_articles}</total_articles>
+                        <accepts>${item.accepts}</accepts>
+                        <dismiss>${item.dismiss}</dismiss>
+                        <total_typings>${item.total_typings}</total_typings>
+                        <incorrect_typings>${item.incorrect_typings}</incorrect_typings>
+                        <homo_avg>${item.homo_avg}</homo_avg>
+                        <avg_pause>${item.avg_pause}</avg_pause>
+                    </Student>`;
+                })
+                .join("");
+            content = `<?xml version="1.0" encoding="UTF-8"?>
+            <Students>
+                ${xmlItems}
+            </Students>`;
+        }
+
+        downloadFile(
+            content,
+            fileNameWithExt,
+            fileType === "json"
+                ? "application/json;charset=utf-8"
+                : "application/xml;charset=utf-8"
+        );
+        setModalOpen(false);
+    };
+
     const headWeb = "Student Analytics";
+    const linksBreadcrumb = [
+        { title: "Home", url: "/" },
+        { title: headWeb, url: "" },
+    ];
 
     return (
-        <AdminLayout breadcrumb={<Breadcrumb header={headWeb} links={[{ title: "Home", url: "/" }, { title: headWeb, url: "" }]} />}>
+        <AdminLayout
+            breadcrumb={<Breadcrumb header={headWeb} links={linksBreadcrumb} />}
+        >
             <Head title={headWeb} />
             <section className="content">
                 <div className="container-fluid">
@@ -81,9 +177,25 @@ export default function IndexPage() {
                                         className="w-[180px] px-3 py-2 text-sm rounded-xl border bg-white shadow-sm flex justify-between items-center focus:outline-none"
                                         onClick={() => setKhmerOpen(!khmerOpen)}
                                     >
-                                        {khmerOptions.find((opt) => opt.value === selectedKhmer)?.label || "Select Experience Level"}
-                                        <svg className={`w-4 h-4 ml-2 transition-transform ${khmerOpen ? "rotate-180" : "rotate-0"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                        {khmerOptions.find(
+                                            (opt) => opt.value === selectedKhmer
+                                        )?.label || "Select Experience Level"}
+                                        <svg
+                                            className={`w-4 h-4 ml-2 transition-transform ${
+                                                khmerOpen
+                                                    ? "rotate-180"
+                                                    : "rotate-0"
+                                            }`}
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                                d="M19 9l-7 7-7-7"
+                                            />
                                         </svg>
                                     </button>
 
@@ -95,12 +207,15 @@ export default function IndexPage() {
                                                         key={opt.value}
                                                         type="button"
                                                         className={`flex w-full text-left px-4 py-2 text-[14px] rounded-lg transition ${
-                                                            selectedKhmer === opt.value
+                                                            selectedKhmer ===
+                                                            opt.value
                                                                 ? "bg-blue-100 text-blue-700 font-bold"
                                                                 : "hover:bg-gray-100 text-gray-700"
                                                         }`}
                                                         onClick={() => {
-                                                            setSelectedKhmer(opt.value);
+                                                            setSelectedKhmer(
+                                                                opt.value
+                                                            );
                                                             setKhmerOpen(false);
                                                         }}
                                                     >
@@ -119,9 +234,26 @@ export default function IndexPage() {
                                         className="w-[180px] px-3 py-2 text-sm rounded-xl border bg-white shadow-sm flex justify-between items-center focus:outline-none"
                                         onClick={() => setEduOpen(!eduOpen)}
                                     >
-                                        {educationOptions.find((opt) => opt.value === selectedEducation)?.label || "Select Education Level"}
-                                        <svg className={`w-4 h-4 ml-2 transition-transform ${eduOpen ? "rotate-180" : "rotate-0"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                        {educationOptions.find(
+                                            (opt) =>
+                                                opt.value === selectedEducation
+                                        )?.label || "Select Education Level"}
+                                        <svg
+                                            className={`w-4 h-4 ml-2 transition-transform ${
+                                                eduOpen
+                                                    ? "rotate-180"
+                                                    : "rotate-0"
+                                            }`}
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                                d="M19 9l-7 7-7-7"
+                                            />
                                         </svg>
                                     </button>
 
@@ -133,12 +265,15 @@ export default function IndexPage() {
                                                         key={opt.value}
                                                         type="button"
                                                         className={`flex w-full text-left px-4 py-2 text-[14px] rounded-lg transition ${
-                                                            selectedEducation === opt.value
+                                                            selectedEducation ===
+                                                            opt.value
                                                                 ? "bg-blue-100 text-blue-700 font-bold"
                                                                 : "hover:bg-gray-100 text-gray-700"
                                                         }`}
                                                         onClick={() => {
-                                                            setSelectedEducation(opt.value);
+                                                            setSelectedEducation(
+                                                                opt.value
+                                                            );
                                                             setEduOpen(false);
                                                         }}
                                                     >
@@ -155,17 +290,22 @@ export default function IndexPage() {
                                     <Search className="w-4 h-4 text-gray-500" />
                                     <input
                                         value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        onChange={(e) =>
+                                            setSearchTerm(e.target.value)
+                                        }
                                         type="text"
                                         placeholder="Search by name or email"
                                         className="px-2 outline-none border-none bg-transparent text-sm placeholder-gray-400 w-full min-w-[150px] focus:outline-none focus:ring-0"
                                     />
                                 </div>
 
-                                {/* Add User */}
-                                <a className="inline-flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm text-white bg-green-600 hover:bg-green-500 transition">
-                                    <UserPlus className="w-4 h-4" /> Add User
-                                </a>
+                                {/* Export Button */}
+                                <button
+                                    onClick={() => setModalOpen(true)}
+                                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm text-white bg-green-600 hover:bg-green-500 transition"
+                                >
+                                    <FileUp className="w-4 h-4" /> Export
+                                </button>
                             </div>
                         </div>
 
@@ -173,42 +313,94 @@ export default function IndexPage() {
                             <table className="min-w-max text-left border-collapse">
                                 <thead className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
                                     <tr>
-                                        <th className="py-2 px-16">#ID</th>
-                                        <th className="py-2 px-16">Name</th>
-                                        <th className="py-2 px-16">Email</th>
-                                        <th className="py-2 px-16">Role</th>
-                                        <th className="py-2 px-16">Age</th>
-                                        <th className="py-2 px-16">Education</th>
-                                        <th className="py-2 px-16">Experience</th>
-                                        <th className="py-2 px-16">Total Articles</th>
-                                        <th className="py-2 px-16">Accepts</th>
-                                        <th className="py-2 px-16">Dismiss</th>
-                                        <th className="py-2 px-16">Total Typings</th>
-                                        <th className="py-2 px-16">Incorrect Typings</th>
-                                        <th className="py-2 px-16">Avg Accuracy (%)</th>
-                                        <th className="py-2 px-16">Avg Pause (s)</th>
+                                        <th className="py-3 px-16">#ID</th>
+                                        <th className="py-3 px-16">Name</th>
+                                        <th className="py-3 px-16">Email</th>
+                                        <th className="py-3 px-16">Role</th>
+                                        <th className="py-3 px-16">Age</th>
+                                        <th className="py-3 px-16">
+                                            Education
+                                        </th>
+                                        <th className="py-3 px-16">
+                                            Experience
+                                        </th>
+                                        <th className="py-3 px-16">
+                                            Total Articles
+                                        </th>
+                                        <th className="py-3 px-16">Accepts</th>
+                                        <th className="py-3 px-16">Dismiss</th>
+                                        <th className="py-3 px-16">
+                                            Total Typings
+                                        </th>
+                                        <th className="py-3 px-16">
+                                            Incorrect Typings
+                                        </th>
+                                        <th className="py-3 px-16">
+                                            Avg Accuracy (%)
+                                        </th>
+                                        <th className="py-3 px-16">
+                                            Avg Pause (s)
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody className="text-gray-700">
                                     {pageItems.length === 0 ? (
-                                        <tr className="border-t"><td colSpan={14} className="py-12 px-6 text-center text-sm text-gray-500">No analytics data available.</td></tr>
+                                        <tr className="border-t">
+                                            <td
+                                                colSpan={14}
+                                                className="py-12 px-6 text-center text-sm text-gray-500"
+                                            >
+                                                No analytics data available.
+                                            </td>
+                                        </tr>
                                     ) : (
                                         pageItems.map((u) => (
-                                            <tr key={u.id} className="border-t hover:bg-gray-50 transition">
-                                                <td className="py-3 px-16">{u.id}</td>
-                                                <td className="py-3 px-16">{u.name}</td>
-                                                <td className="py-3 px-16">{u.email}</td>
-                                                <td className="py-3 px-16">{u.role}</td>
-                                                <td className="py-3 px-16">{u.age}</td>
-                                                <td className="py-3 px-16">{u.education}</td>
-                                                <td className="py-3 px-16">{u.experience}</td>
-                                                <td className="py-3 px-16">{u.total_articles}</td>
-                                                <td className="py-3 px-16">{u.accepts}</td>
-                                                <td className="py-3 px-16">{u.dismiss}</td>
-                                                <td className="py-3 px-16">{u.total_typings}</td>
-                                                <td className="py-3 px-16">{u.incorrect_typings}</td>
-                                                <td className="py-3 px-16">{u.homo_avg}</td>
-                                                <td className="py-3 px-16">{u.avg_pause}</td>
+                                            <tr
+                                                key={u.id}
+                                                className="border-t hover:bg-gray-50 transition"
+                                            >
+                                                <td className="py-3 px-16">
+                                                    {u.id}
+                                                </td>
+                                                <td className="py-3 px-16">
+                                                    {u.name}
+                                                </td>
+                                                <td className="py-3 px-16">
+                                                    {u.email}
+                                                </td>
+                                                <td className="py-3 px-16">
+                                                    {u.role}
+                                                </td>
+                                                <td className="py-3 px-16">
+                                                    {u.age}
+                                                </td>
+                                                <td className="py-3 px-16">
+                                                    {u.education}
+                                                </td>
+                                                <td className="py-3 px-16">
+                                                    {u.experience}
+                                                </td>
+                                                <td className="py-3 px-16">
+                                                    {u.total_articles}
+                                                </td>
+                                                <td className="py-3 px-16">
+                                                    {u.accepts}
+                                                </td>
+                                                <td className="py-3 px-16">
+                                                    {u.dismiss}
+                                                </td>
+                                                <td className="py-3 px-16">
+                                                    {u.total_typings}
+                                                </td>
+                                                <td className="py-3 px-16">
+                                                    {u.incorrect_typings}
+                                                </td>
+                                                <td className="py-3 px-16">
+                                                    {u.homo_avg}
+                                                </td>
+                                                <td className="py-3 px-16">
+                                                    {u.avg_pause}
+                                                </td>
                                             </tr>
                                         ))
                                     )}
@@ -222,17 +414,26 @@ export default function IndexPage() {
                                 <div className="flex items-center justify-center space-x-2">
                                     <button
                                         className="px-3 py-1 rounded-md border bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition"
-                                        onClick={() => setPage((p) => Math.max(1, p - 1))}
+                                        onClick={() =>
+                                            setPage((p) => Math.max(1, p - 1))
+                                        }
                                         disabled={page === 1}
                                     >
                                         Previous
                                     </button>
 
                                     <div className="flex items-center space-x-1">
-                                        {Array.from({ length: totalPages }, (_, i) => i + 1).map((pn) => (
+                                        {Array.from(
+                                            { length: totalPages },
+                                            (_, i) => i + 1
+                                        ).map((pn) => (
                                             <button
                                                 key={pn}
-                                                className={`px-3 py-1 rounded-md border transition ${pn === page ? 'bg-blue-500 text-white border-blue-500' : 'bg-white text-gray-700 hover:bg-gray-100'}`}
+                                                className={`px-3 py-1 rounded-md border transition ${
+                                                    pn === page
+                                                        ? "bg-blue-500 text-white border-blue-500"
+                                                        : "bg-white text-gray-700 hover:bg-gray-100"
+                                                }`}
                                                 onClick={() => setPage(pn)}
                                             >
                                                 {pn}
@@ -242,7 +443,11 @@ export default function IndexPage() {
 
                                     <button
                                         className="px-3 py-1 rounded-md border bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition"
-                                        onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                                        onClick={() =>
+                                            setPage((p) =>
+                                                Math.min(totalPages, p + 1)
+                                            )
+                                        }
                                         disabled={page === totalPages}
                                     >
                                         Next
@@ -253,6 +458,64 @@ export default function IndexPage() {
                     </div>
                 </div>
             </section>
+
+            {/* Export Modal */}
+            <Modal show={modalOpen} onClose={() => setModalOpen(false)}>
+                <div className="p-6">
+                    <h3 className="text-lg font-semibold mb-4">Export Student Analytics Data</h3>
+
+                    <div className="flex gap-2 mb-4">
+                        <div className="flex-1">
+                            <label
+                                htmlFor="filename"
+                                className="block text-sm font-medium text-gray-700 mb-2"
+                            >
+                                File Name
+                            </label>
+                            <input
+                                id="filename"
+                                type="text"
+                                value={fileName}
+                                onChange={(e) => setFileName(e.target.value)}
+                                className="w-full px-3 py-2 text-sm rounded-md border focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                                placeholder="Enter file name"
+                            />
+                        </div>
+                        <div className="w-40">
+                            <label
+                                htmlFor="filetype"
+                                className="block text-sm font-medium text-gray-700 mb-2"
+                            >
+                                File Type
+                            </label>
+                            <select
+                                id="filetype"
+                                value={fileType}
+                                onChange={(e) => setFileType(e.target.value)}
+                                className="w-full px-3 py-2 text-sm rounded-md border focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                            >
+                                <option value="json">JSON</option>
+                                <option value="xml">XML</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div className="flex justify-between gap-2">
+                        <button
+                            onClick={() => setModalOpen(false)}
+                            className="rounded-[10px] border-2 border-gray-300 px-8 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold disabled:opacity-60"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            onClick={handleExport}
+                                className="rounded-[10px] px-9 py-1 bg-green-600 text-white font-semibold hover:bg-green-700 transition disabled:opacity-60"
+                        >
+                            Export
+                        </button>
+                    </div>
+                </div>
+            </Modal>
         </AdminLayout>
     );
 }
