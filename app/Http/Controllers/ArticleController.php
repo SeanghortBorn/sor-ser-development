@@ -9,7 +9,8 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 use Illuminate\Support\Facades\Storage;
-use \Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class ArticleController extends Controller
 {
@@ -50,23 +51,47 @@ class ArticleController extends Controller
     {
         $validated = $request->validate([
             'title' => 'required|max:255|min:2',
-            'file' => 'required|file|max:10240|mimes:txt,pdf,doc,docx',
-            'audio' => 'required|file|max:20480|mimes:mp3,wav,m4a,ogg',
+            // File validation
+            'file' => [
+                'required',
+                'file',
+                'max:10240',
+                'mimes:txt,pdf,doc,docx',
+                'mimetypes:text/plain,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+            ],
+            // Audio validation - including video/mp4 for m4a files!
+            'audio' => [
+                'required',
+                'file',
+                'max:20480',
+                'mimes:mp3,wav,m4a,ogg,aac,mp4',
+                'mimetypes:audio/mpeg,audio/wav,audio/wave,audio/x-wav,audio/mp4,audio/x-m4a,audio/m4a,audio/aac,audio/ogg,video/mp4,application/octet-stream'
+            ],
         ], [
+            'file.required' => 'File is required.',
             'file.max' => 'File size must not exceed 10 MB.',
             'file.mimes' => 'File must be a txt, pdf, doc, or docx file.',
+            'file.mimetypes' => 'Invalid file type.',
+            'audio.required' => 'Audio is required.',
             'audio.max' => 'Audio file size must not exceed 20 MB.',
-            'audio.mimes' => 'Audio must be mp3, wav, m4a, or ogg format.',
+            'audio.mimes' => 'Audio must be mp3, wav, m4a, aac, or ogg format.',
+            'audio.mimetypes' => 'Invalid audio file type.',
             'title.required' => 'Title is required.',
             'title.min' => 'Title must be at least 2 characters.',
             'title.max' => 'Title must not exceed 255 characters.',
         ]);
+        
         $validated['user_id'] = Auth::user()->id;
 
         try {
             // Handle file upload
             if ($request->hasFile('file')) {
                 $file = $request->file('file');
+                
+                if (!$file->isValid()) {
+                    return back()->withErrors(['file' => 'The uploaded file is invalid.']);
+                }
+                
                 if ($file->getSize() === 0) {
                     return back()->withErrors(['file' => 'Uploaded file is empty.']);
                 }
@@ -98,6 +123,11 @@ class ArticleController extends Controller
             // Handle audio upload
             if ($request->hasFile('audio')) {
                 $audio = $request->file('audio');
+                
+                if (!$audio->isValid()) {
+                    return back()->withErrors(['audio' => 'The uploaded audio file is invalid.']);
+                }
+                
                 if ($audio->getSize() === 0) {
                     return back()->withErrors(['audio' => 'Uploaded audio is empty.']);
                 }
@@ -115,9 +145,17 @@ class ArticleController extends Controller
             }
 
             $model->create($validated);
+            
             return redirect()->route('articles.index')->with('message', 'Article created successfully.');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::error('Validation error in article store', ['errors' => $e->errors()]);
+            return back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
-            return back()->withErrors(['error' => 'Failed to create article: ' . $e->getMessage()]);
+            Log::error('Error creating article', [
+                'error' => $e->getMessage(), 
+                'trace' => $e->getTraceAsString()
+            ]);
+            return back()->withErrors(['error' => 'Failed to create article: ' . $e->getMessage()])->withInput();
         }
     }
 
@@ -150,13 +188,25 @@ class ArticleController extends Controller
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'file' => 'nullable|file|mimes:txt,pdf,doc,docx',
-            'audio' => 'nullable|file|mimes:mp3,wav,m4a,ogg',
+            'file' => [
+                'nullable',
+                'file',
+                'max:10240',
+                'mimes:txt,pdf,doc,docx',
+                'mimetypes:text/plain,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+            ],
+            'audio' => [
+                'nullable',
+                'file',
+                'max:20480',
+                'mimes:mp3,wav,m4a,ogg,aac,mp4',
+                'mimetypes:audio/mpeg,audio/wav,audio/wave,audio/x-wav,audio/mp4,audio/x-m4a,audio/m4a,audio/aac,audio/ogg,video/mp4,application/octet-stream'
+            ],
         ], [
             'file.max' => 'File size must not exceed 10 MB.',
             'file.mimes' => 'File must be a txt, pdf, doc, or docx file.',
             'audio.max' => 'Audio file size must not exceed 20 MB.',
-            'audio.mimes' => 'Audio must be mp3, wav, m4a, or ogg format.',
+            'audio.mimes' => 'Audio must be mp3, wav, m4a, aac, or ogg format.',
             'title.required' => 'Title is required.',
             'title.max' => 'Title must not exceed 255 characters.',
         ]);
@@ -248,6 +298,7 @@ class ArticleController extends Controller
             $article->save();
             return redirect()->route('articles.index')->with('message', 'Article updated successfully.');
         } catch (\Exception $e) {
+            Log::error('Error updating article', ['error' => $e->getMessage()]);
             return back()->withErrors(['error' => 'Failed to update article: ' . $e->getMessage()]);
         }
     }
