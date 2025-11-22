@@ -228,7 +228,7 @@ export default function index() {
                                 Get Started
                             </a>
                             <a
-                                href="/contact"
+                                href="/contacts"
                                 className="px-4 py-2 border-2 border-gray-100 text-white rounded-xl font-semibold transition-all text-center text-sm"
                             >
                                 Contact Us

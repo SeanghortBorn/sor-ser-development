@@ -288,11 +288,14 @@ export default function SidebarCheckGrammar({
 
         const finalWords = [];
         const itemsToTrack = [];
-        
+
         // Process all comparison items to build final text
         for (const comp of comparisonResult.comparison) {
             if (comp.type === "same") {
-                const pushWord = comp.article_word?.article_word || comp.user_word?.user_word || "";
+                const pushWord =
+                    comp.article_word?.article_word ||
+                    comp.user_word?.user_word ||
+                    "";
                 if (pushWord !== "") finalWords.push(pushWord);
                 continue;
             }
@@ -308,7 +311,9 @@ export default function SidebarCheckGrammar({
                     comparison_type: comp.type,
                     user_word: comp.user_word?.user_word || "",
                     article_word: comp.article_word?.article_word || "",
-                    word_position: comp.user_word?.user_index || comp.article_word?.article_index,
+                    word_position:
+                        comp.user_word?.user_index ||
+                        comp.article_word?.article_index,
                 });
                 continue;
             }
@@ -319,7 +324,9 @@ export default function SidebarCheckGrammar({
                     comparison_type: comp.type,
                     user_word: comp.user_word?.user_word || "",
                     article_word: comp.article_word?.article_word || "",
-                    word_position: comp.user_word?.user_index || comp.article_word?.article_index,
+                    word_position:
+                        comp.user_word?.user_index ||
+                        comp.article_word?.article_index,
                 });
             }
 
@@ -329,7 +336,9 @@ export default function SidebarCheckGrammar({
                     comparison_type: comp.type,
                     user_word: comp.user_word?.user_word || "",
                     article_word: comp.article_word?.article_word || "",
-                    word_position: comp.user_word?.user_index || comp.article_word?.article_index,
+                    word_position:
+                        comp.user_word?.user_index ||
+                        comp.article_word?.article_index,
                 });
             }
 
@@ -360,7 +369,10 @@ export default function SidebarCheckGrammar({
                     session_id: sessionStorage.getItem("sessionId"),
                 });
             } catch (err) {
-                console.error("Track comparison action error:", err.response?.data ?? err.message);
+                console.error(
+                    "Track comparison action error:",
+                    err.response?.data ?? err.message
+                );
             }
         }
 
@@ -937,14 +949,27 @@ export default function SidebarCheckGrammar({
                                             "Missing Word (Expected word is missing)"}
                                         {item.type === "replaced" &&
                                             "Incorrect Word"}
-                                        {item.type === "extra" && "Extra Word (Unmatched in the article)"}
+                                        {item.type === "extra" &&
+                                            "Extra Word (Unmatched in the article)"}
                                     </p>
                                     {/* <div className="mb-3 flex items-center gap-2"> */}
 
-                                    <div className={`${item.type !== "missing" ? "gap-2 " : ""} mb-3 flex items-center `}>
+                                    <div
+                                        className={`${
+                                            item.type !== "missing"
+                                                ? "gap-2 "
+                                                : ""
+                                        } mb-3 flex items-center `}
+                                    >
                                         <span
-                                            className={`${item.type !== "missing" ? "line-through " : ""}text-base ${
-                                                diffIndex === 0 ? "text-red-500" : "text-gray-500"
+                                            className={`${
+                                                item.type !== "missing"
+                                                    ? "line-through "
+                                                    : ""
+                                            }text-base ${
+                                                diffIndex === 0
+                                                    ? "text-red-500"
+                                                    : "text-gray-500"
                                             }`}
                                         >
                                             {typeof item.user_word
@@ -958,8 +983,8 @@ export default function SidebarCheckGrammar({
 
                                         <span>
                                             {item.type !== "missing" && (
-                                            <ArrowRight className="w-4 h-4 text-slate-500" />
-                                        )}
+                                                <ArrowRight className="w-4 h-4 text-slate-500" />
+                                            )}
                                         </span>
                                         <span
                                             className={`text-base font-semibold ${
@@ -978,7 +1003,10 @@ export default function SidebarCheckGrammar({
                                             className="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-full flex items-center text-xs font-medium transition"
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                handleAcceptOrDismiss(item, "accept");
+                                                handleAcceptOrDismiss(
+                                                    item,
+                                                    "accept"
+                                                );
                                             }}
                                         >
                                             <Check className="w-3.5 h-3.5 mr-1" />{" "}
@@ -988,7 +1016,10 @@ export default function SidebarCheckGrammar({
                                             className="flex items-center text-gray-700 hover:text-red-600 px-3 rounded-full border-2 hover:bg-red-50 text-xs font-medium transition"
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                handleAcceptOrDismiss(item, "dismiss");
+                                                handleAcceptOrDismiss(
+                                                    item,
+                                                    "dismiss"
+                                                );
                                             }}
                                         >
                                             <Trash className="w-3.5 h-3.5 mr-1" />{" "}
@@ -1024,7 +1055,13 @@ export default function SidebarCheckGrammar({
                         <div className="mb-2">
                             <div className="flex justify-between items-center">
                                 <h3 className="text-lg font-semibold text-gray-800">
-                                    Explanation
+                                    {explainLoading ? (
+                                        <div className="py-2 text-center">Loading…</div>
+                                    ) : explainData ? (
+                                        explainData.notFound ? "Are You Sure?" : "Explanation"
+                                    ) : (
+                                        <> </>
+                                    )}
                                 </h3>
                                 <button
                                     className="text-gray-500 hover:text-gray-700"
@@ -1041,13 +1078,25 @@ export default function SidebarCheckGrammar({
                             <div className="space-y-3 text-sm text-gray-700">
                                 {explainData.notFound ? (
                                     <div>
-                                        <div className="text-sm text-gray-700 mb-4">
-                                            No entry found for{" "}
-                                            <span className="font-mono">
-                                                {explainData.word}
-                                            </span>
-                                            .
-                                        </div>
+                                        {explainAction === "accept" && (
+                                            <div className="text-sm text-gray-700 mb-4">
+                                                Are you sure you want to
+                                                continue with the word{" "}
+                                                <span className="font-semibold text-green-600">
+                                                    {explainData.word}
+                                                </span>
+                                            </div>
+                                        )}
+                                        {explainAction === "dismiss" && (
+                                            <div className="text-sm text-gray-700 mb-4">
+                                                Are you sure you want to
+                                                ignore the word{" "}
+                                                <span className="text-red-600 font-semibold">
+                                                    {explainData.word}
+                                                </span>
+                                            </div>
+                                        )}
+
                                         {/* Accept/Dismiss buttons for not found */}
                                         <div className="flex justify-between items-center pt-4 gap-3">
                                             <button
@@ -1061,7 +1110,9 @@ export default function SidebarCheckGrammar({
                                             {explainAction === "accept" && (
                                                 <button
                                                     type="button"
-                                                    onClick={handleExplainAction}
+                                                    onClick={
+                                                        handleExplainAction
+                                                    }
                                                     className="rounded-[10px] px-9 py-1 bg-green-600 text-white font-semibold hover:bg-green-700 transition"
                                                 >
                                                     Accept
@@ -1070,7 +1121,9 @@ export default function SidebarCheckGrammar({
                                             {explainAction === "dismiss" && (
                                                 <button
                                                     type="button"
-                                                    onClick={handleExplainAction}
+                                                    onClick={
+                                                        handleExplainAction
+                                                    }
                                                     className="rounded-[10px] px-9 py-1 bg-red-600 text-white font-semibold hover:bg-red-700 transition"
                                                 >
                                                     Ignore
@@ -1085,13 +1138,17 @@ export default function SidebarCheckGrammar({
                                             <div>
                                                 <p>
                                                     <span className="font-semibold text-lg">
-                                                        {explainData.displayedWord}
+                                                        {
+                                                            explainData.displayedWord
+                                                        }
                                                     </span>
                                                     {explainData.isHomophone && (
                                                         <span className="ml-2 text-xs text-gray-500">
                                                             (homophone of{" "}
                                                             <strong>
-                                                                {explainData.word}
+                                                                {
+                                                                    explainData.word
+                                                                }
                                                             </strong>
                                                             )
                                                         </span>
@@ -1149,7 +1206,8 @@ export default function SidebarCheckGrammar({
                                                         : Array.isArray(
                                                               explainData.phoneme
                                                           ) &&
-                                                          explainData.phoneme.length
+                                                          explainData.phoneme
+                                                              .length
                                                         ? explainData.phoneme.join(
                                                               ", "
                                                           )
@@ -1186,7 +1244,9 @@ export default function SidebarCheckGrammar({
                                             {explainAction === "accept" && (
                                                 <button
                                                     type="button"
-                                                    onClick={handleExplainAction}
+                                                    onClick={
+                                                        handleExplainAction
+                                                    }
                                                     className="rounded-[10px] px-9 py-1 bg-green-600 text-white font-semibold hover:bg-green-700 transition disabled:opacity-60"
                                                 >
                                                     Accept
@@ -1195,7 +1255,9 @@ export default function SidebarCheckGrammar({
                                             {explainAction === "dismiss" && (
                                                 <button
                                                     type="button"
-                                                    onClick={handleExplainAction}
+                                                    onClick={
+                                                        handleExplainAction
+                                                    }
                                                     className="rounded-[10px] px-9 py-1 bg-red-600 text-white font-semibold hover:bg-red-700 transition"
                                                 >
                                                     Ignore

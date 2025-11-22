@@ -190,7 +190,7 @@ export default function Quiz() {
     };
 
     return (
-        <>
+        <div div className="bg-[#f7f8fa]">
             <Head title="Quiz" />
 
             {/* Fullscreen quiz modal at top for visibility */}
@@ -270,7 +270,7 @@ export default function Quiz() {
 
                         {/* Quiz List */}
                         {!quizStarted && (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 mt-3">
                                 {quizzes.map((quiz) => (
                                     <motion.div
                                         key={quiz.id}
@@ -279,7 +279,7 @@ export default function Quiz() {
                                         whileHover={{ translateY: -6 }}
                                         className="rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-md transition-all"
                                     >
-                                        <div className="p-5">
+                                        <div className="p-4 md:p-6 flex flex-col justify-between h-full">
                                             <div className="flex items-start justify-between">
                                                 <div className="min-w-0">
                                                     <h3 className="text-gray-900 font-semibold text-lg truncate">{quiz.title}</h3>
@@ -291,18 +291,18 @@ export default function Quiz() {
                                                     <svg className="w-5 h-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 6a1.5 1.5 0 110-3 1.5 1.5 0 010 3zm0 5a1.5 1.5 0 110-3 1.5 1.5 0 010 3zm0 5a1.5 1.5 0 110-3 1.5 1.5 0 010 3z"/></svg>
                                                 </button>
                                             </div>
-                                            <div className="mt-4 flex items-center justify-end gap-3">
+                                            <div className="mt-2 flex items-center justify-end">
                                                 {auth?.can?.teacher && (
                                                     <Link
                                                         href={route("quizzes.edit", quiz.id)}
-                                                        className="px-4 py-2 rounded-xl border border-blue-500 text-blue-600 font-medium text-sm hover:bg-blue-50"
+                                                        className="px-4 py-1.5 rounded-xl border border-blue-500 text-blue-600 font-medium text-sm hover:bg-blue-50"
                                                     >
                                                         Edit
                                                     </Link>
                                                 )}
                                                 <button
                                                     onClick={() => handleStartQuiz(quiz)}
-                                                    className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm"
+                                                    className="px-4 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm"
                                                 >
                                                     Start
                                                 </button>
@@ -1025,6 +1025,6 @@ export default function Quiz() {
 
             {/* show footer only when not in-quiz modal */}
             {!quizStarted && <Footer />}
-        </>
+        </div>
     );
 }

@@ -317,7 +317,7 @@ export default function QuizzesSection() {
                             </div>
 
                             {/* Per-Quiz Day-over-Day Change */}
-                            <div className="mt-5 border-t border-gray-100 pt-4">
+                            {/* <div className="mt-5 border-t border-gray-100 pt-4">
                                 <div className="flex items-center justify-between mb-2">
                                     <h3 className="text-sm font-semibold text-gray-800">Per-Quiz Day-over-Day Change</h3>
                                     <span className="text-xs text-gray-500">Today vs Yesterday</span>
@@ -332,7 +332,7 @@ export default function QuizzesSection() {
                                         </li>
                                     ))}
                                 </ul>
-                            </div>
+                            </div> */}
                         </div>
                     </section>
 

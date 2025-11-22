@@ -235,7 +235,7 @@ export default function index() {
                                     to you within 24 hours.
                                 </p>
                             </div>
-
+{/* 
                             {submitted && (
                                 <div className="mb-6 p-5 bg-gradient-to-r from-green-50 to-emerald-50 border-l-4 border-green-500 rounded-lg flex items-start gap-4">
                                     <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -253,7 +253,7 @@ export default function index() {
                                         </p>
                                     </div>
                                 </div>
-                            )}
+                            )} */}
 
                             <div className="space-y-4">
                                 <div className="grid md:grid-cols-2 gap-6">
