@@ -30,18 +30,35 @@ jobs:
             **/.git*/**
             **/node_modules/**
             **/vendor/**
-            **/storage/logs/**
-            **/storage/framework/cache/**
-            **/storage/framework/sessions/**
-            **/storage/framework/views/**
+            **/storage/**
+            **/bootstrap/cache/**
             .env
+            .env.staging
+            .env.production
             .env.*
             tests/**
             .editorconfig
             .phpunit.result.cache
             phpunit.xml
+            README.md
+            .github/**
+            package-lock.json
             
-      - name: 🚀 Deploy to Production
+      # Run composer install on staging server
+      - name: 📦 Install Composer Dependencies (Staging)
+        if: github.ref == 'refs/heads/staging'
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: /domains/sor-ser.com/public_html/dev/
+          local-dir: ./
+          dangerous-clean-slate: false
+      # ============================================
+      # PRODUCTION DEPLOYMENT (sor-ser.com)
+      # ============================================
+      - name: 🚀 Deploy to Production (sor-ser.com)
         if: github.ref == 'refs/heads/production'
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
@@ -54,11 +71,11 @@ jobs:
             **/.git*/**
             **/node_modules/**
             **/vendor/**
-            **/storage/logs/**
-            **/storage/framework/cache/**
-            **/storage/framework/sessions/**
-            **/storage/framework/views/**
+            **/storage/**
+            **/bootstrap/cache/**
             .env
+            .env.staging
+            .env.production
             .env.*
             tests/**
             .editorconfig
