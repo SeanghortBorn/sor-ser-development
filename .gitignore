@@ -8,6 +8,7 @@
 /storage/pail
 /vendor
 .env
+.env.*
 .env.backup
 .env.production
 .phpactor.json
@@ -22,3 +23,5 @@ yarn-error.log
 /.vscode
 /.zed
 archieved/
+.DS_Store
+/.github
