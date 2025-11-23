@@ -3,8 +3,8 @@ name: Deploy to Hostinger
 on:
   push:
     branches:
-      - main
-      - production
+      - staging      # Triggers deployment to dev.sor-ser.com
+      - production   # Triggers deployment to sor-ser.com
 
 jobs:
   deploy:
@@ -14,14 +14,17 @@ jobs:
       - name: 🚚 Checkout code
         uses: actions/checkout@v3
       
-      - name: 🚀 Deploy to Staging
-        if: github.ref == 'refs/heads/main'
+      # ============================================
+      # STAGING DEPLOYMENT (dev.sor-ser.com)
+      # ============================================
+      - name: 🧪 Deploy to Staging (dev.sor-ser.com)
+        if: github.ref == 'refs/heads/staging'
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: domains/sor-ser.com/public_html/dev/
+          server-dir: /domains/sor-ser.com/public_html/dev/
           exclude: |
             **/.git*
             **/.git*/**
@@ -31,21 +34,42 @@ jobs:
             **/storage/framework/cache/**
             **/storage/framework/sessions/**
             **/storage/framework/views/**
+            **/bootstrap/cache/**
             .env
+            .env.staging
+            .env.production
             .env.*
             tests/**
             .editorconfig
             .phpunit.result.cache
             phpunit.xml
+            README.md
+            .github/**
+            package-lock.json
             
-      - name: 🚀 Deploy to Production
+      # Run composer install on staging server
+      - name: 📦 Install Composer Dependencies (Staging)
+        if: github.ref == 'refs/heads/staging'
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: /domains/sor-ser.com/public_html/dev/
+          local-dir: ./
+          dangerous-clean-slate: false
+          
+      # ============================================
+      # PRODUCTION DEPLOYMENT (sor-ser.com)
+      # ============================================
+      - name: 🚀 Deploy to Production (sor-ser.com)
         if: github.ref == 'refs/heads/production'
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: domains/sor-ser.com/public_html/
+          server-dir: /domains/sor-ser.com/public_html/
           exclude: |
             **/.git*
             **/.git*/**
@@ -55,9 +79,27 @@ jobs:
             **/storage/framework/cache/**
             **/storage/framework/sessions/**
             **/storage/framework/views/**
+            **/bootstrap/cache/**
             .env
+            .env.staging
+            .env.production
             .env.*
             tests/**
             .editorconfig
             .phpunit.result.cache
             phpunit.xml
+            README.md
+            .github/**
+            package-lock.json
+      
+      - name: ✅ Deployment Complete
+        run: |
+          if [ "${{ github.ref }}" == "refs/heads/staging" ]; then
+            echo "🎉 Staging deployment successful!"
+            echo "📝 Next: SSH into server and run 'composer install' in dev folder"
+            echo "🔗 Check: https://dev.sor-ser.com"
+          else
+            echo "🎉 Production deployment successful!"
+            echo "📝 Next: SSH into server and run 'composer install' in production folder"
+            echo "🔗 Check: https://sor-ser.com"
+          fi
