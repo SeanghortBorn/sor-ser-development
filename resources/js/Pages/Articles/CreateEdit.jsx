@@ -21,8 +21,8 @@ export default function ArticlesCreateEdit({ datas, isEdit }) {
         if (datas) {
             setForm({
                 title: datas.title || "",
-                file: null, // <-- always null on edit
-                audio: null, // <-- always null on edit
+                file: null,
+                audio: null,
             });
             setPreviewFile(datas.file ? resolveUrl(datas.file, "files") : null);
             setPreviewAudio(
@@ -31,12 +31,56 @@ export default function ArticlesCreateEdit({ datas, isEdit }) {
         }
     }, [datas]);
 
+    // FIXED: Helper to resolve file/audio URL
     const resolveUrl = (media, bucket) => {
         if (!media) return null;
+        
+        // If it's already a full URL, return it
         if (typeof media === "string") {
-            if (media.startsWith("http") || media.startsWith("/")) return media;
+            if (media.startsWith("http://") || media.startsWith("https://")) {
+                return media;
+            }
+            if (media.startsWith("/storage/")) {
+                return media;
+            }
+            // Otherwise treat it as just a filename
             return `/storage/uploads/${bucket}/${media}`;
         }
+
+        // Handle object with file_path
+        if (media.file_path) {
+            const filePath = String(media.file_path);
+            
+            // If it starts with http, return as is
+            if (filePath.startsWith("http://") || filePath.startsWith("https://")) {
+                return filePath;
+            }
+            
+            // If it already has /storage/, return as is
+            if (filePath.startsWith("/storage/")) {
+                return filePath;
+            }
+            
+            // If it starts with storage/, add leading slash
+            if (filePath.startsWith("storage/")) {
+                return `/${filePath}`;
+            }
+            
+            // If it starts with uploads/, prepend /storage/
+            if (filePath.startsWith("uploads/")) {
+                return `/storage/${filePath}`;
+            }
+            
+            // If it starts with public/, convert to /storage/
+            if (filePath.startsWith("public/")) {
+                return `/storage/${filePath.replace(/^public\//, "")}`;
+            }
+            
+            // Default: assume it's just a filename
+            return `/storage/uploads/${bucket}/${filePath}`;
+        }
+
+        // Fallback to other properties
         if (media.url) return media.url;
         if (media.path) {
             const p = media.path.replace(/^public\//, "");
@@ -44,16 +88,9 @@ export default function ArticlesCreateEdit({ datas, isEdit }) {
                 ? media.path
                 : `/storage/${p}`;
         }
-        if (media.file_path) {
-            const fp = String(media.file_path);
-            if (fp.startsWith("http") || fp.startsWith("/")) return fp;
-            if (fp.startsWith("public/"))
-                return `/storage/${fp.replace(/^public\//, "")}`;
-            return `/storage/${fp}`;
-        }
-        if (media.filename)
-            return `/storage/uploads/${bucket}/${media.filename}`;
+        if (media.filename) return `/storage/uploads/${bucket}/${media.filename}`;
         if (media.name) return `/storage/uploads/${bucket}/${media.name}`;
+        
         return null;
     };
 
