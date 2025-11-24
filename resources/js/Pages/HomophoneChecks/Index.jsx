@@ -1253,7 +1253,7 @@ export default function Index() {
                             </div>
 
                             {/* Auto-check status (manual button removed) */}
-                            <div className="flex justify-end items-center mt-2">
+                            <div className="flex justify-end items-center mt-1">
                                 <button
                                     type="button"
                                     onClick={handleSaveClick}
@@ -1263,7 +1263,7 @@ export default function Index() {
                                         !paragraph.trim() ||
                                         canAccessLibrary === null
                                     }
-                                    className={`px-6 py-2 rounded-xl font-medium transition ${
+                                    className={`px-6 py-1 rounded-xl font-medium transition ${
                                         saving ||
                                         isChecking ||
                                         !paragraph.trim() ||
