@@ -24,4 +24,5 @@ yarn-error.log
 /.zed
 archieved/
 .DS_Store
-/.github
+/.github/vendor
+/node_modules
