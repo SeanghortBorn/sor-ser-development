@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import { Head, usePage } from "@inertiajs/react";
 import AdminLayout from "@/Layouts/AdminLayout";
 import Breadcrumb from "@/Components/Breadcrumb";
@@ -52,7 +52,7 @@ export default function IndexPage() {
         return () => document.removeEventListener("click", onDoc);
     }, []);
 
-    const filtered = analytics.filter((u) => {
+    const filtered = useMemo(() => analytics.filter((u) => {
         const q = searchTerm.trim().toLowerCase();
         if (q) {
             const inName = String(u.name || "").toLowerCase().includes(q);
@@ -62,7 +62,7 @@ export default function IndexPage() {
         if (selectedKhmer && String(u.experience || "") !== selectedKhmer) return false;
         if (selectedEducation && String(u.education || "") !== selectedEducation) return false;
         return true;
-    });
+    }), [analytics, searchTerm, selectedKhmer, selectedEducation]);
 
     const perPage = 15;
     const [page, setPage] = useState(1);
@@ -93,25 +93,28 @@ export default function IndexPage() {
         .replace(/'/g, "&apos;");
 
     const buildXml = (items) => {
-        const students = items.map(item => `
-    <Student>
-        <id>${escapeXml(item.id)}</id>
-        <name>${escapeXml(item.name)}</name>
-        <email>${escapeXml(item.email)}</email>
-        <role>${escapeXml(item.role)}</role>
-        <age>${escapeXml(item.age)}</age>
-        <education>${escapeXml(item.education)}</education>
-        <experience>${escapeXml(item.experience)}</experience>
-        <total_articles>${escapeXml(item.total_articles)}</total_articles>
-        <accepts>${escapeXml(item.accepts)}</accepts>
-        <dismiss>${escapeXml(item.dismiss)}</dismiss>
-        <total_typings>${escapeXml(item.total_typings)}</total_typings>
-        <incorrect_typings>${escapeXml(item.incorrect_typings)}</incorrect_typings>
-        <homo_avg>${escapeXml(item.homo_avg)}</homo_avg>
-        <avg_pause>${escapeXml(item.avg_pause)}</avg_pause>
-    </Student>`).join("");
-
-        return `<?xml version="1.0" encoding="UTF-8"?>\n<Students>${students}\n</Students>`;
+        const students = items.map(item => `   
+            <Student>
+                <id>${escapeXml(item.id)}</id>
+                <name>${escapeXml(item.name)}</name>
+                <email>${escapeXml(item.email)}</email>
+                <role>${escapeXml(item.role)}</role>
+                <age>${escapeXml(item.age)}</age>
+                <education>${escapeXml(item.education)}</education>
+                <experience>${escapeXml(item.experience)}</experience>
+                <total_articles>${escapeXml(item.total_articles)}</total_articles>
+                <total_quizzes>${escapeXml(item.total_quizzes)}</total_quizzes>
+                <total_questions>${escapeXml(item.total_questions)}</total_questions>
+                <incorrect_questions>${escapeXml(item.incorrect_questions)}</incorrect_questions>
+                <accepts>${escapeXml(item.accepts)}</accepts>
+                <dismiss>${escapeXml(item.dismiss)}</dismiss>
+                <total_typings>${escapeXml(item.total_typings)}</total_typings>
+                <incorrect_typings>${escapeXml(item.incorrect_typings)}</incorrect_typings>
+                <homo_avg>${escapeXml(item.homo_avg)}</homo_avg>
+                <avg_score>${escapeXml(item.avg_score || 'N/A')}</avg_score>
+                <avg_pause>${escapeXml(item.avg_pause)}</avg_pause>
+            </Student>`).join("\n");
+        return `<?xml version="1.0" encoding="UTF-8"?>\n<Students>\n${students}\n</Students>`;
     };
 
     const handleExport = () => {
@@ -269,12 +272,12 @@ export default function IndexPage() {
                                 >
                                     {showCheckbox ? (
                                         <>
-                                            <CheckSquare className="w-4 h-4" />
+                                            <Square className="w-4 h-4" />
                                             Unselect
                                         </>
                                     ) : (
                                         <>
-                                            <Square className="w-4 h-4" />
+                                            <CheckSquare className="w-4 h-4" />
                                             Select
                                         </>
                                     )}
@@ -317,11 +320,15 @@ export default function IndexPage() {
                                         <th className="py-3 px-8">Education</th>
                                         <th className="py-3 px-8">Experience</th>
                                         <th className="py-3 px-8">Total Articles</th>
+                                        <th className="py-3 px-8">Total Quizzes</th>
+                                        <th className="py-3 px-8">Total Questions</th>
+                                        <th className="py-3 px-8">Incorrect Questions</th>
                                         <th className="py-3 px-8">Accepts</th>
                                         <th className="py-3 px-8">Dismiss</th>
                                         <th className="py-3 px-8">Total Typings</th>
                                         <th className="py-3 px-8">Incorrect Typings</th>
                                         <th className="py-3 px-8">Avg Accuracy (%)</th>
+                                        <th className="py-3 px-8">Avg Score (%)</th>
                                         <th className="py-3 px-8">Avg Pause (s)</th>
                                         <th className="py-3 px-8">Actions</th>
                                     </tr>
@@ -329,7 +336,7 @@ export default function IndexPage() {
                                 <tbody className="text-gray-700">
                                     {pageItems.length === 0 ? (
                                         <tr>
-                                            <td colSpan={showCheckbox ? 16 : 15} className="py-12 text-center text-gray-500">
+                                            <td colSpan={showCheckbox ? 20 : 19} className="py-12 text-center text-gray-500">
                                                 No analytics data available.
                                             </td>
                                         </tr>
@@ -350,20 +357,24 @@ export default function IndexPage() {
                                                 <td className="py-3 px-8">{u.name}</td>
                                                 <td className="py-3 px-8">{u.email}</td>
                                                 <td className="py-3 px-8">{u.role}</td>
-                                                <td className="py-3 px-8">{u.age || "-"}</td>
-                                                <td className="py-3 px-8">{u.education || "-"}</td>
-                                                <td className="py-3 px-8">{u.experience || "-"}</td>
+                                                <td className="py-3 px-8">{u.age || "N/A"}</td>
+                                                <td className="py-3 px-8">{u.education || "N/A"}</td>
+                                                <td className="py-3 px-8">{u.experience || "N/A"}</td>
                                                 <td className="py-3 px-8">{u.total_articles}</td>
+                                                <td className="py-3 px-8">{u.total_quizzes ?? "N/A"}</td>
+                                                <td className="py-3 px-8">{u.total_questions ?? "N/A"}</td>
+                                                <td className="py-3 px-8">{u.incorrect_questions ?? "N/A"}</td>
                                                 <td className="py-3 px-8">{u.accepts}</td>
                                                 <td className="py-3 px-8">{u.dismiss}</td>
                                                 <td className="py-3 px-8">{u.total_typings}</td>
                                                 <td className="py-3 px-8">{u.incorrect_typings}</td>
-                                                <td className="py-3 px-8">{u.homo_avg || "-"}</td>
-                                                <td className="py-3 px-8">{u.avg_pause || "-"}</td>
+                                                <td className="py-3 px-8">{u.homo_avg || "N/A"}</td>
+                                                <td className="py-3 px-8">{u.avg_score}</td>
+                                                <td className="py-3 px-8">{u.avg_pause || "N/A"}</td>
                                                 <td className="py-3 px-8">
                                                     <div className="flex gap-2">
-                                                        <button onClick={() => exportSingle(u)} className="px-2 py-1 rounded-md text-sm border bg-white hover:bg-gray-50">JSON</button>
-                                                        <button onClick={() => { setFileType("xml"); exportSingle(u); }} className="px-2 py-1 rounded-md text-sm border bg-white hover:bg-gray-50">XML</button>
+                                                        <button onClick={() => exportSingle(u)} className="px-2 py-1 rounded-md text-sm border bg-green-500 hover:bg-green-600 transition-colors text-gray-50">JSON</button>
+                                                        <button onClick={() => { setFileType("xml"); exportSingle(u); }} className="px-2 py-1 rounded-md text-sm border bg-green-500 hover:bg-green-600 transition-colors text-gray-50">XML</button>
                                                     </div>
                                                 </td>
                                             </tr>
@@ -377,9 +388,9 @@ export default function IndexPage() {
                         <div className="mt-4 px-6 py-3 border-t border-gray-100">
                             {totalPages > 1 && (
                                 <div className="flex justify-center gap-2">
-                                    <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="px-4 py-2 border rounded disabled:opacity-50">Previous</button>
-                                    <span className="px-4 py-2">Page {page} of {totalPages}</span>
-                                    <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages} className="px-4 py-2 border rounded disabled:opacity-50">Next</button>
+                                    <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="px-3 py-1 border rounded disabled:opacity-50">Previous</button>
+                                    <span className="px-3 py-1">Page {page} of {totalPages}</span>
+                                    <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages} className="px-3 py-1 border rounded disabled:opacity-50">Next</button>
                                 </div>
                             )}
                         </div>
