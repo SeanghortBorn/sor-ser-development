@@ -27,3 +27,4 @@ archieved/
 /.github/vendor
 /node_modules
 public/staging/
+public/hot
