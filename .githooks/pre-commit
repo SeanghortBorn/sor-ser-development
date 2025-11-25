@@ -1,0 +1,25 @@
+#!/bin/bash
+
+# Pre-commit hook to prevent committing public/hot file
+
+if git diff --cached --name-only | grep -q "^public/hot$"; then
+    echo "❌ ERROR: Cannot commit public/hot file!"
+    echo ""
+    echo "The public/hot file is a Vite development file and should never be committed."
+    echo ""
+    echo "To fix this:"
+    echo "  1. Remove the file: rm public/hot"
+    echo "  2. Make sure it's in .gitignore"
+    echo "  3. Try committing again"
+    echo ""
+    exit 1
+fi
+
+# Check if public/hot exists in working directory (warning only)
+if [ -f "public/hot" ]; then
+    echo "⚠️  WARNING: public/hot file exists in your working directory"
+    echo "   This file should be deleted before deployment"
+    echo ""
+fi
+
+exit 0
