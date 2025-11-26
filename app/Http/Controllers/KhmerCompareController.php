@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\KhmerTokenizerService;
 use Illuminate\Http\Request;
 use App\Models\Article;
 use Illuminate\Support\Facades\Storage;
@@ -10,6 +11,13 @@ use Illuminate\Support\Facades\Http;
 
 class KhmerCompareController extends Controller
 {
+    protected $tokenizer;
+
+    public function __construct(KhmerTokenizerService $tokenizer)
+    {
+        $this->tokenizer = $tokenizer;
+    }
+
     public function compare(Request $request)
     {
         $articleId = $request->input('article_id');
@@ -273,12 +281,40 @@ class KhmerCompareController extends Controller
         }
     }
 
-    // Segment text: keep space for user, remove space in article
+    /**
+     * 
+     * Segment text: keep space for user, remove space in article
+     */
     private function segmentText(?string $text, bool $keepSpace = false): array
     {
         $text = (string) ($text ?? '');
         if ($text === '') return [];
 
+        // PRIMARY: Use local PHP tokenizer
+        try {
+            $tokens = $this->tokenizer->tokenize($text, $keepSpace);
+            
+            if (!$keepSpace) {
+                // Article mode: remove spaces and empty tokens
+                $tokens = array_values(array_filter($tokens, fn($t) => trim($t) !== ''));
+            }
+            
+            Log::debug('Segmentation successful', [
+                'method' => 'local-tokenizer',
+                'keepSpace' => $keepSpace,
+                'token_count' => count($tokens),
+            ]);
+            
+            return $tokens;
+            
+        } catch (\Throwable $e) {
+            Log::error("Local tokenization failed: {$e->getMessage()}", [
+                'text_length' => mb_strlen($text),
+                'keepSpace' => $keepSpace,
+            ]);
+        }
+
+        // FALLBACK: Try external API (temporary during transition)
         $apiUrl = env('KHMER_SEGMENT_API_URL') 
                     ? rtrim(env('KHMER_SEGMENT_API_URL'), '/') . '/segment'
                     : null;
@@ -286,25 +322,35 @@ class KhmerCompareController extends Controller
         if ($apiUrl) {
             try {
                 $res = Http::timeout(3)->post($apiUrl, ['text' => $text]);
+                
                 if ($res->successful()) {
                     $json = $res->json();
                     $tokens = $json['tokens'] ?? ($json['data']['tokens'] ?? []);
 
-                    if (!is_array($tokens)) $tokens = [];
+                    if (!is_array($tokens)) {
+                        $tokens = [];
+                    }
 
                     if ($keepSpace) {
                         return array_map(fn($t) => $t === '' ? ' ' : $t, $tokens);
                     }
 
-                    // Article: remove spaces & empty tokens
+                    // Article mode: remove spaces
                     return array_values(array_filter($tokens, fn($t) => trim($t) !== ''));
                 }
             } catch (\Throwable $e) {
-                Log::debug("Segmentation API failed");
+                Log::debug("External API segmentation failed", [
+                    'error' => $e->getMessage(),
+                ]);
             }
         }
 
-        // Fallback tokenizer
+        // LAST RESORT: character-by-character fallback
+        Log::warning('Using character fallback in comparison', [
+            'text_length' => mb_strlen($text),
+            'keepSpace' => $keepSpace,
+        ]);
+        
         $tokens = [];
         $len = mb_strlen($text);
 
