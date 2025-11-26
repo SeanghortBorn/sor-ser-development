@@ -1,13 +1,22 @@
 <?php
+// File: app/Http/Controllers/KhmerSegmentController.php
 
 namespace App\Http\Controllers;
 
+use App\Services\KhmerTokenizerService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class KhmerSegmentController extends Controller
 {
+    protected $tokenizer;
+
+    public function __construct(KhmerTokenizerService $tokenizer)
+    {
+        $this->tokenizer = $tokenizer;
+    }
+
     public function segment(Request $request)
     {
         $text = (string) $request->input('text', '');
@@ -17,9 +26,29 @@ class KhmerSegmentController extends Controller
             return response()->json(['tokens' => []]);
         }
 
-        $apiBase = env('KHMER_SEGMENT_API_URL');
+        // PRIMARY: Try local PHP tokenizer first
+        try {
+            $result = $this->tokenizer->segment($text);
+            
+            Log::debug('Tokenization successful', [
+                'method' => 'local-php',
+                'text_length' => mb_strlen($text),
+                'token_count' => count($result['tokens']),
+            ]);
+            
+            return response()->json($result);
+            
+        } catch (\Throwable $e) {
+            Log::error("Local tokenizer failed: {$e->getMessage()}", [
+                'exception' => get_class($e),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
+        }
 
-        // 1. Try external segmenter API
+        // FALLBACK: Try external API (keep temporarily during transition)
+        $apiBase = env('KHMER_SEGMENT_API_URL');
+        
         if (!empty($apiBase)) {
             $endpoint = rtrim($apiBase, '/') . '/segment';
 
@@ -28,46 +57,47 @@ class KhmerSegmentController extends Controller
 
                 if ($res->successful()) {
                     $json = $res->json();
-
-                    // Normalize payload
-                    $tokens = $json['tokens']
-                        ?? $json['data']['tokens']
-                        ?? $json['data']
-                        ?? null;
+                    $tokens = $json['tokens'] 
+                            ?? $json['data']['tokens'] 
+                            ?? $json['data'] 
+                            ?? null;
 
                     if (is_array($tokens)) {
+                        Log::debug('External API fallback used', [
+                            'endpoint' => $endpoint,
+                            'token_count' => count($tokens),
+                        ]);
+                        
                         return response()->json([
-                            'tokens' => array_values($tokens)
+                            'tokens' => array_values($tokens),
+                            'source' => 'external-api-fallback'
                         ]);
                     }
-
-                    Log::warning('Khmer segmenter returned unexpected payload', [
+                    
+                    Log::warning('External API returned unexpected format', [
                         'endpoint' => $endpoint,
-                        'status' => $res->status(),
-                        'body' => $res->body(),
-                    ]);
-                } else {
-                    Log::warning('Khmer segmenter responded with non-success', [
-                        'endpoint' => $endpoint,
-                        'status'  => $res->status(),
-                        'body'    => $res->body(),
+                        'response' => $res->body(),
                     ]);
                 }
-
             } catch (\Throwable $e) {
-                Log::error("Khmer segment external API error: {$e->getMessage()}", [
+                Log::error("External API failed: {$e->getMessage()}", [
                     'endpoint' => $endpoint,
-                    'exception' => $e,
+                    'exception' => get_class($e),
                 ]);
-                // Continue to fallback segmentation
             }
         }
 
-        // 2. Fallback Khmer word segmentation
-        // This avoids splitting characters and returns proper word-like chunks.
+        // LAST RESORT: Simple character-based segmentation
+        Log::warning('Using character fallback segmentation', [
+            'text_length' => mb_strlen($text),
+        ]);
+        
         preg_match_all('/[\x{1780}-\x{17FF}\x{200B}]+/u', $text, $matches);
         $tokens = array_values($matches[0]);
 
-        return response()->json(['tokens' => $tokens]);
+        return response()->json([
+            'tokens' => $tokens,
+            'source' => 'character-fallback'
+        ]);
     }
 }
