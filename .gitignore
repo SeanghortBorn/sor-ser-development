@@ -26,5 +26,5 @@ archieved/
 .DS_Store
 /.github/vendor
 /node_modules
-public/staging/
-public/hot
+composer-install.log
+public/test.html
