@@ -567,27 +567,26 @@ export default function Index() {
 
     // Compare with article
     const runCompare = async () => {
-        if (!selectedArticle || !paragraph.trim()) return;
-        // DON'T clear comparisonResult here - keep old data during check
-        setIsChecking(true); // Start loading
-        try {
-            const res = await axios.post("/api/compare", {
-                article_id: selectedArticle.id,
-                userInput: paragraph,
-            });
-            if (res.data && Array.isArray(res.data.comparison)) {
-                setComparisonResult(res.data);
-            } else {
-                console.error("Invalid comparison result format:", res.data);
-                setComparisonResult(null);
-            }
-        } catch (e) {
-            console.error("Error in comparison:", e);
+    if (!selectedArticle || !paragraph.trim()) return;
+    setIsChecking(true); // Start loading
+    try {
+        const res = await axios.post("/api/compare", {
+            article_id: selectedArticle.id,  // ✅ Correct state variable
+            user_input: paragraph            // ✅ Correct parameter name (snake_case)
+        });
+        if (res.data && Array.isArray(res.data.comparison)) {
+            setComparisonResult(res.data);
+        } else {
+            console.error("Invalid comparison result format:", res.data);
             setComparisonResult(null);
-        } finally {
-            setIsChecking(false); // Stop loading
         }
-    };
+    } catch (e) {
+        console.error("Error in comparison:", e);
+        setComparisonResult(null);
+    } finally {
+        setIsChecking(false); // Stop loading
+    }
+};
 
     // Auto-save
     const autoSave = async (newTitle, newParagraph) => {

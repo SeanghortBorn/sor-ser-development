@@ -39,4 +39,7 @@ return [
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
         'redirect' => env('GOOGLE_REDIRECT_URI'),
     ],
+    'khmer_segment' => [
+        'url' => env('KHMER_SEGMENT_API_URL'),
+    ],
 ];

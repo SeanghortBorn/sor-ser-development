@@ -1,0 +1,159 @@
+[33m9e79b40[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/staging[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mstaging[m[33m)[m HEAD@{0}: checkout: moving from main to main
+[33m9e79b40[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/staging[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mstaging[m[33m)[m HEAD@{1}: checkout: moving from staging to main
+[33m9e79b40[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/staging[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mstaging[m[33m)[m HEAD@{2}: checkout: moving from main to staging
+[33m9e79b40[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/staging[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mstaging[m[33m)[m HEAD@{3}: checkout: moving from staging to main
+[33m9e79b40[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/staging[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mstaging[m[33m)[m HEAD@{4}: reset: moving to main
+[33m5bd4ea6[m HEAD@{5}: checkout: moving from staging to staging
+[33m5bd4ea6[m HEAD@{6}: checkout: moving from production to staging
+[33m977a31a[m[33m ([m[1;31morigin/production[m[33m, [m[1;32mproduction[m[33m)[m HEAD@{7}: commit (merge): Merge staging to production - resolve .gitignore conflict
+[33m79ef7e3[m HEAD@{8}: checkout: moving from staging to production
+[33m5bd4ea6[m HEAD@{9}: merge main: Merge made by the 'ort' strategy.
+[33mb65ff68[m HEAD@{10}: checkout: moving from main to staging
+[33m9e79b40[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/staging[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mstaging[m[33m)[m HEAD@{11}: commit: Add local PHP Khmer tokenizer - eliminate Digital Ocean dependency
+[33m7a3a121[m HEAD@{12}: checkout: moving from production to main
+[33m79ef7e3[m HEAD@{13}: rebase (finish): returning to refs/heads/production
+[33m79ef7e3[m HEAD@{14}: pull origin production --rebase (pick): Configure no-reply@sor-ser.com as official email sender test and working
+[33m46780bf[m HEAD@{15}: pull origin production --rebase (pick): configure hostinger email for no-reply@sor-ser.com
+[33m584d6c7[m HEAD@{16}: pull origin production --rebase (pick): add pre-commit hook to prevent commiting to public/hot file
+[33m6b12b9b[m HEAD@{17}: pull origin production --rebase (start): checkout 6b12b9b47c62fcada1a720e454f701343e950333
+[33m7b64b93[m HEAD@{18}: reset: moving to HEAD
+[33m7b64b93[m HEAD@{19}: merge staging: Merge made by the 'ort' strategy.
+[33ma6ba2f0[m HEAD@{20}: checkout: moving from staging to production
+[33mb65ff68[m HEAD@{21}: pull origin staging --no-rebase: Merge made by the 'ort' strategy.
+[33m1404502[m HEAD@{22}: merge main: Merge made by the 'ort' strategy.
+[33m3b0f4d0[m HEAD@{23}: checkout: moving from main to staging
+[33m7a3a121[m HEAD@{24}: commit: Configure no-reply@sor-ser.com as official email sender test and working
+[33mfe174d6[m HEAD@{25}: commit: configure hostinger email for no-reply@sor-ser.com
+[33m6b78565[m HEAD@{26}: checkout: moving from staging to main
+[33m3b0f4d0[m HEAD@{27}: checkout: moving from main to staging
+[33m6b78565[m HEAD@{28}: checkout: moving from staging to main
+[33m3b0f4d0[m HEAD@{29}: checkout: moving from main to staging
+[33m6b78565[m HEAD@{30}: checkout: moving from staging to main
+[33m3b0f4d0[m HEAD@{31}: commit: add pre-commit hook to prevent commiting to public/hot file
+[33m785f68b[m HEAD@{32}: merge main: Merge made by the 'ort' strategy.
+[33m00f205c[m HEAD@{33}: checkout: moving from main to staging
+[33m6b78565[m HEAD@{34}: pull origin main --no-rebase: Merge made by the 'ort' strategy.
+[33m23adb57[m HEAD@{35}: commit: Fix: Resolve duplicate routes - remove quiz route conflicts and disable Fortify auto-routing
+[33m712cb65[m HEAD@{36}: checkout: moving from staging to main
+[33m00f205c[m HEAD@{37}: merge main: Merge made by the 'ort' strategy.
+[33m2243b1f[m HEAD@{38}: checkout: moving from main to staging
+[33m712cb65[m HEAD@{39}: commit: Fix: remove dupplicated quizzes routes
+[33m268d057[m HEAD@{40}: checkout: moving from main to main
+[33m268d057[m HEAD@{41}: checkout: moving from fix/quizes-edit-route to main
+[33m268d057[m HEAD@{42}: reset: moving to HEAD
+[33m268d057[m HEAD@{43}: checkout: moving from main to fix/quizes-edit-route
+[33m268d057[m HEAD@{44}: checkout: moving from production to main
+[33ma6ba2f0[m HEAD@{45}: merge staging: Merge made by the 'ort' strategy.
+[33ma356426[m HEAD@{46}: checkout: moving from production to production
+[33ma356426[m HEAD@{47}: commit: merge with main
+[33m2a777fe[m HEAD@{48}: checkout: moving from production to production
+[33m2a777fe[m HEAD@{49}: merge main: Merge made by the 'ort' strategy.
+[33m2e74872[m HEAD@{50}: checkout: moving from main to production
+[33m268d057[m HEAD@{51}: checkout: moving from staging to main
+[33m2243b1f[m HEAD@{52}: commit: npm run build
+[33m9adf7f6[m HEAD@{53}: checkout: moving from staging to staging
+[33m9adf7f6[m HEAD@{54}: merge main: Merge made by the 'ort' strategy.
+[33m7c71f57[m HEAD@{55}: checkout: moving from main to staging
+[33m268d057[m HEAD@{56}: checkout: moving from main to main
+[33m268d057[m HEAD@{57}: commit: Update user role. Register 1st user as admin automatically.
+[33ma648df7[m HEAD@{58}: reset: moving to origin/main
+[33ma648df7[m HEAD@{59}: checkout: moving from main to main
+[33ma648df7[m HEAD@{60}: checkout: moving from production to main
+[33m2e74872[m HEAD@{61}: checkout: moving from staging to production
+[33m7c71f57[m HEAD@{62}: checkout: moving from main to staging
+[33ma648df7[m HEAD@{63}: commit: deleted deploy.yml
+[33md69c471[m HEAD@{64}: checkout: moving from main to main
+[33md69c471[m HEAD@{65}: checkout: moving from main to main
+[33md69c471[m HEAD@{66}: commit: Clean up - remove automation files
+[33m03083f1[m HEAD@{67}: checkout: moving from production to main
+[33m2e74872[m HEAD@{68}: merge main: Merge made by the 'ort' strategy.
+[33mc1c4393[m HEAD@{69}: checkout: moving from staging to production
+[33m7c71f57[m HEAD@{70}: merge main: Merge made by the 'ort' strategy.
+[33mc1c4393[m HEAD@{71}: checkout: moving from main to staging
+[33m03083f1[m HEAD@{72}: commit: Remove vendor and node_modules from git
+[33m8aa35e2[m HEAD@{73}: commit: Update .gitignore
+[33mc1c4393[m HEAD@{74}: checkout: moving from production to main
+[33mc1c4393[m HEAD@{75}: checkout: moving from main to production
+[33mc1c4393[m HEAD@{76}: checkout: moving from staging to main
+[33mc1c4393[m HEAD@{77}: checkout: moving from main to staging
+[33mc1c4393[m HEAD@{78}: checkout: moving from main to main
+[33mc1c4393[m HEAD@{79}: checkout: moving from production to main
+[33mc1c4393[m HEAD@{80}: checkout: moving from main to production
+[33mc1c4393[m HEAD@{81}: checkout: moving from staging to main
+[33mc1c4393[m HEAD@{82}: checkout: moving from main to staging
+[33mc1c4393[m HEAD@{83}: checkout: moving from main to main
+[33mc1c4393[m HEAD@{84}: checkout: moving from main to main
+[33mc1c4393[m HEAD@{85}: checkout: moving from staging to main
+[33m29ed48a[m HEAD@{86}: commit: remove deploy.yml
+[33m33bb5cd[m HEAD@{87}: checkout: moving from staging to staging
+[33m33bb5cd[m HEAD@{88}: commit: Ensure vendor is ignored
+[33mbfb9b6d[m HEAD@{89}: commit: Remove vendor from git
+[33m63d9b45[m HEAD@{90}: commit: update deploy.yml
+[33m59b5507[m HEAD@{91}: commit: update deploy.yml
+[33m2c47c3a[m HEAD@{92}: commit: update deploy.yml
+[33mc1c4393[m HEAD@{93}: merge main: Fast-forward
+[33m752d501[m HEAD@{94}: checkout: moving from main to staging
+[33mc1c4393[m HEAD@{95}: checkout: moving from main to main
+[33mc1c4393[m HEAD@{96}: commit: Add post-deployment script
+[33m6ca4752[m HEAD@{97}: commit: Fix deployment configuration
+[33m7a3513a[m HEAD@{98}: checkout: moving from main to main
+[33m7a3513a[m HEAD@{99}: rebase (finish): returning to refs/heads/main
+[33m7a3513a[m HEAD@{100}: rebase (pick): WIP: save local changes
+[33m91538ac[m HEAD@{101}: rebase (continue): update deployyml
+[33m99d5b52[m HEAD@{102}: rebase (start): checkout origin/main
+[33m17f18a4[m HEAD@{103}: checkout: moving from backup-main to main
+[33m17f18a4[m HEAD@{104}: checkout: moving from main to backup-main
+[33m17f18a4[m HEAD@{105}: rebase (abort): returning to refs/heads/main
+[33m99d5b52[m HEAD@{106}: rebase (start): checkout origin/main
+[33m17f18a4[m HEAD@{107}: commit: WIP: save local changes
+[33mdc4dc4d[m HEAD@{108}: commit: update deployyml
+[33m148e6dc[m HEAD@{109}: commit: add post development script
+[33m752d501[m HEAD@{110}: checkout: moving from production to main
+[33m2b76243[m HEAD@{111}: checkout: moving from main to production
+[33m752d501[m HEAD@{112}: checkout: moving from production to main
+[33m2b76243[m HEAD@{113}: commit: update .gitignore and deploy.yml
+[33m9e4cc58[m HEAD@{114}: checkout: moving from staging to production
+[33m752d501[m HEAD@{115}: checkout: moving from main to staging
+[33m752d501[m HEAD@{116}: pull origin main: Fast-forward
+[33m8c7d85f[m HEAD@{117}: checkout: moving from production to main
+[33m9e4cc58[m HEAD@{118}: commit: Add: compile frontend assets for server deployment
+[33mf0045a9[m HEAD@{119}: commit: update production
+[33m80f26b4[m HEAD@{120}: commit: Fix audio URL resolution for production
+[33m8c7d85f[m HEAD@{121}: checkout: moving from main to production
+[33m8c7d85f[m HEAD@{122}: checkout: moving from production to main
+[33m8c7d85f[m HEAD@{123}: checkout: moving from main to production
+[33m8c7d85f[m HEAD@{124}: checkout: moving from bug/fix-bugs to main
+[33m8c7d85f[m HEAD@{125}: checkout: moving from main to bug/fix-bugs
+[33m8c7d85f[m HEAD@{126}: commit: fix file upload
+[33md452091[m HEAD@{127}: commit: Add per-site PHP upload limits (.user.ini)
+[33m64a63bb[m HEAD@{128}: checkout: moving from main to main
+[33m64a63bb[m HEAD@{129}: commit: Update role: First signup user promote to Admin automatically
+[33m7bd2c10[m HEAD@{130}: commit: Add FTP exclusions
+[33m53909ba[m HEAD@{131}: commit: deploy.yml
+[33mc6e5d23[m HEAD@{132}: merge feature/new-feature: Fast-forward
+[33mdc44335[m HEAD@{133}: checkout: moving from feature/new-feature to main
+[33mc6e5d23[m HEAD@{134}: commit: Update Deploy.yml
+[33mdc44335[m HEAD@{135}: checkout: moving from main to feature/new-feature
+[33mdc44335[m HEAD@{136}: commit: update deploy.yml
+[33m5972e3f[m HEAD@{137}: commit: regenerate package-lock.json
+[33m2384176[m HEAD@{138}: commit: Update deploy.yml
+[33m021b26c[m HEAD@{139}: commit: Deploy vendor folder for shared hosting
+[33m136a90c[m HEAD@{140}: commit: Fix deployment path
+[33m59484d7[m HEAD@{141}: commit: deploy debug 2
+[33mab34bf9[m HEAD@{142}: commit: debugging deploy.yml
+[33m4ad6308[m HEAD@{143}: commit: Add git action deployment
+[33ma0d4d35[m HEAD@{144}: commit: Resolve merge conflicts after stash pop
+[33mf2922ad[m HEAD@{145}: reset: moving to origin/main
+[33mf2922ad[m HEAD@{146}: reset: moving to origin/main
+[33mf2922ad[m HEAD@{147}: reset: moving to origin/main
+[33mf2922ad[m HEAD@{148}: reset: moving to origin/main
+[33mf2922ad[m HEAD@{149}: commit: Add production build assets
+[33mb01632b[m HEAD@{150}: reset: moving to origin/main
+[33m9ec4ae0[m HEAD@{151}: checkout: moving from main to main
+[33m9ec4ae0[m HEAD@{152}: commit: chore: update deps
+[33mb01632b[m HEAD@{153}: pull origin main: Fast-forward
+[33mbe83755[m HEAD@{154}: reset: moving to HEAD
+[33mbe83755[m HEAD@{155}: reset: moving to origin/main
+[33m663903a[m HEAD@{156}: reset: moving to HEAD
+[33m5a2781b[m HEAD@{157}: checkout: moving from main to main
+[33m5a2781b[m HEAD@{158}: clone: from github.com:SeanghortBorn/sor-ser-development.git
