@@ -21,7 +21,7 @@ class KhmerCompareController extends Controller
     public function compare(Request $request)
     {
         $articleId = $request->input('article_id');
-        $userInput = (string) $request->input('userInput', '');
+        $userInput = (string) $request->input('user_input', '');
 
         try {
             $articleText = '';
@@ -285,88 +285,38 @@ class KhmerCompareController extends Controller
      * 
      * Segment text: keep space for user, remove space in article
      */
-    private function segmentText(?string $text, bool $keepSpace = false): array
-    {
-        $text = (string) ($text ?? '');
-        if ($text === '') return [];
+    /**
+ * Segment text: keep space for user, remove space in article
+ */
+private function segmentText(?string $text, bool $keepSpace = false): array
+{
+    $text = (string) ($text ?? '');
+    if ($text === '') return [];
 
-        // PRIMARY: Use local PHP tokenizer
-        try {
-            $tokens = $this->tokenizer->tokenize($text, $keepSpace);
-            
-            if (!$keepSpace) {
-                // Article mode: remove spaces and empty tokens
-                $tokens = array_values(array_filter($tokens, fn($t) => trim($t) !== ''));
-            }
-            
-            Log::debug('Segmentation successful', [
-                'method' => 'local-tokenizer',
-                'keepSpace' => $keepSpace,
-                'token_count' => count($tokens),
-            ]);
-            
-            return $tokens;
-            
-        } catch (\Throwable $e) {
-            Log::error("Local tokenization failed: {$e->getMessage()}", [
-                'text_length' => mb_strlen($text),
-                'keepSpace' => $keepSpace,
-            ]);
+    try {
+        // Call the tokenizer service (which handles API + fallback internally)
+        $tokens = $this->tokenizer->tokenize($text, $keepSpace);
+
+        if (!$keepSpace) {
+            // Article mode: remove spaces and empty tokens
+            $tokens = array_values(array_filter($tokens, fn($t) => trim($t) !== ''));
         }
 
-        // FALLBACK: Try external API (temporary during transition)
-        $apiUrl = env('KHMER_SEGMENT_API_URL') 
-                    ? rtrim(env('KHMER_SEGMENT_API_URL'), '/') . '/segment'
-                    : null;
+        Log::debug('Tokenization successful', [
+            'method' => 'via-tokenizer-service',
+            'keepSpace' => $keepSpace,
+            'token_count' => count($tokens),
+        ]);
 
-        if ($apiUrl) {
-            try {
-                $res = Http::timeout(3)->post($apiUrl, ['text' => $text]);
-                
-                if ($res->successful()) {
-                    $json = $res->json();
-                    $tokens = $json['tokens'] ?? ($json['data']['tokens'] ?? []);
+        return $tokens;
 
-                    if (!is_array($tokens)) {
-                        $tokens = [];
-                    }
-
-                    if ($keepSpace) {
-                        return array_map(fn($t) => $t === '' ? ' ' : $t, $tokens);
-                    }
-
-                    // Article mode: remove spaces
-                    return array_values(array_filter($tokens, fn($t) => trim($t) !== ''));
-                }
-            } catch (\Throwable $e) {
-                Log::debug("External API segmentation failed", [
-                    'error' => $e->getMessage(),
-                ]);
-            }
-        }
-
-        // LAST RESORT: character-by-character fallback
-        Log::warning('Using character fallback in comparison', [
+    } catch (\Throwable $e) {
+        Log::error("Tokenization failed: {$e->getMessage()}", [
             'text_length' => mb_strlen($text),
             'keepSpace' => $keepSpace,
         ]);
-        
-        $tokens = [];
-        $len = mb_strlen($text);
 
-        for ($i = 0; $i < $len; $i++) {
-            $char = mb_substr($text, $i, 1);
-
-            if ($char === ' ') {
-                if ($keepSpace) {
-                    $tokens[] = ' ';
-                }
-                continue;
-            }
-
-            $tokens[] = $char;
-        }
-
-        return $tokens;
+        return [];
     }
+}
 }
