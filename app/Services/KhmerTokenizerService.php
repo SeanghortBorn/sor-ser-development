@@ -280,4 +280,46 @@ class KhmerTokenizerService
     {
         self::$khmerWords = array_unique(array_merge(self::$khmerWords, $words));
     }
+    /**
+     * Fallback: segment text locally using PHP dictionary matching
+     */
+    private function segmentLocally(string $text, bool $keepSpaces = false): array
+    {
+        $tokens = [];
+        $length = mb_strlen($text, 'UTF-8');
+        $i = 0;
+
+        while ($i < $length) {
+            $char = mb_substr($text, $i, 1, 'UTF-8');
+
+            // Handle spaces
+            if (preg_match('/\s/u', $char)) {
+                if ($keepSpaces) {
+                    $tokens[] = $char;
+                }
+                $i++;
+                continue;
+            }
+
+            // Handle punctuation
+            if (preg_match('/[។៕៚.,!?;:\'"()\[\]{}]/u', $char)) {
+                $tokens[] = $char;
+                $i++;
+                continue;
+            }
+
+            // Try to match Khmer words
+            if ($this->isKhmerCharacter($char)) {
+                $word = $this->extractWord($text, $i);
+                $tokens[] = $word;
+                $i += mb_strlen($word, 'UTF-8');
+            } else {
+                // Non-Khmer character
+                $tokens[] = $char;
+                $i++;
+            }
+        }
+
+        return $tokens;
+    }
 }
