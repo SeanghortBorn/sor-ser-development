@@ -34,3 +34,4 @@ createInertiaApp({
         color: '#4B5563',
     },
 });
+// Clean rebuild 20251128_150555
