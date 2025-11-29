@@ -1,3 +1,4 @@
+// Production build v2
 import '../css/app.css';
 import './bootstrap';
 
@@ -38,3 +39,7 @@ createInertiaApp({
 // Clean rebuild 20251128_151903
 // Clean rebuild 20251128_152130
 // Clean rebuild 20251128_152608
+// Production build 1764319536
+
+// Build timestamp: 20251128_154740
+// Force new hash
