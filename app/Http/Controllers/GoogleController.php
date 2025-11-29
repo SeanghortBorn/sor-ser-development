@@ -37,7 +37,7 @@ class GoogleController extends Controller
                     return redirect()->route('two-factor.login');
                 }
                 Auth::login($findUser);
-                return redirect()->intended('dashboard');
+                return redirect()->intended('homophone.check');
             }
 
             // If not found, try by email
@@ -55,7 +55,7 @@ class GoogleController extends Controller
                     return redirect()->route('two-factor.login');
                 }
                 Auth::login($existingUser);
-                return redirect()->intended('dashboard');
+                return redirect()->intended('homophone.check');
             }
 
             // Otherwise, register new user
@@ -68,7 +68,7 @@ class GoogleController extends Controller
             ]);
 
             Auth::login($newUser);
-            return redirect()->intended('dashboard');
+            return redirect()->intended('homophone.check');
 
         } catch (Exception $e) {
             return redirect('/login')->with('error', 'Failed to login with Google: ' . $e->getMessage());

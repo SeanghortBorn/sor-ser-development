@@ -16,12 +16,23 @@ class CheckPermission
      * @param  string  $permission  The required permission
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function handle(Request $request, Closure $next, $permission): Response
+    public function handle(Request $request, Closure $next, string $permission): Response
     {
         // Get the currently authenticated user
         $user = $request->user();
-        // Check if the user has the specified permission
-        if (!$user || !$user->hasPermissionTo($permission)) {
+        
+        // Check if user is authenticated
+        if (!$user) {
+            abort(403, 'You must be logged in.');
+        }
+
+        // IMPORTANT: Admin bypass - Admins have access to everything
+        if ($user->hasRole('Admin')) {
+            return $next($request);
+        }
+
+        // Check if the user has the specified permission with explicit guard
+        if (!$user->hasPermissionTo($permission, 'web')) {
             abort(403, 'You do not have the required permission.');
         }
 

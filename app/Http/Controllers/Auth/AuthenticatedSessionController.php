@@ -57,8 +57,8 @@ class AuthenticatedSessionController extends Controller
             return redirect()->route('two-factor.login');
         }
 
-        // If no 2FA is required or already confirmed, go to intended page
-        return redirect()->intended(route('dashboard', absolute: false));
+        // CHANGED: Redirect to homophone-check instead of dashboard
+        return redirect()->intended(route('homophone.check', absolute: false));
     }
 
     /**
