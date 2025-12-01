@@ -28,3 +28,5 @@ return new class extends Migration
         Schema::dropIfExists('teams');
     }
 };
+
+# don't use
