@@ -28,4 +28,12 @@ class GrammarChecker extends Model
     {
         return $this->belongsToMany(Tag::class, 'grammar_checker_tag');
     }
+
+    /**
+     * Get the article associated with this grammar checker
+     */
+    public function article()
+    {
+        return $this->belongsTo(Article::class);
+    }
 }

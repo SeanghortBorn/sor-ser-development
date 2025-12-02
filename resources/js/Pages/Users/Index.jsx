@@ -17,6 +17,7 @@ import {
     UserCheck,
     GraduationCap,
     User,
+    BarChart3,
 } from "lucide-react";
 
 export default function UserPage({
@@ -46,11 +47,11 @@ export default function UserPage({
         {
             id: "total",
             label: "Total Users",
-            icon: "UsersRound", // optional: icon name or component reference
+            icon: "UsersRound",
             color: "text-blue-500",
             borderColor: "border-blue-100",
             bgColor: "bg-blue-50",
-            value: 0, // will be updated dynamically
+            value: 0,
             description: "All users registered in the system",
         },
         {
@@ -348,7 +349,8 @@ export default function UserPage({
                                             Created At
                                         </th>
                                         {(can["user-edit"] ||
-                                            can["user-delete"]) && (
+                                            can["user-delete"] ||
+                                            can["user-list"]) && (
                                             <th className="py-3 px-4 text-center">
                                                 Action
                                             </th>
@@ -379,12 +381,6 @@ export default function UserPage({
                                                     ) : item.permissions
                                                           ?.length > 0 ? (
                                                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-600 text-white">
-                                                            {/* {item.permissions
-                                                                .map(
-                                                                    (p) =>
-                                                                        p.name
-                                                                )
-                                                                .join(", ")} */}
                                                             Student
                                                         </span>
                                                     ) : (
@@ -411,9 +407,29 @@ export default function UserPage({
                                                 </td>
 
                                                 {(can["user-edit"] ||
-                                                    can["user-block"]) && (
+                                                    can["user-block"] ||
+                                                    can["user-list"]) && (
                                                     <td className="py-3 px-4 text-center">
                                                         <div className="flex justify-center gap-2 items-center">
+                                                            {/* NEW: View Progress Button */}
+                                                            {can["user-list"] && (
+                                                                <div className="relative group">
+                                                                    <Link
+                                                                        href={route(
+                                                                            "users.progress",
+                                                                            item.id
+                                                                        )}
+                                                                        className="inline-flex items-center gap-1.5 px-2 py-2 text-sm font-medium rounded-xl bg-cyan-500 text-white hover:bg-cyan-600 transition"
+                                                                    >
+                                                                        <BarChart3 className="w-4 h-4" />
+                                                                    </Link>
+                                                                    <div className="absolute bottom-full mb-2 hidden group-hover:block bg-white text-gray-800 text-xs px-3 py-1 rounded-lg shadow-md border whitespace-nowrap z-10">
+                                                                        View
+                                                                        Progress
+                                                                    </div>
+                                                                </div>
+                                                            )}
+
                                                             {can["user-edit"] &&
                                                                 can[
                                                                     "user-create"
@@ -428,7 +444,7 @@ export default function UserPage({
                                                                         >
                                                                             <Pencil className="w-4 h-4" />
                                                                         </Link>
-                                                                        <div className="absolute bottom-full mb-2 hidden group-hover:block bg-white text-gray-800 text-xs px-3 py-1 rounded-lg shadow-md border">
+                                                                        <div className="absolute bottom-full mb-2 hidden group-hover:block bg-white text-gray-800 text-xs px-3 py-1 rounded-lg shadow-md border whitespace-nowrap z-10">
                                                                             Edit
                                                                             User
                                                                         </div>
@@ -451,7 +467,7 @@ export default function UserPage({
                                                                         >
                                                                             <ShieldCheck className="w-4 h-4" />
                                                                         </button>
-                                                                        <div className="absolute bottom-full mb-2 hidden group-hover:block bg-white text-gray-800 text-xs px-3 py-1 rounded-lg shadow-md border">
+                                                                        <div className="absolute bottom-full mb-2 hidden group-hover:block bg-white text-gray-800 text-xs px-3 py-1 rounded-lg shadow-md border whitespace-nowrap z-10">
                                                                             Assign
                                                                             Student
                                                                             Role
@@ -475,7 +491,7 @@ export default function UserPage({
                                                                         >
                                                                             <RotateCcw className="w-4 h-4" />
                                                                         </button>
-                                                                        <div className="absolute bottom-full mb-2 hidden group-hover:block bg-white text-gray-800 text-xs px-3 py-1 rounded-lg shadow-md border">
+                                                                        <div className="absolute bottom-full mb-2 hidden group-hover:block bg-white text-gray-800 text-xs px-3 py-1 rounded-lg shadow-md border whitespace-nowrap z-10">
                                                                             Reset
                                                                             Password
                                                                         </div>
@@ -509,7 +525,7 @@ export default function UserPage({
                                                                             </>
                                                                         )}
                                                                     </button>
-                                                                    <div className="absolute bottom-full mb-2 hidden group-hover:block bg-white text-gray-800 text-xs px-2 py-1 rounded-lg shadow-md border">
+                                                                    <div className="absolute bottom-full mb-2 hidden group-hover:block bg-white text-gray-800 text-xs px-2 py-1 rounded-lg shadow-md border whitespace-nowrap z-10">
                                                                         {item.blocked
                                                                             ? "Unblock"
                                                                             : "Block"}
@@ -526,7 +542,8 @@ export default function UserPage({
                                             <td
                                                 colSpan={
                                                     can["user-edit"] ||
-                                                    can["user-block"]
+                                                    can["user-block"] ||
+                                                    can["user-list"]
                                                         ? 7
                                                         : 6
                                                 }
@@ -546,7 +563,7 @@ export default function UserPage({
                             onClose={() => {
                                 setShowBlockModal(false);
                                 setBlockTarget(null);
-                                setBlockProcessing(false); // reset on close
+                                setBlockProcessing(false);
                             }}
                             maxWidth="lg"
                         >
