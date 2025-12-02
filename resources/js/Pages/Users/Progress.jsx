@@ -1,20 +1,21 @@
 import React from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link } from '@inertiajs/react';
-import { 
-    LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, 
-    Tooltip, Legend, ResponsiveContainer 
+import {
+    LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid,
+    Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
+import { FileText, BarChart3, ArrowLeft } from 'lucide-react';
 
-export default function UserProgress({ 
-    auth, 
-    user, 
-    articlesAttempted, 
-    accuracyTrends, 
+export default function UserProgress({
+    auth,
+    user,
+    articlesAttempted,
+    accuracyTrends,
     correctionPatterns,
     typingActivity,
     audioBehavior,
-    learningMetrics 
+    learningMetrics
 }) {
     return (
         <AuthenticatedLayout user={auth.user}>
@@ -55,11 +56,10 @@ export default function UserProgress({
                                 </div>
                                 <div>
                                     <p className="text-sm text-gray-600">Status</p>
-                                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded ${
-                                        user.status === 'Active' 
-                                            ? 'bg-green-100 text-green-800' 
+                                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded ${user.status === 'Active'
+                                            ? 'bg-green-100 text-green-800'
                                             : 'bg-red-100 text-red-800'
-                                    }`}>
+                                        }`}>
                                         {user.status}
                                     </span>
                                 </div>
@@ -91,11 +91,10 @@ export default function UserProgress({
                         </div>
                         <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
                             <p className="text-sm text-gray-600">Progress Trend</p>
-                            <p className={`text-2xl font-bold ${
-                                learningMetrics.progress_trend === 'Improving' ? 'text-green-600' :
-                                learningMetrics.progress_trend === 'Declining' ? 'text-red-600' :
-                                'text-gray-600'
-                            }`}>
+                            <p className={`text-2xl font-bold ${learningMetrics.progress_trend === 'Improving' ? 'text-green-600' :
+                                    learningMetrics.progress_trend === 'Declining' ? 'text-red-600' :
+                                        'text-gray-600'
+                                }`}>
                                 {learningMetrics.progress_trend}
                             </p>
                         </div>
@@ -107,9 +106,8 @@ export default function UserProgress({
                         </div>
                         <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
                             <p className="text-sm text-gray-600">Improvement Rate</p>
-                            <p className={`text-2xl font-bold ${
-                                learningMetrics.improvement_rate > 0 ? 'text-green-600' : 'text-red-600'
-                            }`}>
+                            <p className={`text-2xl font-bold ${learningMetrics.improvement_rate > 0 ? 'text-green-600' : 'text-red-600'
+                                }`}>
                                 {learningMetrics.improvement_rate > 0 ? '+' : ''}
                                 {learningMetrics.improvement_rate}%
                             </p>
@@ -170,10 +168,10 @@ export default function UserProgress({
                                         <YAxis domain={[0, 100]} />
                                         <Tooltip />
                                         <Legend />
-                                        <Line 
-                                            type="monotone" 
-                                            dataKey="accuracy" 
-                                            stroke="#3B82F6" 
+                                        <Line
+                                            type="monotone"
+                                            dataKey="accuracy"
+                                            stroke="#3B82F6"
                                             strokeWidth={2}
                                             name="Accuracy (%)"
                                         />
@@ -229,10 +227,10 @@ export default function UserProgress({
                                         <YAxis />
                                         <Tooltip />
                                         <Legend />
-                                        <Line 
-                                            type="monotone" 
-                                            dataKey="characters" 
-                                            stroke="#8B5CF6" 
+                                        <Line
+                                            type="monotone"
+                                            dataKey="characters"
+                                            stroke="#8B5CF6"
                                             strokeWidth={2}
                                             name="Characters Typed"
                                         />
@@ -305,6 +303,9 @@ export default function UserProgress({
                                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                     Latest Attempt
                                                 </th>
+                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                    Actions
+                                                </th>
                                             </tr>
                                         </thead>
                                         <tbody className="bg-white divide-y divide-gray-200">
@@ -317,11 +318,10 @@ export default function UserProgress({
                                                         {article.attempts}
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded ${
-                                                            article.best_accuracy >= 80 ? 'bg-green-100 text-green-800' :
-                                                            article.best_accuracy >= 60 ? 'bg-yellow-100 text-yellow-800' :
-                                                            'bg-red-100 text-red-800'
-                                                        }`}>
+                                                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded ${article.best_accuracy >= 80 ? 'bg-green-100 text-green-800' :
+                                                                article.best_accuracy >= 60 ? 'bg-yellow-100 text-yellow-800' :
+                                                                    'bg-red-100 text-red-800'
+                                                            }`}>
                                                             {article.best_accuracy}%
                                                         </span>
                                                     </td>
@@ -330,6 +330,18 @@ export default function UserProgress({
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                         {article.latest_attempt}
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <Link
+                                                            href={route('users.articles.details', {
+                                                                userId: user.id,
+                                                                articleId: article.article_id
+                                                            })}
+                                                            className="inline-flex items-center px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md"
+                                                        >
+                                                            <FileText className="w-4 h-4 mr-1.5" />
+                                                            View Details
+                                                        </Link>
                                                     </td>
                                                 </tr>
                                             ))}

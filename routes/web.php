@@ -1,4 +1,5 @@
 <?php
+use App\Http\Controllers\UserArticleDetailController;
 use App\Http\Controllers\UserProgressController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\TwoFactorLoginController;
@@ -134,13 +135,23 @@ Route::middleware('auth')->group(function () {
         Route::patch('/{id}/permissions', [UserController::class, 'updatePermissions'])->name('users.update-permissions')->middleware('check:user-edit');
         Route::post('/users/{id}/block', [UserController::class, 'block'])->name('users.block');
         Route::post('/users/{id}/unblock', [UserController::class, 'unblock'])->name('users.unblock');
-        # Route::get('/{id}', [UserController::class, 'edit'])->name('users.edit')->middleware(['check:user-edit']);
         Route::post("/", [UserController::class, 'store'])->name('users.store');
         Route::patch("/{id}", [UserController::class, 'update'])->name('users.update');
         Route::delete("/{id}", [UserController::class, 'destroy'])->name('users.destroy')->middleware(['check:user-delete']);
         Route::patch('/{id}/permissions', [UserController::class, 'updatePermissions'])->name('users.update-permissions')->middleware('check:user-edit');
         Route::post('/users/{id}/block', [UserController::class, 'block'])->name('users.block');
         Route::post('/users/{id}/unblock', [UserController::class, 'unblock'])->name('users.unblock');
+    });
+
+    Route::prefix('users/{userId}/articles/{articleId}')->group(function () {
+    Route::get('/details', [UserArticleDetailController::class, 'show'])
+        ->name('users.articles.details')
+        ->middleware(['check:user-list']);
+    
+    Route::get('/export/{format}', [UserArticleDetailController::class, 'exportData'])
+        ->name('users.articles.export')
+        ->middleware(['check:user-list'])
+        ->where('format', 'csv|json|xml');
     });
 
     Route::resource('grammar-checkers', GrammarCheckerController::class)->except(['create', 'edit']);
