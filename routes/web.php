@@ -97,14 +97,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/categories/{id}', [CategoryController::class, 'edit'])->name('categories.edit');
     Route::delete('/categories/{id}', [CategoryController::class, 'destroy'])->name('categories.destroy');
 
-    # Route::get('/quizzes', [QuizController::class, 'index'])->name('quizzes.index')->middleware(['check:quiz-list']);
-    # Route::get('/quizzes/create', [QuizController::class, 'create'])->name('quizzes.create')->middleware(['check:quiz-create']);
-    # Route::post('/quizzes', [QuizController::class, 'store'])->name('quizzes.store');
-    # Route::patch('/quizzes/{id}', [QuizController::class, 'update'])->name('quizzes.update');
-    # Route::get('/quizzes/{id}', [QuizController::class, 'edit'])->name('quizzes.edit');
-    # Route::delete('/quizzes/{id}', [QuizController::class, 'destroy'])->name('quizzes.destroy');
-    # Route::resource('quizzes', QuizController::class);
-    # Replace the commented-out resource route with the following routes:
     // Quiz routes with custom middleware
     Route::resource('quizzes', QuizController::class)->except(['index', 'create']);
     Route::get('/quizzes', [QuizController::class, 'index'])->name('quizzes.index')->middleware(['check:quiz-list']);
@@ -130,6 +122,11 @@ Route::middleware('auth')->group(function () {
     Route::prefix('users')->group(function () {
         Route::get('/', [UserController::class, 'index'])->name('users.index')->middleware(['check:user-list']);
         Route::get('/create', [UserController::class, 'create'])->name('users.create')->middleware(['check:user-create']);
+
+        // ADD THIS LINE - User Progress Dashboard
+        Route::get('/{id}/progress', [UserProgressController::class, 'show'])
+            ->name('users.progress')
+            ->middleware(['check:user-list']); // Reuse user-list permission
         Route::get('/{id}', [UserController::class, 'edit'])->name('users.edit')->middleware(['check:user-edit']);
         Route::post("/", [UserController::class, 'store'])->name('users.store');
         Route::patch("/{id}", [UserController::class, 'update'])->name('users.update');
@@ -137,13 +134,7 @@ Route::middleware('auth')->group(function () {
         Route::patch('/{id}/permissions', [UserController::class, 'updatePermissions'])->name('users.update-permissions')->middleware('check:user-edit');
         Route::post('/users/{id}/block', [UserController::class, 'block'])->name('users.block');
         Route::post('/users/{id}/unblock', [UserController::class, 'unblock'])->name('users.unblock');
-    
-        // ADD THIS LINE - User Progress Dashboard
-        Route::get('/{id}/progress', [UserProgressController::class, 'show'])
-            ->name('users.progress')
-            ->middleware(['check:user-list']); // Reuse user-list permission
-        
-        Route::get('/{id}', [UserController::class, 'edit'])->name('users.edit')->middleware(['check:user-edit']);
+        # Route::get('/{id}', [UserController::class, 'edit'])->name('users.edit')->middleware(['check:user-edit']);
         Route::post("/", [UserController::class, 'store'])->name('users.store');
         Route::patch("/{id}", [UserController::class, 'update'])->name('users.update');
         Route::delete("/{id}", [UserController::class, 'destroy'])->name('users.destroy')->middleware(['check:user-delete']);
