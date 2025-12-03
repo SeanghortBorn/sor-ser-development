@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Auth;
-
+use Spatie\Permission\Models\Permission;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
@@ -13,7 +13,6 @@ use Illuminate\Validation\Rules;
 use Inertia\Inertia;
 use Inertia\Response;
 use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
 
 class RegisteredUserController extends Controller
 {
@@ -36,28 +35,80 @@ class RegisteredUserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'age' => 'nullable|integer|min:1|max:120',
-            'education_level' => 'nullable|string|max:255',
-            'khmer_experience' => 'nullable|string|max:255',
         ]);
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'age' => $request->age,
-            'education_level' => $request->education_level,
-            'khmer_experience' => $request->khmer_experience,
         ]);
 
-        // Check if this is the first user
-        $this->assignRoleToFirstUser($user);
+        // Assign role based on system settings
+        $this->assignRoleToNewUser($user);
 
         event(new Registered($user));
 
         Auth::login($user);
 
         return redirect(route('homophone.check', absolute: false));
+    }
+
+    /**
+     * Assign role to newly registered user
+     */
+    protected function assignRoleToNewUser($user)
+    {
+        // Check if this is the first user
+        if (User::count() === 1) {
+            // First user becomes Admin
+            $adminRole = Role::firstOrCreate(
+                ['name' => 'Admin'],
+                ['guard_name' => 'web']
+            );
+
+            // Ensure admin has all permissions
+            $permissions = $this->ensurePermissionsExist();
+            $adminRole->syncPermissions($permissions);
+            $user->assignRole($adminRole);
+
+            \Log::info('First user registered as Admin', [
+                'user_id' => $user->id,
+                'email' => $user->email,
+            ]);
+        } else {
+            // Get default role from system settings
+            $defaultRoleId = \App\Models\SystemSetting::get('default_role_id');
+            
+            if ($defaultRoleId) {
+                $defaultRole = Role::find($defaultRoleId);
+                if ($defaultRole) {
+                    $user->assignRole($defaultRole);
+                    \Log::info('User registered with configured default role', [
+                        'user_id' => $user->id,
+                        'email' => $user->email,
+                        'role' => $defaultRole->name,
+                    ]);
+                    return;
+                }
+            }
+
+            // Fallback: Create "User" role if no default is set
+            $userRole = Role::firstOrCreate(
+                ['name' => 'User'],
+                ['guard_name' => 'web']
+            );
+            
+            // Give basic permissions
+            $basicPermissions = Permission::whereIn('name', ['article-list', 'homophone-list'])->get();
+            $userRole->syncPermissions($basicPermissions);
+            
+            $user->assignRole($userRole);
+
+            \Log::info('User registered with fallback User role', [
+                'user_id' => $user->id,
+                'email' => $user->email,
+            ]);
+        }
     }
 
     /**
@@ -150,8 +201,8 @@ class RegisteredUserController extends Controller
             'homophone-edit',
             'homophone-delete',
             
-            // Student permission
-            'student',
+            // Settings management
+            'settings-edit',
         ];
 
         $permissions = [];

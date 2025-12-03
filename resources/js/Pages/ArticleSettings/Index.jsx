@@ -365,7 +365,30 @@ export default function ArticleSettingsIndex({ articles, articleOptions }) {
                                                     >
                                                         <option value="nlp_only">NLP Only (Basic features)</option>
                                                         <option value="nlp_la">NLP + LA (Full features with analytics)</option>
+                                                        <option value="none">Adaptive (Based on User Role)</option>
                                                     </select>
+                                                    
+                                                    {/* Explanation Text */}
+                                                    <div className="mt-2 text-xs">
+                                                        {formData.typing_mode === 'none' && (
+                                                            <span className="text-blue-600 flex items-center">
+                                                                <span className="mr-1">⚡</span>
+                                                                Adaptive: Users get features based on their role
+                                                            </span>
+                                                        )}
+                                                        {formData.typing_mode === 'nlp_only' && (
+                                                            <span className="text-orange-600 flex items-center">
+                                                                <span className="mr-1">🔒</span>
+                                                                All users restricted to basic features only
+                                                            </span>
+                                                        )}
+                                                        {formData.typing_mode === 'nlp_la' && (
+                                                            <span className="text-green-600 flex items-center">
+                                                                <span className="mr-1">🚀</span>
+                                                                Full features for NLP+LA users, basic for NLP-only users
+                                                            </span>
+                                                        )}
+                                                    </div>
                                                 </div>
 
                                                 {/* Unlock Delay Days */}

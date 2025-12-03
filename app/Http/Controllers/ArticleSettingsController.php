@@ -18,6 +18,10 @@ class ArticleSettingsController extends Controller
      */
     public function index()
     {
+        // Check permission
+        if (!auth()->user()->can('article-create')) {
+            abort(403, 'You do not have permission to access article settings.');
+        }
         // Get all articles with their settings, ordered by display_order
         $articles = Article::with(['file', 'audio'])
             ->get()

@@ -1,5 +1,6 @@
 import { Link, usePage } from "@inertiajs/react";
 import { useEffect, useState } from "react";
+import { Settings } from 'lucide-react';
 
 function MenuGroup({ label, icon, children, active }) {
     const [open, setOpen] = useState(active);
@@ -379,6 +380,15 @@ export default function MenuSideBar({ lang, setLang }) {
                     {/* ═══════════════════════════════════════════════════════
                      * Articles (with Article Settings - FIX16)
                      * ═══════════════════════════════════════════════════════ */}
+
+                     {/* Article Settings - Admin Only */}
+                    {can["article-create"] && routeExists('article-settings.index') && (
+                        <MenuItem
+                            href={safeRoute("article-settings.index")}
+                            label={"Article Settings"}
+                            active={routeName === "article-settings.index" || isActive("article-settings")}
+                        />
+                    )}
                     {(can["article-list"] || can["article-create"]) && (
                         <MenuGroup
                             label={"Articles"}
@@ -527,6 +537,18 @@ export default function MenuSideBar({ lang, setLang }) {
                                         />
                                     )}
                                 </MenuGroup>
+                            )}
+
+                            {/* ═══════════════════════════════════════════════════════
+                             * FIX17: System Settings
+                             * ═══════════════════════════════════════════════════════ */}
+                            {can["settings-edit"] && routeExists('settings.index') && (
+                                <MenuItem
+                                    href={safeRoute("settings.index")}
+                                    icon={icons.settings}
+                                    label={"Settings"}
+                                    active={routeName === "settings.index" || isActive("settings")}
+                                />
                             )}
                         </>
                     )}

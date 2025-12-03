@@ -1,4 +1,6 @@
 <?php
+use App\Http\Controllers\HomophoneCheckController;
+use App\Http\Controllers\SystemSettingsController;
 use App\Http\Controllers\ArticleSettingsController;
 use App\Http\Controllers\ArticleProgressionController;
 use App\Http\Controllers\UserArticleDetailController;
@@ -29,7 +31,9 @@ use Laravel\Fortify\Http\Controllers\TwoFactorQrCodeController;
 use Laravel\Fortify\Http\Controllers\TwoFactorSecretKeyController;
 
 Route::redirect('/', '/home');
-Route::inertia('/homophone-check', 'HomophoneChecks/Index')->name('homophone.check');
+Route::get('/homophone-check', [App\Http\Controllers\HomophoneCheckController::class, 'index'])
+    ->name('homophone.check')
+    ->middleware('auth');
 Route::inertia('/home', 'Homes/index')->name('home');
 Route::inertia('/subscribe', 'Subscribes/index')->name('subscribe');
 Route::inertia('/contacts', 'Contacts/index')->name('contacts');
@@ -40,6 +44,20 @@ Route::get('/quiz-practice', [QuizController::class, 'landingPage'])->name('quiz
 // Route::middleware(['auth','verified', 'check.user.role'])->group(function () {
 Route::middleware(['auth', 'check.user.role'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+});
+
+// Add after the dashboard route
+Route::middleware(['auth', 'check.user.role'])->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    
+    // System Settings (Admin only)
+    Route::get('/settings', [App\Http\Controllers\SystemSettingsController::class, 'index'])
+        ->name('settings.index')
+        ->middleware(['check:settings-edit']);
+    
+    Route::post('/settings', [App\Http\Controllers\SystemSettingsController::class, 'update'])
+        ->name('settings.update')
+        ->middleware(['check:settings-edit']);
 });
 
 // Google Authentication Routes

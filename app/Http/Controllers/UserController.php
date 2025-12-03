@@ -85,7 +85,7 @@ class UserController extends Controller
             ],
             'password' => ['required', 'string', 'min:8'],
             'roles' => ['nullable', 'array'],
-            'roles.*' => ['integer', 'exists:roles,id'],
+            'roles.*' => ['exists:roles,id'],
         ])->validate();
 
         $user = User::create([
@@ -94,11 +94,21 @@ class UserController extends Controller
             'password' => Hash::make($validated['password']),
         ]);
 
-        // Assign roles only if provided and not empty
+        // Admin can assign specific role, or use default
         if (!empty($validated['roles'])) {
-            $user->assignRole($validated['roles']);
+            $roles = Role::whereIn('id', $validated['roles'])->get();
+            $user->syncRoles($roles);
+        } else {
+            // Use system default role
+            $defaultRoleId = \App\Models\SystemSetting::get('default_role_id');
+            if ($defaultRoleId) {
+                $defaultRole = Role::find($defaultRoleId);
+                if ($defaultRole) {
+                    $user->assignRole($defaultRole);
+                }
+            }
         }
-        // If roles is empty/null, do not assign any role (user will have no roles)
+
         return to_route('users.index')->with("success", "User created successfully");
     }
 

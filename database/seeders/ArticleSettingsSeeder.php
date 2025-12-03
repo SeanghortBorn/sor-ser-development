@@ -115,6 +115,45 @@ class ArticleSettingsSeeder extends Seeder
         $this->command->info('      - Time delays (e.g., 10 days after completing previous)');
         $this->command->info('      - Typing mode (NLP Only vs NLP+LA)');
         $this->command->newLine();
+
+        $articles = Article::orderBy('id')->get();
+        
+        if ($articles->isEmpty()) {
+            $this->command->info('No articles found. Please create articles first.');
+            return;
+        }
+
+        $previousArticleId = null;
+        $order = 1;
+
+        foreach ($articles as $article) {
+            ArticleSetting::updateOrCreate(
+                ['article_id' => $article->id],
+                [
+                    'display_order' => $order,
+                    'prerequisite_article_id' => $previousArticleId,
+                    'unlock_delay_days' => 0,
+                    'unlock_delay_hours' => 0,
+                    'availability_mode' => $previousArticleId === null ? 'always' : 'sequential',
+                    'typing_mode' => 'none', // Adaptive mode
+                    'slug' => \Illuminate\Support\Str::slug($article->title),
+                    'category' => 'general',
+                    'description' => null,
+                    'is_active' => true,
+                    'is_required' => true,
+                    'max_attempts' => null,
+                    'min_completion_accuracy' => 70.0,
+                ]
+            );
+
+            $previousArticleId = $article->id;
+            $order++;
+        }
+
+        $this->command->info("✅ Created settings for {$articles->count()} articles");
+        $this->command->info("📌 First article: Always available");
+        $this->command->info("📌 Other articles: Sequential (must complete previous)");
+        $this->command->info("📌 Typing mode: Adaptive (based on user role)");
     }
 
     /**

@@ -272,4 +272,122 @@ class ArticleProgressionService
         // All articles completed or none available
         return null;
     }
+
+    /**
+     * Get effective typing mode for user on specific article
+     * Takes into account both article settings and user role
+     * 
+     * @param int $articleId
+     * @param int|User $user User ID or User model
+     * @return string 'nlp_only' or 'nlp_la'
+     */
+    public function getEffectiveTypingMode($articleId, $user): string
+    {
+        // Get user model if ID provided
+        if (!($user instanceof \App\Models\User)) {
+            $user = \App\Models\User::findOrFail($user);
+        }
+
+        // Get article settings
+        $settings = \App\Models\ArticleSetting::where('article_id', $articleId)->first();
+        
+        // If no settings, default to nlp_la
+        if (!$settings) {
+            return 'nlp_la';
+        }
+
+        $articleTypingMode = $settings->typing_mode;
+
+        // Case 1: Article set to "nlp_only" → ALL users get nlp_only
+        if ($articleTypingMode === 'nlp_only') {
+            return 'nlp_only';
+        }
+
+        // Case 2: Article set to "none" (adaptive) → Use user's role default
+        if ($articleTypingMode === 'none') {
+            return $this->getUserDefaultTypingMode($user);
+        }
+
+        // Case 3: Article set to "nlp_la" → Respect user's role
+        if ($articleTypingMode === 'nlp_la') {
+            $userDefault = $this->getUserDefaultTypingMode($user);
+            
+            // If user is nlp_only group, they can't access nlp_la features
+            if ($userDefault === 'nlp_only') {
+                return 'nlp_only';
+            }
+            
+            // User has nlp_la access
+            return 'nlp_la';
+        }
+
+        // Fallback
+        return 'nlp_la';
+    }
+
+    /**
+     * Get user's default typing mode based on their role
+     * 
+     * @param User $user
+     * @return string 'nlp_only' or 'nlp_la'
+     */
+    protected function getUserDefaultTypingMode($user): string
+    {
+        // Admin always gets full features
+        if ($user->hasRole('Admin') || $user->hasRole('admin')) {
+            return 'nlp_la';
+        }
+
+        // Check role name for typing mode hints
+        $roleName = $user->roles->first()->name ?? '';
+        
+        // If role name contains "NLP-only" or "basic" → nlp_only
+        if (stripos($roleName, 'NLP-only') !== false || 
+            stripos($roleName, 'basic') !== false ||
+            stripos($roleName, 'Group A') !== false) {
+            return 'nlp_only';
+        }
+
+        // If role name contains "NLP+LA" or "full" or "advanced" → nlp_la
+        if (stripos($roleName, 'NLP+LA') !== false || 
+            stripos($roleName, 'full') !== false ||
+            stripos($roleName, 'Group B') !== false ||
+            stripos($roleName, 'advanced') !== false) {
+            return 'nlp_la';
+        }
+
+        // Check permissions - if user has advanced permissions, give nlp_la
+        if ($user->can('article-create') || $user->can('quiz-create')) {
+            return 'nlp_la';
+        }
+
+        // Default to nlp_only for safety
+        return 'nlp_only';
+    }
+
+    /**
+     * Get all available articles for a specific user
+     * Returns only articles that user can currently access
+     * 
+     * @param int $userId
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getAvailableArticles($userId)
+    {
+        $allArticles = \App\Models\Article::with(['file', 'audio'])->orderBy('id', 'asc')->get();
+        $availableArticles = [];
+
+        foreach ($allArticles as $article) {
+            [$canAccess, $message, $unlockTime] = $this->canUserAccessArticle($userId, $article->id);
+            
+            if ($canAccess) {
+                // Add typing mode info
+                $article->effective_typing_mode = $this->getEffectiveTypingMode($article->id, $userId);
+                $article->typing_mode_label = $article->effective_typing_mode === 'nlp_only' ? 'Basic' : 'Full Features';
+                $availableArticles[] = $article;
+            }
+        }
+
+        return collect($availableArticles);
+    }
 }

@@ -9,7 +9,7 @@ import Modal from "@/Components/Modal";
 import axios from "axios";
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from "recharts";
 
-export default function Index() {
+export default function Index({ articles: initialArticles = [], userRole }) {
     const { auth } = usePage().props;
     const userId = auth?.user?.id;
 
@@ -55,7 +55,7 @@ export default function Index() {
     const [isZoomed, setIsZoomed] = useState(false);
 
     // Dropdown for articles
-    const [articles, setArticles] = useState([]);
+    const [articles, setArticles] = useState(initialArticles);
     const [selectedArticle, setSelectedArticle] = useState(null);
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const dropdownRef = useRef(null);
@@ -503,24 +503,7 @@ export default function Index() {
             fetchHistoryDetailAccuracy(item.id),
         ]);
     };
-    useEffect(() => {
-        if (!userId) return; // Don't fetch if user is not authenticated
-        axios
-            .get("/api/articles", { headers: { Accept: "application/json" } })
-            .then((res) => {
-                setArticles(
-                    Array.isArray(res.data) ? res.data : res.data.data || []
-                );
-            })
-            .catch((err) => {
-                // Silently handle 401 errors
-                if (err.response?.status !== 401) {
-                    console.error("Error fetching articles:", err);
-                }
-                setArticles([]);
-            });
-    }, [userId]); // Add userId as dependency
-
+   
     useEffect(() => {
         fetchHistory();
     }, [userId]); // Add userId as dependency
