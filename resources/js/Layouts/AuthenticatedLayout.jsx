@@ -23,6 +23,7 @@ export default function AuthenticatedLayout({ header, children }) {
                                 </Link>
                             </div>
 
+                            {/* Desktop Navigation */}
                             <div className="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                                 <NavLink
                                     href={route('dashboard')}
@@ -36,6 +37,25 @@ export default function AuthenticatedLayout({ header, children }) {
                                 >
                                     Categories
                                 </NavLink>
+                                
+                                {/* ═══════════════════════════════════════════ */}
+                                {/* FIX16: Article Settings Link (Admin)        */}
+                                {/* ═══════════════════════════════════════════ */}
+                                <NavLink
+                                    href={route('article-settings.index')}
+                                    active={route().current('article-settings.*')}
+                                >
+                                    Article Settings
+                                </NavLink>
+                                
+                                {/* FIX16: My Learning Link (User)              */}
+                                <NavLink
+                                    href={route('learn.articles.index')}
+                                    active={route().current('learn.articles.*')}
+                                >
+                                    My Learning
+                                </NavLink>
+                                {/* ═══════════════════════════════════════════ */}
                             </div>
                         </div>
 
@@ -127,6 +147,7 @@ export default function AuthenticatedLayout({ header, children }) {
                     </div>
                 </div>
 
+                {/* Mobile Navigation */}
                 <div
                     className={
                         (showingNavigationDropdown ? 'block' : 'hidden') +
@@ -140,6 +161,23 @@ export default function AuthenticatedLayout({ header, children }) {
                         >
                             Dashboard
                         </ResponsiveNavLink>
+                        
+                        {/* ═══════════════════════════════════════════ */}
+                        {/* FIX16: Mobile Navigation Links              */}
+                        {/* ═══════════════════════════════════════════ */}
+                        <ResponsiveNavLink
+                            href={route('article-settings.index')}
+                            active={route().current('article-settings.*')}
+                        >
+                            Article Settings
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            href={route('learn.articles.index')}
+                            active={route().current('learn.articles.*')}
+                        >
+                            My Learning
+                        </ResponsiveNavLink>
+                        {/* ═══════════════════════════════════════════ */}
                     </div>
 
                     <div className="border-t border-gray-200 pb-1 pt-4">

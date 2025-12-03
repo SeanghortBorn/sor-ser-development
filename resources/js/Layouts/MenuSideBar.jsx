@@ -239,6 +239,57 @@ export default function MenuSideBar({ lang, setLang }) {
                 <line x1="8" y1="12" x2="16" y2="12" />
             </svg>
         ),
+        // ═══════════════════════════════════════════════════════════════
+        // FIX16: New Icons for Article Settings & User Learning
+        // ═══════════════════════════════════════════════════════════════
+        settings: (
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+            >
+                <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+                <circle cx="12" cy="12" r="3" />
+            </svg>
+        ),
+        learning: (
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+            >
+                <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+                <path d="M6 12v5c3 3 9 3 12 0v-5" />
+            </svg>
+        ),
+        progress: (
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+            >
+                <path d="M3 3v18h18" />
+                <path d="m19 9-5 5-4-4-3 3" />
+            </svg>
+        ),
     };
 
     return (
@@ -279,14 +330,9 @@ export default function MenuSideBar({ lang, setLang }) {
              * ---------------------------- */}
             <div className="sidebar">
                 <nav className="flex-1 px-2 py-3 space-y-2">
-                    {/* Dashboard */}
-                    {/* <MenuItem
-                        href={route("dashboard")}
-                        icon={icons.dashboard}
-                        label={"Dashboard"}
-                        active={isActive("dashboard")}
-                    /> */}
-
+                    {/* ═══════════════════════════════════════════════════════
+                     * Dashboard
+                     * ═══════════════════════════════════════════════════════ */}
                     <MenuGroup
                         label={"Dashboard"}
                         icon={icons.dashboard}
@@ -308,11 +354,14 @@ export default function MenuSideBar({ lang, setLang }) {
                         />
                     </MenuGroup>
 
+                    {/* ═══════════════════════════════════════════════════════
+                     * Articles (with Article Settings - FIX16)
+                     * ═══════════════════════════════════════════════════════ */}
                     {(can["article-list"] || can["article-create"]) && (
                         <MenuGroup
                             label={"Articles"}
                             icon={icons.article}
-                            active={isActive("articles")}
+                            active={isActive("articles", "article-settings")}
                         >
                             <MenuItem
                                 href={route("articles.index")}
@@ -326,9 +375,20 @@ export default function MenuSideBar({ lang, setLang }) {
                                     active={routeName === "articles.create"}
                                 />
                             )}
+                            {/* ═══════════════════════════════════════════
+                             * FIX16: Article Settings (Progression)
+                             * ═══════════════════════════════════════════ */}
+                            <MenuItem
+                                href={route("article-settings.index")}
+                                label={"Article Settings"}
+                                active={routeName === "article-settings.index" || isActive("article-settings")}
+                            />
                         </MenuGroup>
                     )}
 
+                    {/* ═══════════════════════════════════════════════════════
+                     * Homophones
+                     * ═══════════════════════════════════════════════════════ */}
                     {(can["homophone-list"] || can["homophone-create"]) && (
                         <MenuGroup
                             label={"Homophones"}
@@ -350,6 +410,9 @@ export default function MenuSideBar({ lang, setLang }) {
                         </MenuGroup>
                     )}
 
+                    {/* ═══════════════════════════════════════════════════════
+                     * Quizzes
+                     * ═══════════════════════════════════════════════════════ */}
                     {(can["quiz-list"] || can["quiz-create"]) && (
                         <MenuGroup
                             label={"Quizzes"}
@@ -371,20 +434,16 @@ export default function MenuSideBar({ lang, setLang }) {
                         </MenuGroup>
                     )}
 
-                    {/* Authentication Section */}
+                    {/* ═══════════════════════════════════════════════════════
+                     * Authentication Section
+                     * ═══════════════════════════════════════════════════════ */}
                     {(can["role-list"] || can["user-list"]) && (
                         <>
                             <div className="text-xs font-semibold text-gray-400 mb-2 pt-2 px-2 tracking-wider uppercase">
                                 {"Authentication"}
                             </div>
 
-                            {/* <MenuItem
-                                href={route("roles.index")}
-                                icon={icons.role}
-                                label={t("Roles List", "បញ្ជីតួនាទី")}
-                                active={routeName === "roles.index"}
-                            /> */}
-
+                            {/* Roles */}
                             {(can["role-list"] || can["role-create"]) && (
                                 <MenuGroup
                                     label={"Roles"}
@@ -408,18 +467,14 @@ export default function MenuSideBar({ lang, setLang }) {
                                 </MenuGroup>
                             )}
 
-                            {/* Users */}
-                            {/* <MenuItem
-                                href={route("users.index")}
-                                icon={icons.user}
-                                label={t("User List", "បញ្ជីអ្នកប្រើប្រាស់")}
-                                active={routeName === "users.index"}
-                            /> */}
+                            {/* ═══════════════════════════════════════════════════════
+                             * Users (with User Learning - FIX16)
+                             * ═══════════════════════════════════════════════════════ */}
                             {(can["user-list"] || can["user-create"]) && (
                                 <MenuGroup
                                     label={"Users"}
                                     icon={icons.user}
-                                    active={isActive("users")}
+                                    active={isActive("users", "learn")}
                                 >
                                     <MenuItem
                                         href={route("users.index")}
@@ -435,6 +490,15 @@ export default function MenuSideBar({ lang, setLang }) {
                                             }
                                         />
                                     )}
+                                    {/* ═══════════════════════════════════════════
+                                     * FIX16: User Learning (My Learning)
+                                     * View each user's learning progress
+                                     * ═══════════════════════════════════════════ */}
+                                    <MenuItem
+                                        href={route("learn.articles.index")}
+                                        label={"User Learning"}
+                                        active={isActive("learn")}
+                                    />
                                 </MenuGroup>
                             )}
                         </>

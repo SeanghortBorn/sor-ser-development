@@ -1,4 +1,6 @@
 <?php
+use App\Http\Controllers\ArticleSettingsController;
+use App\Http\Controllers\ArticleProgressionController;
 use App\Http\Controllers\UserArticleDetailController;
 use App\Http\Controllers\UserProgressController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
@@ -80,10 +82,8 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/student-analytics', [StudentAnalyticsController::class, 'index'])->name('student.analytics')->middleware(['check:user-list']);
 
-    // Route::get('/student-analytics', 'StudentAnalytics/index')->name('student.analytics');
-
     Route::get('/api/articles', [ArticleController::class, 'apiList']);
-    Route::get('/api/audios/{id}', [ArticleController::class, 'getAudio']); // Add this line
+    Route::get('/api/audios/{id}', [ArticleController::class, 'getAudio']);
 
     Route::inertia('/library', 'Libraries/index')->name('library')->middleware(['check:student']);
 
@@ -123,18 +123,10 @@ Route::middleware('auth')->group(function () {
     Route::prefix('users')->group(function () {
         Route::get('/', [UserController::class, 'index'])->name('users.index')->middleware(['check:user-list']);
         Route::get('/create', [UserController::class, 'create'])->name('users.create')->middleware(['check:user-create']);
-
-        // ADD THIS LINE - User Progress Dashboard
         Route::get('/{id}/progress', [UserProgressController::class, 'show'])
             ->name('users.progress')
-            ->middleware(['check:user-list']); // Reuse user-list permission
+            ->middleware(['check:user-list']);
         Route::get('/{id}', [UserController::class, 'edit'])->name('users.edit')->middleware(['check:user-edit']);
-        Route::post("/", [UserController::class, 'store'])->name('users.store');
-        Route::patch("/{id}", [UserController::class, 'update'])->name('users.update');
-        Route::delete("/{id}", [UserController::class, 'destroy'])->name('users.destroy')->middleware(['check:user-delete']);
-        Route::patch('/{id}/permissions', [UserController::class, 'updatePermissions'])->name('users.update-permissions')->middleware('check:user-edit');
-        Route::post('/users/{id}/block', [UserController::class, 'block'])->name('users.block');
-        Route::post('/users/{id}/unblock', [UserController::class, 'unblock'])->name('users.unblock');
         Route::post("/", [UserController::class, 'store'])->name('users.store');
         Route::patch("/{id}", [UserController::class, 'update'])->name('users.update');
         Route::delete("/{id}", [UserController::class, 'destroy'])->name('users.destroy')->middleware(['check:user-delete']);
@@ -144,14 +136,14 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::prefix('users/{userId}/articles/{articleId}')->group(function () {
-    Route::get('/details', [UserArticleDetailController::class, 'show'])
-        ->name('users.articles.details')
-        ->middleware(['check:user-list']);
-    
-    Route::get('/export/{format}', [UserArticleDetailController::class, 'exportData'])
-        ->name('users.articles.export')
-        ->middleware(['check:user-list'])
-        ->where('format', 'csv|json|xml');
+        Route::get('/details', [UserArticleDetailController::class, 'show'])
+            ->name('users.articles.details')
+            ->middleware(['check:user-list']);
+        
+        Route::get('/export/{format}', [UserArticleDetailController::class, 'exportData'])
+            ->name('users.articles.export')
+            ->middleware(['check:user-list'])
+            ->where('format', 'csv|json|xml');
     });
 
     Route::resource('grammar-checkers', GrammarCheckerController::class)->except(['create', 'edit']);
@@ -176,7 +168,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/json', function () {
             return response()->json(['homophones' => Homophone::all()]);
         })->name('homophones.json');
-        Route::post( '/import', [HomophoneController::class, 'import'])->name('homophones.import');
+        Route::post('/import', [HomophoneController::class, 'import'])->name('homophones.import');
         Route::post('/clear', [HomophoneController::class, 'clear'])->name('homophones.clear')->middleware(['check:homophone-delete']);
     });
     Route::get('/homophones.json', function () {
@@ -186,6 +178,60 @@ Route::middleware('auth')->group(function () {
     Route::post('/feedback', [App\Http\Controllers\FeedbackController::class, 'store']);
     Route::get('/feedback', [App\Http\Controllers\FeedbackController::class, 'index'])->name('feedback.index');
     Route::get('/feedback/create', [App\Http\Controllers\FeedbackController::class, 'create'])->name('feedback.create');
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // FIX16: ARTICLE PROGRESSION SYSTEM ROUTES
+    // ═══════════════════════════════════════════════════════════════════════
+    
+    // ADMIN: Article Settings Management
+    Route::prefix('article-settings')->group(function () {
+        Route::get('/', [ArticleSettingsController::class, 'index'])
+            ->name('article-settings.index')
+            ->middleware(['check:article-list']);
+        
+        Route::put('/{id}', [ArticleSettingsController::class, 'update'])
+            ->name('article-settings.update')
+            ->middleware(['check:article-edit']);
+        
+        Route::post('/update-order', [ArticleSettingsController::class, 'updateOrder'])
+            ->name('article-settings.update-order')
+            ->middleware(['check:article-edit']);
+        
+        Route::post('/bulk-typing-mode', [ArticleSettingsController::class, 'bulkUpdateTypingMode'])
+            ->name('article-settings.bulk-typing-mode')
+            ->middleware(['check:article-edit']);
+        
+        Route::post('/setup-chain', [ArticleSettingsController::class, 'setupSequentialChain'])
+            ->name('article-settings.setup-chain')
+            ->middleware(['check:article-edit']);
+        
+        Route::post('/reset', [ArticleSettingsController::class, 'resetToDefault'])
+            ->name('article-settings.reset')
+            ->middleware(['check:article-edit']);
+        
+        Route::get('/preview-chain', [ArticleSettingsController::class, 'previewChain'])
+            ->name('article-settings.preview-chain');
+    });
+    
+    // USER: Article Progression (Learning)
+    Route::prefix('learn')->group(function () {
+        Route::get('/articles', [ArticleProgressionController::class, 'index'])
+            ->name('learn.articles.index');
+        
+        Route::get('/articles/{id}', [ArticleProgressionController::class, 'show'])
+            ->name('learn.articles.show');
+        
+        Route::get('/articles/{id}/check', [ArticleProgressionController::class, 'checkAvailability'])
+            ->name('learn.articles.check');
+        
+        Route::post('/articles/{id}/complete', [ArticleProgressionController::class, 'recordCompletion'])
+            ->name('learn.articles.complete');
+        
+        Route::get('/progress', [ArticleProgressionController::class, 'getProgress'])
+            ->name('learn.progress');
+    });
+    
+    // ═══════════════════════════════════════════════════════════════════════
 });
 
 require __DIR__ . '/auth.php';

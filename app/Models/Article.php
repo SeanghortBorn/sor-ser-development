@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\File;
 use App\Models\Audio;
+use App\Models\ArticleSetting;
 
 class Article extends Model
 {
@@ -14,6 +15,21 @@ class Article extends Model
         'file_id',
         'audios_id',
     ];
+
+    public function setting()
+    {
+        return $this->hasOne(ArticleSetting::class);
+    }
+
+    public function getTypingModeAttribute()
+    {
+        return $this->setting?->typing_mode ?? 'nlp_only';
+    }
+
+    public function isFullFeatureMode()
+    {
+        return $this->setting?->typing_mode === 'nlp_la';
+    }
 
     /**
      * Get the file associated with the article.
