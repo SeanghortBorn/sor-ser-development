@@ -17,7 +17,6 @@ import {
     UserCheck,
     GraduationCap,
     User,
-    BarChart3,
 } from "lucide-react";
 
 export default function UserPage({
@@ -411,25 +410,6 @@ export default function UserPage({
                                                     can["user-list"]) && (
                                                     <td className="py-3 px-4 text-center">
                                                         <div className="flex justify-center gap-2 items-center">
-                                                            {/* NEW: View Progress Button */}
-                                                            {can["user-list"] && (
-                                                                <div className="relative group">
-                                                                    <Link
-                                                                        href={route(
-                                                                            "users.progress",
-                                                                            item.id
-                                                                        )}
-                                                                        className="inline-flex items-center gap-1.5 px-2 py-2 text-sm font-medium rounded-xl bg-cyan-500 text-white hover:bg-cyan-600 transition"
-                                                                    >
-                                                                        <BarChart3 className="w-4 h-4" />
-                                                                    </Link>
-                                                                    <div className="absolute bottom-full mb-2 hidden group-hover:block bg-white text-gray-800 text-xs px-3 py-1 rounded-lg shadow-md border whitespace-nowrap z-10">
-                                                                        View
-                                                                        Progress
-                                                                    </div>
-                                                                </div>
-                                                            )}
-
                                                             {can["user-edit"] &&
                                                                 can[
                                                                     "user-create"

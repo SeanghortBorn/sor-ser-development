@@ -7,6 +7,19 @@ import { ClipboardPlus, Search } from "lucide-react";
 import Modal from "@/Components/Modal";
 
 export default function ArticlesPage({ articles, search = "" }) {
+    const canViewArticle = (auth) => {
+        // Check if user has admin or instructor role
+        const hasRequiredRole = auth.user.roles?.some(role => 
+            ['Admin', 'Instructor'].includes(role.name)
+        );
+        
+        // Or check specific permission
+        const hasPermission = auth.user.permissions?.some(perm => 
+            perm.name === 'articles-view'
+        );
+        
+        return hasRequiredRole || hasPermission;
+    };
     const { auth } = usePage().props;
     const can = auth?.can ?? {};
     const datasList = articles?.data || [];
@@ -291,6 +304,15 @@ export default function ArticlesPage({ articles, search = "" }) {
                                                                     Delete
                                                                 </button>
                                                             )}
+
+                                                        {canViewArticle(auth) && (
+                                                            <button
+                                                                onClick={() => window.location.href = route('articles.show', article.id)}
+                                                                className="text-blue-600 hover:text-blue-800"
+                                                            >
+                                                                View Article
+                                                            </button>
+                                                        )}
                                                     </div>
                                                 </td>
                                             </tr>

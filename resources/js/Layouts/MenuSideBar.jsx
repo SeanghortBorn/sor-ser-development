@@ -1,6 +1,6 @@
 import { Link, usePage } from "@inertiajs/react";
 import { useEffect, useState } from "react";
-import { Settings } from 'lucide-react';
+import { Settings, Shield } from 'lucide-react';
 
 function MenuGroup({ label, icon, children, active }) {
     const [open, setOpen] = useState(active);
@@ -313,6 +313,22 @@ export default function MenuSideBar({ lang, setLang }) {
                 <path d="m19 9-5 5-4-4-3 3" />
             </svg>
         ),
+        permissions: (
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+            >
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                <path d="m9 12 2 2 4-4"/>
+            </svg>
+        ),
     };
 
     return (
@@ -378,17 +394,20 @@ export default function MenuSideBar({ lang, setLang }) {
                     </MenuGroup>
 
                     {/* ═══════════════════════════════════════════════════════
-                     * Articles (with Article Settings - FIX16)
+                     * FIX18: User Progress - All authenticated users can view their own
                      * ═══════════════════════════════════════════════════════ */}
-
-                     {/* Article Settings - Admin Only */}
-                    {can["article-create"] && routeExists('article-settings.index') && (
+                    {routeExists('user-progress.index') && (
                         <MenuItem
-                            href={safeRoute("article-settings.index")}
-                            label={"Article Settings"}
-                            active={routeName === "article-settings.index" || isActive("article-settings")}
+                            href={safeRoute("user-progress.index")}
+                            icon={icons.progress}
+                            label={"My Progress"}
+                            active={isActive("user-progress")}
                         />
                     )}
+
+                    {/* ═══════════════════════════════════════════════════════
+                     * Articles (with Article Settings - FIX16)
+                     * ═══════════════════════════════════════════════════════ */}
                     {(can["article-list"] || can["article-create"]) && (
                         <MenuGroup
                             label={"Articles"}
@@ -409,9 +428,9 @@ export default function MenuSideBar({ lang, setLang }) {
                             )}
                             {/* ═══════════════════════════════════════════
                              * FIX16: Article Settings (Progression)
-                             * Only show if route exists
+                             * Only show if route exists and user has permission
                              * ═══════════════════════════════════════════ */}
-                            {routeExists('article-settings.index') && (
+                            {can["article-create"] && routeExists('article-settings.index') && (
                                 <MenuItem
                                     href={safeRoute("article-settings.index")}
                                     label={"Article Settings"}

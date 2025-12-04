@@ -1,0 +1,1 @@
+import{c}from"./createLucideIcon-gPHM0LOm.js";const o=[["path",{d:"M5 21v-6",key:"1hz6c0"}],["path",{d:"M12 21V3",key:"1lcnhd"}],["path",{d:"M19 21V9",key:"unv183"}]],t=c("chart-no-axes-column",o);const e=[["path",{d:"M12 6v6l4 2",key:"mmk7yg"}],["circle",{cx:"12",cy:"12",r:"10",key:"1mglay"}]],n=c("clock",e);export{n as C,t as a};

@@ -15,6 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // Register route middleware
         $middleware->alias([
             'check' => \App\Http\Middleware\CheckPermission::class,
+
             'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
             'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
@@ -22,6 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'ensureFrontendRequestsAreStateful' => \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
             'jwt' => \App\Http\Middleware\jwtMiddleware::class,
             'check.user.role' => \App\Http\Middleware\CheckUserRole::class,
+            'page_permission' => \App\Http\Middleware\CheckPagePermission::class,
         ]);
         
         $middleware->web(append: [

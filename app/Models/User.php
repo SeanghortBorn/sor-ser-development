@@ -180,4 +180,12 @@ class User extends Authenticatable implements MustVerifyEmail, JWTSubject
     {
         return $this->hasMany(UserHomophoneAccuracy::class);
     }
+
+    /**
+     * Get the user's article completions
+     */
+    public function articleCompletions()
+    {
+        return $this->hasMany(UserArticleCompletion::class);
+    }
 }

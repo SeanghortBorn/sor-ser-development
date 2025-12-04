@@ -1,0 +1,22 @@
+[90m= [39m[34;4mApp\Models\User[39;24m {#6292
+    [34mid[39m: [35m4[39m,
+    [34mname[39m: "[32mUser 03[39m",
+    [34memail[39m: "[32muser03@email.com[39m",
+    [34memail_verified_at[39m: [36mnull[39m,
+    [34mis_admin[39m: [35m0[39m,
+    #[33mpassword[39m: "[32m$2y$12$mkOFbHhweU8uJ8NYFglWLu1K6MopNeNYsljL7VpnN1.PjUwWmwcHu[39m",
+    [34mblocked[39m: [35m0[39m,
+    #[33mtwo_factor_secret[39m: [36mnull[39m,
+    #[33mtwo_factor_recovery_codes[39m: [36mnull[39m,
+    [34mtwo_factor_confirmed_at[39m: [36mnull[39m,
+    [34mtoken[39m: [36mnull[39m,
+    [34mage[39m: [36mnull[39m,
+    [34meducation_level[39m: [36mnull[39m,
+    [34mkhmer_experience[39m: [36mnull[39m,
+    #[33mremember_token[39m: [36mnull[39m,
+    [34mcreated_at[39m: "[32m2025-12-03 10:50:28[39m",
+    [34mupdated_at[39m: "[32m2025-12-03 10:50:28[39m",
+    [34mgoogle_id[39m: [36mnull[39m,
+    +[1mprofile_photo_url[22m: "[32mhttps://ui-avatars.com/api/?name=U+0&color=7F9CF5&background=EBF4FF[39m",
+  }
+

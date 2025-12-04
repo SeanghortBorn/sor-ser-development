@@ -29,6 +29,7 @@ use Laravel\Fortify\Http\Controllers\TwoFactorAuthenticatedSessionController;
 use Laravel\Fortify\Http\Controllers\TwoFactorAuthenticationController;
 use Laravel\Fortify\Http\Controllers\TwoFactorQrCodeController;
 use Laravel\Fortify\Http\Controllers\TwoFactorSecretKeyController;
+use App\Http\Controllers\PermissionManagementController;
 
 Route::redirect('/', '/home');
 Route::get('/homophone-check', [App\Http\Controllers\HomophoneCheckController::class, 'index'])
@@ -41,12 +42,7 @@ Route::inertia('/contacts', 'Contacts/index')->name('contacts');
 // Quiz landing page for students/guests (published quizzes)
 Route::get('/quiz-practice', [QuizController::class, 'landingPage'])->name('quiz.practice');
 
-// Route::middleware(['auth','verified', 'check.user.role'])->group(function () {
-Route::middleware(['auth', 'check.user.role'])->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-});
-
-// Add after the dashboard route
+// Dashboard route (single definition)
 Route::middleware(['auth', 'check.user.role'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     
@@ -98,7 +94,9 @@ Route::middleware('auth')->group(function () {
             ->middleware('password.confirm');
     });
 
-    Route::get('/student-analytics', [StudentAnalyticsController::class, 'index'])->name('student.analytics')->middleware(['check:user-list']);
+    Route::get('/student-analytics', [StudentAnalyticsController::class, 'index'])
+        ->name('student.analytics')
+        ->middleware(['check:user-list']);
 
     Route::get('/api/articles', [ArticleController::class, 'apiList']);
     Route::get('/api/audios/{id}', [ArticleController::class, 'getAudio']);
@@ -125,34 +123,53 @@ Route::middleware('auth')->group(function () {
         Route::post('/quizzes/submit', [QuizController::class, 'submitAttempt'])->name('quizzes.submit');
         Route::get('/quizzes/result/{attempt}', [QuizController::class, 'showResult'])->name('quizzes.result');
     });
+    
     Route::get('/analytics', [QuizController::class, 'analyse'])->name('analytics');
-    // Tags
-    Route::resource('tags', TagController::class);
 
-    Route::prefix('roles')->group(function () {
-        Route::get('/', [RolesController::class, 'index'])->name('roles.index')->middleware(['check:role-list']);
-        Route::get('/create', [RolesController::class, 'create'])->name('roles.create')->middleware(['check:role-create']);
-        Route::get('/{id}', [RolesController::class, 'edit'])->name('roles.edit')->middleware(['check:role-edit']);
-        Route::post("/", [RolesController::class, 'store'])->name('roles.store');
-        Route::patch("/{id}", [RolesController::class, 'update'])->name('roles.update');
-        Route::delete("/{id}", [RolesController::class, 'destroy'])->name('roles.destroy')->middleware(['check:role-delete']);
+    // ═══════════════════════════════════════════════════════════════════════
+    // ROLES ROUTES - SINGLE CLEAN DEFINITION
+    // ═══════════════════════════════════════════════════════════════════════
+    Route::prefix('roles')->middleware(['auth'])->group(function () {
+        Route::get('/', [RolesController::class, 'index'])
+            ->name('roles.index')
+            ->middleware(['check:role-list']);
+        
+        Route::get('/create', [RolesController::class, 'create'])
+            ->name('roles.create')
+            ->middleware(['check:role-create']);
+        
+        Route::post('/', [RolesController::class, 'store'])
+            ->name('roles.store');
+        
+        Route::get('/{role}/edit', [RolesController::class, 'edit'])
+            ->name('roles.edit')
+            ->middleware(['check:role-edit']);
+        
+        Route::put('/{role}', [RolesController::class, 'update'])
+            ->name('roles.update');
+        
+        Route::patch('/{role}', [RolesController::class, 'update']);
+        
+        Route::delete('/{role}', [RolesController::class, 'destroy'])
+            ->name('roles.destroy')
+            ->middleware(['check:role-delete']);
     });
 
+    // Users
     Route::prefix('users')->group(function () {
         Route::get('/', [UserController::class, 'index'])->name('users.index')->middleware(['check:user-list']);
         Route::get('/create', [UserController::class, 'create'])->name('users.create')->middleware(['check:user-create']);
-        Route::get('/{id}/progress', [UserProgressController::class, 'show'])
-            ->name('users.progress')
-            ->middleware(['check:user-list']);
         Route::get('/{id}', [UserController::class, 'edit'])->name('users.edit')->middleware(['check:user-edit']);
         Route::post("/", [UserController::class, 'store'])->name('users.store');
         Route::patch("/{id}", [UserController::class, 'update'])->name('users.update');
         Route::delete("/{id}", [UserController::class, 'destroy'])->name('users.destroy')->middleware(['check:user-delete']);
-        Route::patch('/{id}/permissions', [UserController::class, 'updatePermissions'])->name('users.update-permissions')->middleware('check:user-edit');
-        Route::post('/users/{id}/block', [UserController::class, 'block'])->name('users.block');
-        Route::post('/users/{id}/unblock', [UserController::class, 'unblock'])->name('users.unblock');
+        Route::post('/{id}/block', [UserController::class, 'block'])->name('users.block')->middleware(['check:user-block']);
+        Route::patch('/{id}/permissions', [UserController::class, 'updatePermissions'])->name('users.update-permissions');
     });
 
+    // ═══════════════════════════════════════════════════════════════════════
+    // FIX16: USER ARTICLE DETAIL ANALYTICS
+    // ═══════════════════════════════════════════════════════════════════════
     Route::prefix('users/{userId}/articles/{articleId}')->group(function () {
         Route::get('/details', [UserArticleDetailController::class, 'show'])
             ->name('users.articles.details')
@@ -250,6 +267,33 @@ Route::middleware('auth')->group(function () {
     });
     
     // ═══════════════════════════════════════════════════════════════════════
+    // FIX18: USER PROGRESS ROUTES
+    // ═══════════════════════════════════════════════════════════════════════
+    Route::prefix('user-progress')->name('user-progress.')->group(function () {
+        Route::get('/', [UserProgressController::class, 'index'])
+            ->name('index');
+        
+        Route::get('/{user}', [UserProgressController::class, 'show'])
+            ->name('show');
+    });
+
+    // Permission Management (Admin only)
+    Route::middleware(['check:permissions-manage'])->prefix('permissions')->name('permissions.')->group(function () {
+        Route::get('/', [PermissionManagementController::class, 'index'])
+            ->name('index');
+        
+        Route::post('/grant-role', [PermissionManagementController::class, 'grantToRole'])
+            ->name('grant-role');
+        
+        Route::post('/grant-user', [PermissionManagementController::class, 'grantToUser'])
+            ->name('grant-user');
+        
+        Route::delete('/revoke-role', [PermissionManagementController::class, 'revokeFromRole'])
+            ->name('revoke-role');
+        
+        Route::delete('/revoke-user', [PermissionManagementController::class, 'revokeFromUser'])
+            ->name('revoke-user');
+    });
 });
 
 require __DIR__ . '/auth.php';

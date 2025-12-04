@@ -13,55 +13,38 @@ use App\Models\UserAudioActivity;
 use App\Models\Article;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use App\Models\UserArticleCompletion;
+use App\Services\PermissionService;
+
+
 
 class UserProgressController extends Controller
 {
     /**
      * Display comprehensive progress dashboard for a specific user
      */
-    public function show($id)
+    public function show(User $targetUser)
     {
-        // Get user with relationships
-        $user = User::with(['roles', 'permissions'])->findOrFail($id);
+        $user = auth()->user();
+        
+        // Check permissions
+        $canViewAll = $this->permissionService->canUserAccess($user, 'user-progress', 'view');
+        $canViewOwn = $this->permissionService->canViewOwn($user, 'user-progress');
+        
+        // If not admin/instructor and trying to view someone else's progress, deny
+        if (!$canViewAll && $targetUser->id !== $user->id) {
+            abort(403, "You can only view your own progress");
+        }
 
-        // Get user's profile data
-        $profileData = [
-            'id' => $user->id,
-            'name' => $user->name,
-            'email' => $user->email,
-            'roles' => $user->roles->pluck('name')->toArray(),
-            'permissions' => $user->permissions->pluck('name')->toArray(),
-            'created_at' => $user->created_at->format('Y-m-d'),
-            'status' => $user->blocked ? 'Blocked' : 'Active',
-            'total_checks' => GrammarChecker::where('user_id', $id)->count(),
-        ];
+        $completions = UserArticleCompletion::where('user_id', $targetUser->id)
+            ->with('article')
+            ->orderBy('completed_at', 'desc')
+            ->get();
 
-        // Get articles attempted by user
-        $articlesAttempted = $this->getArticlesAttempted($id);
-
-        // Get daily accuracy trends (last 30 days)
-        $accuracyTrends = $this->getDailyAccuracyTrends($id);
-
-        // Get correction patterns (accept/reject)
-        $correctionPatterns = $this->getCorrectionPatterns($id);
-
-        // Get typing activity analysis
-        $typingActivity = $this->getTypingActivity($id);
-
-        // Get audio listening behavior
-        $audioBehavior = $this->getAudioBehavior($id);
-
-        // Get overall learning metrics
-        $learningMetrics = $this->getLearningMetrics($id);
-
-        return Inertia::render('Users/Progress', [
-            'user' => $profileData,
-            'articlesAttempted' => $articlesAttempted,
-            'accuracyTrends' => $accuracyTrends,
-            'correctionPatterns' => $correctionPatterns,
-            'typingActivity' => $typingActivity,
-            'audioBehavior' => $audioBehavior,
-            'learningMetrics' => $learningMetrics,
+        return Inertia::render('UserProgress/Show', [
+            'targetUser' => $targetUser,
+            'completions' => $completions,
+            'canViewAll' => $canViewAll,
         ]);
     }
 
@@ -348,5 +331,48 @@ class UserProgressController extends Controller
             'strengths' => $strengths,
             'weaknesses' => $weaknesses,
         ];
+    }
+
+    protected PermissionService $permissionService;
+
+    public function __construct(PermissionService $permissionService)
+    {
+        $this->permissionService = $permissionService;
+    }
+
+    public function index(Request $request)
+    {
+        $user = auth()->user();
+        
+        // Check if user can view all progress or only their own
+        $canViewAll = $this->permissionService->canUserAccess($user, 'user-progress', 'view');
+        $canViewOwn = $this->permissionService->canViewOwn($user, 'user-progress');
+
+        if (!$canViewAll && !$canViewOwn) {
+            abort(403, "You don't have permission to view user progress");
+        }
+
+        if ($canViewAll) {
+            // Admin/Instructor view: show all users
+            $users = User::with(['articleCompletions.article'])
+                ->withCount('articleCompletions')
+                ->orderBy('name')
+                ->paginate(20);
+        } else {
+            // Self-view: show only current user's progress
+            $users = User::where('id', $user->id)
+                ->with(['articleCompletions.article'])
+                ->withCount('articleCompletions')
+                ->paginate(1);
+        }
+
+        return Inertia::render('UserProgress/Index', [
+            'users' => $users,
+            'canViewAll' => $canViewAll,
+            'permissions' => [
+                'canManage' => $user->hasPermissionTo('permissions-manage'),
+                'canEdit' => $this->permissionService->canUserAccess($user, 'user-progress', 'update'),
+            ]
+        ]);
     }
 }

@@ -2,27 +2,28 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\PagePermission;
+use App\Models\PermissionOverride;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
-use App\Http\Controllers\Controller;
 
 class RolesController extends Controller
 {
+    /**
+     * Display a listing of the resource.
+     */
     public function index(Request $request)
     {
-        $search = $request->input('search');
+        $search = $request->get('search', '');
+        
         $roles = Role::with('permissions')
             ->when($search, function ($query, $search) {
-                $query->where('name', 'like', "%{$search}%")
-                    ->orWhereHas('permissions', function ($q) use ($search) {
-                        $q->where('name', 'like', "%{$search}%");
-                    });
+                return $query->where('name', 'LIKE', "%{$search}%");
             })
-            ->orderBy('id', 'asc')
-            ->paginate(10)
-            ->appends(['search' => $search]);
+            ->orderBy('id', 'desc')
+            ->paginate(10);
 
         return Inertia::render('Roles/Index', [
             'roles' => $roles,
@@ -30,70 +31,186 @@ class RolesController extends Controller
         ]);
     }
 
+    /**
+     * Show the form for creating a new resource.
+     */
     public function create()
     {
-        $permissions = Permission::all();
+        $permissions = Permission::orderBy('name')->get();
+        $pages = PagePermission::orderBy('page_name')->get();
 
         return Inertia::render('Roles/CreateEdit', [
-            'permissions' => $permissions
+            'permissions' => $permissions,
+            'pages' => $pages,
         ]);
     }
 
+    /**
+     * Store a newly created resource in storage.
+     */
     public function store(Request $request)
     {
         $validated = $request->validate([
-           'name' => 'required|min:3|unique:roles,name'
+            'name' => 'required|string|max:255|unique:roles,name',
+            'permissions' => 'nullable|array',
+            'permissions.*' => 'exists:permissions,id',
+            'page_permissions' => 'nullable|array',
         ]);
 
-        $role = Role::create($validated);
+        $role = Role::create([
+            'name' => $validated['name'],
+            'guard_name' => 'web',
+        ]);
 
-        if($request->permissions) {
-
-            $permissions = Permission::whereIn("id", $request->permissions)->pluck('name');
-
+        // Sync regular permissions
+        if (!empty($validated['permissions'])) {
+            $permissions = Permission::whereIn('id', $validated['permissions'])->get();
             $role->syncPermissions($permissions);
         }
 
-        return to_route('roles.index')->with("success", "Role added successfully");
+        // Sync page permissions
+        if (!empty($validated['page_permissions'])) {
+            $this->syncPagePermissions($role, $validated['page_permissions']);
+        }
+
+        return redirect()
+            ->route('roles.index')
+            ->with('success', 'Role created successfully with permissions');
     }
 
-    public function edit($id)
-    {
-        $role = Role::with(['permissions'])->find($id);
+    /**
+     * Display the specified resource.
+     * DISABLED - Using modal view in Index page instead
+     */
+    // public function show(Role $role)
+    // {
+    //     $role->load('permissions');
+    //     
+    //     return Inertia::render('Roles/Show', [
+    //         'role' => $role,
+    //     ]);
+    // }
 
-        $permissions = Permission::all();
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(Role $role)
+    {
+        $role->load('permissions');
+        $permissions = Permission::orderBy('name')->get();
+        $pages = PagePermission::orderBy('page_name')->get();
+        
+        // Load existing page permissions for this role
+        $existingPagePerms = PermissionOverride::where('role_id', $role->id)
+            ->with('pagePermission')
+            ->get();
+        
+        $pagePermissions = [];
+        foreach ($existingPagePerms as $perm) {
+            $pageName = $perm->pagePermission->page_name;
+            if (!isset($pagePermissions[$pageName])) {
+                $pagePermissions[$pageName] = [];
+            }
+            $pagePermissions[$pageName][$perm->permission_type] = true;
+        }
+        
+        $role->page_permissions = $pagePermissions;
 
         return Inertia::render('Roles/CreateEdit', [
             'role' => $role,
-            'permissions' => $permissions
+            'permissions' => $permissions,
+            'pages' => $pages,
         ]);
     }
 
-    public function update(Request $request, $id)
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, Role $role)
     {
         $validated = $request->validate([
-            'name' => 'required|min:3|unique:roles,name,' . $id
+            'name' => 'required|string|max:255|unique:roles,name,' . $role->id,
+            'permissions' => 'nullable|array',
+            'permissions.*' => 'exists:permissions,id',
+            'page_permissions' => 'nullable|array',
         ]);
 
-        $role = Role::findById($id);
+        $role->update([
+            'name' => $validated['name'],
+        ]);
 
-        $role->name = $validated['name'];
+        // Sync regular permissions
+        if (isset($validated['permissions'])) {
+            $permissions = Permission::whereIn('id', $validated['permissions'])->get();
+            $role->syncPermissions($permissions);
+        }
 
-        $role->save();
+        // Sync page permissions
+        if (isset($validated['page_permissions'])) {
+            $this->syncPagePermissions($role, $validated['page_permissions']);
+        }
 
-        $permissions = Permission::whereIn("id", $request->permissions)->pluck('name');
-
-        $role->syncPermissions($permissions);
-
-        return to_route('roles.index')->with("success", "Role updated successfully");
+        return redirect()
+            ->route('roles.index')
+            ->with('success', 'Role updated successfully');
     }
 
-    public function destroy($id)
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(Role $role)
     {
-        $role = Role::findById($id);
+        // Prevent deletion of Admin role
+        if ($role->name === 'Admin') {
+            return redirect()
+                ->route('roles.index')
+                ->with('error', 'Cannot delete Admin role');
+        }
 
+        // Check if role has users
+        if ($role->users()->count() > 0) {
+            return redirect()
+                ->route('roles.index')
+                ->with('error', 'Cannot delete role with assigned users');
+        }
+
+        // Delete page permissions for this role
+        PermissionOverride::where('role_id', $role->id)->delete();
+        
         $role->delete();
 
-        return to_route('roles.index')->with("success", "Role Deleted successfully");
+        return redirect()
+            ->route('roles.index')
+            ->with('success', 'Role deleted successfully');
+    }
+
+    /**
+     * Sync page permissions for a role
+     */
+    protected function syncPagePermissions(Role $role, array $pagePermissions)
+    {
+        // Delete existing page permissions for this role
+        PermissionOverride::where('role_id', $role->id)->delete();
+
+        // Create new page permissions
+        foreach ($pagePermissions as $pageName => $actions) {
+            $pagePermission = PagePermission::firstOrCreate([
+                'page_name' => $pageName,
+            ], [
+                'description' => ucfirst($pageName) . ' page',
+                'requires_admin' => true,
+            ]);
+
+            foreach ($actions as $action => $enabled) {
+                if ($enabled) {
+                    PermissionOverride::create([
+                        'page_permission_id' => $pagePermission->id,
+                        'role_id' => $role->id,
+                        'permission_type' => $action,
+                        'granted_by' => auth()->id(),
+                    ]);
+                }
+            }
+        }
     }
 }

@@ -78,7 +78,14 @@ export default function RolePage({ roles, search: searchProp = "" }) {
 
         destroy(route("roles.destroy", roleToDelete.id), {
             preserveScroll: true,
-            onSuccess: () => closeModal(),
+            onSuccess: () => {
+                closeModal();
+                // Force refresh the page to show updated list
+                router.reload({ only: ['roles'] });
+            },
+            onError: (errors) => {
+                console.error('Delete error:', errors);
+            },
             onFinish: () => reset(),
         });
     };
@@ -361,7 +368,7 @@ export default function RolePage({ roles, search: searchProp = "" }) {
                                 onClick={closeViewRole}
                                 className="rounded-[10px] border-2 border-gray-300 px-8 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold"
                             >
-                                Cancel
+                                Close
                             </button>
                         </div>
                     </div>
