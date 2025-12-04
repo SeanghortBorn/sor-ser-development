@@ -58,7 +58,7 @@ class AuthenticatedSessionController extends Controller
         }
 
         // CHANGED: Redirect to homophone-check instead of dashboard
-        return redirect()->intended(route('homophone.check', absolute: false));
+        return redirect()->intended(route('homophone-check.index', absolute: false));
     }
 
     /**

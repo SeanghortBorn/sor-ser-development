@@ -32,9 +32,25 @@ use Laravel\Fortify\Http\Controllers\TwoFactorSecretKeyController;
 use App\Http\Controllers\PermissionManagementController;
 
 Route::redirect('/', '/home');
-Route::get('/homophone-check', [App\Http\Controllers\HomophoneCheckController::class, 'index'])
-    ->name('homophone.check')
-    ->middleware('auth');
+
+// Route::get('/homophone-check', [App\Http\Controllers\HomophoneCheckController::class, 'index'])
+//     ->name('homophone.check')
+//     ->middleware('auth');
+
+// Homophone Check routes
+Route::middleware(['auth'])->group(function () {
+    Route::get('/homophone-check', [HomophoneCheckController::class, 'index'])
+        ->name('homophone-check.index');
+
+    // Save completion when user finishes article
+    Route::post('/homophone-check/{article}/save-completion', [HomophoneCheckController::class, 'saveCompletion'])
+        ->name('homophone-check.save-completion');
+
+    // Get live progress while user is typing
+    Route::post('/homophone-check/{article}/live-progress', [HomophoneCheckController::class, 'getLiveProgress'])
+        ->name('homophone-check.live-progress');
+});
+
 Route::inertia('/home', 'Homes/index')->name('home');
 Route::inertia('/subscribe', 'Subscribes/index')->name('subscribe');
 Route::inertia('/contacts', 'Contacts/index')->name('contacts');

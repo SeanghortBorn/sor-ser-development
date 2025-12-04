@@ -8,6 +8,7 @@ use App\Models\UserArticleCompletion;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 
 class ArticleSettingsController extends Controller
@@ -22,6 +23,7 @@ class ArticleSettingsController extends Controller
         if (!auth()->user()->can('article-create')) {
             abort(403, 'You do not have permission to access article settings.');
         }
+        
         // Get all articles with their settings, ordered by display_order
         $articles = Article::with(['file', 'audio'])
             ->get()
@@ -54,6 +56,9 @@ class ArticleSettingsController extends Controller
                         'is_required' => $setting->is_required,
                         'max_attempts' => $setting->max_attempts,
                         'min_completion_accuracy' => $setting->min_completion_accuracy,
+                        'min_completion_percentage' => $setting->min_completion_percentage ?? 70, // NEW
+                        'group_a_redirect' => $setting->group_a_redirect, // NEW
+                        'group_b_redirect' => $setting->group_b_redirect, // NEW
                     ],
                 ];
             })
@@ -71,29 +76,83 @@ class ArticleSettingsController extends Controller
 
     /**
      * Update settings for a single article
+     * FIXED: Now properly handles all fields including new completion threshold
      */
     public function update(Request $request, $id)
     {
-        $validated = $request->validate([
-            'display_order' => 'required|integer|min:0',
-            'prerequisite_article_id' => 'nullable|exists:articles,id',
-            'unlock_delay_days' => 'required|integer|min:0',
-            'unlock_delay_hours' => 'required|integer|min:0|max:23',
-            'availability_mode' => ['required', Rule::in(['always', 'sequential', 'time_gated'])],
-            'typing_mode' => ['required', Rule::in(['nlp_only', 'nlp_la'])],
-            'slug' => 'nullable|string|max:50',
-            'category' => 'nullable|string|max:50',
-            'description' => 'nullable|string|max:500',
-            'is_active' => 'boolean',
-            'is_required' => 'boolean',
-            'max_attempts' => 'nullable|integer|min:1',
-            'min_completion_accuracy' => 'nullable|numeric|min:0|max:100',
-        ]);
+        try {
+            // Find the setting by article_id
+            $setting = ArticleSetting::where('article_id', $id)->firstOrFail();
+            
+            // Validate the request
+            $validated = $request->validate([
+                'display_order' => 'nullable|integer|min:0',
+                'prerequisite_article_id' => 'nullable|exists:articles,id',
+                'unlock_delay_days' => 'nullable|integer|min:0',
+                'unlock_delay_hours' => 'nullable|integer|min:0|max:23',
+                'availability_mode' => ['nullable', Rule::in(['always', 'sequential', 'time_gated'])],
+                'typing_mode' => ['nullable', Rule::in(['nlp_only', 'nlp_la', 'none'])],
+                'slug' => 'nullable|string|max:50',
+                'category' => 'nullable|string|max:50',
+                'description' => 'nullable|string|max:500',
+                'is_active' => 'nullable|boolean',
+                'is_required' => 'nullable|boolean',
+                'max_attempts' => 'nullable|integer|min:1',
+                'min_completion_accuracy' => 'nullable|numeric|min:0|max:100',
+                // NEW FIELDS
+                'min_completion_percentage' => 'nullable|numeric|min:0|max:100',
+                'group_a_redirect' => 'nullable|string|max:255',
+                'group_b_redirect' => 'nullable|string|max:255',
+            ]);
 
-        $setting = ArticleSetting::where('article_id', $id)->firstOrFail();
-        $setting->update($validated);
+            // Update the setting
+            $setting->update($validated);
 
-        return back()->with('success', 'Article settings updated successfully.');
+            // Log the update
+            Log::info('Article setting updated', [
+                'setting_id' => $setting->id,
+                'article_id' => $setting->article_id,
+                'updated_by' => auth()->id(),
+                'updated_fields' => array_keys($validated),
+            ]);
+
+            // Return Inertia redirect back with success message
+            return back()->with('success', 'Article settings updated successfully');
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::warning('Article setting validation failed', [
+                'article_id' => $id,
+                'errors' => $e->errors(),
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+            
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            Log::error('Article setting not found', [
+                'article_id' => $id,
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Article settings not found',
+            ], 404);
+            
+        } catch (\Exception $e) {
+            Log::error('Failed to update article setting', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'article_id' => $id,
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update settings: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 
     /**
@@ -125,7 +184,7 @@ class ArticleSettingsController extends Controller
         $validated = $request->validate([
             'article_ids' => 'required|array',
             'article_ids.*' => 'exists:articles,id',
-            'typing_mode' => ['required', Rule::in(['nlp_only', 'nlp_la'])],
+            'typing_mode' => ['required', Rule::in(['nlp_only', 'nlp_la', 'none'])],
         ]);
 
         ArticleSetting::whereIn('article_id', $validated['article_ids'])
@@ -194,6 +253,7 @@ class ArticleSettingsController extends Controller
                         'typing_mode' => 'nlp_only',
                         'is_active' => true,
                         'is_required' => true,
+                        'min_completion_percentage' => 70,
                     ]
                 );
             }
@@ -219,6 +279,7 @@ class ArticleSettingsController extends Controller
                     'unlock_delay' => $setting->unlock_delay_text,
                     'availability_mode' => $setting->availability_mode_text,
                     'typing_mode' => $setting->typing_mode_text,
+                    'completion_threshold' => ($setting->min_completion_percentage ?? 70) . '%',
                 ];
             });
 

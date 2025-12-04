@@ -16,6 +16,8 @@ class ArticleSetting extends Model
      * - Time gating
      * - Typing modes
      * - Availability modes
+     * - Completion thresholds (NEW in FIX21)
+     * - Group-specific redirects (NEW in FIX21)
      */
     
     protected $fillable = [
@@ -34,6 +36,9 @@ class ArticleSetting extends Model
         'is_required',
         'max_attempts',
         'min_completion_accuracy',
+        'min_completion_percentage',  // NEW: Threshold for unlocking next article
+        'group_a_redirect',           // NEW: Redirect URL for Group A users
+        'group_b_redirect',           // NEW: Redirect URL for Group B users
     ];
 
     protected $casts = [
@@ -44,6 +49,7 @@ class ArticleSetting extends Model
         'is_required' => 'boolean',
         'max_attempts' => 'integer',
         'min_completion_accuracy' => 'decimal:2',
+        'min_completion_percentage' => 'decimal:2', // NEW
     ];
 
     // ═══════════════════════════════════════════════════════════════════
@@ -161,6 +167,7 @@ class ArticleSetting extends Model
         return match($this->typing_mode) {
             'nlp_only' => 'NLP Only (Basic features)',
             'nlp_la' => 'NLP + LA (Full features with analytics)',
+            'none' => 'Adaptive (based on user role)',
             default => 'Unknown',
         };
     }
@@ -187,6 +194,23 @@ class ArticleSetting extends Model
     public function isFullFeatureMode(): bool
     {
         return $this->typing_mode === 'nlp_la';
+    }
+
+    /**
+     * NEW: Get formatted completion percentage for display
+     */
+    public function getMinCompletionPercentageFormattedAttribute(): string
+    {
+        $percentage = $this->min_completion_percentage ?? 70;
+        return number_format($percentage, 0) . '%';
+    }
+
+    /**
+     * NEW: Get completion threshold as decimal (for comparisons)
+     */
+    public function getCompletionThresholdAttribute(): float
+    {
+        return (float) ($this->min_completion_percentage ?? 70.00);
     }
 
     // ═══════════════════════════════════════════════════════════════════
@@ -234,6 +258,7 @@ class ArticleSetting extends Model
                 'typing_mode' => 'nlp_only',
                 'is_active' => true,
                 'is_required' => true,
+                'min_completion_percentage' => 70.00, // Default threshold
             ]
         );
     }

@@ -28,10 +28,72 @@ class ArticleProgressionService
 
     /**
      * Check if a user can access a specific article
+     * UPDATED: Now uses min_completion_percentage from settings
      */
     public function canUserAccessArticle(int $userId, int $articleId): array
     {
-        return UserArticleCompletion::checkArticleAvailability($userId, $articleId);
+        $setting = ArticleSetting::where('article_id', $articleId)->first();
+        
+        // If no setting or article is inactive
+        if (!$setting || !$setting->is_active) {
+            return [false, 'Article not available', null];
+        }
+
+        // Always available mode
+        if ($setting->availability_mode === 'always') {
+            return [true, 'Always available', null];
+        }
+
+        // Check if user has completed prerequisite
+        if ($setting->prerequisite_article_id) {
+            $prerequisiteCompletion = UserArticleCompletion::where([
+                'user_id' => $userId,
+                'article_id' => $setting->prerequisite_article_id,
+            ])->first();
+
+            // Get the prerequisite's minimum completion percentage
+            $prerequisiteSetting = ArticleSetting::where('article_id', $setting->prerequisite_article_id)->first();
+            $minPercentage = $prerequisiteSetting->min_completion_percentage ?? 70.00;
+
+            // Check if prerequisite is completed with required accuracy
+            if (!$prerequisiteCompletion || 
+                $prerequisiteCompletion->best_accuracy < $minPercentage) {
+                
+                $prerequisiteTitle = Article::find($setting->prerequisite_article_id)->title ?? 'previous article';
+                return [
+                    false, 
+                    "Complete '{$prerequisiteTitle}' with at least {$minPercentage}% accuracy first",
+                    null
+                ];
+            }
+
+            // Sequential mode: prerequisite completed, allow access
+            if ($setting->availability_mode === 'sequential') {
+                return [true, 'Prerequisite completed', null];
+            }
+
+            // Time-gated mode: check if enough time has passed
+            if ($setting->availability_mode === 'time_gated') {
+                $delaySeconds = ($setting->unlock_delay_days * 24 * 3600) + 
+                              ($setting->unlock_delay_hours * 3600);
+                
+                $unlockTime = $prerequisiteCompletion->completed_at->addSeconds($delaySeconds);
+                
+                if (now()->lt($unlockTime)) {
+                    $remaining = now()->diff($unlockTime);
+                    $message = sprintf(
+                        'Unlocks in %d days, %d hours',
+                        $remaining->days,
+                        $remaining->h
+                    );
+                    return [false, $message, $unlockTime];
+                }
+                
+                return [true, 'Time delay met', null];
+            }
+        }
+
+        return [false, 'Unknown availability mode', null];
     }
 
     /**
@@ -389,5 +451,53 @@ class ArticleProgressionService
         }
 
         return collect($availableArticles);
+    }
+
+    /**
+     * Get ALL articles (locked and unlocked) with status for user
+     * NEW: For showing all articles in dropdown with locked ones disabled
+     * 
+     * @param int $userId
+     * @return \Illuminate\Support\Collection
+     */
+    public function getAllArticlesWithStatus($userId)
+    {
+        $allArticles = \App\Models\Article::with(['file', 'audio', 'setting'])
+            ->whereHas('setting', function ($query) {
+                $query->where('is_active', true);
+            })
+            ->get()
+            ->sortBy(function ($article) {
+                return $article->setting->display_order ?? 999;
+            })
+            ->values();
+
+        return $allArticles->map(function ($article) use ($userId) {
+            [$canAccess, $lockMessage, $unlockTime] = $this->canUserAccessArticle($userId, $article->id);
+            
+            // Get typing mode
+            $typingMode = $this->getEffectiveTypingMode($article->id, $userId);
+            
+            // Get completion status
+            $completion = UserArticleCompletion::where([
+                'user_id' => $userId,
+                'article_id' => $article->id,
+            ])->first();
+            
+            return [
+                'id' => $article->id,
+                'title' => $article->title,
+                'audios_id' => $article->audios_id,
+                'can_access' => $canAccess,
+                'is_locked' => !$canAccess,
+                'lock_message' => $lockMessage,
+                'unlock_time' => $unlockTime,
+                'typing_mode' => $typingMode,
+                'display_order' => $article->setting->display_order ?? 999,
+                'best_accuracy' => $completion->best_accuracy ?? null,
+                'attempt_count' => $completion->attempt_count ?? 0,
+                'is_completed' => $completion && $completion->status === 'completed',
+            ];
+        });
     }
 }

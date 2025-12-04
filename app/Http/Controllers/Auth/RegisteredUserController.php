@@ -50,7 +50,7 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        return redirect(route('homophone.check', absolute: false));
+        return redirect(route('homophone-check.index', absolute: false));
     }
 
     /**
