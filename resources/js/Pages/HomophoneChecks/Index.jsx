@@ -33,6 +33,21 @@ export default function Index({ articles: initialArticles = [], userRole }) {
     const [isChecking, setIsChecking] = useState(false);
     const [sessionId, setSessionId] = useState(null);
 
+    // Live progress state
+    const [liveProgress, setLiveProgress] = useState({
+        currentAccuracy: 0,
+        minRequired: 70,
+        bestAccuracy: 0,
+    });
+
+    // Calculate current accuracy from comparison result for unlock criteria
+    const getCurrentAccuracy = () => {
+        if (!comparisonResult?.stats || !comparisonResult?.article_words) return 0;
+        const correctWords = comparisonResult.stats.same || 0;
+        const totalWords = comparisonResult.article_words.length || 0;
+        return totalWords > 0 ? (correctWords / totalWords) * 100 : 0;
+    };
+
     // Modals
     const [showAccountModal, setShowAccountModal] = useState(false);
     const [showBlockModal, setShowBlockModal] = useState(false);
@@ -140,8 +155,56 @@ export default function Index({ articles: initialArticles = [], userRole }) {
     useEffect(() => {
         if (!paragraph.trim() || !selectedArticle) {
             setComparisonResult(null);
+            setLiveProgress({
+                currentAccuracy: 0,
+                minRequired: 70,
+                bestAccuracy: 0,
+            });
         }
     }, [paragraph, selectedArticle]);
+
+    // Update live progress when paragraph or article changes (based on word count)
+    useEffect(() => {
+        if (!selectedArticle) {
+            setLiveProgress({
+                currentAccuracy: 0,
+                minRequired: 70,
+                bestAccuracy: 0,
+            });
+            return;
+        }
+
+        const updateProgress = async () => {
+            // Get word counts from comparison result if available
+            let typedWordCount = 0;
+            let articleWordCount = 0;
+
+            if (comparisonResult?.user_words && comparisonResult?.article_words) {
+                // Use word counts from comparison API
+                typedWordCount = comparisonResult.user_words.length;
+                articleWordCount = comparisonResult.article_words.length;
+            } else {
+                // Fallback: calculate word counts manually
+                typedWordCount = await calculateWordCount(paragraph);
+            }
+
+            // Calculate progress percentage based on word count
+            const currentAccuracy = articleWordCount > 0
+                ? Math.min(100, (typedWordCount / articleWordCount) * 100)
+                : 0;
+
+            const minRequired = selectedArticle.min_completion_percentage || 70;
+            const bestAccuracy = selectedArticle.best_accuracy || 0;
+
+            setLiveProgress({
+                currentAccuracy,
+                minRequired,
+                bestAccuracy,
+            });
+        };
+
+        updateProgress();
+    }, [paragraph, selectedArticle, comparisonResult]);
 
     // Fetch history
     const fetchHistory = async () => {
@@ -331,6 +394,20 @@ export default function Index({ articles: initialArticles = [], userRole }) {
             setSaving(true);
             try {
                 await autoSave(docTitle, paragraph);
+
+                // Calculate accuracy from comparison result and save completion
+                if (comparisonResult?.stats && selectedArticle) {
+                    const stats = comparisonResult.stats;
+                    const totalWords = comparisonResult.article_words?.length || 0;
+                    const correctWords = stats.same || 0;
+                    const accuracyPercentage = totalWords > 0
+                        ? (correctWords / totalWords) * 100
+                        : 0;
+
+                    // Save completion with calculated accuracy
+                    await handleSaveCompletion(accuracyPercentage);
+                }
+
                 if (canAccessLibrary === true) {
                     setShowDetailsModal(true);
                     setTimeout(() => {
@@ -347,6 +424,19 @@ export default function Index({ articles: initialArticles = [], userRole }) {
                 setSaving(false);
             }
         } else {
+            // Calculate and save completion for existing checker
+            if (comparisonResult?.stats && selectedArticle) {
+                const stats = comparisonResult.stats;
+                const totalWords = comparisonResult.article_words?.length || 0;
+                const correctWords = stats.same || 0;
+                const accuracyPercentage = totalWords > 0
+                    ? (correctWords / totalWords) * 100
+                    : 0;
+
+                // Save completion with calculated accuracy
+                await handleSaveCompletion(accuracyPercentage);
+            }
+
             if (canAccessLibrary === true) {
                 setShowDetailsModal(true);
                 await currentStats.fetchAllStats(checkerId);
@@ -359,36 +449,67 @@ export default function Index({ articles: initialArticles = [], userRole }) {
 
     // Handle save completion
     const handleSaveCompletion = async (accuracyPercentage) => {
-        if (!selectedArticle?.id) return;
+        if (!selectedArticle?.id) {
+            console.warn("No article selected for completion");
+            return;
+        }
 
         try {
+            // Get CSRF token safely
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+            if (!csrfToken) {
+                console.error("CSRF token not found");
+                return;
+            }
+
+            console.log("Saving completion:", {
+                article_id: selectedArticle.id,
+                accuracy: accuracyPercentage,
+                checker_id: checkerId
+            });
+
             const response = await fetch(
                 `/homophone-check/${selectedArticle.id}/save-completion`,
                 {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
-                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]')
-                            .content,
+                        "X-CSRF-TOKEN": csrfToken,
                     },
                     body: JSON.stringify({
-                        accuracy_percentage: accuracyPercentage,
-                        total_characters: paragraph?.length || 0,
-                        correct_characters: Math.round(
-                            (accuracyPercentage / 100) * (paragraph?.length || 0)
-                        ),
-                        typed_text: paragraph || "",
+                        accuracy: accuracyPercentage,
                         time_spent: 0,
                         grammar_checker_id: checkerId,
                     }),
                 }
             );
 
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error("Server error:", errorText);
+                return;
+            }
+
             const data = await response.json();
+            console.log("Completion saved:", data);
 
             if (data.success) {
                 setCompletionData(data.completion);
                 setShowCompletionModal(true);
+
+                // Update live progress with new best accuracy
+                setLiveProgress(prev => ({
+                    ...prev,
+                    bestAccuracy: data.completion.best_accuracy || prev.bestAccuracy,
+                }));
+
+                // Reload the page to refresh articles list with updated access status
+                console.log("Reloading page in 3 seconds to show unlocked articles...");
+                setTimeout(() => {
+                    window.location.reload();
+                }, 3000); // Give user time to see the completion modal
+            } else {
+                console.error("Save completion failed:", data.message);
             }
         } catch (error) {
             console.error("Save completion error:", error);
@@ -613,6 +734,9 @@ export default function Index({ articles: initialArticles = [], userRole }) {
                             setComparisonResult={setComparisonResult}
                             articleId={selectedArticle?.id}
                             isChecking={isChecking}
+                            liveProgress={liveProgress}
+                            selectedArticle={selectedArticle}
+                            currentAccuracy={getCurrentAccuracy()}
                         />
                     </div>
                 </div>

@@ -1,79 +1,87 @@
 import React from 'react';
+import { CheckCircle2, XCircle } from 'lucide-react';
 
 export default function LiveProgressBar({
     currentAccuracy,
     minRequired,
     bestAccuracy,
-    isVisible
+    isVisible,
+    selectedArticle,
+    comparisonAccuracy = 0
 }) {
     if (!isVisible) return null;
 
     const progressPercentage = Math.min(100, (currentAccuracy / minRequired) * 100);
-    const willUnlock = currentAccuracy >= minRequired;
-    const remaining = Math.max(0, minRequired - currentAccuracy);
+    const typingMet = currentAccuracy >= minRequired;
+    const accuracyMet = comparisonAccuracy >= minRequired;
+    const allCriteriaMet = typingMet && accuracyMet;
 
     return (
-        <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-            {/* Header */}
+        <div className="bg-white border border-gray-200 rounded-lg p-3 shadow-sm">
+            {/* Compact Header with Status */}
             <div className="flex justify-between items-center mb-2">
-                <h3 className="text-sm font-semibold text-gray-700">
-                    Current Progress
-                </h3>
-                <div className="flex gap-3 text-xs">
-                    <span className="text-gray-600">
-                        Current: <span className="font-semibold text-blue-600">{currentAccuracy.toFixed(1)}%</span>
-                    </span>
-                    {bestAccuracy > 0 && (
-                        <span className="text-gray-600">
-                            Best: <span className="font-semibold text-green-600">{bestAccuracy.toFixed(1)}%</span>
-                        </span>
-                    )}
-                    <span className="text-gray-600">
-                        Required: <span className="font-semibold text-purple-600">{minRequired}%</span>
-                    </span>
+                <h3 className="text-sm font-semibold text-gray-700">Progress to Unlock</h3>
+                <div className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
+                    allCriteriaMet ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'
+                }`}>
+                    {allCriteriaMet ? '✓ Ready' : 'In Progress'}
                 </div>
             </div>
 
             {/* Progress Bar */}
-            <div className="relative w-full h-6 bg-gray-100 rounded-full overflow-hidden border border-gray-200">
-                {/* Current Progress Fill */}
+            <div className="relative w-full h-5 bg-gray-100 rounded-full overflow-hidden border border-gray-200 mb-2">
                 <div
                     className={`absolute top-0 left-0 h-full transition-all duration-300 ${
-                        willUnlock
-                            ? 'bg-gradient-to-r from-green-400 to-green-500'
-                            : 'bg-gradient-to-r from-blue-400 to-blue-500'
+                        typingMet ? 'bg-gradient-to-r from-green-400 to-green-500' : 'bg-gradient-to-r from-blue-400 to-blue-500'
                     }`}
                     style={{ width: `${progressPercentage}%` }}
                 />
-
-                {/* Required Threshold Line */}
-                <div
-                    className="absolute top-0 h-full w-0.5 bg-purple-600 z-10"
-                    style={{ left: '100%' }}
-                >
-                    <div className="absolute -top-1 -left-1 w-2 h-2 bg-purple-600 rounded-full" />
-                    <div className="absolute -bottom-1 -left-1 w-2 h-2 bg-purple-600 rounded-full" />
-                </div>
-
-                {/* Percentage Text */}
                 <div className="absolute inset-0 flex items-center justify-center">
                     <span className="text-xs font-bold text-gray-700 drop-shadow-sm">
-                        {currentAccuracy.toFixed(1)}%
+                        Typed: {currentAccuracy.toFixed(1)}%
                     </span>
                 </div>
             </div>
 
-            {/* Status Message */}
-            <div className="mt-2 text-center">
-                {willUnlock ? (
-                    <p className="text-xs font-medium text-green-600">
-                        Great! You've reached the required accuracy to unlock the next article!
-                    </p>
-                ) : (
-                    <p className="text-xs text-gray-600">
-                        {remaining.toFixed(1)}% more needed to unlock the next article
-                    </p>
-                )}
+            {/* Inline Criteria */}
+            <div className="space-y-1 text-xs">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5">
+                        {typingMet ? (
+                            <CheckCircle2 className="w-3.5 h-3.5 text-green-600" />
+                        ) : (
+                            <XCircle className="w-3.5 h-3.5 text-gray-400" />
+                        )}
+                        <span className="text-gray-700">Typing</span>
+                    </div>
+                    <span className={typingMet ? 'text-green-600 font-semibold' : 'text-gray-600'}>
+                        {currentAccuracy.toFixed(1)}% / {minRequired}%
+                    </span>
+                </div>
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5">
+                        {accuracyMet ? (
+                            <CheckCircle2 className="w-3.5 h-3.5 text-green-600" />
+                        ) : (
+                            <XCircle className="w-3.5 h-3.5 text-gray-400" />
+                        )}
+                        <span className="text-gray-700">Accuracy</span>
+                    </div>
+                    <span className={accuracyMet ? 'text-green-600 font-semibold' : 'text-gray-600'}>
+                        {comparisonAccuracy.toFixed(1)}% / {minRequired}%
+                    </span>
+                </div>
+            </div>
+
+            {/* Compact Status Message */}
+            <div className="mt-2 pt-2 border-t border-gray-100">
+                <p className="text-xs text-center text-gray-600">
+                    {allCriteriaMet ? (
+                        <span className="text-green-600 font-medium">Click "Save" to unlock next article!</span>
+                    ) : (
+                        <span>Complete {minRequired}% typing with {minRequired}% accuracy</span>
+                    )}
+                </p>
             </div>
         </div>
     );

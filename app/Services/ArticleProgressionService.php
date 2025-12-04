@@ -497,6 +497,14 @@ class ArticleProgressionService
                 'best_accuracy' => $completion->best_accuracy ?? null,
                 'attempt_count' => $completion->attempt_count ?? 0,
                 'is_completed' => $completion && $completion->status === 'completed',
+                // All unlock criteria
+                'min_completion_percentage' => $article->setting->min_completion_percentage ?? 70.00,
+                'min_completion_accuracy' => $article->setting->min_completion_accuracy ?? null,
+                'max_attempts' => $article->setting->max_attempts ?? null,
+                'unlock_delay_days' => $article->setting->unlock_delay_days ?? 0,
+                'unlock_delay_hours' => $article->setting->unlock_delay_hours ?? 0,
+                'availability_mode' => $article->setting->availability_mode ?? 'sequential',
+                'prerequisite_article_id' => $article->setting->prerequisite_article_id ?? null,
             ];
         });
     }

@@ -3,6 +3,7 @@ import { Check, Trash, Info, ArrowRight } from "lucide-react";
 import { Link, usePage } from "@inertiajs/react";
 import axios from "axios";
 import Modal from "@/Components/Modal";
+import LiveProgressBar from "@/Components/HomophoneChecks/LiveProgressBar";
 
 export default function SidebarCheckGrammar({
     text = "",
@@ -12,6 +13,9 @@ export default function SidebarCheckGrammar({
     setComparisonResult,
     articleId,
     isChecking = false,
+    liveProgress = { currentAccuracy: 0, minRequired: 70, bestAccuracy: 0 },
+    selectedArticle = null,
+    currentAccuracy = 0,
 }) {
     const [dismissedItems, setDismissedItems] = useState([]);
     const [showExplainModal, setShowExplainModal] = useState(false);
@@ -838,9 +842,28 @@ export default function SidebarCheckGrammar({
                 item.index_compared <= lastNonMissingIndex
         );
 
+        // Calculate comparison accuracy from comparison result
+        const comparisonAccuracy = comparisonResult?.stats
+            ? ((comparisonResult.stats.same || 0) / (comparisonResult.article_words?.length || 1)) * 100
+            : 0;
+
         return (
             <div className="w-96 rounded-xl border border-gray-200 bg-white h-[75vh] flex flex-col overflow-hidden shadow-sm">
                 <div className="px-6 pt-4 pb-2 border-gray-200">
+                    {/* Live Progress Bar - Compact with inline criteria */}
+                    {selectedArticle && (
+                        <div className="mb-3">
+                            <LiveProgressBar
+                                currentAccuracy={liveProgress.currentAccuracy}
+                                minRequired={liveProgress.minRequired}
+                                bestAccuracy={liveProgress.bestAccuracy}
+                                isVisible={true}
+                                selectedArticle={selectedArticle}
+                                comparisonAccuracy={comparisonAccuracy}
+                            />
+                        </div>
+                    )}
+
                     {/* Header */}
                     {isChecking ? (
                         <div className="flex justify-between items-center border border-gray-200 rounded-xl px-4 py-2 bg-white shadow-sm animate-pulse mb-3">
