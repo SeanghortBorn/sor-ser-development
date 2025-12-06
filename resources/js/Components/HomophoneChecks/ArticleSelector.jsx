@@ -36,10 +36,23 @@ export default function ArticleSelector({
                             {article.can_access ? "✅" : "🔒"}
                         </span>
                         <div className="flex-1">
-                            <div className="font-medium">{article.title}</div>
+                            <div className="flex items-center gap-2">
+                                <span className="font-medium">{article.title}</span>
+                                {article.is_completed && (
+                                    <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-green-100 text-green-800 border border-green-300">
+                                        Completed
+                                    </span>
+                                )}
+                            </div>
                             {!article.can_access && article.lock_message && (
                                 <div className="text-xs text-gray-500 mt-1">
                                     🔒 {article.lock_message}
+                                </div>
+                            )}
+                            {article.is_completed && article.best_accuracy && (
+                                <div className="text-xs text-gray-600 mt-1">
+                                    Best: {article.best_accuracy}%
+                                    {article.typing_speed && ` • ${article.typing_speed} WPM`}
                                 </div>
                             )}
                         </div>

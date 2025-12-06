@@ -57,6 +57,8 @@ class ArticleSettingsController extends Controller
                         'max_attempts' => $setting->max_attempts,
                         'min_completion_accuracy' => $setting->min_completion_accuracy,
                         'min_completion_percentage' => $setting->min_completion_percentage ?? 70, // NEW
+                        'min_typing_speed' => $setting->min_typing_speed, // NEW
+                        'min_typed_words_percentage' => $setting->min_typed_words_percentage, // NEW
                         'group_a_redirect' => $setting->group_a_redirect, // NEW
                         'group_b_redirect' => $setting->group_b_redirect, // NEW
                     ],
@@ -101,6 +103,8 @@ class ArticleSettingsController extends Controller
                 'min_completion_accuracy' => 'nullable|numeric|min:0|max:100',
                 // NEW FIELDS
                 'min_completion_percentage' => 'nullable|numeric|min:0|max:100',
+                'min_typing_speed' => 'nullable|numeric|min:0|max:999',
+                'min_typed_words_percentage' => 'nullable|numeric|min:0|max:100',
                 'group_a_redirect' => 'nullable|string|max:255',
                 'group_b_redirect' => 'nullable|string|max:255',
             ]);

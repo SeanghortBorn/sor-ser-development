@@ -67,6 +67,7 @@ class HomophoneCheckController extends Controller
         try {
             $validated = $request->validate([
                 'accuracy' => 'required|numeric|min:0|max:100',
+                'typing_speed' => 'nullable|numeric|min:0|max:999',
                 'time_spent' => 'nullable|integer|min:0',
                 'grammar_checker_id' => 'nullable|integer|exists:grammar_checkers,id',
             ]);
@@ -82,6 +83,7 @@ class HomophoneCheckController extends Controller
                 $newBestAccuracy = max($completion->best_accuracy ?? 0, $validated['accuracy']);
                 $completion->update([
                     'best_accuracy' => $newBestAccuracy,
+                    'typing_speed' => $validated['typing_speed'] ?? $completion->typing_speed,
                     'completed_at' => now(),
                     'status' => 'completed',
                     'total_time_spent' => ($completion->total_time_spent ?? 0) + ($validated['time_spent'] ?? 0),
@@ -94,6 +96,7 @@ class HomophoneCheckController extends Controller
                     'user_id' => $user->id,
                     'article_id' => $articleId,
                     'best_accuracy' => $validated['accuracy'],
+                    'typing_speed' => $validated['typing_speed'] ?? null,
                     'completed_at' => now(),
                     'status' => 'completed',
                     'attempt_count' => 1,
@@ -108,9 +111,15 @@ class HomophoneCheckController extends Controller
             // Get article setting for completion threshold and redirect
             $setting = ArticleSetting::where('article_id', $articleId)->first();
             $minPercentage = $setting->min_completion_percentage ?? 70.00;
+            $minTypingSpeed = $setting->min_typing_speed ?? null;
 
-            // Determine if user unlocked next article based on best_accuracy
+            // Determine if user unlocked next article based on best_accuracy AND typing_speed
             $unlockedNext = $completion->best_accuracy >= $minPercentage;
+
+            // Also check typing speed if it's required
+            if ($unlockedNext && $minTypingSpeed !== null) {
+                $unlockedNext = ($completion->typing_speed ?? 0) >= $minTypingSpeed;
+            }
 
             // Get next article if unlocked
             $nextArticle = null;
@@ -154,7 +163,9 @@ class HomophoneCheckController extends Controller
                         $validated['accuracy'],
                         $minPercentage,
                         $unlockedNext,
-                        $completion->best_accuracy
+                        $completion->best_accuracy,
+                        $completion->typing_speed,
+                        $minTypingSpeed
                     ),
                 ],
             ]);
@@ -267,22 +278,41 @@ class HomophoneCheckController extends Controller
     /**
      * Generate completion feedback message
      */
-    protected function getCompletionMessage($accuracy, $minRequired, $unlockedNext, $bestAccuracy = null)
+    protected function getCompletionMessage($accuracy, $minRequired, $unlockedNext, $bestAccuracy = null, $typingSpeed = null, $minTypingSpeed = null)
     {
         $accuracy = round($accuracy, 1);
         $minRequired = round($minRequired, 0);
         $bestAccuracy = $bestAccuracy ? round($bestAccuracy, 1) : $accuracy;
 
-        if ($bestAccuracy >= $minRequired) {
+        $meetsAccuracy = $bestAccuracy >= $minRequired;
+        $meetsTypingSpeed = $minTypingSpeed === null || ($typingSpeed ?? 0) >= $minTypingSpeed;
+
+        if ($meetsAccuracy && $meetsTypingSpeed) {
             if ($unlockedNext) {
-                return "Great job! Your best score is {$bestAccuracy}% and you've unlocked the next article!";
+                return "Great job! Your best score is {$bestAccuracy}%" .
+                       ($typingSpeed ? " with {$typingSpeed} WPM" : "") .
+                       " and you've unlocked the next article!";
             } else {
-                return "Excellent! Your best score is {$bestAccuracy}%. You've completed this article.";
+                return "Excellent! Your best score is {$bestAccuracy}%" .
+                       ($typingSpeed ? " with {$typingSpeed} WPM" : "") .
+                       ". You've completed this article.";
             }
         } else {
-            $needed = $minRequired - $bestAccuracy;
-            $needed = round($needed, 1);
-            return "Your best score is {$bestAccuracy}%. You need {$needed}% more to unlock the next article. Keep practicing!";
+            $messages = [];
+
+            if (!$meetsAccuracy) {
+                $needed = $minRequired - $bestAccuracy;
+                $needed = round($needed, 1);
+                $messages[] = "Accuracy: {$bestAccuracy}% (need {$needed}% more to reach {$minRequired}%)";
+            }
+
+            if (!$meetsTypingSpeed) {
+                $speedNeeded = $minTypingSpeed - ($typingSpeed ?? 0);
+                $speedNeeded = round($speedNeeded, 1);
+                $messages[] = "Typing Speed: " . ($typingSpeed ?? 0) . " WPM (need {$speedNeeded} more WPM to reach {$minTypingSpeed} WPM)";
+            }
+
+            return "Keep practicing! " . implode(". ", $messages) . ".";
         }
     }
 }

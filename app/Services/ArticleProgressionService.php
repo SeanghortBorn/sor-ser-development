@@ -51,18 +51,32 @@ class ArticleProgressionService
                 'article_id' => $setting->prerequisite_article_id,
             ])->first();
 
-            // Get the prerequisite's minimum completion percentage
+            // Get the prerequisite's minimum completion percentage and typing speed
             $prerequisiteSetting = ArticleSetting::where('article_id', $setting->prerequisite_article_id)->first();
             $minPercentage = $prerequisiteSetting->min_completion_percentage ?? 70.00;
+            $minTypingSpeed = $prerequisiteSetting->min_typing_speed ?? null;
 
             // Check if prerequisite is completed with required accuracy
-            if (!$prerequisiteCompletion || 
+            if (!$prerequisiteCompletion ||
                 $prerequisiteCompletion->best_accuracy < $minPercentage) {
-                
+
                 $prerequisiteTitle = Article::find($setting->prerequisite_article_id)->title ?? 'previous article';
                 return [
-                    false, 
+                    false,
                     "Complete '{$prerequisiteTitle}' with at least {$minPercentage}% accuracy first",
+                    null
+                ];
+            }
+
+            // Check if typing speed requirement is met (if specified)
+            if ($minTypingSpeed !== null &&
+                ($prerequisiteCompletion->typing_speed ?? 0) < $minTypingSpeed) {
+
+                $prerequisiteTitle = Article::find($setting->prerequisite_article_id)->title ?? 'previous article';
+                $currentSpeed = $prerequisiteCompletion->typing_speed ?? 0;
+                return [
+                    false,
+                    "Complete '{$prerequisiteTitle}' with at least {$minTypingSpeed} WPM (current: {$currentSpeed} WPM)",
                     null
                 ];
             }
@@ -147,25 +161,27 @@ class ArticleProgressionService
      * Record that a user completed an article
      */
     public function recordArticleCompletion(
-        int $userId, 
-        int $articleId, 
+        int $userId,
+        int $articleId,
         float $accuracy,
         ?int $grammarCheckerId = null,
-        ?int $timeSpent = null
+        ?int $timeSpent = null,
+        ?float $typingSpeed = null
     ): UserArticleCompletion {
         $completion = UserArticleCompletion::getOrCreateForUserArticle($userId, $articleId);
-        
+
         // Update time spent
         if ($timeSpent !== null) {
             $completion->total_time_spent += $timeSpent;
         }
-        
-        $completion->markCompleted($accuracy, $grammarCheckerId);
+
+        $completion->markCompleted($accuracy, $typingSpeed, $grammarCheckerId);
 
         Log::info('Article completed', [
             'user_id' => $userId,
             'article_id' => $articleId,
             'accuracy' => $accuracy,
+            'typing_speed' => $typingSpeed,
             'status' => $completion->status,
             'next_unlock_at' => $completion->next_unlock_at,
         ]);
@@ -495,10 +511,12 @@ class ArticleProgressionService
                 'typing_mode' => $typingMode,
                 'display_order' => $article->setting->display_order ?? 999,
                 'best_accuracy' => $completion->best_accuracy ?? null,
+                'typing_speed' => $completion->typing_speed ?? null,
                 'attempt_count' => $completion->attempt_count ?? 0,
-                'is_completed' => $completion && $completion->status === 'completed',
+                'is_completed' => $completion ? $completion->isCompleted() : false,
                 // All unlock criteria
                 'min_completion_percentage' => $article->setting->min_completion_percentage ?? 70.00,
+                'min_typing_speed' => $article->setting->min_typing_speed ?? null,
                 'min_completion_accuracy' => $article->setting->min_completion_accuracy ?? null,
                 'max_attempts' => $article->setting->max_attempts ?? null,
                 'unlock_delay_days' => $article->setting->unlock_delay_days ?? 0,

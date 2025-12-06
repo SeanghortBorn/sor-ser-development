@@ -37,6 +37,8 @@ class ArticleSetting extends Model
         'max_attempts',
         'min_completion_accuracy',
         'min_completion_percentage',  // NEW: Threshold for unlocking next article
+        'min_typing_speed',           // NEW: Minimum typing speed (WPM) to unlock next
+        'min_typed_words_percentage', // NEW: Minimum % of words that must be typed
         'group_a_redirect',           // NEW: Redirect URL for Group A users
         'group_b_redirect',           // NEW: Redirect URL for Group B users
     ];
@@ -50,6 +52,8 @@ class ArticleSetting extends Model
         'max_attempts' => 'integer',
         'min_completion_accuracy' => 'decimal:2',
         'min_completion_percentage' => 'decimal:2', // NEW
+        'min_typing_speed' => 'decimal:2', // NEW
+        'min_typed_words_percentage' => 'decimal:2', // NEW
     ];
 
     // ═══════════════════════════════════════════════════════════════════
@@ -211,6 +215,23 @@ class ArticleSetting extends Model
     public function getCompletionThresholdAttribute(): float
     {
         return (float) ($this->min_completion_percentage ?? 70.00);
+    }
+
+    /**
+     * NEW: Get formatted typing speed for display
+     */
+    public function getMinTypingSpeedFormattedAttribute(): string
+    {
+        $speed = $this->min_typing_speed ?? 0;
+        return $speed > 0 ? number_format($speed, 0) . ' WPM' : 'No minimum';
+    }
+
+    /**
+     * NEW: Get typing speed threshold as decimal (for comparisons)
+     */
+    public function getTypingSpeedThresholdAttribute(): float
+    {
+        return (float) ($this->min_typing_speed ?? 0.00);
     }
 
     // ═══════════════════════════════════════════════════════════════════

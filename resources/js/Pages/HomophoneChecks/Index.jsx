@@ -40,6 +40,10 @@ export default function Index({ articles: initialArticles = [], userRole }) {
         bestAccuracy: 0,
     });
 
+    // Typing speed tracking
+    const [typingStartTime, setTypingStartTime] = useState(null);
+    const [totalTypingTime, setTotalTypingTime] = useState(0);
+
     // Calculate current accuracy from comparison result for unlock criteria
     const getCurrentAccuracy = () => {
         if (!comparisonResult?.stats || !comparisonResult?.article_words) return 0;
@@ -142,6 +146,12 @@ export default function Index({ articles: initialArticles = [], userRole }) {
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, [dropdownOpen]);
+
+    // Reset typing timer when article changes
+    useEffect(() => {
+        setTypingStartTime(null);
+        setTotalTypingTime(0);
+    }, [selectedArticle?.id]);
 
     // Format time utility
     const formatTime = (seconds) => {
@@ -323,6 +333,12 @@ export default function Index({ articles: initialArticles = [], userRole }) {
     // Typing tracker
     const handleTypingTrack = (e) => {
         const newValue = e.target.value;
+
+        // Start typing timer on first keystroke
+        if (!typingStartTime && newValue.length > 0) {
+            setTypingStartTime(Date.now());
+        }
+
         if (!userId || !checkerId) return;
 
         const prevValue = lastTypedValueRef.current;
@@ -462,9 +478,19 @@ export default function Index({ articles: initialArticles = [], userRole }) {
                 return;
             }
 
+            // Calculate typing speed (WPM)
+            let typingSpeed = null;
+            if (typingStartTime && paragraph.trim()) {
+                const elapsedTimeMs = Date.now() - typingStartTime;
+                const elapsedTimeMinutes = elapsedTimeMs / (1000 * 60);
+                const wordCount = paragraph.trim().split(/\s+/).length;
+                typingSpeed = elapsedTimeMinutes > 0 ? Math.round(wordCount / elapsedTimeMinutes) : 0;
+            }
+
             console.log("Saving completion:", {
                 article_id: selectedArticle.id,
                 accuracy: accuracyPercentage,
+                typing_speed: typingSpeed,
                 checker_id: checkerId
             });
 
@@ -478,7 +504,8 @@ export default function Index({ articles: initialArticles = [], userRole }) {
                     },
                     body: JSON.stringify({
                         accuracy: accuracyPercentage,
-                        time_spent: 0,
+                        typing_speed: typingSpeed,
+                        time_spent: typingStartTime ? Math.round((Date.now() - typingStartTime) / 1000) : 0,
                         grammar_checker_id: checkerId,
                     }),
                 }
@@ -665,11 +692,26 @@ export default function Index({ articles: initialArticles = [], userRole }) {
                                                         onClick={() => article.can_access && handleSelectArticle(article)}
                                                         title={!article.can_access ? article.lock_message : ""}
                                                     >
-                                                        <div className="flex items-center gap-2">
-                                                            {!article.can_access && <span className="text-sm">🔒</span>}
-                                                            <span className="font-mono text-gray-500">{idx + 1}</span>
-                                                            {". "}
-                                                            {article.title}
+                                                        <div className="flex flex-col gap-1">
+                                                            <div className="flex items-center gap-2">
+                                                                {!article.can_access && <span className="text-sm">🔒</span>}
+                                                                <span className="font-mono text-gray-500">{idx + 1}</span>
+                                                                {". "}
+                                                                <span>{article.title}</span>
+                                                            </div>
+                                                            {article.is_completed && (
+                                                                <div className="ml-8 flex items-center gap-2">
+                                                                    <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-green-100 text-green-800 border border-green-300">
+                                                                        Completed
+                                                                    </span>
+                                                                    {article.best_accuracy && (
+                                                                        <span className="text-xs text-gray-600">
+                                                                            Best: {article.best_accuracy}%
+                                                                            {article.typing_speed && ` • ${article.typing_speed} WPM`}
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                            )}
                                                         </div>
                                                     </button>
                                                 ))}

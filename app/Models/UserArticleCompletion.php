@@ -19,6 +19,7 @@ class UserArticleCompletion extends Model
         'article_id',
         'completed_at',
         'best_accuracy',
+        'typing_speed',
         'attempt_count',
         'grammar_checker_id',
         'next_unlock_at',
@@ -30,6 +31,7 @@ class UserArticleCompletion extends Model
         'completed_at' => 'datetime',
         'next_unlock_at' => 'datetime',
         'best_accuracy' => 'decimal:2',
+        'typing_speed' => 'decimal:2',
         'attempt_count' => 'integer',
         'total_time_spent' => 'integer',
     ];
@@ -108,13 +110,18 @@ class UserArticleCompletion extends Model
     /**
      * Mark article as completed and calculate next unlock time
      */
-    public function markCompleted(float $accuracy, ?int $grammarCheckerId = null): void
+    public function markCompleted(float $accuracy, ?float $typingSpeed = null, ?int $grammarCheckerId = null): void
     {
         $articleSetting = ArticleSetting::where('article_id', $this->article_id)->first();
-        
+
         // Update best accuracy if this attempt is better
         if ($accuracy > ($this->best_accuracy ?? 0)) {
             $this->best_accuracy = $accuracy;
+        }
+
+        // Update typing speed
+        if ($typingSpeed !== null) {
+            $this->typing_speed = $typingSpeed;
         }
 
         $this->completed_at = Carbon::now();
@@ -123,8 +130,8 @@ class UserArticleCompletion extends Model
 
         // Determine status based on minimum accuracy requirement
         if ($articleSetting && $articleSetting->min_completion_accuracy !== null) {
-            $this->status = $accuracy >= $articleSetting->min_completion_accuracy 
-                ? 'passed' 
+            $this->status = $accuracy >= $articleSetting->min_completion_accuracy
+                ? 'passed'
                 : 'failed';
         } else {
             // No minimum accuracy required, just completing counts as passed
