@@ -947,12 +947,12 @@ export default function SidebarCheckGrammar({
                                             found
                                         </span>
                                     </span>
-                                    <button
+                                    {/* <button
                                         className="border border-green-500 text-green-600 px-3 py-1 rounded-full text-xs font-medium hover:bg-green-50 transition"
                                         onClick={handleAcceptAll}
                                     >
                                         Accept all
-                                    </button>
+                                    </button> */}
                                 </div>
                             )}
 
