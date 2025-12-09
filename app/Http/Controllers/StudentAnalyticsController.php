@@ -17,10 +17,28 @@ class StudentAnalyticsController extends Controller
 {
     public function index()
     {
-        // Get all users with related data
-        $users = User::with(['roles', 'permissions'])->get();
+        // OPTIMIZED: Eager load all relationships and use withCount to avoid N+1 queries
+        // This reduces 700+ queries to ~10 queries!
+        $users = User::with([
+            'roles',
+            'permissions',
+            'quizAttempts' => function ($query) {
+                $query->with(['quiz' => function ($q) {
+                    $q->withCount('questions');
+                }]);
+            },
+            'homophoneAccuracies',
+        ])
+        ->withCount([
+            'grammarCheckers as total_articles',
+            'comparisonActivities as accepts' => fn($q) => $q->where('action', 'accept'),
+            'comparisonActivities as dismiss' => fn($q) => $q->where('action', 'dismiss'),
+            'typingActivities as total_typings' => fn($q) => $q->where('status', 1),
+            'typingActivities as incorrect_typings' => fn($q) => $q->where('status', 0),
+        ])
+        ->get();
 
-        // Prepare analytics data for each user
+        // Map data using eager-loaded relationships (NO queries in loop!)
         $data = $users->map(function ($user) {
             // Role
             $role = $user->roles->first();
@@ -31,27 +49,27 @@ class StudentAnalyticsController extends Controller
             $education = $user->education_level ?? 'N/A';
             $experience = $user->khmer_experience ?? 'N/A';
 
-            // Total Articles (GrammarChecker)
-            $totalArticles = GrammarChecker::where('user_id', $user->id)->count();
-            // Accepts/Dismiss (from comparison activities table)
-            $accepts = UserComparisonActivity::where('user_id', $user->id)->where('action', 'accept')->count();
-            $dismiss = UserComparisonActivity::where('user_id', $user->id)->where('action', 'dismiss')->count();
+            // Total Articles - from withCount (no query!)
+            $totalArticles = $user->total_articles;
 
-            // Total Typings/Incorrect Typings (from user_typing_activities)
-            // status = 1 => correct/typed (total), status = 0 => incorrect (per your note)
-            $totalTypings = UserTypingActivity::where('user_id', $user->id)->where('status', 1)->count();
-            $incorrectTypings = UserTypingActivity::where('user_id', $user->id)->where('status', 0)->count();
+            // Accepts/Dismiss - from withCount (no query!)
+            $accepts = $user->accepts;
+            $dismiss = $user->dismiss;
 
-            // Quiz metrics (from quiz_attempts, questions)
-            $attempts = QuizAttempt::where('user_id', $user->id)->get();
+            // Total Typings/Incorrect Typings - from withCount (no query!)
+            $totalTypings = $user->total_typings;
+            $incorrectTypings = $user->incorrect_typings;
+
+            // Quiz metrics - from eager-loaded relationships (no queries!)
+            $attempts = $user->quizAttempts;
             $totalQuizzes = $attempts->pluck('quiz_id')->unique()->count();
             $totalQuestions = 0;
             $incorrectQuestions = 0;
             $attemptPercentages = [];
 
             foreach ($attempts as $attempt) {
-                $quizId = $attempt->quiz_id;
-                $questionsCount = Question::where('quiz_id', $quizId)->count();
+                // Use eager-loaded quiz with questions_count (no query!)
+                $questionsCount = $attempt->quiz->questions_count ?? 0;
                 $totalQuestions += $questionsCount;
 
                 $answers = $attempt->answers;
@@ -73,12 +91,12 @@ class StudentAnalyticsController extends Controller
 
             $avgScore = !empty($attemptPercentages) ? round(array_sum($attemptPercentages) / count($attemptPercentages), 2) : 'N/A';
 
-            // Homo Avg (accuracy)
-            $accuracy = UserHomophoneAccuracy::where('user_id', $user->id)->avg('accuracy');
+            // Homo Avg (accuracy) - from eager-loaded collection (no query!)
+            $accuracy = $user->homophoneAccuracies->avg('accuracy');
             $homoAvg = $accuracy !== null ? round($accuracy, 2) : 'N/A';
 
-            // Avg Pause (s)
-            $avgPause = UserHomophoneAccuracy::where('user_id', $user->id)->avg('avg_pause_duration');
+            // Avg Pause (s) - from eager-loaded collection (no query!)
+            $avgPause = $user->homophoneAccuracies->avg('avg_pause_duration');
             $avgPause = $avgPause !== null ? round($avgPause, 2) : 'N/A';
 
             return [

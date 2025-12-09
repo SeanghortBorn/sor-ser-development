@@ -1,0 +1,78 @@
+# This workflow runs when you push to the production branch. It determines bump type from commit message tags ([major], [minor], [patch]) and performs the release steps including README update, version.json update, changelog generation, tag creation and GitHub Release creation.
+# Notes:
+
+# The bump_semver.js script will read package.json to determine current semver, bump accordingly (major/minor/patch) and write the updated package.json and version.json.
+
+# update_readme.sh will update the <!-- VERSION: ... --> placeholder and the visible Current version: line.
+
+# generate_changelog.js will populate or update CHANGELOG.md with commits since the last tag.
+
+name: Production Release
+runs-on: ubuntu-latest
+
+
+steps:
+- name: Checkout
+uses: actions/checkout@v4
+with:
+fetch-depth: 0
+
+
+- name: Setup Node
+uses: actions/setup-node@v4
+with:
+node-version: 20
+
+
+- name: Determine bump type from commit message
+id: bump
+run: |
+COMMIT_MSG=$(git log -1 --pretty=%B)
+echo "commit message: $COMMIT_MSG"
+if echo "$COMMIT_MSG" | grep -qi "\[major\]"; then
+echo "bump=major" >> $GITHUB_OUTPUT
+elif echo "$COMMIT_MSG" | grep -qi "\[minor\]"; then
+echo "bump=minor" >> $GITHUB_OUTPUT
+else
+echo "bump=patch" >> $GITHUB_OUTPUT
+fi
+
+
+- name: Install node (no packages to install)
+run: node -v && npm -v
+
+
+- name: Bump semver and prepare release files
+env:
+BUMP_TYPE: ${{ steps.bump.outputs.bump }}
+GITHUB_REF: ${{ github.ref }}
+run: |
+node .github/scripts/bump_semver.js production
+
+
+- name: Update README and version.json
+run: |
+chmod +x .github/scripts/update_readme.sh
+./.github/scripts/update_readme.sh production
+
+
+- name: Generate changelog (commits since last tag)
+run: node .github/scripts/generate_changelog.js
+
+
+- name: Commit version files back to repo
+run: |
+git config user.name "github-actions[bot]"
+git config user.email "github-actions[bot]@users.noreply.github.com"
+git add version.json README.md CHANGELOG.md package.json
+git commit -m "chore(release): production release [skip ci]" || echo "no changes to commit"
+git push origin HEAD:production || echo "push failed"
+
+
+- name: Create tag and release
+uses: ncipollo/release-action@v1
+with:
+tag: "v$(jq -r .version package.json)"
+name: "Release v$(jq -r .version package.json)"
+body_path: CHANGELOG.md
+draft: false

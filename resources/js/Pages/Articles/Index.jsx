@@ -461,7 +461,6 @@ export default function ArticlesPage({ articles, search = "" }) {
                                                         viewTarget.audio,
                                                         "audios"
                                                     );
-                                                    console.log("Audio URL:", audioUrl); // Debug log
                                                     return (
                                                         <audio
                                                             key={audioUrl}

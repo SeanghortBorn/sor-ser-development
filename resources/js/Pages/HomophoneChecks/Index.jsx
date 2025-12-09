@@ -487,13 +487,6 @@ export default function Index({ articles: initialArticles = [], userRole }) {
                 typingSpeed = elapsedTimeMinutes > 0 ? Math.round(wordCount / elapsedTimeMinutes) : 0;
             }
 
-            console.log("Saving completion:", {
-                article_id: selectedArticle.id,
-                accuracy: accuracyPercentage,
-                typing_speed: typingSpeed,
-                checker_id: checkerId
-            });
-
             const response = await fetch(
                 `/homophone-check/${selectedArticle.id}/save-completion`,
                 {
@@ -518,7 +511,6 @@ export default function Index({ articles: initialArticles = [], userRole }) {
             }
 
             const data = await response.json();
-            console.log("Completion saved:", data);
 
             if (data.success) {
                 setCompletionData(data.completion);
@@ -531,7 +523,6 @@ export default function Index({ articles: initialArticles = [], userRole }) {
                 }));
 
                 // Reload the page to refresh articles list with updated access status
-                console.log("Reloading page in 3 seconds to show unlocked articles...");
                 setTimeout(() => {
                     window.location.reload();
                 }, 3000); // Give user time to see the completion modal

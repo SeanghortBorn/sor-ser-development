@@ -68,13 +68,13 @@ class CategoryController extends Controller
      */
     public function update(Request $request, Category $model, $id)
     {
-        $request->validate([
+        $validated = $request->validate([
             'name' => 'required|max:255|min:2',
             'view_order' => 'required',
         ]);
-        
+
         $rsDatasModel = Category::find($id);
-        $rsDatasModel->update($request->all());
+        $rsDatasModel->update($validated);
 
         return redirect()->route('categories.index');
     }

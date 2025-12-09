@@ -127,10 +127,8 @@ export default function TagsSection({ onTagUpdate, onTagClick, allTags, fetchAll
         setSelectedTagId(tag.id === selectedTagId ? null : tag.id);
         if (onTagClick) {
             onTagClick(tag);
-        } else {
-            // Example: filterGrammarByTag(tag.id);
-            console.log("Grammar check/filter for tag:", tag.id);
         }
+        // TODO: Implement filterGrammarByTag functionality
     };
 
     return (

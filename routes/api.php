@@ -28,11 +28,6 @@ Route::group([ 'middleware' => 'api', 'prefix' => 'auth' ], function ($router) {
 Route::post('/khmer-segment', [KhmerSegmentController::class, 'segment']);
 Route::post('/compare', [KhmerCompareController::class, 'compare']);
 
-// User activity tracking routes (without auth for testing)
-Route::post('/track/comparison-action', [UserActivityController::class, 'trackComparisonAction']);
-Route::post('/track/audio-activity', [UserActivityController::class, 'trackAudioActivity']);
-Route::get('/track/stats', [UserActivityController::class, 'getStats']);
-
 Route::get('/user-activity-stats', [UserActivityController::class, 'getStats']);
 Route::get('/user-activities/stats', [UserActivityController::class, 'getStats']);
 Route::post('/accuracy', [AccuracyController::class, 'store'])->name('accuracy.store');
@@ -46,8 +41,7 @@ Route::get('/quiz-attempts', function () {
     return QuizAttempt::all();
 });
 
-
-// Or with auth
+// Authenticated routes
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/track/comparison-action', [UserActivityController::class, 'trackComparisonAction']);
     Route::post('/track/audio-activity', [UserActivityController::class, 'trackAudioActivity']);

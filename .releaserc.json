@@ -1,0 +1,37 @@
+/*
+semantic-release config
+This config:
+
+detects major/minor/patch from commit messages
+
+generates proper version
+
+creates GitHub tag + Release
+
+runs our custom plugin to add date
+
+updates README
+*/
+
+{
+  "branches": ["main"],
+  "plugins": [
+    "@semantic-release/commit-analyzer",
+    "@semantic-release/release-notes-generator",
+    "@semantic-release/changelog",
+    [
+      "@semantic-release/exec",
+      {
+        "prepareCmd": "npm run add-date-version ${nextRelease.version}"
+      }
+    ],
+    [
+      "@semantic-release/exec",
+      {
+        "prepareCmd": "./.github/scripts/update_readme.sh ${nextRelease.version}"
+      }
+    ],
+    "@semantic-release/github",
+    "@semantic-release/git"
+  ]
+}

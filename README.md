@@ -1,6 +1,13 @@
-# sor-ser-development
-Sor-Ser Application Development
+# Sor-Ser Web App
 
+<!-- VERSION: 1.0.0.20250101 -->
+Current version: 1.0.0.20250101
+
+
+Short description...
+
+
+# Instruction
 # Step 01
 composer install
 

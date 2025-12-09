@@ -88,7 +88,7 @@ class GrammarCheckerController extends Controller
 
     public function update(Request $request, GrammarChecker $grammarChecker)
     {
-        $request->validate([
+        $validated = $request->validate([
             'title' => 'nullable|string|max:255', // allow empty title
             'paragraph' => 'nullable|string',
             'word_count' => 'required|integer',
@@ -97,7 +97,7 @@ class GrammarCheckerController extends Controller
             'article_id' => 'nullable|exists:articles,id', // <-- add validation
         ]);
 
-        $data = $request->all();
+        $data = $validated;
         // Only set title if not empty, otherwise let DB default
         if (array_key_exists('title', $data) && !$data['title']) {
             unset($data['title']);
