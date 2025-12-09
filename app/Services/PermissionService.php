@@ -2,36 +2,40 @@
 
 namespace App\Services;
 
-use App\Models\PagePermission;
-use App\Models\PermissionOverride;
 use App\Models\User;
 use Illuminate\Support\Facades\Cache;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
-
-class PermissionService {
+class PermissionService
+{
     /**
-     * Check if user can perform action on a page
+     * Check if user can perform action on a page.
+     *
+     * Uses Spatie Laravel Permission exclusively.
+     * Permission format: "page_name.action" (e.g., "articles.view", "users.edit")
      */
     public function canUserAccess(User $user, string $pageName, string $action = 'view'): bool
     {
-        // Admin always has access (except explicit blocks)
+        // Admin role always has access (except explicit blocks)
         if ($user->hasRole('Admin')) {
-            // Check for explicit block
+            // Check for explicit block permission
             if ($this->isExplicitlyBlocked($user, $pageName)) {
                 return false;
             }
             return true;
         }
 
+        // Cache permission check for performance
         $cacheKey = "permission:{$user->id}:{$pageName}:{$action}";
-        
+
         return Cache::remember($cacheKey, 300, function () use ($user, $pageName, $action) {
             return $this->checkPermission($user, $pageName, $action);
         });
     }
-    
+
     /**
-     * Core permission checking logic
+     * Core permission checking logic using Spatie.
      */
     protected function checkPermission(User $user, string $pageName, string $action): bool
     {
@@ -40,245 +44,297 @@ class PermissionService {
             return false;
         }
 
-        $pagePermission = PagePermission::where('page_name', $pageName)->first();
-        
-        if (!$pagePermission) {
-            // Page not registered, deny by default
-            return false;
-        }
+        // 2. Check Spatie permission: "page_name.action"
+        $permission = "{$pageName}.{$action}";
 
-        // 2. Check user-specific permissions (second highest priority)
-        $userOverride = PermissionOverride::where('page_permission_id', $pagePermission->id)
-            ->where('user_id', $user->id)
-            ->where('permission_type', $action)
-            ->first();
-            
-        if ($userOverride) {
-            return true;
-        }
-
-        // 3. Check role-based permissions
-        $userRoleIds = $user->roles->pluck('id')->toArray();
-        
-        $roleOverride = PermissionOverride::where('page_permission_id', $pagePermission->id)
-            ->whereIn('role_id', $userRoleIds)
-            ->where('permission_type', $action)
-            ->first();
-            
-        if ($roleOverride) {
-            return true;
-        }
-
-        // 4. Check Spatie permission system
-        $permission = "{$pageName}-{$action}";
-        if ($user->hasPermissionTo($permission)) {
-            return true;
-        }
-
-        // 5. Default: deny if page requires admin
-        return !$pagePermission->requires_admin;
+        return $user->hasPermissionTo($permission);
     }
-    
+
     /**
-     * Check if user is explicitly blocked from page
+     * Check if user is explicitly blocked from page.
+     *
+     * Blocks are implemented as "page_name.block" permissions.
+     * If a user has this permission, they are blocked from the page.
      */
     protected function isExplicitlyBlocked(User $user, string $pageName): bool
     {
-        $pagePermission = PagePermission::where('page_name', $pageName)->first();
-        
-        if (!$pagePermission) {
-            return false;
-        }
+        $blockPermission = "{$pageName}.block";
 
-        // Check user-specific block
-        $userBlock = PermissionOverride::where('page_permission_id', $pagePermission->id)
-            ->where('user_id', $user->id)
-            ->where('permission_type', 'block')
-            ->exists();
-            
-        if ($userBlock) {
-            return true;
-        }
-
-        // Check role-based block
-        $userRoleIds = $user->roles->pluck('id')->toArray();
-        
-        return PermissionOverride::where('page_permission_id', $pagePermission->id)
-            ->whereIn('role_id', $userRoleIds)
-            ->where('permission_type', 'block')
-            ->exists();
+        return $user->hasPermissionTo($blockPermission);
     }
-    
+
     /**
-     * Check if user can view their own data on a page
+     * Check if user can view their own data on a page.
      */
     public function canViewOwn(User $user, string $pageName): bool
     {
-        $pagePermission = PagePermission::where('page_name', $pageName)->first();
-        
-        if (!$pagePermission) {
+        $permission = "{$pageName}.own";
+
+        return $user->hasPermissionTo($permission);
+    }
+
+    /**
+     * Grant permission to a role.
+     */
+    public function grantToRole(string $pageName, int $roleId, string $action): bool
+    {
+        $role = Role::find($roleId);
+
+        if (!$role) {
             return false;
         }
 
-        // Check user-specific "own" permission
-        $userOwn = PermissionOverride::where('page_permission_id', $pagePermission->id)
-            ->where('user_id', $user->id)
-            ->where('permission_type', 'own')
-            ->exists();
-            
-        if ($userOwn) {
-            return true;
-        }
-
-        // Check role-based "own" permission
-        $userRoleIds = $user->roles->pluck('id')->toArray();
-        
-        $roleOwn = PermissionOverride::where('page_permission_id', $pagePermission->id)
-            ->whereIn('role_id', $userRoleIds)
-            ->where('permission_type', 'own')
-            ->exists();
-            
-        if ($roleOwn) {
-            return true;
-        }
-
-        // Check Spatie permission
-        return $user->hasPermissionTo("{$pageName}-own");
-    }
-    
-    /**
-     * Grant permission to a role
-     */
-    public function grantToRole(string $pageName, int $roleId, string $action, User $grantedBy): bool
-    {
-        $pagePermission = PagePermission::firstOrCreate([
-            'page_name' => $pageName,
-        ], [
-            'description' => ucfirst($pageName) . ' page',
-            'requires_admin' => true,
+        // Create permission if it doesn't exist
+        $permissionName = "{$pageName}.{$action}";
+        $permission = Permission::firstOrCreate([
+            'name' => $permissionName,
+            'guard_name' => 'web',
         ]);
 
-        PermissionOverride::updateOrCreate(
-            [
-                'page_permission_id' => $pagePermission->id,
-                'role_id' => $roleId,
-                'permission_type' => $action,
-            ],
-            [
-                'granted_by' => $grantedBy->id,
-            ]
-        );
+        // Grant permission to role
+        if (!$role->hasPermissionTo($permission)) {
+            $role->givePermissionTo($permission);
+        }
 
         // Clear cache for all users with this role
         $this->clearCacheForRole($roleId);
 
         return true;
     }
-    
+
     /**
-     * Grant permission to a user
+     * Grant permission to a user.
      */
-    public function grantToUser(string $pageName, int $userId, string $action, User $grantedBy): bool
+    public function grantToUser(string $pageName, int $userId, string $action): bool
     {
-        $pagePermission = PagePermission::firstOrCreate([
-            'page_name' => $pageName,
-        ], [
-            'description' => ucfirst($pageName) . ' page',
-            'requires_admin' => true,
-        ]);
+        $user = User::find($userId);
 
-        PermissionOverride::updateOrCreate(
-            [
-                'page_permission_id' => $pagePermission->id,
-                'user_id' => $userId,
-                'permission_type' => $action,
-            ],
-            [
-                'granted_by' => $grantedBy->id,
-            ]
-        );
-
-        // Clear cache for this user
-        Cache::tags("user:{$userId}")->flush();
-
-        return true;
-    }
-    
-    /**
-     * Revoke permission from role
-     */
-    public function revokeFromRole(string $pageName, int $roleId, string $action): bool
-    {
-        $pagePermission = PagePermission::where('page_name', $pageName)->first();
-        
-        if (!$pagePermission) {
+        if (!$user) {
             return false;
         }
 
-        PermissionOverride::where('page_permission_id', $pagePermission->id)
-            ->where('role_id', $roleId)
-            ->where('permission_type', $action)
-            ->delete();
+        // Create permission if it doesn't exist
+        $permissionName = "{$pageName}.{$action}";
+        $permission = Permission::firstOrCreate([
+            'name' => $permissionName,
+            'guard_name' => 'web',
+        ]);
+
+        // Grant permission to user
+        if (!$user->hasPermissionTo($permission)) {
+            $user->givePermissionTo($permission);
+        }
+
+        // Clear cache for this user
+        $this->clearUserCache($userId);
+
+        return true;
+    }
+
+    /**
+     * Revoke permission from role.
+     */
+    public function revokeFromRole(string $pageName, int $roleId, string $action): bool
+    {
+        $role = Role::find($roleId);
+
+        if (!$role) {
+            return false;
+        }
+
+        $permissionName = "{$pageName}.{$action}";
+        $permission = Permission::where('name', $permissionName)->first();
+
+        if ($permission && $role->hasPermissionTo($permission)) {
+            $role->revokePermissionTo($permission);
+        }
 
         $this->clearCacheForRole($roleId);
 
         return true;
     }
-    
+
     /**
-     * Revoke permission from user
+     * Revoke permission from user.
      */
     public function revokeFromUser(string $pageName, int $userId, string $action): bool
     {
-        $pagePermission = PagePermission::where('page_name', $pageName)->first();
-        
-        if (!$pagePermission) {
+        $user = User::find($userId);
+
+        if (!$user) {
             return false;
         }
 
-        PermissionOverride::where('page_permission_id', $pagePermission->id)
-            ->where('user_id', $userId)
-            ->where('permission_type', $action)
-            ->delete();
+        $permissionName = "{$pageName}.{$action}";
+        $permission = Permission::where('name', $permissionName)->first();
 
-        Cache::tags("user:{$userId}")->flush();
+        if ($permission && $user->hasPermissionTo($permission)) {
+            $user->revokePermissionTo($permission);
+        }
+
+        $this->clearUserCache($userId);
 
         return true;
     }
-    
+
     /**
-     * Clear permission cache for all users with a role
+     * Block user from accessing a page.
+     */
+    public function blockUser(string $pageName, int $userId): bool
+    {
+        return $this->grantToUser($pageName, $userId, 'block');
+    }
+
+    /**
+     * Unblock user from accessing a page.
+     */
+    public function unblockUser(string $pageName, int $userId): bool
+    {
+        return $this->revokeFromUser($pageName, $userId, 'block');
+    }
+
+    /**
+     * Block role from accessing a page.
+     */
+    public function blockRole(string $pageName, int $roleId): bool
+    {
+        return $this->grantToRole($pageName, $roleId, 'block');
+    }
+
+    /**
+     * Unblock role from accessing a page.
+     */
+    public function unblockRole(string $pageName, int $roleId): bool
+    {
+        return $this->revokeFromRole($pageName, $roleId, 'block');
+    }
+
+    /**
+     * Get all permissions for a page.
+     */
+    public function getPagePermissions(string $pageName): array
+    {
+        $pattern = "{$pageName}.%";
+        $permissions = Permission::where('name', 'like', $pattern)->get();
+
+        $rolePermissions = [];
+        $userPermissions = [];
+
+        foreach ($permissions as $permission) {
+            // Get roles with this permission
+            $roles = Role::permission($permission)->get();
+            foreach ($roles as $role) {
+                $rolePermissions[] = [
+                    'role' => $role->name,
+                    'permission' => $permission->name,
+                    'action' => str_replace("{$pageName}.", '', $permission->name),
+                ];
+            }
+
+            // Get users with this permission (direct assignment)
+            $users = User::permission($permission)->get();
+            foreach ($users as $user) {
+                $userPermissions[] = [
+                    'user_id' => $user->id,
+                    'user_name' => $user->name,
+                    'permission' => $permission->name,
+                    'action' => str_replace("{$pageName}.", '', $permission->name),
+                ];
+            }
+        }
+
+        return [
+            'page' => $pageName,
+            'permissions' => $permissions,
+            'role_permissions' => $rolePermissions,
+            'user_permissions' => $userPermissions,
+        ];
+    }
+
+    /**
+     * Get all permissions for a user.
+     */
+    public function getUserPermissions(int $userId): array
+    {
+        $user = User::find($userId);
+
+        if (!$user) {
+            return [];
+        }
+
+        return [
+            'direct_permissions' => $user->getDirectPermissions()->pluck('name')->toArray(),
+            'role_permissions' => $user->getPermissionsViaRoles()->pluck('name')->toArray(),
+            'all_permissions' => $user->getAllPermissions()->pluck('name')->toArray(),
+        ];
+    }
+
+    /**
+     * Clear permission cache for a user.
+     */
+    public function clearUserCache(int $userId): void
+    {
+        // Clear Spatie's permission cache
+        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+
+        // Clear user-specific cache keys
+        Cache::forget("permission:{$userId}:*");
+        Cache::forget("user:{$userId}");
+    }
+
+    /**
+     * Clear permission cache for all users with a role.
      */
     protected function clearCacheForRole(int $roleId): void
     {
+        // Clear Spatie's permission cache
+        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+
+        // Clear cache for all users with this role
         $users = User::whereHas('roles', function ($query) use ($roleId) {
             $query->where('roles.id', $roleId);
         })->get();
 
         foreach ($users as $user) {
-            Cache::tags("user:{$user->id}")->flush();
+            $this->clearUserCache($user->id);
         }
     }
-    
+
     /**
-     * Get all permissions for a page
+     * Sync role permissions (remove all existing, add new ones).
      */
-    public function getPagePermissions(string $pageName): array
+    public function syncRolePermissions(int $roleId, array $permissions): bool
     {
-        $pagePermission = PagePermission::where('page_name', $pageName)->first();
-        
-        if (!$pagePermission) {
-            return [];
+        $role = Role::find($roleId);
+
+        if (!$role) {
+            return false;
         }
 
-        $overrides = PermissionOverride::where('page_permission_id', $pagePermission->id)
-            ->with(['role', 'user', 'grantedBy'])
-            ->get();
+        // Sync permissions (remove all old, add new)
+        $role->syncPermissions($permissions);
 
-        return [
-            'page' => $pagePermission,
-            'role_permissions' => $overrides->where('role_id', '!=', null)->values(),
-            'user_permissions' => $overrides->where('user_id', '!=', null)->values(),
-        ];
+        $this->clearCacheForRole($roleId);
+
+        return true;
+    }
+
+    /**
+     * Sync user permissions (remove all existing, add new ones).
+     */
+    public function syncUserPermissions(int $userId, array $permissions): bool
+    {
+        $user = User::find($userId);
+
+        if (!$user) {
+            return false;
+        }
+
+        // Sync permissions (remove all old, add new)
+        $user->syncPermissions($permissions);
+
+        $this->clearUserCache($userId);
+
+        return true;
     }
 }
