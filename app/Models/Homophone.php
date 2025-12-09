@@ -2,67 +2,95 @@
 
 namespace App\Models;
 
-class Homophone
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
+class Homophone extends Model
 {
-    protected static $file = 'storage/app/homophones.json';
+    use HasFactory, SoftDeletes;
 
-    public static function all()
+    /**
+     * The table associated with the model.
+     */
+    protected $table = 'homophones';
+
+    /**
+     * The attributes that are mass assignable.
+     */
+    protected $fillable = [
+        'word',
+        'definition',
+        'pronunciation',
+        'explanation',
+        'examples',
+        'is_active',
+    ];
+
+    /**
+     * The attributes that should be cast.
+     */
+    protected $casts = [
+        'examples' => 'array',
+        'is_active' => 'boolean',
+        'deleted_at' => 'datetime',
+    ];
+
+    /**
+     * Get the variants for this homophone.
+     */
+    public function variants(): HasMany
     {
-        if (!file_exists(storage_path('app/homophones.json'))) {
-            return [];
-        }
-        $json = file_get_contents(storage_path('app/homophones.json'));
-        return json_decode($json, true) ?? [];
+        return $this->hasMany(HomophoneVariant::class)->orderBy('sort_order');
     }
 
-    public static function find($id)
+    /**
+     * Get the groups this homophone belongs to.
+     */
+    public function groups(): BelongsToMany
     {
-        $all = static::all();
-        foreach ($all as $item) {
-            if ($item['id'] == $id) return $item;
-        }
-        return null;
+        return $this->belongsToMany(
+            HomophoneGroup::class,
+            'homophone_group_members',
+            'homophone_id',
+            'group_id'
+        )->withTimestamps();
     }
 
-    public static function create($data)
+    /**
+     * Scope a query to only include active homophones.
+     */
+    public function scopeActive($query)
     {
-        $all = static::all();
-        if (!isset($data['id']) || !$data['id']) {
-            $data['id'] = count($all) ? max(array_column($all, 'id')) + 1 : 1;
-        }
-        // Always store homophone as array of strings
-        if (isset($data['homophone'])) {
-            if (is_array($data['homophone'])) {
-                $data['homophone'] = array_map('strval', $data['homophone']);
-            } elseif (is_string($data['homophone'])) {
-                $data['homophone'] = array_map('trim', explode(',', $data['homophone']));
-            } else {
-                $data['homophone'] = [];
-            }
-        } else {
-            $data['homophone'] = [];
-        }
-        $all[] = $data;
-        file_put_contents(storage_path('app/homophones.json'), json_encode($all, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-        return $data;
+        return $query->where('is_active', true);
     }
 
-    public static function update($id, $data)
+    /**
+     * Scope a query to include variants relationship.
+     */
+    public function scopeWithVariants($query)
     {
-        $all = static::all();
-        foreach ($all as &$item) {
-            if ($item['id'] == $id) {
-                $item = array_merge($item, $data);
-                break;
-            }
-        }
-        file_put_contents(storage_path('app/homophones.json'), json_encode($all, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        return $query->with('variants');
     }
 
-    public static function delete($id)
+    /**
+     * Scope a query to search by word or variants.
+     */
+    public function scopeSearch($query, string $term)
     {
-        $all = static::all();
-        $all = array_filter($all, fn($item) => $item['id'] != $id);
-        file_put_contents(storage_path('app/homophones.json'), json_encode(array_values($all), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        return $query->where('word', 'like', "%{$term}%")
+            ->orWhereHas('variants', function ($q) use ($term) {
+                $q->where('variant_word', 'like', "%{$term}%");
+            });
+    }
+
+    /**
+     * Get all variant words as an array (for backward compatibility).
+     */
+    public function getVariantWordsAttribute(): array
+    {
+        return $this->variants->pluck('variant_word')->toArray();
     }
 }
