@@ -5,7 +5,10 @@
     "type": "module",
     "scripts": {
         "build": "vite build",
+        "build:analyze": "vite build --mode analyze",
+        "build:stats": "vite build --mode production && node -e \"console.log('Build complete! Check public/build/manifest.json for chunk details.')\"",
         "dev": "vite",
+        "preview": "vite preview",
         "test": "vitest",
         "test:ui": "vitest --ui",
         "test:coverage": "vitest --coverage",
