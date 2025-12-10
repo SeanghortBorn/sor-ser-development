@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import { usePage } from "@inertiajs/react";
-import Chart from "react-apexcharts";
+// TODO: Migrate to recharts
+// import Chart from "react-apexcharts";
 import { TrendingUp, BookOpen, Radar, BarChart3 } from "lucide-react";
 import HomophonePieCharts from "./HomophonePieCharts";
 import RecentArticles from "./RecentArticles";
-import { ResponsivePie } from "@nivo/pie";
+// TODO: Migrate to recharts
+// import { ResponsivePie } from "@nivo/pie";
 import axios from "axios";
 
 export default function AnalyticsSection() {

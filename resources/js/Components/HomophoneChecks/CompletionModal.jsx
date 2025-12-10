@@ -32,10 +32,54 @@ export default function CompletionModal({ show, completionData, onClose }) {
 
                     <div className="my-6">
                         <div className="text-6xl font-bold text-blue-600 mb-2">
-                            {completionData.accuracy}%
+                            {typeof completionData.accuracy === 'number'
+                                ? completionData.accuracy.toFixed(1)
+                                : completionData.accuracy}%
                         </div>
                         <div className="text-gray-600 text-sm">Accuracy Score</div>
                     </div>
+
+                    {/* Additional Metrics */}
+                    <div className="grid grid-cols-2 gap-4 mb-6">
+                        {/* Total Time */}
+                        <div className="bg-gray-50 rounded-lg p-3">
+                            <div className="text-2xl font-bold text-gray-800">
+                                {completionData.totalTimeSpent
+                                    ? `${Math.floor(completionData.totalTimeSpent / 60)}:${(completionData.totalTimeSpent % 60).toString().padStart(2, '0')}`
+                                    : '0:00'}
+                            </div>
+                            <div className="text-xs text-gray-600 mt-1">Total Time</div>
+                        </div>
+
+                        {/* Deleted Characters */}
+                        <div className="bg-gray-50 rounded-lg p-3">
+                            <div className="text-2xl font-bold text-gray-800">
+                                {completionData.deletedCharsCount || 0}
+                            </div>
+                            <div className="text-xs text-gray-600 mt-1">Deleted Chars</div>
+                        </div>
+                    </div>
+
+                    {/* Deleted Characters Detail */}
+                    {completionData.deletedCharsDetail && completionData.deletedCharsDetail.length > 0 && (
+                        <details className="mb-6 text-left">
+                            <summary className="cursor-pointer text-sm text-gray-700 font-medium hover:text-gray-900">
+                                View Deleted Characters Detail ({completionData.deletedCharsDetail.length} deletions)
+                            </summary>
+                            <div className="mt-3 max-h-32 overflow-y-auto bg-gray-50 rounded-lg p-3 space-y-2">
+                                {completionData.deletedCharsDetail.map((deletion, idx) => (
+                                    <div key={idx} className="text-xs text-gray-600 border-b border-gray-200 pb-2 last:border-0">
+                                        <span className="font-mono bg-red-100 text-red-700 px-1 rounded">
+                                            "{deletion.characters}"
+                                        </span>
+                                        <span className="ml-2 text-gray-500">
+                                            ({deletion.count} chars at position {deletion.position})
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                        </details>
+                    )}
 
                     <p className="text-gray-700 mb-6 text-sm leading-relaxed">
                         {completionData.message}
@@ -66,9 +110,14 @@ export default function CompletionModal({ show, completionData, onClose }) {
                     <button
                         onClick={() => {
                             onClose();
-                            if (completionData.redirect_url) {
-                                window.location.href = completionData.redirect_url;
-                            }
+                            // Redirect or reload after a small delay to allow modal to close gracefully
+                            setTimeout(() => {
+                                if (completionData.redirect_url) {
+                                    window.location.href = completionData.redirect_url;
+                                } else {
+                                    window.location.reload();
+                                }
+                            }, 300);
                         }}
                         className="w-full px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-semibold transition-colors"
                     >

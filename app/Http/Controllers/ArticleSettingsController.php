@@ -102,9 +102,9 @@ class ArticleSettingsController extends Controller
                 'max_attempts' => 'nullable|integer|min:1',
                 'min_completion_accuracy' => 'nullable|numeric|min:0|max:100',
                 // NEW FIELDS
-                'min_completion_percentage' => 'nullable|numeric|min:0|max:100',
-                'min_typing_speed' => 'nullable|numeric|min:0|max:999',
-                'min_typed_words_percentage' => 'nullable|numeric|min:0|max:100',
+                'min_completion_percentage' => 'nullable|numeric|min:0|max:100', // Optional - Minimum Accuracy %
+                'min_typing_speed' => 'nullable|numeric|min:0|max:999', // Optional
+                'min_typed_words_percentage' => 'required|numeric|min:0|max:100', // Required - Minimum Typed Words %
                 'group_a_redirect' => 'nullable|string|max:255',
                 'group_b_redirect' => 'nullable|string|max:255',
             ]);

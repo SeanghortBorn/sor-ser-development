@@ -24,6 +24,7 @@ export default function UserPage({
     permissions = [],
     search: searchProp = "",
     userStats = {},
+    showTrashed = false,
 }) {
     const { auth } = usePage().props;
     const can = auth?.can ?? {};
@@ -238,12 +239,32 @@ export default function UserPage({
         setSearchTerm(term);
         router.get(
             route("users.index"),
-            { search: term },
+            { search: term, trashed: showTrashed ? 1 : 0 },
             {
                 preserveState: true,
                 replace: true,
             }
         );
+    };
+
+    const toggleTrashedView = () => {
+        router.get(
+            route("users.index"),
+            { search: searchTerm, trashed: showTrashed ? 0 : 1 },
+            {
+                preserveState: true,
+                replace: true,
+            }
+        );
+    };
+
+    const handleRestore = (userId) => {
+        router.post(route("users.restore", userId), {}, {
+            preserveScroll: true,
+            onSuccess: () => {
+                router.reload({ only: ["users", "userStats"] });
+            },
+        });
     };
 
     const headWeb = "User List";
@@ -304,7 +325,7 @@ export default function UserPage({
                                 User Management
                             </h3>
 
-                            {/* Right side (Search + Add User) */}
+                            {/* Right side (Search + Toggle + Add User) */}
                             <div className="flex items-center gap-3 ml-auto">
                                 <form
                                     className="inline-block"
@@ -322,7 +343,20 @@ export default function UserPage({
                                     </div>
                                 </form>
 
-                                {can["user-create"] && can["user-list"] && (
+                                {can["user-list"] && (
+                                    <button
+                                        onClick={toggleTrashedView}
+                                        className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm transition ${
+                                            showTrashed
+                                                ? "bg-gray-600 text-white hover:bg-gray-500"
+                                                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                                        }`}
+                                    >
+                                        {showTrashed ? "Show Active" : `Deleted (${userStats.trashed || 0})`}
+                                    </button>
+                                )}
+
+                                {can["user-create"] && can["user-list"] && !showTrashed && (
                                     <a
                                         href={route("users.create")}
                                         className="inline-flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm text-white bg-green-600 hover:bg-green-500 transition"
@@ -361,7 +395,9 @@ export default function UserPage({
                                         users.data.map((item) => (
                                             <tr
                                                 key={item.id}
-                                                className="border-t hover:bg-gray-50 transition"
+                                                className={`border-t hover:bg-gray-50 transition ${
+                                                    item.blocked ? 'blur-[0.5px] opacity-60' : ''
+                                                }`}
                                             >
                                                 <td className="py-3 px-4 font-semibold">
                                                     {item.id}
@@ -410,107 +446,105 @@ export default function UserPage({
                                                     can["user-list"]) && (
                                                     <td className="py-3 px-4 text-center">
                                                         <div className="flex justify-center gap-2 items-center">
-                                                            {can["user-edit"] &&
-                                                                can[
-                                                                    "user-create"
-                                                                ] && (
-                                                                    <div className="relative group">
-                                                                        <Link
-                                                                            href={route(
-                                                                                "users.edit",
-                                                                                item.id
-                                                                            )}
-                                                                            className="inline-flex items-center gap-1.5 px-2 py-2 text-sm font-medium rounded-xl bg-blue-500 text-white hover:bg-blue-600 transition"
-                                                                        >
-                                                                            <Pencil className="w-4 h-4" />
-                                                                        </Link>
-                                                                        <div className="absolute bottom-full mb-2 hidden group-hover:block bg-white text-gray-800 text-xs px-3 py-1 rounded-lg shadow-md border whitespace-nowrap z-10">
-                                                                            Edit
-                                                                            User
-                                                                        </div>
-                                                                    </div>
-                                                                )}
-
-                                                            {can["user-edit"] &&
-                                                                can[
-                                                                    "user-create"
-                                                                ] && (
+                                                            {showTrashed ? (
+                                                                // Show restore button for deleted users
+                                                                can["user-create"] && (
                                                                     <div className="relative group">
                                                                         <button
                                                                             type="button"
-                                                                            className="inline-flex items-center gap-1.5 px-2 py-2 text-sm font-medium rounded-xl bg-indigo-600 text-white hover:bg-indigo-500 transition"
-                                                                            onClick={() =>
-                                                                                openPermissionModal(
-                                                                                    item
-                                                                                )
-                                                                            }
-                                                                        >
-                                                                            <ShieldCheck className="w-4 h-4" />
-                                                                        </button>
-                                                                        <div className="absolute bottom-full mb-2 hidden group-hover:block bg-white text-gray-800 text-xs px-3 py-1 rounded-lg shadow-md border whitespace-nowrap z-10">
-                                                                            Assign
-                                                                            Student
-                                                                            Role
-                                                                        </div>
-                                                                    </div>
-                                                                )}
-
-                                                            {can["user-edit"] &&
-                                                                can[
-                                                                    "user-create"
-                                                                ] && (
-                                                                    <div className="relative group">
-                                                                        <button
-                                                                            type="button"
-                                                                            className="inline-flex items-center gap-1.5 px-2 py-2 text-sm font-medium rounded-xl bg-amber-500 text-white hover:bg-amber-600 transition"
-                                                                            onClick={() =>
-                                                                                openResetModal(
-                                                                                    item
-                                                                                )
-                                                                            }
+                                                                            onClick={() => handleRestore(item.id)}
+                                                                            className="inline-flex items-center gap-1.5 px-2 py-2 text-sm font-medium rounded-xl bg-green-500 text-white hover:bg-green-600 transition"
                                                                         >
                                                                             <RotateCcw className="w-4 h-4" />
                                                                         </button>
                                                                         <div className="absolute bottom-full mb-2 hidden group-hover:block bg-white text-gray-800 text-xs px-3 py-1 rounded-lg shadow-md border whitespace-nowrap z-10">
-                                                                            Reset
-                                                                            Password
+                                                                            Restore
+                                                                            User
                                                                         </div>
                                                                     </div>
-                                                                )}
-
-                                                            {can[
-                                                                "user-block"
-                                                            ] && (
-                                                                <div className="relative group">
-                                                                    <button
-                                                                        type="button"
-                                                                        className={`inline-flex items-center gap-1.5 px-2 py-2 text-sm font-medium rounded-xl ${
-                                                                            item.blocked
-                                                                                ? "bg-green-500 hover:bg-green-600"
-                                                                                : "bg-red-500 hover:bg-red-400"
-                                                                        } text-white transition`}
-                                                                        onClick={() =>
-                                                                            handleBlockClick(
-                                                                                item
-                                                                            )
-                                                                        }
-                                                                    >
-                                                                        {item.blocked ? (
-                                                                            <>
-                                                                                <CheckCircle className="w-4 h-4" />
-                                                                            </>
-                                                                        ) : (
-                                                                            <>
-                                                                                <Ban className="w-4 h-4" />
-                                                                            </>
+                                                                )
+                                                            ) : (
+                                                                // Show regular action buttons for active users
+                                                                <>
+                                                                    {can["user-edit"] &&
+                                                                        can[
+                                                                            "user-create"
+                                                                        ] && (
+                                                                            <div className="relative group">
+                                                                                <Link
+                                                                                    href={route(
+                                                                                        "users.edit",
+                                                                                        item.id
+                                                                                    )}
+                                                                                    className="inline-flex items-center gap-1.5 px-2 py-2 text-sm font-medium rounded-xl bg-blue-500 text-white hover:bg-blue-600 transition"
+                                                                                >
+                                                                                    <Pencil className="w-4 h-4" />
+                                                                                </Link>
+                                                                                <div className="absolute bottom-full mb-2 hidden group-hover:block bg-white text-gray-800 text-xs px-3 py-1 rounded-lg shadow-md border whitespace-nowrap z-10">
+                                                                                    Edit
+                                                                                    User
+                                                                                </div>
+                                                                            </div>
                                                                         )}
-                                                                    </button>
-                                                                    <div className="absolute bottom-full mb-2 hidden group-hover:block bg-white text-gray-800 text-xs px-2 py-1 rounded-lg shadow-md border whitespace-nowrap z-10">
-                                                                        {item.blocked
-                                                                            ? "Unblock"
-                                                                            : "Block"}
-                                                                    </div>
-                                                                </div>
+
+                                                                    {can["user-edit"] &&
+                                                                        can[
+                                                                            "user-create"
+                                                                        ] && (
+                                                                            <div className="relative group">
+                                                                                <button
+                                                                                    type="button"
+                                                                                    className="inline-flex items-center gap-1.5 px-2 py-2 text-sm font-medium rounded-xl bg-amber-500 text-white hover:bg-amber-600 transition"
+                                                                                    onClick={() =>
+                                                                                        openResetModal(
+                                                                                            item
+                                                                                        )
+                                                                                    }
+                                                                                >
+                                                                                    <RotateCcw className="w-4 h-4" />
+                                                                                </button>
+                                                                                <div className="absolute bottom-full mb-2 hidden group-hover:block bg-white text-gray-800 text-xs px-3 py-1 rounded-lg shadow-md border whitespace-nowrap z-10">
+                                                                                    Reset
+                                                                                    Password
+                                                                                </div>
+                                                                            </div>
+                                                                        )}
+
+                                                                    {can[
+                                                                        "user-block"
+                                                                    ] && (
+                                                                        <div className="relative group">
+                                                                            <button
+                                                                                type="button"
+                                                                                className={`inline-flex items-center gap-1.5 px-2 py-2 text-sm font-medium rounded-xl ${
+                                                                                    item.blocked
+                                                                                        ? "bg-green-500 hover:bg-green-600"
+                                                                                        : "bg-red-500 hover:bg-red-400"
+                                                                                } text-white transition`}
+                                                                                onClick={() =>
+                                                                                    handleBlockClick(
+                                                                                        item
+                                                                                    )
+                                                                                }
+                                                                            >
+                                                                                {item.blocked ? (
+                                                                                    <>
+                                                                                        <CheckCircle className="w-4 h-4" />
+                                                                                    </>
+                                                                                ) : (
+                                                                                    <>
+                                                                                        <Ban className="w-4 h-4" />
+                                                                                    </>
+                                                                                )}
+                                                                            </button>
+                                                                            <div className="absolute bottom-full mb-2 hidden group-hover:block bg-white text-gray-800 text-xs px-2 py-1 rounded-lg shadow-md border whitespace-nowrap z-10">
+                                                                                {item.blocked
+                                                                                    ? "Unblock"
+                                                                                    : "Block"}
+                                                                            </div>
+                                                                        </div>
+                                                                    )}
+                                                                </>
                                                             )}
                                                         </div>
                                                     </td>

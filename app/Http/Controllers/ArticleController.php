@@ -11,9 +11,18 @@ use Inertia\Response;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use App\Services\FileUploadService;
+use App\Services\KhmerTextService;
+use App\Http\Requests\Article\StoreArticleRequest;
+use App\Http\Requests\Article\UpdateArticleRequest;
 
 class ArticleController extends Controller
 {
+    public function __construct(
+        protected FileUploadService $fileUploadService,
+        protected KhmerTextService $khmerTextService
+    ) {}
+
     /**
      * Display a listing of the resource.
      */
@@ -47,74 +56,23 @@ class ArticleController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request, Article $model)
+    public function store(StoreArticleRequest $request, Article $model)
     {
-        $validated = $request->validate([
-            'title' => 'required|max:255|min:2',
-            // File validation
-            'file' => [
-                'required',
-                'file',
-                'max:10240',
-                'mimes:txt,pdf,doc,docx',
-                'mimetypes:text/plain,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-            ],
-            // Audio validation - including video/mp4 for m4a files!
-            'audio' => [
-                'required',
-                'file',
-                'max:20480',
-                'mimes:mp3,wav,m4a,ogg,aac,mp4',
-                'mimetypes:audio/mpeg,audio/wav,audio/wave,audio/x-wav,audio/mp4,audio/x-m4a,audio/m4a,audio/aac,audio/ogg,video/mp4,application/octet-stream'
-            ],
-        ], [
-            'file.required' => 'File is required.',
-            'file.max' => 'File size must not exceed 10 MB.',
-            'file.mimes' => 'File must be a txt, pdf, doc, or docx file.',
-            'file.mimetypes' => 'Invalid file type.',
-            'audio.required' => 'Audio is required.',
-            'audio.max' => 'Audio file size must not exceed 20 MB.',
-            'audio.mimes' => 'Audio must be mp3, wav, m4a, aac, or ogg format.',
-            'audio.mimetypes' => 'Invalid audio file type.',
-            'title.required' => 'Title is required.',
-            'title.min' => 'Title must be at least 2 characters.',
-            'title.max' => 'Title must not exceed 255 characters.',
-        ]);
-        
+        $validated = $request->validated();
         $validated['user_id'] = Auth::user()->id;
 
         try {
             // Handle file upload
             if ($request->hasFile('file')) {
-                $file = $request->file('file');
-                
-                if (!$file->isValid()) {
-                    return back()->withErrors(['file' => 'The uploaded file is invalid.']);
-                }
-                
-                if ($file->getSize() === 0) {
-                    return back()->withErrors(['file' => 'Uploaded file is empty.']);
-                }
-                
-                $fileModel = new File();
-                $fileModel->title = $file->getClientOriginalName();
-                $storedPath = $file->store('uploads/files', 'public');
-                $fileModel->file_path = $storedPath;
-                $fileModel->file_size = $file->getSize();
-                $fileModel->file_type = $file->getClientMimeType();
+                $uploadedFile = $request->file('file');
 
-                $wordCount = 0;
-                if ($fileModel->file_type === 'text/plain') {
-                    $fileContent = file_get_contents($file->getRealPath());
-                    $tokens = preg_split('/\s+/u', $fileContent, -1, PREG_SPLIT_NO_EMPTY);
-                    foreach ($tokens as $token) {
-                        if (preg_match('/[\x{1780}-\x{17FF}]/u', $token)) {
-                            $wordCount++;
-                        }
-                    }
-                }
-                $fileModel->word_count = $wordCount;
-                $fileModel->save();
+                // Calculate Khmer word count for text files
+                $wordCount = $this->khmerTextService->countKhmerWordsFromFile(
+                    $uploadedFile->getRealPath(),
+                    $uploadedFile->getClientMimeType()
+                );
+
+                $fileModel = $this->fileUploadService->uploadFile($uploadedFile, 'files', $wordCount);
                 $validated['file_id'] = $fileModel->id;
             } else {
                 return back()->withErrors(['file' => 'No file uploaded.']);
@@ -122,49 +80,22 @@ class ArticleController extends Controller
 
             // Handle audio upload
             if ($request->hasFile('audio')) {
-                $audio = $request->file('audio');
-                
-                if (!$audio->isValid()) {
-                    return back()->withErrors(['audio' => 'The uploaded audio file is invalid.']);
-                }
-                
-                if ($audio->getSize() === 0) {
-                    return back()->withErrors(['audio' => 'Uploaded audio is empty.']);
-                }
-                
-                $audioModel = new Audio();
-                $audioModel->title = $audio->getClientOriginalName();
-                $storedPath = $audio->store('uploads/audios', 'public');
-                $audioModel->file_path = $storedPath;
-                $audioModel->file_size = $audio->getSize();
-                $audioModel->duration = 0;
-                $audioModel->save();
+                $audioModel = $this->fileUploadService->uploadAudio($request->file('audio'), 'audios');
                 $validated['audios_id'] = $audioModel->id;
             } else {
                 return back()->withErrors(['audio' => 'No audio uploaded.']);
             }
 
             $model->create($validated);
-            
+
             return redirect()->route('articles.index')->with('message', 'Article created successfully.');
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            Log::error('Validation error in article store', ['errors' => $e->errors()]);
-            return back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
             Log::error('Error creating article', [
-                'error' => $e->getMessage(), 
+                'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
             return back()->withErrors(['error' => 'Failed to create article: ' . $e->getMessage()])->withInput();
         }
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Article $article, $id)
-    {
-        //
     }
 
     /**
@@ -182,117 +113,43 @@ class ArticleController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
+    public function update(UpdateArticleRequest $request, $id)
     {
         $article = Article::findOrFail($id);
-
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'file' => [
-                'nullable',
-                'file',
-                'max:10240',
-                'mimes:txt,pdf,doc,docx',
-                'mimetypes:text/plain,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-            ],
-            'audio' => [
-                'nullable',
-                'file',
-                'max:20480',
-                'mimes:mp3,wav,m4a,ogg,aac,mp4',
-                'mimetypes:audio/mpeg,audio/wav,audio/wave,audio/x-wav,audio/mp4,audio/x-m4a,audio/m4a,audio/aac,audio/ogg,video/mp4,application/octet-stream'
-            ],
-        ], [
-            'file.max' => 'File size must not exceed 10 MB.',
-            'file.mimes' => 'File must be a txt, pdf, doc, or docx file.',
-            'audio.max' => 'Audio file size must not exceed 20 MB.',
-            'audio.mimes' => 'Audio must be mp3, wav, m4a, aac, or ogg format.',
-            'title.required' => 'Title is required.',
-            'title.max' => 'Title must not exceed 255 characters.',
-        ]);
+        $validated = $request->validated();
 
         try {
             $article->title = $validated['title'];
 
             // Replace or create file
             if ($request->hasFile('file')) {
-                $file = $request->file('file');
-                if ($article->file) {
-                    // Delete old physical file from storage
-                    if (Storage::disk('public')->exists($article->file->file_path)) {
-                        Storage::disk('public')->delete($article->file->file_path);
-                    }
-                    // Update existing file row
-                    $storedPath = $file->store('uploads/files', 'public');
-                    $fileType = $file->getClientMimeType();
-                    $wordCount = 0;
-                    if ($fileType === 'text/plain') {
-                        $fileContent = file_get_contents($file->getRealPath());
-                        $tokens = preg_split('/\s+/u', $fileContent, -1, PREG_SPLIT_NO_EMPTY);
-                        foreach ($tokens as $token) {
-                            if (preg_match('/[\x{1780}-\x{17FF}]/u', $token)) {
-                                $wordCount++;
-                            }
-                        }
-                    }
-                    $article->file->update([
-                        'title' => $file->getClientOriginalName(),
-                        'file_path' => $storedPath,
-                        'file_size' => $file->getSize(),
-                        'file_type' => $fileType,
-                        'word_count' => $wordCount,
-                    ]);
-                } else {
-                    // Create new file row and link
-                    $fileModel = new File();
-                    $fileModel->title = $file->getClientOriginalName();
-                    $storedPath = $file->store('uploads/files', 'public');
-                    $fileModel->file_path = $storedPath;
-                    $fileModel->file_size = $file->getSize();
-                    $fileModel->file_type = $file->getClientMimeType();
-                    $wordCount = 0;
-                    if ($fileModel->file_type === 'text/plain') {
-                        $fileContent = file_get_contents($file->getRealPath());
-                        $tokens = preg_split('/\s+/u', $fileContent, -1, PREG_SPLIT_NO_EMPTY);
-                        foreach ($tokens as $token) {
-                            if (preg_match('/[\x{1780}-\x{17FF}]/u', $token)) {
-                                $wordCount++;
-                            }
-                        }
-                    }
-                    $fileModel->word_count = $wordCount;
-                    $fileModel->save();
-                    $article->file_id = $fileModel->id;
-                }
+                $uploadedFile = $request->file('file');
+
+                // Calculate Khmer word count for text files
+                $wordCount = $this->khmerTextService->countKhmerWordsFromFile(
+                    $uploadedFile->getRealPath(),
+                    $uploadedFile->getClientMimeType()
+                );
+
+                $fileModel = $this->fileUploadService->replaceFile(
+                    $article->file,
+                    $uploadedFile,
+                    'files',
+                    $wordCount
+                );
+
+                $article->file_id = $fileModel->id;
             }
 
             // Replace or create audio
             if ($request->hasFile('audio')) {
-                $audio = $request->file('audio');
-                if ($article->audio) {
-                    // Delete old physical audio from storage
-                    if (Storage::disk('public')->exists($article->audio->file_path)) {
-                        Storage::disk('public')->delete($article->audio->file_path);
-                    }
-                    // Update existing audio row
-                    $storedPath = $audio->store('uploads/audios', 'public');
-                    $article->audio->update([
-                        'title' => $audio->getClientOriginalName(),
-                        'file_path' => $storedPath,
-                        'file_size' => $audio->getSize(),
-                        'duration' => 0,
-                    ]);
-                } else {
-                    // Create new audio row and link
-                    $audioModel = new Audio();
-                    $audioModel->title = $audio->getClientOriginalName();
-                    $storedPath = $audio->store('uploads/audios', 'public');
-                    $audioModel->file_path = $storedPath;
-                    $audioModel->file_size = $audio->getSize();
-                    $audioModel->duration = 0;
-                    $audioModel->save();
-                    $article->audios_id = $audioModel->id;
-                }
+                $audioModel = $this->fileUploadService->replaceAudio(
+                    $article->audio,
+                    $request->file('audio'),
+                    'audios'
+                );
+
+                $article->audios_id = $audioModel->id;
             }
 
             $article->save();
@@ -388,6 +245,65 @@ class ArticleController extends Controller
                 'file_path' => $publicPath,
                 'duration' => $audio->duration
             ]
+        ]);
+    }
+
+    /**
+     * Show completion stats for a specific article.
+     * Displays which users completed/not completed the article.
+     */
+    public function completionStats($id)
+    {
+        $article = Article::findOrFail($id);
+
+        // Get all users with their roles
+        $users = \App\Models\User::with('roles')
+            ->select('id', 'name', 'email', 'created_at')
+            ->get();
+
+        // Get all completions for this article
+        $completions = \App\Models\UserArticleCompletion::where('article_id', $id)
+            ->select('user_id', 'accuracy', 'typing_speed', 'created_at', 'best_accuracy')
+            ->get()
+            ->keyBy('user_id');
+
+        // Map users with their completion status
+        $userStats = $users->map(function ($user) use ($completions) {
+            $completion = $completions->get($user->id);
+
+            return [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->roles->first()?->name ?? 'Student',
+                'has_completed' => $completion !== null,
+                'accuracy' => $completion?->accuracy,
+                'best_accuracy' => $completion?->best_accuracy,
+                'typing_speed' => $completion?->typing_speed,
+                'completed_at' => $completion?->created_at?->format('Y-m-d H:i:s'),
+                'member_since' => $user->created_at?->format('Y-m-d'),
+            ];
+        });
+
+        // Separate completed and not completed users
+        $completed = $userStats->filter(fn($u) => $u['has_completed'])->values();
+        $notCompleted = $userStats->filter(fn($u) => !$u['has_completed'])->values();
+
+        return Inertia::render('Articles/CompletionStats', [
+            'article' => [
+                'id' => $article->id,
+                'title' => $article->title,
+            ],
+            'stats' => [
+                'total_users' => $users->count(),
+                'completed_count' => $completed->count(),
+                'not_completed_count' => $notCompleted->count(),
+                'completion_rate' => $users->count() > 0
+                    ? round(($completed->count() / $users->count()) * 100, 1)
+                    : 0,
+            ],
+            'completed_users' => $completed,
+            'not_completed_users' => $notCompleted,
         ]);
     }
 }

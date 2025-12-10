@@ -81,11 +81,17 @@ export default function Index({ articles: initialArticles = [], userRole }) {
         currentAccuracy: 0,
         minRequired: 70,
         bestAccuracy: 0,
+        comparisonAccuracy: 0,
+        currentTypingSpeed: 0,
     });
 
     // Typing speed tracking
     const [typingStartTime, setTypingStartTime] = useState(null);
     const [totalTypingTime, setTotalTypingTime] = useState(0);
+
+    // Deleted character tracking
+    const [deletedCharsCount, setDeletedCharsCount] = useState(0);
+    const [deletedCharsDetail, setDeletedCharsDetail] = useState([]);
 
     // Modals
     const [showAccountModal, setShowAccountModal] = useState(false);
@@ -190,10 +196,12 @@ export default function Index({ articles: initialArticles = [], userRole }) {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, [dropdownOpen]);
 
-    // Reset typing timer when article changes
+    // Reset typing timer and deleted characters tracking when article changes
     useEffect(() => {
         setTypingStartTime(null);
         setTotalTypingTime(0);
+        setDeletedCharsCount(0);
+        setDeletedCharsDetail([]);
     }, [selectedArticle?.id]);
 
     // Sync with Zustand store when article changes
@@ -221,6 +229,8 @@ export default function Index({ articles: initialArticles = [], userRole }) {
                 currentAccuracy: 0,
                 minRequired: 70,
                 bestAccuracy: 0,
+                comparisonAccuracy: 0,
+                currentTypingSpeed: 0,
             });
         }
     }, [paragraph, selectedArticle]);
@@ -232,6 +242,8 @@ export default function Index({ articles: initialArticles = [], userRole }) {
                 currentAccuracy: 0,
                 minRequired: 70,
                 bestAccuracy: 0,
+                comparisonAccuracy: 0,
+                currentTypingSpeed: 0,
             });
             return;
         }
@@ -251,13 +263,28 @@ export default function Index({ articles: initialArticles = [], userRole }) {
                 ? Math.min(100, (typedWordCount / articleWordCount) * 100)
                 : 0;
 
-            const minRequired = selectedArticle.min_completion_percentage || 70;
+            // Use min_typed_words_percentage as the default minimum (for typing percentage)
+            const minRequired = selectedArticle.min_typed_words_percentage || 70;
             const bestAccuracy = selectedArticle.best_accuracy || 0;
+
+            // Calculate comparison accuracy (from comparison results)
+            const comparisonAccuracy = comparisonResult?.accuracy || 0;
+
+            // Calculate current typing speed
+            let currentTypingSpeed = 0;
+            if (typingStartTime && paragraph.trim()) {
+                const elapsedTimeMs = Date.now() - typingStartTime;
+                const elapsedTimeMinutes = elapsedTimeMs / (1000 * 60);
+                const wordCount = paragraph.trim().split(/\s+/).length;
+                currentTypingSpeed = elapsedTimeMinutes > 0 ? Math.round(wordCount / elapsedTimeMinutes) : 0;
+            }
 
             setLiveProgress({
                 currentAccuracy,
                 minRequired,
                 bestAccuracy,
+                comparisonAccuracy,
+                currentTypingSpeed,
             });
         };
 
@@ -426,6 +453,19 @@ export default function Index({ articles: initialArticles = [], userRole }) {
         } else if (currLen < prevLen) {
             const deletedCount = prevLen - currLen;
             const deletedChars = prevValue.slice(-deletedCount);
+
+            // Update local deleted characters tracking
+            setDeletedCharsCount(prev => prev + deletedCount);
+            setDeletedCharsDetail(prev => [
+                ...prev,
+                {
+                    timestamp: Date.now(),
+                    characters: deletedChars,
+                    count: deletedCount,
+                    position: currLen
+                }
+            ]);
+
             setTimeout(() => {
                 deletedChars.split('').forEach(char => {
                     axios.post("/api/track/typing", {
@@ -560,7 +600,14 @@ export default function Index({ articles: initialArticles = [], userRole }) {
             });
 
             if (result.success) {
-                setCompletionData(result.completion);
+                // Add additional metrics to completion data
+                const enhancedCompletionData = {
+                    ...result.completion,
+                    totalTimeSpent: typingStartTime ? Math.round((Date.now() - typingStartTime) / 1000) : 0,
+                    deletedCharsCount: deletedCharsCount,
+                    deletedCharsDetail: deletedCharsDetail,
+                };
+                setCompletionData(enhancedCompletionData);
                 setShowCompletionModal(true);
                 success("Completion saved successfully!");
 
@@ -570,10 +617,7 @@ export default function Index({ articles: initialArticles = [], userRole }) {
                     bestAccuracy: result.completion.best_accuracy || prev.bestAccuracy,
                 }));
 
-                // Reload the page to refresh articles list
-                setTimeout(() => {
-                    window.location.reload();
-                }, 3000);
+                // Don't auto-reload - let user close modal manually
             } else {
                 showError("Failed to save completion");
             }
@@ -897,7 +941,10 @@ export default function Index({ articles: initialArticles = [], userRole }) {
                 <CompletionModal
                     show={showCompletionModal}
                     completionData={completionData}
-                    onClose={() => setShowCompletionModal(false)}
+                    onClose={() => {
+                        setShowCompletionModal(false);
+                        // Don't reload here - let the modal handle redirect/reload
+                    }}
                 />
             </ErrorBoundary>
 

@@ -2,16 +2,13 @@
 import '../css/app.css';
 import './bootstrap';
 
-// Import jQuery and Bootstrap (Required for dropdowns)
-import $ from 'jquery';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+// Import jQuery and make it globally available for Bootstrap and AdminLTE
+import jQuery from 'jquery';
+window.$ = window.jQuery = jQuery;
 
-// Import AdminLTE
-import 'admin-lte/dist/css/adminlte.min.css';
-import 'admin-lte/dist/js/adminlte.min.js';
-
-import '@fortawesome/fontawesome-free/css/all.min.css';
+// Import Bootstrap's and AdminLTE's JavaScript
+import 'bootstrap';
+import 'admin-lte';
 
 import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';

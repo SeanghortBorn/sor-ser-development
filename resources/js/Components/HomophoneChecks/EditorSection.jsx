@@ -28,8 +28,11 @@ const EditorSection = memo(({
         currentAccuracy: 0,
         minRequired: 70,
         bestAccuracy: 0,
+        comparisonAccuracy: 0,
+        currentTypingSpeed: 0,
     },
     autoSave = true,
+    selectedArticle = null,
 }) => {
     const [wordCount, setWordCount] = useState(0);
     const [readingTime, setReadingTime] = useState(0);
@@ -79,6 +82,10 @@ const EditorSection = memo(({
                     currentAccuracy={progress.currentAccuracy}
                     minRequired={progress.minRequired}
                     bestAccuracy={progress.bestAccuracy}
+                    comparisonAccuracy={progress.comparisonAccuracy}
+                    currentTypingSpeed={progress.currentTypingSpeed}
+                    selectedArticle={selectedArticle}
+                    isVisible={true}
                     className="border-b border-gray-200"
                 />
             )}

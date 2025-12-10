@@ -509,9 +509,36 @@ export default function SidebarCheckGrammar({
     };
 
     // Only show explain modal for student permission
-    const handleAcceptOrDismiss = (item, actionType) => {
+    const handleAcceptOrDismiss = async (item, actionType) => {
         if (auth?.can?.student === true) {
-            openExplain(item, actionType);
+            // Check if word exists in homophone database first
+            const raw =
+                (item.article_word && item.article_word.article_word) ||
+                (item.user_word && item.user_word.user_word) ||
+                "";
+
+            if (!raw) {
+                // No word found, accept/dismiss directly
+                handleComparisonAction(item, actionType);
+                return;
+            }
+
+            try {
+                const map = await fetchHomophones();
+                const wordExists = map[raw] || map[normalizeWord(raw)];
+
+                if (wordExists) {
+                    // Word found in homophone database → show explanation modal
+                    openExplain(item, actionType);
+                } else {
+                    // Word NOT in homophone database → accept/dismiss instantly without popup
+                    handleComparisonAction(item, actionType);
+                }
+            } catch (error) {
+                console.error('Error checking homophone:', error);
+                // On error, accept/dismiss directly to avoid blocking user
+                handleComparisonAction(item, actionType);
+            }
         } else {
             handleComparisonAction(item, actionType);
         }

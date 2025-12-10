@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { ResponsivePie } from "@nivo/pie";
-import { ResponsiveRadar } from "@nivo/radar";
+// TODO: Migrate to recharts
+// import { ResponsivePie } from "@nivo/pie";
+// import { ResponsiveRadar } from "@nivo/radar";
 
 const HomophoneCharts = () => {
     const [tooltip, setTooltip] = useState({

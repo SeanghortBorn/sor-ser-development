@@ -181,6 +181,7 @@ Route::middleware('auth')->group(function () {
         Route::delete("/{id}", [UserController::class, 'destroy'])->name('users.destroy')->middleware(['check:user-delete']);
         Route::post('/{id}/block', [UserController::class, 'block'])->name('users.block')->middleware(['check:user-block']);
         Route::patch('/{id}/permissions', [UserController::class, 'updatePermissions'])->name('users.update-permissions');
+        Route::post('/{id}/restore', [UserController::class, 'restore'])->name('users.restore')->middleware(['check:user-create']);
     });
 
     // ═══════════════════════════════════════════════════════════════════════
@@ -203,6 +204,7 @@ Route::middleware('auth')->group(function () {
     Route::prefix('articles')->group(function () {
         Route::get('/', [ArticleController::class, 'index'])->name('articles.index')->middleware(['check:article-list']);
         Route::get('/create', [ArticleController::class, 'create'])->name('articles.create')->middleware(['check:article-create']);
+        Route::get('/{id}/completion-stats', [ArticleController::class, 'completionStats'])->name('articles.completion-stats')->middleware(['check:article-list']);
         Route::get('/{id}', [ArticleController::class, 'edit'])->name('articles.edit')->middleware(['check:article-edit']);
         Route::post("/", [ArticleController::class, 'store'])->name('articles.store');
         Route::patch("/{id}", [ArticleController::class, 'update'])->name('articles.update');

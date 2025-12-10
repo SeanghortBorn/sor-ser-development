@@ -6,42 +6,27 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Homophone;
 use App\Models\HomophoneVariant;
+use App\Services\HomophoneService;
+use App\Http\Requests\Homophone\StoreHomophoneRequest;
+use App\Http\Requests\Homophone\UpdateHomophoneRequest;
 use Illuminate\Support\Facades\DB;
 
 class HomophoneController extends Controller
 {
+    public function __construct(
+        protected HomophoneService $homophoneService
+    ) {}
+
     public function index(Request $request)
     {
-        // OPTIMIZED: Use Eloquent query builder instead of loading all into memory
         $search = trim($request->query('search', ''));
 
-        $query = Homophone::withVariants()
-            ->active()
-            ->orderBy('id', 'asc');
+        $homophones = $this->homophoneService->getPaginated($search, 10);
 
-        // Apply search filter using database query
-        if ($search !== '') {
-            $query->search($search);
-        }
-
-        // Use Laravel's built-in pagination (much more efficient!)
-        $homophones = $query->paginate(10)
-            ->withQueryString() // Preserve search query in pagination links
-            ->through(function ($homophone) {
-                // Transform data for frontend compatibility
-                return [
-                    'id' => $homophone->id,
-                    'word' => $homophone->word,
-                    'pos' => $homophone->pronunciation, // Map to old 'pos' field
-                    'pro' => $homophone->pronunciation, // Map to old 'pro' field
-                    'definition' => $homophone->definition,
-                    'example' => is_array($homophone->examples) ? implode(', ', $homophone->examples) : ($homophone->examples ?? ''),
-                    'phoneme' => $homophone->pronunciation, // Map to old 'phoneme' field
-                    'homophone' => $homophone->variant_words, // Use accessor for variants
-                    'is_active' => $homophone->is_active,
-                    'created_at' => $homophone->created_at,
-                ];
-            });
+        // Transform data for frontend compatibility
+        $homophones->through(function ($homophone) {
+            return $this->homophoneService->formatForFrontend($homophone);
+        });
 
         return Inertia::render('HomoPhone/Index', [
             'homophones' => $homophones,
@@ -56,132 +41,65 @@ class HomophoneController extends Controller
 
     public function edit($id)
     {
-        $homophone = Homophone::withVariants()->findOrFail($id);
+        $homophone = $this->homophoneService->getById($id);
 
-        // Transform for frontend compatibility
         return Inertia::render('HomoPhone/CreateEdit', [
-            'homophone' => [
-                'id' => $homophone->id,
-                'word' => $homophone->word,
-                'pos' => $homophone->pronunciation,
-                'pro' => $homophone->pronunciation,
-                'definition' => $homophone->definition,
-                'example' => is_array($homophone->examples) ? implode(', ', $homophone->examples) : ($homophone->examples ?? ''),
-                'phoneme' => $homophone->pronunciation,
-                'homophone' => $homophone->variant_words,
-            ]
+            'homophone' => $this->homophoneService->formatForFrontend($homophone)
         ]);
     }
 
-    public function store(Request $request)
+    public function store(StoreHomophoneRequest $request)
     {
-        $validated = $request->validate([
-            'word' => 'required|string|max:255',
-            'pos' => 'nullable|string|max:255',
-            'pro' => 'nullable|string|max:255',
-            'definition' => 'nullable|string|max:1000',
-            'example' => 'nullable|string|max:1000',
-            'phoneme' => 'nullable|string|max:255',
-            'homophone' => 'nullable|array',
-        ]);
-
-        DB::transaction(function () use ($validated) {
-            // Create main homophone record
-            $homophone = Homophone::create([
-                'word' => $validated['word'],
-                'pronunciation' => $validated['pro'] ?? $validated['phoneme'] ?? $validated['pos'] ?? null,
-                'definition' => $validated['definition'] ?? null,
-                'examples' => $validated['example'] ? [$validated['example']] : null,
-                'is_active' => true,
-            ]);
-
-            // Create variant records
-            if (!empty($validated['homophone']) && is_array($validated['homophone'])) {
-                foreach ($validated['homophone'] as $index => $variant) {
-                    if (!empty($variant)) {
-                        HomophoneVariant::create([
-                            'homophone_id' => $homophone->id,
-                            'variant_word' => $variant,
-                            'sort_order' => $index,
-                        ]);
-                    }
-                }
-            }
-        });
+        $this->homophoneService->create($request->validated());
 
         return redirect()->route('homophones.index')->with('success', 'Homophone added');
     }
 
-    public function update(Request $request, $id)
+    public function update(UpdateHomophoneRequest $request, $id)
     {
-        $validated = $request->validate([
-            'word' => 'required|string|max:255',
-            'pos' => 'nullable|string|max:255',
-            'pro' => 'nullable|string|max:255',
-            'definition' => 'nullable|string|max:1000',
-            'example' => 'nullable|string|max:1000',
-            'phoneme' => 'nullable|string|max:255',
-            'homophone' => 'nullable|array',
-        ]);
-
-        DB::transaction(function () use ($id, $validated) {
-            $homophone = Homophone::findOrFail($id);
-
-            // Update main record
-            $homophone->update([
-                'word' => $validated['word'],
-                'pronunciation' => $validated['pro'] ?? $validated['phoneme'] ?? $validated['pos'] ?? null,
-                'definition' => $validated['definition'] ?? null,
-                'examples' => $validated['example'] ? [$validated['example']] : null,
-            ]);
-
-            // Delete existing variants
-            $homophone->variants()->delete();
-
-            // Create new variants
-            if (!empty($validated['homophone']) && is_array($validated['homophone'])) {
-                foreach ($validated['homophone'] as $index => $variant) {
-                    if (!empty($variant)) {
-                        HomophoneVariant::create([
-                            'homophone_id' => $homophone->id,
-                            'variant_word' => $variant,
-                            'sort_order' => $index,
-                        ]);
-                    }
-                }
-            }
-        });
+        $this->homophoneService->update($id, $request->validated());
 
         return redirect()->route('homophones.index')->with('success', 'Homophone updated');
     }
 
     public function destroy($id)
     {
-        $homophone = Homophone::findOrFail($id);
-        $homophone->delete(); // Soft delete (cascade deletes variants due to foreign key)
+        $this->homophoneService->delete($id);
 
         return redirect()->route('homophones.index')->with('success', 'Homophone deleted');
     }
 
     public function import(Request $request)
     {
-        set_time_limit(300);
+        try {
+            // Remove time limit for large imports
+            set_time_limit(0);
 
-        // Accept either file upload or direct homophones array
-        if ($request->hasFile('file')) {
-            $file = $request->file('file');
-            $content = file_get_contents($file->getRealPath());
-            if (!mb_detect_encoding($content, 'UTF-8', true)) {
-                $content = mb_convert_encoding($content, 'UTF-8');
+            // Increase memory limit for large files
+            ini_set('memory_limit', '512M');
+
+            // Accept either file upload or direct homophones array
+            if ($request->hasFile('file')) {
+                $file = $request->file('file');
+                $content = file_get_contents($file->getRealPath());
+                if (!mb_detect_encoding($content, 'UTF-8', true)) {
+                    $content = mb_convert_encoding($content, 'UTF-8');
+                }
+                $homophones = json_decode($content, true);
+                if (json_last_error() !== JSON_ERROR_NONE || !is_array($homophones)) {
+                    return back()->withErrors(['import' => 'Invalid JSON file: ' . json_last_error_msg()]);
+                }
+            } elseif ($request->has('homophones') && is_array($request->homophones)) {
+                $homophones = $request->homophones;
+            } else {
+                return back()->withErrors(['import' => 'No file or homophones data provided.']);
             }
-            $homophones = json_decode($content, true);
-            if (json_last_error() !== JSON_ERROR_NONE || !is_array($homophones)) {
-                return back()->withErrors(['import' => 'Invalid JSON file.']);
-            }
-        } elseif ($request->has('homophones') && is_array($request->homophones)) {
-            $homophones = $request->homophones;
-        } else {
-            return back()->withErrors(['import' => 'No file or homophones data provided.']);
+        } catch (\Exception $e) {
+            \Log::error('Homophone import failed during file reading', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return back()->withErrors(['import' => 'Failed to read import file: ' . $e->getMessage()]);
         }
 
         $count = count($homophones);
@@ -196,81 +114,266 @@ class HomophoneController extends Controller
             ]);
         }
 
-        // OPTIMIZED: Build existing set using database query (much faster!)
         $normalize = function($str) {
             return preg_replace('/\s+/u', ' ', trim((string)$str));
         };
 
-        $existingWords = Homophone::pluck('word', 'id')->toArray();
+        // DUPLICATE DETECTION: Check if we need to scan for duplicates
+        if ($request->query('scan', false)) {
+            return $this->scanForDuplicates($homophones, $normalize);
+        }
+
+        // Get duplicate resolution choices from request (if provided)
+        $duplicateResolutions = $request->input('duplicate_resolutions', []);
+
+        // Build existing homophones cache (word + pronunciation for duplicate detection)
+        $existingHomophones = Homophone::select('id', 'word', 'pronunciation')
+            ->get()
+            ->mapWithKeys(function ($item) use ($normalize) {
+                $key = $normalize($item->word) . '|' . $normalize($item->pronunciation ?? '');
+                return [$key => $item->id];
+            })
+            ->toArray();
+
         $imported = 0;
         $skipped = 0;
+        $replaced = 0;
 
-        DB::transaction(function () use ($homophones, $normalize, $existingWords, &$imported, &$skipped) {
-            foreach ($homophones as $data) {
-                $normalized = [
-                    'word' => $data['word'] ?? $data['Word'] ?? null,
-                    'pos' => $data['pos'] ?? $data['POS'] ?? null,
-                    'pro' => $data['pro'] ?? $data['Pronunciation'] ?? null,
-                    'definition' => $data['definition'] ?? $data['Definition'] ?? null,
-                    'example' => $data['example'] ?? $data['Example'] ?? '',
-                    'phoneme' => $data['phoneme'] ?? $data['Phoneme'] ?? '',
-                    'homophone' => $data['homophone'] ?? [],
-                ];
+        try {
+            // CHUNKED PROCESSING: Process in batches to avoid timeouts
+            $chunkSize = 1000; // Process 1000 items at a time
+            $chunks = array_chunk($homophones, $chunkSize);
+            $totalChunks = count($chunks);
 
-                if (empty($normalized['word']) || empty($normalized['definition'])) {
-                    $skipped++;
-                    continue;
-                }
+            \Log::info("Starting homophone import", [
+                'total_items' => $count,
+                'total_chunks' => $totalChunks,
+                'chunk_size' => $chunkSize,
+            ]);
 
-                // Check for duplicate by word (simplified - can be enhanced)
-                if (in_array($normalize($normalized['word']), array_map($normalize, $existingWords))) {
-                    $skipped++;
-                    continue;
-                }
+            foreach ($chunks as $chunkIndex => $chunk) {
+            // Process each chunk in its own transaction
+            DB::transaction(function () use ($chunk, $normalize, &$existingHomophones, $duplicateResolutions, &$imported, &$skipped, &$replaced) {
+                $homophonesToInsert = [];
+                $homophonesToUpdate = [];
+                $variantsToInsert = [];
+                $now = now();
+                $insertIndex = 0; // Track index for this batch only
 
-                // Convert homophone string to array
-                if (is_string($normalized['homophone'])) {
-                    $normalized['homophone'] = array_filter(array_map('trim', explode(',', $normalized['homophone'])));
-                }
+                foreach ($chunk as $dataIndex => $data) {
+                    $normalized = [
+                        'word' => $data['word'] ?? $data['Word'] ?? null,
+                        'pos' => $data['pos'] ?? $data['POS'] ?? null,
+                        'pro' => $data['pro'] ?? $data['Pronunciation'] ?? null,
+                        'definition' => $data['definition'] ?? $data['Definition'] ?? null,
+                        'example' => $data['example'] ?? $data['Example'] ?? '',
+                        'phoneme' => $data['phoneme'] ?? $data['Phoneme'] ?? '',
+                        'homophone' => $data['homophone'] ?? [],
+                    ];
 
-                // Create homophone with variants
-                $homophone = Homophone::create([
-                    'word' => $normalized['word'],
-                    'pronunciation' => $normalized['pro'] ?? $normalized['phoneme'] ?? $normalized['pos'],
-                    'definition' => $normalized['definition'],
-                    'examples' => $normalized['example'] ? [$normalized['example']] : null,
-                    'is_active' => true,
-                ]);
+                    if (empty($normalized['word']) || empty($normalized['definition'])) {
+                        $skipped++;
+                        continue;
+                    }
 
-                // Create variants
-                if (!empty($normalized['homophone']) && is_array($normalized['homophone'])) {
-                    foreach ($normalized['homophone'] as $index => $variant) {
-                        if (!empty($variant)) {
-                            HomophoneVariant::create([
-                                'homophone_id' => $homophone->id,
-                                'variant_word' => $variant,
-                                'sort_order' => $index,
-                            ]);
+                    $pronunciation = $normalized['pro'] ?? $normalized['phoneme'] ?? $normalized['pos'];
+
+                    // Check for duplicate by word + pronunciation
+                    $normalizedWord = $normalize($normalized['word']);
+                    $normalizedPronunciation = $normalize($pronunciation ?? '');
+                    $duplicateKey = $normalizedWord . '|' . $normalizedPronunciation;
+
+                    if (isset($existingHomophones[$duplicateKey])) {
+                        $existingId = $existingHomophones[$duplicateKey];
+
+                        // Check if user provided resolution for this duplicate
+                        $resolution = $duplicateResolutions[$duplicateKey] ?? 'skip';
+
+                        if ($resolution === 'skip') {
+                            $skipped++;
+                            continue;
+                        } elseif ($resolution === 'replace') {
+                            // Update existing homophone
+                            $homophonesToUpdate[$existingId] = [
+                                'word' => $normalized['word'],
+                                'pronunciation' => $pronunciation,
+                                'definition' => $normalized['definition'],
+                                'examples' => $normalized['example'] ? json_encode([$normalized['example']]) : null,
+                                'updated_at' => $now,
+                            ];
+                            $replaced++;
+                            continue;
                         }
+                    }
+
+                    // Convert homophone string to array
+                    if (is_string($normalized['homophone'])) {
+                        $normalized['homophone'] = array_filter(array_map('trim', explode(',', $normalized['homophone'])));
+                    }
+
+                    // Prepare homophone for batch insert
+                    $homophonesToInsert[] = [
+                        'word' => $normalized['word'],
+                        'pronunciation' => $normalized['pro'] ?? $normalized['phoneme'] ?? $normalized['pos'],
+                        'definition' => $normalized['definition'],
+                        'examples' => $normalized['example'] ? json_encode([$normalized['example']]) : null,
+                        'is_active' => true,
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ];
+
+                    // Store variants for later (use batch index, not global imported counter)
+                    if (!empty($normalized['homophone']) && is_array($normalized['homophone'])) {
+                        $variantsToInsert[$insertIndex] = $normalized['homophone'];
+                    }
+
+                    $insertIndex++; // Increment batch index
+                    $imported++; // Increment global counter
+                    $existingHomophones[$duplicateKey] = null; // Update cache (ID will be set after insert)
+                }
+
+                // Batch update homophones (for replacements)
+                if (!empty($homophonesToUpdate)) {
+                    foreach ($homophonesToUpdate as $id => $updateData) {
+                        DB::table('homophones')->where('id', $id)->update($updateData);
+
+                        // Delete old variants for this homophone
+                        DB::table('homophone_variants')->where('homophone_id', $id)->delete();
                     }
                 }
 
-                $imported++;
-                $existingWords[$homophone->id] = $homophone->word; // Update cache
-            }
-        });
+                // Batch insert homophones (much faster than individual inserts)
+                if (!empty($homophonesToInsert)) {
+                    // Insert homophones individually to get their IDs (still in same transaction)
+                    $insertedIds = [];
+                    foreach ($homophonesToInsert as $homophoneData) {
+                        $id = DB::table('homophones')->insertGetId($homophoneData);
+                        $insertedIds[] = $id;
+                    }
 
-        return redirect()->route('homophones.index')
-            ->with('success', "Import complete! Imported: {$imported}, Skipped: {$skipped}. Time: {$estimatedSeconds}s for {$count} items.");
+                    // Prepare variants for batch insert using ACTUAL inserted IDs
+                    $allVariants = [];
+                    foreach ($variantsToInsert as $index => $variants) {
+                        // Use the actual inserted ID at this index
+                        if (!isset($insertedIds[$index])) {
+                            \Log::error("Missing inserted ID", [
+                                'index' => $index,
+                                'insertedCount' => count($insertedIds),
+                            ]);
+                            continue;
+                        }
+
+                        $homophoneId = $insertedIds[$index];
+                        foreach ($variants as $sortOrder => $variant) {
+                            if (!empty($variant)) {
+                                $allVariants[] = [
+                                    'homophone_id' => $homophoneId,
+                                    'variant_word' => $variant,
+                                    'sort_order' => $sortOrder,
+                                    'created_at' => $now,
+                                    'updated_at' => $now,
+                                ];
+                            }
+                        }
+                    }
+
+                    // Batch insert variants
+                    if (!empty($allVariants)) {
+                        DB::table('homophone_variants')->insert($allVariants);
+                    }
+                }
+            });
+
+                // Optional: Log progress for debugging
+                \Log::info("Homophone import progress: Chunk " . ($chunkIndex + 1) . "/{$totalChunks} completed. Imported: {$imported}, Skipped: {$skipped}");
+            }
+
+            \Log::info("Homophone import completed successfully", [
+                'imported' => $imported,
+                'skipped' => $skipped,
+                'replaced' => $replaced,
+            ]);
+
+            $message = "Import complete! Imported: {$imported}, Skipped: {$skipped}";
+            if ($replaced > 0) {
+                $message .= ", Replaced: {$replaced}";
+            }
+            $message .= " out of {$count} items.";
+
+            return redirect()->route('homophones.index')->with('success', $message);
+
+        } catch (\Exception $e) {
+            \Log::error('Homophone import failed during processing', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'imported_so_far' => $imported,
+                'skipped_so_far' => $skipped,
+            ]);
+
+            return back()->withErrors([
+                'import' => 'Import failed after processing ' . $imported . ' items. Error: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * Scan for duplicates in the import data
+     */
+    private function scanForDuplicates($homophones, $normalize)
+    {
+        // Build existing homophones map (word + pronunciation)
+        $existingHomophones = Homophone::select('id', 'word', 'pronunciation', 'definition')
+            ->get()
+            ->mapWithKeys(function ($item) use ($normalize) {
+                $key = $normalize($item->word) . '|' . $normalize($item->pronunciation ?? '');
+                return [$key => [
+                    'id' => $item->id,
+                    'word' => $item->word,
+                    'pronunciation' => $item->pronunciation,
+                    'definition' => $item->definition,
+                ]];
+            })
+            ->toArray();
+
+        $duplicates = [];
+
+        foreach ($homophones as $index => $data) {
+            $word = $data['word'] ?? $data['Word'] ?? null;
+            $pronunciation = $data['pro'] ?? $data['Pronunciation'] ?? $data['pos'] ?? $data['POS'] ?? $data['phoneme'] ?? $data['Phoneme'] ?? null;
+            $definition = $data['definition'] ?? $data['Definition'] ?? null;
+
+            if (empty($word)) {
+                continue;
+            }
+
+            $duplicateKey = $normalize($word) . '|' . $normalize($pronunciation ?? '');
+
+            if (isset($existingHomophones[$duplicateKey])) {
+                $existing = $existingHomophones[$duplicateKey];
+                $duplicates[] = [
+                    'key' => $duplicateKey,
+                    'index' => $index,
+                    'new' => [
+                        'word' => $word,
+                        'pronunciation' => $pronunciation,
+                        'definition' => $definition,
+                    ],
+                    'existing' => $existing,
+                ];
+            }
+        }
+
+        return response()->json([
+            'has_duplicates' => count($duplicates) > 0,
+            'duplicate_count' => count($duplicates),
+            'duplicates' => $duplicates,
+            'total_items' => count($homophones),
+        ]);
     }
 
     public function clear()
     {
-        // OPTIMIZED: Use database truncate instead of JSON file
-        DB::transaction(function () {
-            HomophoneVariant::query()->delete();
-            Homophone::query()->delete();
-        });
+        $this->homophoneService->clearAll();
 
         return redirect()->route('homophones.index')->with('success', 'All homophones cleared from database.');
     }

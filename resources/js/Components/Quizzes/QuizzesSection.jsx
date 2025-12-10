@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { CheckCircle2, TrendingUp, Target, Brain, Zap, Rocket } from "lucide-react";
 import { usePage, Link } from "@inertiajs/react";
-import Chart from "react-apexcharts";
+// TODO: Migrate to recharts
+// import Chart from "react-apexcharts";
 
 export default function QuizzesSection() {
     const { auth, quizSummary, quizDaily, recentQuizzes: recentFromProps, quizChange = [] } = usePage().props;

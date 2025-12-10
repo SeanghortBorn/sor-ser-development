@@ -210,10 +210,10 @@ export default function ArticleSettingsIndex({ auth, articles, articleOptions })
                                                         </select>
                                                     </div>
 
-                                                    {/* Completion Threshold - NEW */}
+                                                    {/* Completion Threshold - OPTIONAL */}
                                                     <div>
                                                         <label className="block text-sm font-medium mb-2">
-                                                            Minimum Accuracy % to Unlock Next
+                                                            Minimum Accuracy % to Unlock Next <span className="text-gray-400">(Optional)</span>
                                                         </label>
                                                         <input
                                                             type="number"
@@ -221,11 +221,12 @@ export default function ArticleSettingsIndex({ auth, articles, articleOptions })
                                                             max="100"
                                                             step="1"
                                                             className="w-full border rounded px-3 py-2"
-                                                            value={currentData?.min_completion_percentage ?? 70}
-                                                            onChange={(e) => handleFieldChange(article.id, 'min_completion_percentage', parseFloat(e.target.value))}
+                                                            value={currentData?.min_completion_percentage ?? ''}
+                                                            onChange={(e) => handleFieldChange(article.id, 'min_completion_percentage', e.target.value ? parseFloat(e.target.value) : null)}
+                                                            placeholder="Optional"
                                                         />
                                                         <p className="text-xs text-gray-500 mt-1">
-                                                            Users must achieve this accuracy % to unlock the next article
+                                                            Users must achieve this accuracy % to unlock the next article (optional)
                                                         </p>
                                                     </div>
 
@@ -249,23 +250,24 @@ export default function ArticleSettingsIndex({ auth, articles, articleOptions })
                                                         </p>
                                                     </div>
 
-                                                    {/* Minimum Typed Words Percentage - NEW */}
+                                                    {/* Minimum Typed Words Percentage - REQUIRED */}
                                                     <div>
                                                         <label className="block text-sm font-medium mb-2">
-                                                            Minimum Typed Words % to Unlock Next
+                                                            Minimum Typed Words % to Unlock Next <span className="text-red-500">*</span>
                                                         </label>
                                                         <input
                                                             type="number"
                                                             min="0"
                                                             max="100"
                                                             step="1"
+                                                            required
                                                             className="w-full border rounded px-3 py-2"
-                                                            value={currentData?.min_typed_words_percentage ?? ''}
-                                                            onChange={(e) => handleFieldChange(article.id, 'min_typed_words_percentage', e.target.value ? parseFloat(e.target.value) : null)}
-                                                            placeholder="Optional (e.g., 70 for 70%)"
+                                                            value={currentData?.min_typed_words_percentage ?? 70}
+                                                            onChange={(e) => handleFieldChange(article.id, 'min_typed_words_percentage', parseFloat(e.target.value))}
+                                                            placeholder="e.g., 70 for 70%"
                                                         />
                                                         <p className="text-xs text-gray-500 mt-1">
-                                                            Minimum percentage of article words that must be typed (e.g., 70% = 70 words out of 100)
+                                                            Minimum percentage of article words that must be typed (e.g., 70% = 70 words out of 100) - REQUIRED
                                                         </p>
                                                     </div>
 

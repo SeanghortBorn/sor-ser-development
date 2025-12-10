@@ -15,7 +15,14 @@ class UserController extends Controller
 {
     public function index(Request $request)
     {
+        $showTrashed = $request->boolean('trashed');
+
         $baseQuery = User::with(['roles', 'permissions']);
+
+        // Show deleted users if requested
+        if ($showTrashed) {
+            $baseQuery->onlyTrashed();
+        }
 
         // Apply search filter to base query
         if ($request->filled('search')) {
@@ -27,7 +34,7 @@ class UserController extends Controller
         }
 
         // Get paginated results
-        $users = $baseQuery->paginate(10)->appends($request->only('search'));
+        $users = $baseQuery->paginate(10)->appends($request->only(['search', 'trashed']));
         $permissions = Permission::all();
 
         // Calculate stats for TOTAL users in database (ignore search filter)
@@ -46,6 +53,7 @@ class UserController extends Controller
             'employees' => $employeeCount,
             'students' => $studentCount,
             'normal' => $normalCount,
+            'trashed' => User::onlyTrashed()->count(),
         ];
 
         return Inertia::render('Users/Index', [
@@ -53,6 +61,7 @@ class UserController extends Controller
             'permissions' => $permissions,
             'search' => $request->input('search', ''),
             'userStats' => $userStats,
+            'showTrashed' => $showTrashed,
         ]);
     }
 
@@ -129,6 +138,11 @@ class UserController extends Controller
     {
         $user = User::findOrFail($id);
 
+        // Prevent admin from editing own roles
+        if (auth()->id() == $id && $request->has('roles')) {
+            return back()->withErrors(['roles' => 'You cannot modify your own roles.']);
+        }
+
         $validated = Validator::make($request->all(), [
             'name' => ['required', 'string', 'max:255'],
             'email' => [
@@ -157,12 +171,20 @@ class UserController extends Controller
             $user->syncRoles([]); // Remove all roles if none provided
         }
 
-        return to_route('users.index')->with("success", "User updated successfully");
+        return back()->with("success", "User updated successfully");
     }
 
     public function updatePermissions(Request $request, $id)
     {
         $user = User::findOrFail($id);
+
+        // Prevent admin from editing own permissions
+        if (auth()->id() == $id) {
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => 'You cannot modify your own permissions.'], 403);
+            }
+            return back()->withErrors(['permissions' => 'You cannot modify your own permissions.']);
+        }
 
         // Accept empty array or missing permissions key
         $validated = $request->validate([
@@ -205,6 +227,14 @@ class UserController extends Controller
         $user = User::findOrFail($id);
         $user->delete();
 
-        return to_route('users.index')->with("success", "User Deleted successfully");
+        return to_route('users.index')->with("success", "User deleted successfully");
+    }
+
+    public function restore($id)
+    {
+        $user = User::onlyTrashed()->findOrFail($id);
+        $user->restore();
+
+        return back()->with("success", "User restored successfully");
     }
 }

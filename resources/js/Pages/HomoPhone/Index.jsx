@@ -22,6 +22,10 @@ export default function HomophonesPage({ homophones, search = "" }) {
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState(search);
     const [selectedImportFile, setSelectedImportFile] = useState(null);
+    const [showDuplicateModal, setShowDuplicateModal] = useState(false);
+    const [duplicates, setDuplicates] = useState([]);
+    const [duplicateResolutions, setDuplicateResolutions] = useState({});
+    const [parsedData, setParsedData] = useState(null);
     const fileInputRef = useRef();
     const dropdownRef = useRef(null);
 
@@ -51,6 +55,34 @@ export default function HomophonesPage({ homophones, search = "" }) {
         setSelectedImportFile(file || null);
     };
 
+    // Scan for duplicates first
+    const scanForDuplicates = async (data) => {
+        try {
+            const response = await axios.post(
+                route("homophones.import") + "?scan=true",
+                data,
+                {
+                    headers: data instanceof FormData
+                        ? { "Content-Type": "multipart/form-data" }
+                        : { "Content-Type": "application/json" },
+                }
+            );
+
+            if (response.data.has_duplicates) {
+                setDuplicates(response.data.duplicates);
+                setShowDuplicateModal(true);
+                setImportProcessing(false);
+                return true; // Has duplicates
+            }
+            return false; // No duplicates
+        } catch (error) {
+            console.error("Duplicate scan error:", error);
+            setImportError("Failed to scan for duplicates.");
+            setImportProcessing(false);
+            return false;
+        }
+    };
+
     // Import when user clicks Import button
     const handleImportClick = async (e) => {
         e.preventDefault();
@@ -60,27 +92,13 @@ export default function HomophonesPage({ homophones, search = "" }) {
 
         try {
             const file = selectedImportFile;
+            let dataToScan = null;
+            let homophonesData = null;
+
             if (file.name.endsWith(".json")) {
                 const formData = new FormData();
                 formData.append("file", file);
-
-                router.post(route("homophones.import"), formData, {
-                    forceFormData: true,
-                    headers: {
-                        "Content-Type": "multipart/form-data",
-                    },
-                    onFinish: () => {
-                        setImportProcessing(false);
-                        setShowImportModal(false);
-                        setSelectedImportFile(null);
-                        if (fileInputRef.current)
-                            fileInputRef.current.value = "";
-                    },
-                    onError: () => {
-                        setImportError("Import failed.");
-                        setImportProcessing(false);
-                    },
-                });
+                dataToScan = formData;
             } else if (
                 file.name.endsWith(".xlsx") ||
                 file.name.endsWith(".xls")
@@ -104,23 +122,8 @@ export default function HomophonesPage({ homophones, search = "" }) {
                               .filter(Boolean)
                         : [],
                 }));
-                router.post(
-                    route("homophones.import"),
-                    { homophones: importedData },
-                    {
-                        onFinish: () => {
-                            setImportProcessing(false);
-                            setShowImportModal(false);
-                            setSelectedImportFile(null);
-                            if (fileInputRef.current)
-                                fileInputRef.current.value = "";
-                        },
-                        onError: (err) => {
-                            setImportError("Import failed.");
-                            setImportProcessing(false);
-                        },
-                    }
-                );
+                homophonesData = importedData;
+                dataToScan = { homophones: importedData };
             } else {
                 setImportError(
                     "Unsupported file type. Please upload .json or .xlsx/.xls file."
@@ -128,7 +131,18 @@ export default function HomophonesPage({ homophones, search = "" }) {
                 setImportProcessing(false);
                 return;
             }
+
+            // Store parsed data for later use
+            setParsedData({ dataToScan, homophonesData, file });
+
+            // Scan for duplicates
+            const hasDuplicates = await scanForDuplicates(dataToScan);
+            if (!hasDuplicates) {
+                // No duplicates, proceed with import
+                performImport(dataToScan, homophonesData, file);
+            }
         } catch (err) {
+            console.error("Import error:", err);
             setImportError("Failed to parse file.");
             setImportProcessing(false);
         }
@@ -149,6 +163,73 @@ export default function HomophonesPage({ homophones, search = "" }) {
                 },
             }
         );
+    };
+
+    // Perform the actual import
+    const performImport = (dataToScan, homophonesData, file) => {
+        const importData = homophonesData
+            ? { homophones: homophonesData, duplicate_resolutions: duplicateResolutions }
+            : dataToScan;
+
+        // Add duplicate_resolutions to FormData if needed
+        if (dataToScan instanceof FormData && Object.keys(duplicateResolutions).length > 0) {
+            dataToScan.append('duplicate_resolutions', JSON.stringify(duplicateResolutions));
+        }
+
+        const requestData = homophonesData ? importData : dataToScan;
+
+        router.post(route("homophones.import"), requestData, {
+            forceFormData: requestData instanceof FormData,
+            headers: requestData instanceof FormData
+                ? { "Content-Type": "multipart/form-data" }
+                : undefined,
+            onFinish: () => {
+                setImportProcessing(false);
+                setShowImportModal(false);
+                setShowDuplicateModal(false);
+                setSelectedImportFile(null);
+                setDuplicateResolutions({});
+                setParsedData(null);
+                if (fileInputRef.current) fileInputRef.current.value = "";
+            },
+            onError: () => {
+                setImportError("Import failed.");
+                setImportProcessing(false);
+            },
+        });
+    };
+
+    // Handle duplicate resolution
+    const handleDuplicateResolution = (key, resolution) => {
+        setDuplicateResolutions(prev => ({
+            ...prev,
+            [key]: resolution
+        }));
+    };
+
+    // Set all duplicates to replace
+    const handleReplaceAll = () => {
+        const allResolutions = {};
+        duplicates.forEach(dup => {
+            allResolutions[dup.key] = 'replace';
+        });
+        setDuplicateResolutions(allResolutions);
+    };
+
+    // Set all duplicates to skip
+    const handleSkipAll = () => {
+        const allResolutions = {};
+        duplicates.forEach(dup => {
+            allResolutions[dup.key] = 'skip';
+        });
+        setDuplicateResolutions(allResolutions);
+    };
+
+    // Proceed with import after resolving duplicates
+    const proceedWithImport = () => {
+        setImportProcessing(true);
+        const { dataToScan, homophonesData, file } = parsedData;
+        performImport(dataToScan, homophonesData, file);
     };
 
     const headWeb = "Homophones List";
@@ -583,6 +664,144 @@ export default function HomophonesPage({ homophones, search = "" }) {
                                     </button>
                                 </div>
                             </form>
+                        </Modal>
+
+                        {/* Duplicate Resolution Modal */}
+                        <Modal
+                            show={showDuplicateModal}
+                            onClose={() => {
+                                setShowDuplicateModal(false);
+                                setDuplicates([]);
+                                setDuplicateResolutions({});
+                                setImportProcessing(false);
+                            }}
+                            maxWidth="4xl"
+                        >
+                            <div className="p-6">
+                                <h2 className="text-lg font-semibold text-gray-800 mb-2">
+                                    Duplicate Homophones Found
+                                </h2>
+                                <p className="text-gray-700 mb-4">
+                                    Found {duplicates.length} duplicate(s). Choose whether to replace the existing entries or skip importing them.
+                                </p>
+
+                                {/* Bulk Actions */}
+                                <div className="flex gap-2 mb-4">
+                                    <button
+                                        type="button"
+                                        onClick={handleReplaceAll}
+                                        className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition"
+                                    >
+                                        Replace All
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={handleSkipAll}
+                                        className="px-4 py-2 bg-gray-600 text-white text-sm rounded-lg hover:bg-gray-700 transition"
+                                    >
+                                        Skip All
+                                    </button>
+                                </div>
+
+                                {/* Duplicates List */}
+                                <div className="max-h-96 overflow-y-auto space-y-4 mb-6">
+                                    {duplicates.map((dup, index) => (
+                                        <div
+                                            key={index}
+                                            className="border border-gray-200 rounded-lg p-4 bg-gray-50"
+                                        >
+                                            <div className="grid grid-cols-2 gap-4 mb-3">
+                                                {/* Existing */}
+                                                <div>
+                                                    <h4 className="font-medium text-sm text-gray-700 mb-2">
+                                                        Existing in Database
+                                                    </h4>
+                                                    <div className="bg-white p-3 rounded border">
+                                                        <div className="text-sm">
+                                                            <strong>Word:</strong> {dup.existing.word}
+                                                        </div>
+                                                        <div className="text-sm">
+                                                            <strong>Pronunciation:</strong> {dup.existing.pronunciation || 'N/A'}
+                                                        </div>
+                                                        <div className="text-sm text-gray-600">
+                                                            <strong>Definition:</strong> {dup.existing.definition}
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {/* New */}
+                                                <div>
+                                                    <h4 className="font-medium text-sm text-gray-700 mb-2">
+                                                        New from Import
+                                                    </h4>
+                                                    <div className="bg-white p-3 rounded border border-blue-300">
+                                                        <div className="text-sm">
+                                                            <strong>Word:</strong> {dup.new.word}
+                                                        </div>
+                                                        <div className="text-sm">
+                                                            <strong>Pronunciation:</strong> {dup.new.pronunciation || 'N/A'}
+                                                        </div>
+                                                        <div className="text-sm text-gray-600">
+                                                            <strong>Definition:</strong> {dup.new.definition}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Action Buttons */}
+                                            <div className="flex gap-2">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleDuplicateResolution(dup.key, 'replace')}
+                                                    className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition ${
+                                                        duplicateResolutions[dup.key] === 'replace'
+                                                            ? 'bg-blue-600 text-white'
+                                                            : 'bg-white text-blue-600 border border-blue-600 hover:bg-blue-50'
+                                                    }`}
+                                                >
+                                                    Replace
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleDuplicateResolution(dup.key, 'skip')}
+                                                    className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition ${
+                                                        duplicateResolutions[dup.key] === 'skip'
+                                                            ? 'bg-gray-600 text-white'
+                                                            : 'bg-white text-gray-600 border border-gray-600 hover:bg-gray-50'
+                                                    }`}
+                                                >
+                                                    Skip
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* Modal Actions */}
+                                <div className="flex justify-between gap-3">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setShowDuplicateModal(false);
+                                            setShowImportModal(true);
+                                            setDuplicates([]);
+                                            setDuplicateResolutions({});
+                                        }}
+                                        className="rounded-[10px] border-2 border-gray-300 px-8 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold"
+                                        disabled={importProcessing}
+                                    >
+                                        Back
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={proceedWithImport}
+                                        className="rounded-[10px] px-8 py-1 bg-green-600 text-white font-semibold hover:bg-green-700 transition"
+                                        disabled={importProcessing || Object.keys(duplicateResolutions).length === 0}
+                                    >
+                                        {importProcessing ? "Importing..." : "Proceed with Import"}
+                                    </button>
+                                </div>
+                            </div>
                         </Modal>
 
                         {/* Pagination */}

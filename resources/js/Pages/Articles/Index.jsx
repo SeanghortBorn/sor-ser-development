@@ -272,6 +272,19 @@ export default function ArticlesPage({ articles, search = "" }) {
                                                                 View
                                                             </button>
                                                         )}
+                                                        {can[
+                                                            "article-list"
+                                                        ] && (
+                                                            <Link
+                                                                href={route(
+                                                                    "articles.completion-stats",
+                                                                    item.id
+                                                                )}
+                                                                className="px-3 py-1 rounded bg-purple-500 text-white text-xs hover:bg-purple-600"
+                                                            >
+                                                                Stats
+                                                            </Link>
+                                                        )}
                                                         {can["article-edit"] &&
                                                             can[
                                                                 "article-list"
