@@ -2,19 +2,19 @@
 import '../css/app.css';
 import './bootstrap';
 
-// Import jQuery and make it globally available for Bootstrap and AdminLTE
+// Import Font Awesome CSS to ensure fonts are bundled
+import '@fortawesome/fontawesome-free/css/all.min.css';
+
+// Import jQuery and make it globally available (needed by some components)
 import jQuery from 'jquery';
 window.$ = window.jQuery = jQuery;
-
-// Import Bootstrap's and AdminLTE's JavaScript
-import 'bootstrap';
-import 'admin-lte';
 
 import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createRoot } from 'react-dom/client';
+import { BRAND_CONSTANTS } from './constants/brand';
 
-const appName = import.meta.env.VITE_APP_NAME || 'Sor-Ser';
+const appName = import.meta.env.VITE_APP_NAME || BRAND_CONSTANTS.NAME.SHORT;
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,

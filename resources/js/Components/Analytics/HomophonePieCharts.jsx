@@ -1,7 +1,10 @@
 import React, { useState } from "react";
-// TODO: Migrate to recharts
-// import { ResponsivePie } from "@nivo/pie";
-// import { ResponsiveRadar } from "@nivo/radar";
+import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Legend, ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts';
+
+// Ensure React is available globally for recharts
+if (typeof window !== 'undefined' && !window.React) {
+    window.React = React;
+}
 
 const HomophoneCharts = () => {
     const [tooltip, setTooltip] = useState({
@@ -72,45 +75,27 @@ const HomophoneCharts = () => {
 
                 {/* Radar Chart */}
                 <div className="flex-1">
-                    <ResponsiveRadar
-                        data={radarData}
-                        keys={["Current Week"]}
-                        indexBy="metric"
-                        maxValue={100} // since values are percentages
-                        margin={{ top: 20, right: 80, bottom: 30, left: 80 }}
-                        curve="linearClosed"
-                        borderWidth={2}
-                        borderColor="#93c5fd" // blue-300 border
-                        gridLevels={5}
-                        gridShape="circular"
-                        gridLabelOffset={16}
-                        enableDots={true}
-                        dotSize={6}
-                        dotColor="#93c5fd" // blue-300 dots
-                        dotBorderWidth={2}
-                        dotBorderColor="#2563eb" // blue-600 border for contrast
-                        enableDotLabel={true}
-                        dotLabel="value"
-                        dotLabelYOffset={-12}
-                        colors={["#93c5fd"]} // blue-300 fill
-                        fillOpacity={0.6} // adjust transparency
-                        blendMode="multiply"
-                        animate={true}
-                        motionConfig="wobbly"
-                        legends={[
-                            {
-                                anchor: "bottom",
-                                direction: "row",
-                                translateX: 0,
-                                translateY: 40,
-                                itemWidth: 100,
-                                itemHeight: 18,
-                                itemTextColor: "#4B5563",
-                                symbolSize: 18,
-                                symbolShape: "circle",
-                            },
-                        ]}
-                    />
+                    <ResponsiveContainer width="100%" height="100%">
+                        <RadarChart data={radarData}>
+                            <PolarGrid stroke="#E5E7EB" />
+                            <PolarAngleAxis dataKey="metric" tick={{ fill: '#6B7280', fontSize: 12 }} />
+                            <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fill: '#9CA3AF', fontSize: 10 }} />
+                            <Radar
+                                name="Current Week"
+                                dataKey="Current Week"
+                                stroke="#93c5fd"
+                                fill="#93c5fd"
+                                fillOpacity={0.6}
+                                strokeWidth={2}
+                            />
+                            <Legend
+                                verticalAlign="bottom"
+                                height={36}
+                                iconType="circle"
+                            />
+                            <Tooltip />
+                        </RadarChart>
+                    </ResponsiveContainer>
                 </div>
             </div>
 
@@ -129,48 +114,35 @@ const HomophoneCharts = () => {
                 </div>
 
                 {/* Donut Chart */}
-                <div className="flex flex-col items-center justify-center flex-1">
+                <div className="flex flex-col items-center justify-center flex-1 relative">
                     <div className="w-full h-[400px]">
-                        <ResponsivePie
-                            data={data}
-                            margin={{
-                                top: 40,
-                                right: 80,
-                                bottom: 80,
-                                left: 80,
-                            }}
-                            innerRadius={0.5} // donut shape
-                            padAngle={0.6}
-                            cornerRadius={3}
-                            activeOuterRadiusOffset={8}
-                            arcLinkLabelsSkipAngle={10}
-                            arcLinkLabelsTextColor="#333333"
-                            arcLinkLabelsThickness={2}
-                            arcLinkLabelsColor="#93c5fd"
-                            arcLabelsSkipAngle={10}
-                            arcLabelsTextColor={{
-                                from: "color",
-                                modifiers: [["darker", 2]],
-                            }}
-                            legends={[
-                                {
-                                    anchor: "bottom",
-                                    direction: "row",
-                                    justify: false,
-                                    translateX: 0,
-                                    translateY: 56,
-                                    itemsSpacing: 10,
-                                    itemWidth: 100,
-                                    itemHeight: 18,
-                                    itemTextColor: "#4B5563", // gray-700
-                                    symbolSize: 18,
-                                    symbolShape: "circle",
-                                },
-                            ]}
-                        />
+                        <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                                <Pie
+                                    data={data}
+                                    cx="50%"
+                                    cy="50%"
+                                    innerRadius={80}
+                                    outerRadius={120}
+                                    paddingAngle={2}
+                                    dataKey="value"
+                                    label={({ label, value }) => `${label}: ${value}`}
+                                >
+                                    {data.map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={entry.color} />
+                                    ))}
+                                </Pie>
+                                <Tooltip />
+                                <Legend
+                                    verticalAlign="bottom"
+                                    height={36}
+                                    iconType="circle"
+                                />
+                            </PieChart>
+                        </ResponsiveContainer>
                     </div>
                     {/* Center label */}
-                    <div className="absolute flex -mt-12 flex-col items-center justify-center pointer-events-none">
+                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center pointer-events-none">
                         <span className="text-2xl font-bold text-gray-800">
                             100%
                         </span>

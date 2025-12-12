@@ -3,9 +3,9 @@ import { Head, usePage, Link } from "@inertiajs/react";
 import axios from "axios";
 import HeaderNavbar from "@/Components/Navbars/HeaderNavbar";
 import Footer from "@/Components/Footer/Footer";
-import GrammarCheckSection from "@/Components/GrammarChecks/GrammarCheckSection";
-import GrammarCheckHeader from "@/Components/GrammarChecks/GrammarCheckHeader";
-import SidebarCheckGrammar from "@/Components/GrammarChecks/SidebarCheckGrammar";
+import HomophoneCheck from "@/Components/HomophoneChecks/HomophoneCheck";
+import HomophoneCheckFooter from "@/Components/HomophoneChecks/HomophoneCheckFooter";
+import HomophoneSidebar from "@/Components/HomophoneChecks/HomophoneSidebar";
 import Modal from "@/Components/Modal";
 import ErrorBoundary from "@/Components/ErrorBoundary";
 import { ComponentLoader } from "@/Components/LoadingFallback";
@@ -15,6 +15,8 @@ import homophoneApi from "@/services/homophoneApi";
 import { useHomophoneStats } from "@/hooks/useHomophoneStats";
 import { useAudioPlayer } from "@/hooks/useAudioPlayer";
 import { calculateWordCount, calculateReadingTime } from "@/utils/homophoneUtils";
+import PageContainer from "@/Components/Shared/PageContainer";
+import { BRAND_CONSTANTS } from "@/constants/brand";
 
 // Lazy load modals for better performance
 const DetailsModal = lazyLoad(
@@ -644,10 +646,10 @@ export default function Index({ articles: initialArticles = [], userRole }) {
         <>
             <Head title="Homophone Check" />
             <HeaderNavbar />
-            <GrammarCheckSection />
+            <HomophoneCheck />
 
             <section className="relative py-4">
-                <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
+                <PageContainer>
                     <div
                         className={`flex flex-row gap-4 transition-all duration-300 ${
                             showAccountModal ? "blur-sm" : ""
@@ -870,7 +872,7 @@ export default function Index({ articles: initialArticles = [], userRole }) {
                                 </div>
                             }
                         >
-                            <SidebarCheckGrammar
+                            <HomophoneSidebar
                                 text={paragraph}
                                 onReplace={setParagraph}
                                 checkerId={checkerId}
@@ -884,7 +886,7 @@ export default function Index({ articles: initialArticles = [], userRole }) {
                             />
                         </ErrorBoundary>
                     </div>
-                </div>
+                </PageContainer>
             </section>
 
             {/* Modals - Wrapped in Error Boundaries */}
@@ -957,7 +959,7 @@ export default function Index({ articles: initialArticles = [], userRole }) {
                                 Create an account to get started
                             </h2>
                             <p className="text-gray-600 text-md leading-relaxed font-sans">
-                                Create a free SorSer account to start Grammar Checker with AI
+                                Create a free {BRAND_CONSTANTS.NAME.SHORT} account to start Grammar Checker with AI
                             </p>
                             <div className="space-y-3">
                                 <a
@@ -1049,7 +1051,7 @@ export default function Index({ articles: initialArticles = [], userRole }) {
                 </form>
             </Modal>
 
-            <GrammarCheckHeader />
+            <HomophoneCheckFooter />
             <Footer />
         </>
     );

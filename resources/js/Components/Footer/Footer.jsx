@@ -1,10 +1,14 @@
 import React from "react";
 import { Link } from "@inertiajs/react";
+import AppLogo from '@/Components/Shared/AppLogo';
+import PageContainer from '@/Components/Shared/PageContainer';
+import { BRAND_CONSTANTS } from '@/constants/brand';
 
 export default function Footer() {
     return (
-        <footer className="bg-gradient-to-b from-gray-800 to-gray-900 text-gray-300 pt-12 pb-6 px-8 w-full">
-            <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-12 pb-8">
+        <footer className="bg-gradient-to-b from-gray-800 to-gray-900 text-gray-300 pt-12 pb-6 w-full">
+            <PageContainer>
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-12 pb-8">
                 <div className="flex flex-col gap-2">
                     <span className="text-[16px] font-semibold mb-4 text-gray-400">
                         INFORMATION
@@ -51,21 +55,16 @@ export default function Footer() {
                         href="/"
                         className="flex items-center gap-2 flex-shrink-0"
                     >
-                        <div className="relative -mt-2">
-                            <img
-                                src="/images/sor-ser logo.png"
-                                alt="Sor-Ser logo"
-                                className="h-20 w-20 invert brightness-0"
-                            />
-                        </div>
+                        <AppLogo size="xl" variant="white" />
                     </Link>
                 </div>
-            </div>
-            <hr className="border-gray-700 mb-6" />
-            <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center text-gray-400 text-[16px] px-2">
-                <span>© 2025 Sor Ser</span>
-                <span>All rights reserved.</span>
-            </div>
+                </div>
+                <hr className="border-gray-700 my-6" />
+                <div className="flex flex-col md:flex-row justify-between items-center text-gray-400 text-[16px]">
+                    <span>{BRAND_CONSTANTS.COPYRIGHT.FULL}</span>
+                    {/* <span>{BRAND_CONSTANTS.NAME.SHORT}</span> */}
+                </div>
+            </PageContainer>
         </footer>
     );
 }

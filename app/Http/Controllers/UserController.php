@@ -7,9 +7,10 @@ use Inertia\Inertia;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
 use App\Models\User;
+use App\Http\Requests\User\StoreUserRequest;
+use App\Http\Requests\User\UpdateUserRequest;
+use App\Http\Requests\User\UpdatePermissionsRequest;
 
 class UserController extends Controller
 {
@@ -81,21 +82,9 @@ class UserController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(StoreUserRequest $request)
     {
-        $validated = Validator::make($request->all(), [
-            'name' => ['required', 'string', 'max:255'],
-            'email' => [
-                'required',
-                'string',
-                'email',
-                'max:255',
-                Rule::unique('users', 'email'),
-            ],
-            'password' => ['required', 'string', 'min:8'],
-            'roles' => ['nullable', 'array'],
-            'roles.*' => ['exists:roles,id'],
-        ])->validate();
+        $validated = $request->validated();
 
         $user = User::create([
             'name' => $validated['name'],
@@ -134,7 +123,7 @@ class UserController extends Controller
         ]);
     }
 
-    public function update(Request $request, $id)
+    public function update(UpdateUserRequest $request, $id)
     {
         $user = User::findOrFail($id);
 
@@ -143,19 +132,7 @@ class UserController extends Controller
             return back()->withErrors(['roles' => 'You cannot modify your own roles.']);
         }
 
-        $validated = Validator::make($request->all(), [
-            'name' => ['required', 'string', 'max:255'],
-            'email' => [
-                'required',
-                'string',
-                'email',
-                'max:255',
-                Rule::unique('users', 'email')->ignore($user->id),
-            ],
-            'password' => ['nullable', 'string', 'min:8'],
-            'roles' => ['nullable', 'array'],
-            'roles.*' => ['integer', 'exists:roles,id'],
-        ])->validate();
+        $validated = $request->validated();
 
         $user->name = $validated['name'];
         $user->email = $validated['email'];
@@ -174,7 +151,7 @@ class UserController extends Controller
         return back()->with("success", "User updated successfully");
     }
 
-    public function updatePermissions(Request $request, $id)
+    public function updatePermissions(UpdatePermissionsRequest $request, $id)
     {
         $user = User::findOrFail($id);
 
@@ -186,11 +163,7 @@ class UserController extends Controller
             return back()->withErrors(['permissions' => 'You cannot modify your own permissions.']);
         }
 
-        // Accept empty array or missing permissions key
-        $validated = $request->validate([
-            'permissions' => ['nullable', 'array'],
-            'permissions.*' => ['integer', 'exists:permissions,id'],
-        ]);
+        $validated = $request->validated();
 
         // If permissions is not present, treat as empty array
         $permissions = $validated['permissions'] ?? [];

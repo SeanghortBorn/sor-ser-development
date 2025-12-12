@@ -31,6 +31,11 @@ class AppServiceProvider extends ServiceProvider
     {
         Vite::prefetch(concurrency: 3);
 
+        // Register Vite Manifest Helper
+        if (file_exists(app_path('Helpers/ViteManifestHelper.php'))) {
+            require_once app_path('Helpers/ViteManifestHelper.php');
+        }
+
         // Register event listeners
         Event::listen(ArticleCompleted::class, UpdateUserProgress::class . '@handleArticleCompleted');
         Event::listen(ArticleCompleted::class, UnlockNextArticle::class);

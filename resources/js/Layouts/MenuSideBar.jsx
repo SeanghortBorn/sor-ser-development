@@ -1,6 +1,8 @@
 import { Link, usePage } from "@inertiajs/react";
 import { useEffect, useState } from "react";
 import { Settings, Shield } from 'lucide-react';
+import AppLogo from '@/Components/Shared/AppLogo';
+import { BRAND_CONSTANTS } from '@/constants/brand';
 
 function MenuGroup({ label, icon, children, active }) {
     const [open, setOpen] = useState(active);
@@ -343,19 +345,12 @@ export default function MenuSideBar({ lang, setLang }) {
                         className="flex items-center gap-2 flex-shrink-0"
                     >
                         <div className="relative -mt-2">
-                            <img
-                                src="/images/sor-ser logo.png"
-                                alt="Sor-Ser logo"
-                                className="h-9 w-9"
-                                style={{
-                                    filter: "brightness(0) saturate(100%) invert(21%) sepia(94%) saturate(2783%) hue-rotate(210deg) brightness(96%) contrast(97%)",
-                                }}
-                            />
+                            <AppLogo size="md" variant="blue" />
                         </div>
                     </Link>
                     <div className="flex-1">
                         <div className="text-base font-semibold text-blue-700 leading-tight">
-                            Sor-Ser
+                            {BRAND_CONSTANTS.NAME.SHORT}
                         </div>
                         <div className="text-xs text-gray-500 leading-tight">
                             Application
@@ -407,86 +402,83 @@ export default function MenuSideBar({ lang, setLang }) {
 
                     {/* ═══════════════════════════════════════════════════════
                      * Articles (with Article Settings - FIX16)
+                     * SHOW TO ALL USERS
                      * ═══════════════════════════════════════════════════════ */}
-                    {(can["article-list"] || can["article-create"]) && (
-                        <MenuGroup
-                            label={"Articles"}
-                            icon={icons.article}
-                            active={isActive("articles", "article-settings")}
-                        >
+                    <MenuGroup
+                        label={"Articles"}
+                        icon={icons.article}
+                        active={isActive("articles", "article-settings")}
+                    >
+                        <MenuItem
+                            href={route("articles.index")}
+                            label={"Article List"}
+                            active={routeName === "articles.index"}
+                        />
+                        {can["article-create"] && (
                             <MenuItem
-                                href={route("articles.index")}
-                                label={"Article List"}
-                                active={routeName === "articles.index"}
+                                href={route("articles.create")}
+                                label={"Create Article"}
+                                active={routeName === "articles.create"}
                             />
-                            {can["article-create"] && (
-                                <MenuItem
-                                    href={route("articles.create")}
-                                    label={"Create Article"}
-                                    active={routeName === "articles.create"}
-                                />
-                            )}
-                            {/* ═══════════════════════════════════════════
-                             * FIX16: Article Settings (Progression)
-                             * Only show if route exists and user has permission
-                             * ═══════════════════════════════════════════ */}
-                            {can["article-create"] && routeExists('article-settings.index') && (
-                                <MenuItem
-                                    href={safeRoute("article-settings.index")}
-                                    label={"Article Settings"}
-                                    active={routeName === "article-settings.index" || isActive("article-settings")}
-                                />
-                            )}
-                        </MenuGroup>
-                    )}
+                        )}
+                        {/* ═══════════════════════════════════════════
+                         * FIX16: Article Settings (Progression)
+                         * Only show if route exists and user has permission
+                         * ═══════════════════════════════════════════ */}
+                        {can["article-create"] && routeExists('article-settings.index') && (
+                            <MenuItem
+                                href={safeRoute("article-settings.index")}
+                                label={"Article Settings"}
+                                active={routeName === "article-settings.index" || isActive("article-settings")}
+                            />
+                        )}
+                    </MenuGroup>
 
                     {/* ═══════════════════════════════════════════════════════
                      * Homophones
+                     * SHOW TO ALL USERS
                      * ═══════════════════════════════════════════════════════ */}
-                    {(can["homophone-list"] || can["homophone-create"]) && (
-                        <MenuGroup
-                            label={"Homophones"}
-                            icon={icons.homophone}
-                            active={isActive("homophones")}
-                        >
+                    <MenuGroup
+                        label={"Homophones"}
+                        icon={icons.homophone}
+                        active={isActive("homophones")}
+                    >
+                        <MenuItem
+                            href={route("homophones.index")}
+                            label={"Homophone List"}
+                            active={routeName === "homophones.index"}
+                        />
+                        {can["homophone-create"] && (
                             <MenuItem
-                                href={route("homophones.index")}
-                                label={"Homophone List"}
-                                active={routeName === "homophones.index"}
+                                href={route("homophones.create")}
+                                label={"Create Homophone"}
+                                active={routeName === "homophones.create"}
                             />
-                            {can["homophone-create"] && (
-                                <MenuItem
-                                    href={route("homophones.create")}
-                                    label={"Create Homophone"}
-                                    active={routeName === "homophones.create"}
-                                />
-                            )}
-                        </MenuGroup>
-                    )}
+                        )}
+                    </MenuGroup>
 
                     {/* ═══════════════════════════════════════════════════════
                      * Quizzes
+                     * SHOW TO ALL USERS
                      * ═══════════════════════════════════════════════════════ */}
-                    {(can["quiz-list"] || can["quiz-create"]) && (
-                        <MenuGroup
-                            label={"Quizzes"}
-                            icon={icons.quiz}
-                            active={isActive("quizzes")}
-                        >
+                    <MenuGroup
+                        label={"Quizzes"}
+                        icon={icons.quiz}
+                        active={isActive("quizzes")}
+                    >
+                        <MenuItem
+                            href={route("quizzes.index")}
+                            label={"Quiz List"}
+                            active={routeName === "quizzes.index"}
+                        />
+                        {can["quiz-create"] && (
                             <MenuItem
-                                href={route("quizzes.index")}
-                                label={"Quiz List"}
-                                active={routeName === "quizzes.index"}
+                                href={route("quizzes.create")}
+                                label={"Create Quiz"}
+                                active={routeName === "quizzes.create"}
                             />
-                            {can["quiz-create"] && (
-                                <MenuItem
-                                    href={route("quizzes.create")}
-                                    label={"Create Quiz"}
-                                    active={routeName === "quizzes.create"}
-                                />
-                            )}
-                        </MenuGroup>
-                    )}
+                        )}
+                    </MenuGroup>
 
                     {/* ═══════════════════════════════════════════════════════
                      * Authentication Section

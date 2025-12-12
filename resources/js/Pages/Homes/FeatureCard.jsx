@@ -23,17 +23,47 @@ export const FeatureCard = ({ title, bullets, icon }) => (
             </h3>
         </div>
         <ul className="space-y-3 ml-2">
-            {bullets.map((b, i) => (
-                <li
-                    key={i}
-                    className="flex items-start gap-3 text-gray-600 text-sm leading-relaxed"
-                >
-                    <span className="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-blue-500 mt-2" />
-                    <span className="text-gray-500 text-sm font-medium">
-                        {b}
-                    </span>
-                </li>
-            ))}
+            {bullets.map((bullet, i) => {
+                // Check if bullet is an object with main/subs structure
+                if (typeof bullet === 'object' && bullet.main) {
+                    return (
+                        <li key={i} className="space-y-2">
+                            {/* Main bullet point */}
+                            <div className="flex items-start gap-3">
+                                <span className="flex-shrink-0 w-2 h-2 rounded-full bg-blue-500 mt-1.5" />
+                                <span className="text-gray-900 text-sm font-semibold">
+                                    {bullet.main}
+                                </span>
+                            </div>
+                            {/* Sub bullet points */}
+                            {bullet.subs && bullet.subs.length > 0 && (
+                                <ul className="space-y-1.5 ml-5">
+                                    {bullet.subs.map((sub, j) => (
+                                        <li key={j} className="flex items-start gap-2">
+                                            <span className="flex-shrink-0 text-gray-400 text-xs mt-1">•</span>
+                                            <span className="text-gray-500 text-sm font-medium">
+                                                {sub}
+                                            </span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+                        </li>
+                    );
+                }
+                // Fallback for simple string bullets (backward compatible)
+                return (
+                    <li
+                        key={i}
+                        className="flex items-start gap-3 text-gray-600 text-sm leading-relaxed"
+                    >
+                        <span className="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-blue-500 mt-2" />
+                        <span className="text-gray-500 text-sm font-medium">
+                            {bullet}
+                        </span>
+                    </li>
+                );
+            })}
         </ul>
     </div>
 );

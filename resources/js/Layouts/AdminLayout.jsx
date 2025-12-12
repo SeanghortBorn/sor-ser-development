@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
+import "bootstrap/dist/css/bootstrap.min.css";
 import "admin-lte/dist/css/adminlte.min.css";
+import "bootstrap";
 import "admin-lte/dist/js/adminlte.min.js";
 import MenuSideBar from "./MenuSideBar";
 import { Link, usePage } from "@inertiajs/react";

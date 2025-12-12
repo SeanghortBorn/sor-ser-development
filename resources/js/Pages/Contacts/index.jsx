@@ -2,6 +2,7 @@ import Footer from "@/Components/Footer/Footer";
 import HeaderNavbar from "@/Components/Navbars/HeaderNavbar";
 import { Head } from "@inertiajs/react";
 import { useState } from "react";
+import { BRAND_CONSTANTS } from "@/constants/brand";
 
 const Icon = ({ children, className = "w-6 h-6" }) => (
     <svg
@@ -67,13 +68,11 @@ export default function index() {
                                 <h1 className="text-3xl md:text-5xl font-bold leading-tight mb-6 text-white">
                                     Homophones with Khmer{" "}
                                     <span className="bg-gradient-to-r from-orange-400 to-orange-400 bg-clip-text text-transparent">
-                                        Sor Ser
+                                        {BRAND_CONSTANTS.NAME.SHORT_SPACED}
                                     </span>
                                 </h1>
                                 <p className="text-md font-medium text-blue-100 mb-8">
-                                    Have questions or need assistance? Fill out
-                                    the form below and our team will get back to
-                                    you within 24 hours.
+                                    {BRAND_CONSTANTS.COPY.CONTACT_SUBTITLE}
                                 </p>
                                 <div className="flex flex-wrap gap-4">
                                     <a

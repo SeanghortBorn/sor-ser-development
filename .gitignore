@@ -28,3 +28,6 @@ archieved/
 /node_modules
 composer-install.log
 public/test.html
+
+# Vite dev server file
+/public/hot

@@ -1,8 +1,12 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { CheckCircle2, TrendingUp, Target, Brain, Zap, Rocket } from "lucide-react";
 import { usePage, Link } from "@inertiajs/react";
-// TODO: Migrate to recharts
-// import Chart from "react-apexcharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+
+// Ensure React is available globally for recharts
+if (typeof window !== 'undefined' && !window.React) {
+    window.React = React;
+}
 
 export default function QuizzesSection() {
     const { auth, quizSummary, quizDaily, recentQuizzes: recentFromProps, quizChange = [] } = usePage().props;
@@ -75,72 +79,13 @@ export default function QuizzesSection() {
         }));
     }, [quizDaily]);
 
-    const { options, series } = useMemo(() => {
-        const categories = rawData.map((d) => d.day);
-
-        return {
-            options: {
-                chart: {
-                    type: "line",
-                    toolbar: { show: false },
-                    fontFamily: "Inter, sans-serif",
-                },
-                stroke: {
-                    curve: "smooth",
-                    width: [3, 3, 2],
-                },
-                colors: ["#3B82F6", "#10B981"],
-                dataLabels: { enabled: false },
-                grid: {
-                    borderColor: "#E5E7EB",
-                    strokeDashArray: 3,
-                },
-                xaxis: {
-                    categories,
-                    labels: {
-                        style: { colors: "#6B7280", fontSize: "12px" },
-                    },
-                    axisBorder: { show: false },
-                    axisTicks: { show: false },
-                },
-                yaxis: [
-                    {
-                        title: { text: "Attempts" },
-                        labels: {
-                            formatter: (val) => `${Math.round(val)}`,
-                            style: { colors: "#9CA3AF", fontSize: "12px" },
-                        },
-                    },
-                    {
-                        opposite: true,
-                        title: { text: "Avg Score (%)" },
-                        labels: {
-                            formatter: (val) => `${Math.round(val)}%`,
-                            style: { colors: "#9CA3AF", fontSize: "12px" },
-                        },
-                    },
-                ],
-                legend: { show: true },
-                tooltip: {
-                    theme: "light",
-                    y: [
-                        { formatter: (val) => `${Math.round(val)}` },
-                        { formatter: (val) => `${Math.round(val)}` },
-                        { formatter: (val) => `${Math.round(val)}%` },
-                    ],
-                },
-            },
-            series: [
-                {
-                    name: "Attempts (Completed)",
-                    data: rawData.map((d) => d.accepts),
-                },
-                {
-                    name: "Avg Score (%)",
-                    data: rawData.map((d) => d.avgScore ?? 0),
-                },
-            ],
-        };
+    // Transform data for recharts
+    const chartData = useMemo(() => {
+        return rawData.map((d) => ({
+            day: d.day,
+            completed: d.accepts,
+            avgScore: d.avgScore ?? 0,
+        }));
     }, [rawData]);
 
     const recentQuizzes = useMemo(() => {
@@ -263,7 +208,38 @@ export default function QuizzesSection() {
                                 </div>
 
                                 <div className="h-[280px]">
-                                    <Chart options={options} series={series} type="line" height={280} />
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <LineChart data={chartData}>
+                                            <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                                            <XAxis
+                                                dataKey="day"
+                                                tick={{ fill: '#6B7280', fontSize: 12 }}
+                                                axisLine={false}
+                                                tickLine={false}
+                                            />
+                                            <YAxis
+                                                tick={{ fill: '#9CA3AF', fontSize: 12 }}
+                                            />
+                                            <Tooltip />
+                                            <Legend />
+                                            <Line
+                                                type="monotone"
+                                                dataKey="completed"
+                                                stroke="#3B82F6"
+                                                strokeWidth={3}
+                                                name="Completed"
+                                                dot={{ fill: '#3B82F6' }}
+                                            />
+                                            <Line
+                                                type="monotone"
+                                                dataKey="avgScore"
+                                                stroke="#10B981"
+                                                strokeWidth={3}
+                                                name="Avg Score (%)"
+                                                dot={{ fill: '#10B981' }}
+                                            />
+                                        </LineChart>
+                                    </ResponsiveContainer>
                                 </div>
                             </div>
 

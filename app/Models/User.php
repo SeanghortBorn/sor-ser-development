@@ -38,6 +38,9 @@ class User extends Authenticatable implements MustVerifyEmail, JWTSubject
         'khmer_experience',
         'google_id',
         'is_admin',
+        'otp_code',
+        'otp_expires_at',
+        'email_verification_sent_at',
     ];
 
     /**
@@ -72,6 +75,8 @@ class User extends Authenticatable implements MustVerifyEmail, JWTSubject
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_admin' => 'boolean',
+            'otp_expires_at' => 'datetime',
+            'email_verification_sent_at' => 'datetime',
         ];
     }
 

@@ -1,13 +1,15 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { usePage } from "@inertiajs/react";
-// TODO: Migrate to recharts
-// import Chart from "react-apexcharts";
 import { TrendingUp, BookOpen, Radar, BarChart3 } from "lucide-react";
 import HomophonePieCharts from "./HomophonePieCharts";
 import RecentArticles from "./RecentArticles";
-// TODO: Migrate to recharts
-// import { ResponsivePie } from "@nivo/pie";
 import axios from "axios";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+
+// Ensure React is available globally for recharts
+if (typeof window !== 'undefined' && !window.React) {
+    window.React = React;
+}
 
 export default function AnalyticsSection() {
     const { auth, quizAnalysis } = usePage().props;
@@ -307,57 +309,7 @@ export default function AnalyticsSection() {
         }));
     };
 
-    const data = buildDailyData();
-
-    const options = {
-        chart: {
-            type: "line",
-            toolbar: { show: false },
-            fontFamily: "Inter, sans-serif",
-        },
-        stroke: {
-            curve: "smooth",
-            width: 3,
-        },
-        colors: ["#3B82F6", "#BFDBFE"],
-        dataLabels: { enabled: false },
-        grid: {
-            borderColor: "#E5E7EB",
-            strokeDashArray: 3,
-        },
-        xaxis: {
-            categories: data.map((d) => d.day),
-            labels: {
-                style: { colors: "#6B7280", fontSize: "12px" },
-            },
-            axisBorder: { show: false },
-            axisTicks: { show: false },
-        },
-        yaxis: {
-            labels: {
-                formatter: (val) => `${val}`,
-                style: { colors: "#9CA3AF", fontSize: "12px" },
-            },
-        },
-        legend: { show: false },
-        tooltip: {
-            theme: "light",
-            y: {
-                formatter: (val) => `${val}`,
-            },
-        },
-    };
-
-    const series = [
-        {
-            name: "Articles",
-            data: data.map((d) => d.articles),
-        },
-        {
-            name: "Quizzes",
-            data: data.map((d) => d.quizzes),
-        },
-    ];
+    const chartData = buildDailyData();
 
     // Fetch comparison activities for the current user (current month only)
     useEffect(() => {
@@ -658,15 +610,39 @@ export default function AnalyticsSection() {
                         </div>
                     </div>
                     {/* Chart */}
-                    <div className="w-full h-[370px] relative">
-                        <div className="absolute inset-x-0 -left-4 -right-4">
-                            <Chart
-                                options={options}
-                                series={series}
-                                type="line"
-                                height={370}
-                            />
-                        </div>
+                    <div className="w-full h-[370px]">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <LineChart data={chartData}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                                <XAxis
+                                    dataKey="day"
+                                    tick={{ fill: '#6B7280', fontSize: 12 }}
+                                    axisLine={false}
+                                    tickLine={false}
+                                />
+                                <YAxis
+                                    tick={{ fill: '#9CA3AF', fontSize: 12 }}
+                                />
+                                <Tooltip />
+                                <Legend />
+                                <Line
+                                    type="monotone"
+                                    dataKey="articles"
+                                    stroke="#3B82F6"
+                                    strokeWidth={3}
+                                    name="Articles"
+                                    dot={{ fill: '#3B82F6' }}
+                                />
+                                <Line
+                                    type="monotone"
+                                    dataKey="quizzes"
+                                    stroke="#BFDBFE"
+                                    strokeWidth={3}
+                                    name="Quizzes"
+                                    dot={{ fill: '#BFDBFE' }}
+                                />
+                            </LineChart>
+                        </ResponsiveContainer>
                     </div>
                 </div>
                 {/* Donut Chart */}
@@ -683,50 +659,37 @@ export default function AnalyticsSection() {
                         </div>
                     </div>
                     {hasData ? (
-                        <div className="flex flex-col items-center justify-center flex-1">
+                        <div className="flex flex-col items-center justify-center flex-1 relative">
                             <div className="w-full h-[400px]">
-                                <ResponsivePie
-                                    data={lineData}
-                                    margin={{
-                                        top: 30,
-                                        right: 80,
-                                        bottom: 80,
-                                        left: 80,
-                                    }}
-                                    innerRadius={0.5}
-                                    padAngle={0.6}
-                                    cornerRadius={3}
-                                    activeOuterRadiusOffset={8}
-                                    arcLinkLabelsSkipAngle={10}
-                                    arcLinkLabelsTextColor="#333333"
-                                    arcLinkLabelsThickness={2}
-                                    arcLinkLabelsColor="#93c5fd"
-                                    arcLabelsSkipAngle={10}
-                                    arcLabelsTextColor={{
-                                        from: "color",
-                                        modifiers: [["darker", 2]],
-                                    }}
-                                    legends={[
-                                        {
-                                            anchor: "bottom",
-                                            direction: "row",
-                                            justify: false,
-                                            translateX: 0,
-                                            translateY: 56,
-                                            itemsSpacing: 10,
-                                            itemWidth: 90,
-                                            itemHeight: 18,
-                                            itemTextColor: "#4B5563",
-                                            symbolSize: 18,
-                                            symbolShape: "circle",
-                                        },
-                                    ]}
-                                />
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <PieChart>
+                                        <Pie
+                                            data={lineData}
+                                            cx="50%"
+                                            cy="50%"
+                                            innerRadius={80}
+                                            outerRadius={120}
+                                            paddingAngle={2}
+                                            dataKey="value"
+                                            label={({ label, value }) => `${label}: ${value}`}
+                                        >
+                                            {lineData.map((entry, index) => (
+                                                <Cell key={`cell-${index}`} fill={entry.color} />
+                                            ))}
+                                        </Pie>
+                                        <Tooltip />
+                                        <Legend
+                                            verticalAlign="bottom"
+                                            height={36}
+                                            iconType="circle"
+                                        />
+                                    </PieChart>
+                                </ResponsiveContainer>
                             </div>
                             {/* Center label */}
-                            <div className="absolute flex -mt-12 flex-col items-center justify-center pointer-events-none">
+                            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center pointer-events-none">
                                 <span className="text-2xl font-bold text-gray-800">
-                                    100%
+                                    {calculateAccuracyPercentage()}%
                                 </span>
                                 <span className="text-xs text-gray-500 font-medium tracking-wide">
                                     Overall Accuracy
