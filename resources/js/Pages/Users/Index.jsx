@@ -252,38 +252,38 @@ export default function UserPage({
                         </div>
 
                         {/* Table */}
-                        <div className="overflow-x-auto">
+                        <div className="overflow-x-auto rounded-xl border border-gray-200">
                             <table className="min-w-full table-auto">
-                                <thead className="bg-blue-600 text-white text-sm">
+                                <thead className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm">
                                     <tr>
-                                        <th className="px-4 py-3 text-left font-semibold">ID</th>
-                                        <th className="px-4 py-3 text-left font-semibold">Name</th>
-                                        <th className="px-4 py-3 text-left font-semibold">Email</th>
-                                        <th className="px-4 py-3 text-left font-semibold">Roles</th>
-                                        <th className="px-4 py-3 text-left font-semibold">Permissions</th>
-                                        <th className="px-4 py-3 text-left font-semibold">Status</th>
-                                        <th className="px-4 py-3 text-left font-semibold">Joined</th>
-                                        <th className="px-4 py-3 text-center font-semibold">Actions</th>
+                                        <th className="px-6 py-4 text-left font-semibold">ID</th>
+                                        <th className="px-6 py-4 text-left font-semibold">Name</th>
+                                        <th className="px-6 py-4 text-left font-semibold">Email</th>
+                                        <th className="px-6 py-4 text-left font-semibold">Roles</th>
+                                        <th className="px-6 py-4 text-left font-semibold">Permissions</th>
+                                        <th className="px-6 py-4 text-left font-semibold">Status</th>
+                                        <th className="px-6 py-4 text-left font-semibold">Joined</th>
+                                        <th className="px-6 py-4 text-center font-semibold">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody className="text-sm divide-y divide-gray-200">
+                                <tbody className="text-sm divide-y divide-gray-200 bg-white">
                                     {users.data.length === 0 ? (
                                         <tr>
-                                            <td colSpan="8" className="px-4 py-8 text-center text-gray-500">
+                                            <td colSpan="8" className="px-6 py-12 text-center text-gray-500">
                                                 {showTrashed ? "No deleted users found" : "No users found"}
                                             </td>
                                         </tr>
                                     ) : (
                                         users.data.map((user) => (
-                                            <tr key={user.id} className="hover:bg-gray-50 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95">
-                                                <td className="px-4 py-3">{user.id}</td>
-                                                <td className="px-4 py-3 font-medium">{user.name}</td>
-                                                <td className="px-4 py-3 text-gray-600">{user.email}</td>
-                                                <td className="px-4 py-3">
+                                            <tr key={user.id} className="hover:bg-blue-50 transition-all duration-200">
+                                                <td className="px-6 py-4 font-medium text-gray-900">{user.id}</td>
+                                                <td className="px-6 py-4 font-medium text-gray-900">{user.name}</td>
+                                                <td className="px-6 py-4 text-gray-600">{user.email}</td>
+                                                <td className="px-6 py-4">
                                                     {user.roles?.length > 0 ? (
                                                         <div className="flex flex-wrap gap-1">
                                                             {user.roles.map((role) => (
-                                                                <span key={role.id} className="px-2 py-1 bg-blue-100 text-blue-700 rounded-xl text-xs font-medium">
+                                                                <span key={role.id} className="px-2.5 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold">
                                                                     {role.name}
                                                                 </span>
                                                             ))}
@@ -292,16 +292,16 @@ export default function UserPage({
                                                         <span className="text-gray-400 text-xs">No roles</span>
                                                     )}
                                                 </td>
-                                                <td className="px-4 py-3">
+                                                <td className="px-6 py-4">
                                                     {user.permissions?.length > 0 ? (
                                                         <div className="flex flex-wrap gap-1">
                                                             {user.permissions.slice(0, 2).map((perm) => (
-                                                                <span key={perm.id} className="px-2 py-1 bg-green-100 text-green-700 rounded-xl text-xs font-medium">
+                                                                <span key={perm.id} className="px-2.5 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">
                                                                     {perm.name}
                                                                 </span>
                                                             ))}
                                                             {user.permissions.length > 2 && (
-                                                                <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded-xl text-xs">
+                                                                <span className="px-2.5 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-semibold">
                                                                     +{user.permissions.length - 2}
                                                                 </span>
                                                             )}
@@ -310,21 +310,21 @@ export default function UserPage({
                                                         <span className="text-gray-400 text-xs">No permissions</span>
                                                     )}
                                                 </td>
-                                                <td className="px-4 py-3">
+                                                <td className="px-6 py-4">
                                                     {user.blocked ? (
-                                                        <span className="px-2 py-1 bg-red-100 text-red-700 rounded-xl text-xs font-medium">
+                                                        <span className="px-2.5 py-1 bg-red-100 text-red-700 rounded-full text-xs font-semibold">
                                                             Blocked
                                                         </span>
                                                     ) : (
-                                                        <span className="px-2 py-1 bg-green-100 text-green-700 rounded-xl text-xs font-medium">
+                                                        <span className="px-2.5 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">
                                                             Active
                                                         </span>
                                                     )}
                                                 </td>
-                                                <td className="px-4 py-3 text-gray-600">
+                                                <td className="px-6 py-4 text-gray-600">
                                                     {moment(user.created_at).format("MMM D, YYYY")}
                                                 </td>
-                                                <td className="px-4 py-3">
+                                                <td className="px-6 py-4">
                                                     <div className="flex items-center justify-center gap-2">
                                                         {showTrashed ? (
                                                             <ActionButton
@@ -384,8 +384,7 @@ export default function UserPage({
                             <Pagination links={users.links} />
                         </div>
                     </div>
-                </div>
-            </section>
+
 
             {/* Block/Unblock Modal - Using our new ConfirmationModal */}
             <ConfirmationModal
@@ -502,7 +501,6 @@ export default function UserPage({
                     </form>
                 </div>
             </Modal>
-            </div>
         </AdminLayout>
     );
 }

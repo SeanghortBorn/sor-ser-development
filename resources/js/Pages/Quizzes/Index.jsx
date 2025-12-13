@@ -177,45 +177,44 @@ export default function QuizList() {
                             </div>
                         </div>
                         {/* Table */}
-                        <div className="overflow-x-auto">
+                        <div className="overflow-x-auto rounded-xl border border-gray-200">
                             <table className="w-full text-left border-collapse">
-                                <thead className="bg-gradient-to-r from-blue-500 to-blue-600 text-white text-sm">
+                                <thead className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm">
                                     <tr>
-                                        <th className="py-3 px-4">#ID</th>
-                                        <th className="py-3 px-4">Title</th>
-                                        <th className="py-3 px-4">Questions</th>
-                                        <th className="py-3 px-4">Status</th>
-                                        <th className="py-3 px-4 text-center">Actions</th>
+                                        <th className="py-4 px-6 font-semibold">#ID</th>
+                                        <th className="py-4 px-6 font-semibold">Title</th>
+                                        <th className="py-4 px-6 font-semibold">Questions</th>
+                                        <th className="py-4 px-6 font-semibold">Status</th>
+                                        <th className="py-4 px-6 text-center font-semibold">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody className="text-sm text-gray-700">
+                                <tbody className="text-sm text-gray-700 bg-white divide-y divide-gray-200">
                                     {filteredQuizzes.length > 0 ? (
                                         filteredQuizzes.map((quiz) => (
                                             <tr
                                                 key={quiz.id}
-                                                className="border-t hover:bg-gray-50 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
-                                            >
-                                                <td className="py-3 px-4 font-semibold">{quiz.id}</td>
-                                                <td className="py-3 px-4">
+                                                className="hover:bg-blue-50 transition-all duration-200">
+                                                <td className="py-4 px-6 font-semibold text-gray-900">{quiz.id}</td>
+                                                <td className="py-4 px-6">
                                                     <p className="font-medium text-gray-900">{quiz.title}</p>
                                                 </td>
-                                                <td className="py-3 px-4">
-                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                <td className="py-4 px-6">
+                                                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
                                                         {quiz.questions?.length || 0}
                                                     </span>
                                                 </td>
-                                                <td className="py-3 px-4">
+                                                <td className="py-4 px-6">
                                                     <span
-                                                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                                        className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${
                                                             quiz.status === "Published"
-                                                                ? "bg-green-600 text-white"
-                                                                : "bg-orange-400 text-white"
+                                                                ? "bg-green-100 text-green-700"
+                                                                : "bg-orange-100 text-orange-700"
                                                         }`}
                                                     >
                                                         {quiz.status}
                                                     </span>
                                                 </td>
-                                                <td className="py-3 px-4 text-center">
+                                                <td className="py-4 px-6 text-center">
                                                     <div className="flex justify-center gap-2">
                                                         {/* Edit */}
                                                         <div className="relative group">

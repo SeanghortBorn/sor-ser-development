@@ -101,30 +101,30 @@ export default function ArticlesPage({ articles, search = "" }) {
                         </div>
 
                         {/* Table */}
-                        <div className="overflow-x-auto">
+                        <div className="overflow-x-auto rounded-xl border border-gray-200">
                             <table className="min-w-full table-auto">
-                                <thead className="bg-blue-600 text-white text-sm">
+                                <thead className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm">
                                     <tr>
-                                        <th className="px-4 py-3 text-left font-semibold">ID</th>
-                                        <th className="px-4 py-3 text-left font-semibold">Title</th>
-                                        <th className="px-4 py-3 text-left font-semibold">File</th>
-                                        <th className="px-4 py-3 text-left font-semibold">Audio</th>
-                                        <th className="px-4 py-3 text-left font-semibold">Created</th>
-                                        <th className="px-4 py-3 text-center font-semibold">Actions</th>
+                                        <th className="px-6 py-4 text-left font-semibold">ID</th>
+                                        <th className="px-6 py-4 text-left font-semibold">Title</th>
+                                        <th className="px-6 py-4 text-left font-semibold">File</th>
+                                        <th className="px-6 py-4 text-left font-semibold">Audio</th>
+                                        <th className="px-6 py-4 text-left font-semibold">Created</th>
+                                        <th className="px-6 py-4 text-center font-semibold">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody className="text-sm divide-y divide-gray-200">
+                                <tbody className="text-sm divide-y divide-gray-200 bg-white">
                                     {datasList.length === 0 ? (
                                         <tr>
-                                            <td colSpan="6" className="px-4 py-8 text-center text-gray-500">
+                                            <td colSpan="6" className="px-6 py-12 text-center text-gray-500">
                                                 No articles found
                                             </td>
                                         </tr>
                                     ) : (
                                         datasList.map((item) => (
-                                            <tr key={item.id} className="hover:bg-gray-50 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95">
-                                                <td className="px-4 py-3">{item.id}</td>
-                                                <td className="px-4 py-3 font-medium">{item.title}</td>
+                                            <tr key={item.id} className="hover:bg-blue-50 transition-all duration-200">
+                                                <td className="px-6 py-4 font-medium text-gray-900">{item.id}</td>
+                                                <td className="px-6 py-4 font-medium text-gray-900">{item.title}</td>
                                                 <td className="px-4 py-3">
                                                     {item.file ? (
                                                         <div className="flex flex-col gap-1">
@@ -208,9 +208,7 @@ export default function ArticlesPage({ articles, search = "" }) {
                         <div className="mt-6">
                             <Pagination links={articles.links} />
                         </div>
-                    </div>
-                </div>
-            </section>
+            </div>
 
             {/* Delete Modal - Using our new ConfirmationModal */}
             <ConfirmationModal
@@ -295,7 +293,6 @@ export default function ArticlesPage({ articles, search = "" }) {
                     </div>
                 </div>
             </Modal>
-            </div>
         </AdminLayout>
     );
 }

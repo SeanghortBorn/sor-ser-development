@@ -81,37 +81,37 @@ export default function CategoriesPage({ categoryData }) {
                         </div>
 
                         {/* Table */}
-                        <div className="overflow-x-auto">
+                        <div className="overflow-x-auto rounded-xl border border-gray-200">
                             <table className="w-full text-left border-collapse">
-                                <thead className="bg-gradient-to-r from-blue-500 to-blue-600 text-white text-sm">
+                                <thead className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm">
                                     <tr>
-                                        <th className="py-3 px-4">#ID</th>
-                                        <th className="py-3 px-4">Name</th>
-                                        <th className="py-3 px-4">View Order</th>
-                                        <th className="py-3 px-4">Created At</th>
-                                        <th className="py-3 px-4 text-center">Actions</th>
+                                        <th className="py-4 px-6 font-semibold">#ID</th>
+                                        <th className="py-4 px-6 font-semibold">Name</th>
+                                        <th className="py-4 px-6 font-semibold">View Order</th>
+                                        <th className="py-4 px-6 font-semibold">Created At</th>
+                                        <th className="py-4 px-6 text-center font-semibold">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody className="text-sm text-gray-700">
+                                <tbody className="text-sm text-gray-700 bg-white divide-y divide-gray-200">
                                     {datasList.length > 0 ? (
                                         datasList.map((item, k) => (
-                                            <tr key={k} className="border-t hover:bg-gray-50 transition-all duration-200">
-                                                <td className="py-3 px-4 font-semibold">{item?.id}</td>
-                                                <td className="py-3 px-4">
+                                            <tr key={k} className="hover:bg-blue-50 transition-all duration-200">
+                                                <td className="py-4 px-6 font-semibold text-gray-900">{item?.id}</td>
+                                                <td className="py-4 px-6">
                                                     <p className="font-medium text-gray-900">{item?.name}</p>
                                                 </td>
-                                                <td className="py-3 px-4">
-                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                <td className="py-4 px-6">
+                                                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
                                                         {item?.view_order}
                                                     </span>
                                                 </td>
-                                                <td className="py-3 px-4">
+                                                <td className="py-4 px-6">
                                                     <div className="flex items-center gap-1.5 text-gray-600">
                                                         <Calendar className="w-3.5 h-3.5" />
                                                         {moment(item?.created_at).format("DD/MM/YYYY")}
                                                     </div>
                                                 </td>
-                                                <td className="py-3 px-4 text-center">
+                                                <td className="py-4 px-6 text-center">
                                                     <div className="flex justify-center gap-2">
                                                         {/* Edit Button */}
                                                         <div className="relative group">

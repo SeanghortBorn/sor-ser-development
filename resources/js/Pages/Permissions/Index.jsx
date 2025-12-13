@@ -143,9 +143,9 @@ export default function Index({ auth, permissions, roles, users }) {
                                 </div>
                             </div>
                         </div>
-                    </div>
+            </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         {/* Step 1: Select Role or User */}
                         <div className="lg:col-span-1">
                             <div className="bg-white shadow-sm rounded-2xl border border-gray-200 overflow-hidden transition-all duration-200 hover:shadow-md">
@@ -345,7 +345,6 @@ export default function Index({ auth, permissions, roles, users }) {
                             </div>
                         </div>
                     </div>
-                </div>
         </AdminLayout>
     );
 }

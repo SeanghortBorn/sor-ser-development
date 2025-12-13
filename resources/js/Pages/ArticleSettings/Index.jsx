@@ -413,7 +413,6 @@ export default function ArticleSettingsIndex({ auth, articles, articleOptions })
                             })}
                         </div>
                     </div>
-            </div>
         </AdminLayout>
     );
 }

@@ -369,56 +369,55 @@ export default function HomophonesPage({ homophones, search = "" }) {
                                 </div>
                             </div>
                         </div>
-                        <div className="overflow-x-auto">
+                        <div className="overflow-x-auto rounded-xl border border-gray-200">
                             <table className="min-w-full table-auto">
-                                <thead className="bg-blue-600 text-white text-sm">
+                                <thead className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm">
                                     <tr>
-                                        <th className="px-4 py-3">ID</th>
-                                        <th className="px-4 py-3">Word</th>
-                                        <th className="px-4 py-3">POS</th>
-                                        <th className="px-4 py-3">
+                                        <th className="px-6 py-4 font-semibold">ID</th>
+                                        <th className="px-6 py-4 font-semibold">Word</th>
+                                        <th className="px-6 py-4 font-semibold">POS</th>
+                                        <th className="px-6 py-4 font-semibold">
                                             Pronunciation
                                         </th>
-                                        <th className="px-4 py-3">
+                                        <th className="px-6 py-4 font-semibold">
                                             Definition
                                         </th>
-                                        <th className="px-4 py-3">Example</th>
-                                        <th className="px-4 py-3">Phoneme</th>
-                                        <th className="px-4 py-3">
+                                        <th className="px-6 py-4 font-semibold">Example</th>
+                                        <th className="px-6 py-4 font-semibold">Phoneme</th>
+                                        <th className="px-6 py-4 font-semibold">
                                             Homophones
                                         </th>
-                                        <th className="px-4 py-3">Actions</th>
+                                        <th className="px-6 py-4 font-semibold">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody className="text-sm divide-y divide-gray-200">
+                                <tbody className="text-sm divide-y divide-gray-200 bg-white">
                                     {datasList.length > 0 ? (
                                         datasList.map((item) => (
                                             <tr
                                                 key={item.id}
-                                                className="hover:bg-gray-50 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
-                                            >
-                                                <td className="px-4 py-3">
+                                                className="hover:bg-blue-50 transition-all duration-200">
+                                                <td className="px-6 py-4 font-medium text-gray-900">
                                                     {item.id}
                                                 </td>
-                                                <td className="px-4 py-3">
+                                                <td className="px-6 py-4 font-medium text-gray-900">
                                                     {item.word}
                                                 </td>
-                                                <td className="px-4 py-3">
+                                                <td className="px-6 py-4 text-gray-700">
                                                     {item.pos}
                                                 </td>
-                                                <td className="px-4 py-3">
+                                                <td className="px-6 py-4 text-gray-700">
                                                     {item.pro}
                                                 </td>
-                                                <td className="px-4 py-3">
+                                                <td className="px-6 py-4 text-gray-700">
                                                     {item.definition}
                                                 </td>
-                                                <td className="px-4 py-3">
+                                                <td className="px-6 py-4 text-gray-700">
                                                     {item.example}
                                                 </td>
-                                                <td className="px-4 py-3">
+                                                <td className="px-6 py-4 text-gray-700">
                                                     {item.phoneme}
                                                 </td>
-                                                <td className="px-4 py-3">
+                                                <td className="px-6 py-4 text-gray-700">
                                                     {Array.isArray(
                                                         item.homophone
                                                     )
@@ -427,8 +426,8 @@ export default function HomophonesPage({ homophones, search = "" }) {
                                                           )
                                                         : ""}
                                                 </td>
-                                                <td className="px-4 py-3">
-                                                    <div className="flex gap-2">
+                                                <td className="px-6 py-4">
+                                                    <div className="flex gap-2 justify-center">
                                                         <Link
                                                             href={route(
                                                                 "homophones.edit",

@@ -145,43 +145,43 @@ export default function RolePage({ roles, search: searchProp = "" }) {
                         </div>
 
                         {/* Responsive Table */}
-                        <div className="overflow-x-auto w-full">
+                        <div className="overflow-x-auto rounded-xl border border-gray-200">
                             <table className="min-w-full text-left text-sm">
-                                <thead className="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
+                                <thead className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
                                     <tr>
-                                        <th className="py-3 px-4 font-medium whitespace-nowrap">
+                                        <th className="py-4 px-6 font-semibold whitespace-nowrap">
                                             #ID
                                         </th>
-                                        <th className="py-3 px-4 font-medium whitespace-nowrap">
+                                        <th className="py-4 px-6 font-semibold whitespace-nowrap">
                                             Name
                                         </th>
-                                        <th className="py-3 px-4 font-medium text-right whitespace-nowrap">
+                                        <th className="py-4 px-6 font-semibold text-right whitespace-nowrap">
                                             Created At
                                         </th>
                                         {(can["role-edit"] ||
                                             can["role-delete"]) && (
-                                            <th className="py-3 px-4 font-medium text-center whitespace-nowrap">
+                                            <th className="py-4 px-6 font-semibold text-center whitespace-nowrap">
                                                 Actions
                                             </th>
                                         )}
                                     </tr>
                                 </thead>
-                                <tbody className="text-gray-700">
+                                <tbody className="text-gray-700 bg-white divide-y divide-gray-200">
                                     {roles.data.length > 0 ? (
                                         roles.data.map((role) => (
                                             <tr
                                                 key={role.id}
-                                                className="border-t hover:bg-gray-50 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
+                                                className="hover:bg-blue-50 transition-all duration-200"
                                             >
-                                                <td className="py-3 px-4 font-medium">
+                                                <td className="py-4 px-6 font-medium text-gray-900">
                                                     {role.id}
                                                 </td>
-                                                <td className="py-3 px-4">
+                                                <td className="py-4 px-6">
                                                     <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
                                                         {role.name}
                                                     </span>
                                                 </td>
-                                                <td className="py-3 px-4 text-gray-600 text-right">
+                                                <td className="py-4 px-6 text-gray-600 text-right">
                                                     {role.created_at
                                                         ? moment(
                                                               role.created_at
@@ -191,7 +191,7 @@ export default function RolePage({ roles, search: searchProp = "" }) {
 
                                                 {(can["role-edit"] ||
                                                     can["role-delete"]) && (
-                                                    <td className="py-3 px-4 text-center">
+                                                    <td className="py-4 px-6 text-center">
                                                         <div className="flex justify-center items-center gap-2">
                                                             <div className="group relative">
                                                                 <button
