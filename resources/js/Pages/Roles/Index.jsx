@@ -145,7 +145,7 @@ export default function RolePage({ roles, search: searchProp = "" }) {
                         </div>
 
                         {/* Responsive Table */}
-                        <div className="overflow-x-auto rounded-xl border border-gray-200">
+                        <div className="overflow-x-auto rounded-2xl border border-gray-200">
                             <table className="min-w-full text-left text-sm">
                                 <thead className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
                                     <tr>

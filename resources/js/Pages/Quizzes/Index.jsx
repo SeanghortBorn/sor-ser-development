@@ -177,7 +177,7 @@ export default function QuizList() {
                             </div>
                         </div>
                         {/* Table */}
-                        <div className="overflow-x-auto rounded-xl border border-gray-200">
+                        <div className="overflow-x-auto rounded-2xl border border-gray-200">
                             <table className="w-full text-left border-collapse">
                                 <thead className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm">
                                     <tr>
