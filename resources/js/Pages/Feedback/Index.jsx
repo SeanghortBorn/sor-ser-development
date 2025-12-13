@@ -46,7 +46,7 @@ function FeedbackMessageCell({ message }) {
     return (
         <div className="space-y-1 text-sm">
             <div className="flex items-center gap-2 flex-wrap">
-                <span className="inline-flex items-center px-2 py-0.5 text-[11px] font-semibold rounded bg-blue-100 text-blue-700 uppercase tracking-wide">Grammar</span>
+                <span className="inline-flex items-center px-2 py-0.5 text-[11px] font-semibold rounded-full bg-blue-100 text-blue-700 uppercase tracking-wide">Grammar</span>
                 {data.checker_id && (
                     <span className="text-[11px] text-slate-500">Doc #{data.checker_id}</span>
                 )}
@@ -55,12 +55,12 @@ function FeedbackMessageCell({ message }) {
                 )}
             </div>
             <div className="flex items-center gap-2 flex-wrap">
-                <span className="px-2 py-0.5 bg-red-100 text-red-700 rounded font-mono text-xs font-medium">{data.error}</span>
+                <span className="px-2 py-0.5 bg-red-100 text-red-700 rounded-xl font-mono text-xs font-medium">{data.error}</span>
                 <span className="text-slate-400 text-xs">→</span>
-                <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded font-mono text-xs font-medium">{data.suggestion || '—'}</span>
+                <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-xl font-mono text-xs font-medium">{data.suggestion || '—'}</span>
             </div>
             {data.text && (
-                <div className="text-slate-700 text-xs bg-slate-50 border border-slate-200 rounded p-2 leading-relaxed">
+                <div className="text-slate-700 text-xs bg-slate-50 border border-slate-200 rounded-xl p-2 leading-relaxed">
                     {data.text}
                 </div>
             )}
@@ -69,7 +69,7 @@ function FeedbackMessageCell({ message }) {
             )}
             <details className="text-[11px] text-slate-400 cursor-pointer select-none">
                 <summary className="outline-none focus:ring-0">Raw</summary>
-                <pre className="mt-1 p-2 bg-slate-900 text-slate-200 rounded overflow-x-auto text-[10px] leading-snug max-h-40">{message}</pre>
+                <pre className="mt-1 p-2 bg-slate-900 text-slate-200 rounded-xl overflow-x-auto text-[10px] leading-snug max-h-40">{message}</pre>
             </details>
         </div>
     );

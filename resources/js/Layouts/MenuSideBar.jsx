@@ -12,20 +12,20 @@ function MenuGroup({ label, icon, children, active }) {
     }, [active]);
 
     return (
-        <div className="mb-2">
+        <div className="mb-1.5">
             <button
                 onClick={() => setOpen((prev) => !prev)}
-                className={`flex items-center w-full px-2 py-2.5 rounded-xl font-medium transition-all duration-300 group ${
+                className={`flex items-center w-full px-3 py-2.5 rounded-2xl font-medium transition-all duration-200 ease-in-out group ${
                     open || active
-                        ? "bg-blue-100 text-blue-700 border-l-4 border-blue-500"
-                        : "hover:bg-gray-50 text-gray-700 "
-                }`}
+                        ? "bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700 shadow-sm hover:shadow-md"
+                        : "hover:bg-gray-50 text-gray-700 hover:shadow-sm"
+                } hover:scale-[1.02] active:scale-[0.98]`}
             >
                 <span
-                    className={`mr-3 transition-all duration-200 ease-in-out duration-300 ${
+                    className={`mr-3 transition-all duration-200 ease-in-out ${
                         open || active
-                            ? "text-blue-600"
-                            : "text-gray-400 group-"
+                            ? "text-blue-600 scale-110"
+                            : "text-gray-400 group-hover:text-gray-600"
                     }`}
                 >
                     {icon}
@@ -34,12 +34,12 @@ function MenuGroup({ label, icon, children, active }) {
                     {label}
                 </span>
                 <svg
-                    className={`w-4 h-4 ml-auto transition-all duration-300 ${
+                    className={`w-4 h-4 ml-auto transition-all duration-200 ease-in-out ${
                         open ? "rotate-90" : ""
                     } ${
                         open || active
                             ? "text-blue-600"
-                            : "text-gray-400 group-"
+                            : "text-gray-400 group-hover:text-gray-600"
                     }`}
                     fill="none"
                     stroke="currentColor"
@@ -55,11 +55,11 @@ function MenuGroup({ label, icon, children, active }) {
             </button>
 
             <div
-                className={`transition-all duration-300 overflow-hidden ${
-                    open ? "max-h-96 opacity-100 mt-2" : "max-h-0 opacity-0"
+                className={`transition-all duration-200 ease-in-out overflow-hidden ${
+                    open ? "max-h-96 opacity-100 mt-1.5" : "max-h-0 opacity-0"
                 }`}
             >
-                <div className="pl-2 space-y-1">{children}</div>
+                <div className="pl-3 space-y-1">{children}</div>
             </div>
         </div>
     );
@@ -72,25 +72,27 @@ function MenuItem({ href, icon, label, active }) {
     return (
         <Link
             href={href}
-            className={`flex items-center px-2 py-2.5 rounded-xl font-medium transition-all duration-200 ${
+            className={`flex items-center px-3 py-2 rounded-xl font-medium transition-all duration-200 ease-in-out group ${
                 active
-                    ? "bg-blue-100 text-blue-700 border-l-4 border-blue-500"
-                    : "hover:bg-gray-50 text-gray-700 border-l-4 border-transparent"
-            }`}
+                    ? "bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700 shadow-sm"
+                    : "hover:bg-gray-50 text-gray-700 hover:shadow-sm"
+            } hover:scale-[1.02] hover:translate-x-1 active:scale-[0.98]`}
         >
             {/* Icon */}
             <span
-                className={`mr-3 ${active ? "text-blue-600" : "text-gray-400"}`}
+                className={`mr-3 transition-all duration-200 ease-in-out ${
+                    active ? "text-blue-600 scale-110" : "text-gray-400 group-hover:text-gray-600"
+                }`}
             >
                 {icon}
             </span>
 
             {/* Label */}
             <span
-                className={`text-sm transition-all duration-200 ease-in-out duration-200 ${
+                className={`text-sm transition-all duration-200 ease-in-out ${
                     active
-                        ? "text-blue-700"
-                        : "text-gray-600 group-"
+                        ? "text-blue-700 font-semibold"
+                        : "text-gray-600 group-hover:text-gray-900"
                 }`}
             >
                 {label}
@@ -130,8 +132,7 @@ function safeRoute(name, params = {}) {
 export default function MenuSideBar({ lang, setLang }) {
     const { auth } = usePage().props;
     const can = auth?.can ?? {};
-    const routeName = route().current();
-
+    const routeName = route().current();    const isAdmin = auth?.user?.roles_list?.some(role => role.name === 'Admin') ?? false;
     const t = (en, kh) => (lang === "kh" ? kh : en);
     const isActive = (...names) => names.some((n) => routeName?.includes(n));
 
@@ -331,28 +332,46 @@ export default function MenuSideBar({ lang, setLang }) {
                 <path d="m9 12 2 2 4-4"/>
             </svg>
         ),
+        analytics: (
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+            >
+                <path d="M3 3v18h18" />
+                <path d="M18 17V9" />
+                <path d="M13 17V5" />
+                <path d="M8 17v-3" />
+            </svg>
+        ),
     };
 
     return (
-        <aside className="main-sidebar bg-white border-r border-gray-200 w-64 fixed h-full overflow-y-auto pb-4">
+        <aside className="main-sidebar bg-gradient-to-b from-white to-gray-50 border-r border-gray-200 w-64 fixed h-full overflow-y-auto pb-4 shadow-sm">
             {/* ----------------------------
              * Header / Logo
              * ---------------------------- */}
-            <div className="px-4 py-3 border-b border-gray-100 mt-2">
+            <div className="px-4 py-4 border-b border-gray-200 mt-2 mb-1 bg-white shadow-sm">
                 <div className="flex items-center gap-3">
                     <Link
                         href="/"
-                        className="flex items-center gap-2 flex-shrink-0"
+                        className="flex items-center gap-2 flex-shrink-0 transition-all duration-200 ease-in-out hover:scale-105 active:scale-95"
                     >
                         <div className="relative -mt-2">
                             <AppLogo size="md" variant="blue" />
                         </div>
                     </Link>
                     <div className="flex-1">
-                        <div className="text-base font-semibold text-blue-700 leading-tight">
+                        <div className="text-base font-bold text-blue-700 leading-tight">
                             {BRAND_CONSTANTS.NAME.SHORT}
                         </div>
-                        <div className="text-xs text-gray-500 leading-tight">
+                        <div className="text-xs text-gray-500 leading-tight font-medium">
                             Application
                         </div>
                     </div>
@@ -363,42 +382,42 @@ export default function MenuSideBar({ lang, setLang }) {
              * Sidebar Menu
              * ---------------------------- */}
             <div className="sidebar">
-                <nav className="flex-1 px-2 py-3 space-y-2">
+                <nav className="flex-1 px-3 py-4 space-y-1.5">
                     {/* ═══════════════════════════════════════════════════════
                      * Dashboard
                      * ═══════════════════════════════════════════════════════ */}
-                    <MenuGroup
-                        label={"Dashboard"}
+                    <MenuItem
+                        href={route("dashboard")}
                         icon={icons.dashboard}
+                        label={"Dashboard"}
+                        active={route().current("dashboard")}
+                    />
+
+                    {/* ═══════════════════════════════════════════════════════
+                     * Analytics
+                     * ═══════════════════════════════════════════════════════ */}
+                    <MenuGroup
+                        label={"Analytics"}
+                        icon={icons.analytics}
                         active={
-                            route().current("dashboard") ||
-                            route().current("student.analytics")
+                            route().current("user.analytics") ||
+                            isActive("user-progress")
                         }
                     >
                         <MenuItem
-                            href={route("dashboard")}
-                            label={"Dashboard Analytics"}
-                            active={route().current("dashboard")}
+                            href={route("user.analytics")}
+                            label={"User Analytics"}
+                            active={route().current("user.analytics")}
                         />
 
-                        <MenuItem
-                            href={route("student.analytics")}
-                            label={"Student Analytics"}
-                            active={route().current("student.analytics")}
-                        />
+                        {routeExists('user-progress.index') && (
+                            <MenuItem
+                                href={safeRoute("user-progress.index")}
+                                label={"My Progress"}
+                                active={isActive("user-progress")}
+                            />
+                        )}
                     </MenuGroup>
-
-                    {/* ═══════════════════════════════════════════════════════
-                     * FIX18: User Progress - All authenticated users can view their own
-                     * ═══════════════════════════════════════════════════════ */}
-                    {routeExists('user-progress.index') && (
-                        <MenuItem
-                            href={safeRoute("user-progress.index")}
-                            icon={icons.progress}
-                            label={"My Progress"}
-                            active={isActive("user-progress")}
-                        />
-                    )}
 
                     {/* ═══════════════════════════════════════════════════════
                      * Articles (with Article Settings - FIX16)
@@ -485,7 +504,7 @@ export default function MenuSideBar({ lang, setLang }) {
                      * ═══════════════════════════════════════════════════════ */}
                     {(can["role-list"] || can["user-list"]) && (
                         <>
-                            <div className="text-xs font-semibold text-gray-400 mb-2 pt-2 px-2 tracking-wider uppercase">
+                            <div className="text-xs font-bold text-gray-500 mb-2 mt-4 pt-3 px-2 tracking-wider uppercase border-t border-gray-200">
                                 {"Authentication"}
                             </div>
 
@@ -551,15 +570,30 @@ export default function MenuSideBar({ lang, setLang }) {
                             )}
 
                             {/* ═══════════════════════════════════════════════════════
-                             * FIX17: System Settings
+                             * Settings
                              * ═══════════════════════════════════════════════════════ */}
-                            {can["settings-edit"] && routeExists('settings.index') && (
-                                <MenuItem
-                                    href={safeRoute("settings.index")}
-                                    icon={icons.settings}
+                            {(can["settings-edit"] || can["permissions-manage"] || isAdmin) && (
+                                <MenuGroup
                                     label={"Settings"}
-                                    active={routeName === "settings.index" || isActive("settings")}
-                                />
+                                    icon={icons.settings}
+                                    active={isActive("settings", "permissions")}
+                                >
+                                    {(can["settings-edit"] || isAdmin) && routeExists('settings.index') && (
+                                        <MenuItem
+                                            href={safeRoute("settings.index")}
+                                            label={"User Registration"}
+                                            active={routeName === "settings.index" || isActive("settings")}
+                                        />
+                                    )}
+
+                                    {(can["permissions-manage"] || isAdmin) && routeExists('permissions.index') && (
+                                        <MenuItem
+                                            href={safeRoute("permissions.index")}
+                                            label={"Permission"}
+                                            active={routeName === "permissions.index" || isActive("permissions")}
+                                        />
+                                    )}
+                                </MenuGroup>
                             )}
                         </>
                     )}

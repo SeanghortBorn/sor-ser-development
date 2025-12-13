@@ -870,7 +870,7 @@ export default function Index({ articles: initialArticles = [], userRole }) {
                         {/* Right Side - Sidebar - Wrapped in Error Boundary */}
                         <ErrorBoundary
                             fallback={
-                                <div className="w-80 bg-white rounded-xl border border-red-200 shadow-sm p-6 flex items-center justify-center">
+                                <div className="w-80 bg-white rounded-2xl border border-red-200 shadow-sm p-6 flex items-center justify-center">
                                     <p className="text-sm text-red-600">Sidebar unavailable</p>
                                 </div>
                             }
@@ -957,7 +957,7 @@ export default function Index({ articles: initialArticles = [], userRole }) {
             {/* Account Modal */}
             {showAccountModal && (
                 <div className="absolute inset-0 bg-opacity-20 flex items-center justify-center z-10">
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 w-full max-w-xl mx-4">
+                    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 w-full max-w-xl mx-4">
                         <div className="text-center">
                             <h2 className="text-[24px] font-semibold text-gray-900 mb-2">
                                 Create an account to get started
@@ -1039,7 +1039,7 @@ export default function Index({ articles: initialArticles = [], userRole }) {
                         Copy, paste, and cut actions are disabled while typing in this field.
                     </p>
                     <div className="flex items-center gap-2">
-                        <span className="inline-block px-2 py-0.5 text-xs font-medium text-red-800 bg-red-100 rounded">
+                        <span className="inline-block px-2 py-0.5 text-xs font-medium text-red-800 bg-red-100 rounded-full">
                             Please type manually.
                         </span>
                     </div>

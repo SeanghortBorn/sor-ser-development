@@ -104,16 +104,15 @@ export default function QuizList() {
     return (
         <AdminLayout breadcrumb={<Breadcrumb header={headWeb} links={linksBreadcrumb} />}>
             <Head title={headWeb} />
-            <section className="content">
-                <div className="container-fluid">
-                    {/* Stats Cards */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                         {stats.map((stat, idx) => {
                             const Icon = stat.icon;
                             return (
                                 <div
                                     key={idx}
-                                    className={`bg-white px-3 pb-2 pt-3 border-l-4 ${stat.borderColor} shadow-sm rounded-xl flex flex-col hover:shadow-sm transition-all duration-200`}
+                                    className={`bg-white px-3 pb-2 pt-3 border-l-4 ${stat.borderColor} shadow-sm rounded-2xl flex flex-col hover:shadow-md transition-all duration-200`}
                                 >
                                     <div className="flex items-center justify-between">
                                         <p className="text-gray-800 text-base font-semibold">
@@ -137,7 +136,7 @@ export default function QuizList() {
                     </div>
 
                     {/* Quiz Table */}
-                    <div className="bg-white shadow-sm rounded-xl overflow-hidden border border-gray-200 mb-12">
+                    <div className="bg-white shadow-sm rounded-2xl overflow-hidden border border-gray-200 mb-12">
                         {/* Header */}
                         <div className="px-6 py-4 border-b flex flex-col md:flex-row justify-between items-center gap-3">
                             <h3 className="text-xl font-semibold">Quiz Management</h3>
@@ -377,7 +376,6 @@ export default function QuizList() {
                         </form>
                     </Modal>
                 </div>
-            </section>
         </AdminLayout>
     );
 }

@@ -9,7 +9,7 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\TwoFactorLoginController;
 use App\Http\Controllers\HomophoneController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\StudentAnalyticsController;
+use App\Http\Controllers\UserAnalyticsController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\GoogleController;
 use App\Http\Controllers\QuizController;
@@ -110,8 +110,8 @@ Route::middleware('auth')->group(function () {
             ->middleware('password.confirm');
     });
 
-    Route::get('/student-analytics', [StudentAnalyticsController::class, 'index'])
-        ->name('student.analytics')
+    Route::get('/user-analytics', [UserAnalyticsController::class, 'index'])
+        ->name('user.analytics')
         ->middleware(['check:user-list']);
 
     Route::get('/api/articles', [ArticleController::class, 'apiList']);
@@ -131,9 +131,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('/categories/{id}', [CategoryController::class, 'destroy'])->name('categories.destroy');
 
     // Quiz routes with custom middleware
-    Route::resource('quizzes', QuizController::class)->except(['index', 'create']);
-    Route::get('/quizzes', [QuizController::class, 'index'])->name('quizzes.index')->middleware(['check:quiz-list']);
     Route::get('/quizzes/create', [QuizController::class, 'create'])->name('quizzes.create')->middleware(['check:quiz-create']);
+    Route::get('/quizzes', [QuizController::class, 'index'])->name('quizzes.index')->middleware(['check:quiz-list']);
+    Route::resource('quizzes', QuizController::class)->except(['index', 'create']);
 
     Route::middleware(['auth'])->group(function () {
         Route::post('/quizzes/submit', [QuizController::class, 'submitAttempt'])->name('quizzes.submit');

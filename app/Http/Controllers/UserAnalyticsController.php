@@ -13,7 +13,7 @@ use App\Models\QuizAttempt;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
-class StudentAnalyticsController extends Controller
+class UserAnalyticsController extends Controller
 {
     public function index()
     {
@@ -30,7 +30,7 @@ class StudentAnalyticsController extends Controller
             'homophoneAccuracies',
         ])
         ->withCount([
-            'grammarCheckers as total_articles',
+            'articleCompletions as total_articles',
             'comparisonActivities as accepts' => fn($q) => $q->where('action', 'accept'),
             'comparisonActivities as dismiss' => fn($q) => $q->where('action', 'dismiss'),
             'typingActivities as total_typings' => fn($q) => $q->where('status', 1),
@@ -121,7 +121,7 @@ class StudentAnalyticsController extends Controller
             ];
         });
 
-        return Inertia::render('StudentAnalytics/Index', [
+        return Inertia::render('Users/UserAnalytics', [
             'analytics' => $data,
         ]);
     }

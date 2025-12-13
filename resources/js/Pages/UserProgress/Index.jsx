@@ -10,7 +10,7 @@ export default function Index({ auth, users, canViewAll }) {
         <AdminLayout breadcrumb={<Breadcrumb header={title} links={breadcrumbLinks} />}>
             <Head title={title} />
 
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
                 <div className="p-6">
                             <table className="w-full">
                                 <thead>

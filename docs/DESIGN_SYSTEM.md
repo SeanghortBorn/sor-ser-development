@@ -224,7 +224,7 @@ When creating or updating components:
 ## Updated Files
 
 ### Currently Updated
-1. `/resources/js/Pages/Users/ArticleDetail.jsx` ✅
+1. `/resources/js/Pages/Users/UserArticleAnalytics.jsx` ✅
 2. `/resources/js/Pages/Homes/index.jsx` ✅
 3. `/resources/js/Pages/Homes/FeatureCard.jsx` ✅
 4. `/resources/js/Pages/Users/Progress.jsx` ✅ (partial)

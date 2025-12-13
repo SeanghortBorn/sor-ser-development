@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\PagePermission;
-use App\Models\PermissionOverride;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Spatie\Permission\Models\Permission;
@@ -37,11 +35,9 @@ class RolesController extends Controller
     public function create()
     {
         $permissions = Permission::orderBy('name')->get();
-        $pages = PagePermission::orderBy('page_name')->get();
 
         return Inertia::render('Roles/CreateEdit', [
             'permissions' => $permissions,
-            'pages' => $pages,
         ]);
     }
 
@@ -54,7 +50,6 @@ class RolesController extends Controller
             'name' => 'required|string|max:255|unique:roles,name',
             'permissions' => 'nullable|array',
             'permissions.*' => 'exists:permissions,id',
-            'page_permissions' => 'nullable|array',
         ]);
 
         $role = Role::create([
@@ -66,11 +61,6 @@ class RolesController extends Controller
         if (!empty($validated['permissions'])) {
             $permissions = Permission::whereIn('id', $validated['permissions'])->get();
             $role->syncPermissions($permissions);
-        }
-
-        // Sync page permissions
-        if (!empty($validated['page_permissions'])) {
-            $this->syncPagePermissions($role, $validated['page_permissions']);
         }
 
         return redirect()
@@ -98,28 +88,10 @@ class RolesController extends Controller
     {
         $role->load('permissions');
         $permissions = Permission::orderBy('name')->get();
-        $pages = PagePermission::orderBy('page_name')->get();
-        
-        // Load existing page permissions for this role
-        $existingPagePerms = PermissionOverride::where('role_id', $role->id)
-            ->with('pagePermission')
-            ->get();
-        
-        $pagePermissions = [];
-        foreach ($existingPagePerms as $perm) {
-            $pageName = $perm->pagePermission->page_name;
-            if (!isset($pagePermissions[$pageName])) {
-                $pagePermissions[$pageName] = [];
-            }
-            $pagePermissions[$pageName][$perm->permission_type] = true;
-        }
-        
-        $role->page_permissions = $pagePermissions;
 
         return Inertia::render('Roles/CreateEdit', [
             'role' => $role,
             'permissions' => $permissions,
-            'pages' => $pages,
         ]);
     }
 
@@ -132,7 +104,6 @@ class RolesController extends Controller
             'name' => 'required|string|max:255|unique:roles,name,' . $role->id,
             'permissions' => 'nullable|array',
             'permissions.*' => 'exists:permissions,id',
-            'page_permissions' => 'nullable|array',
         ]);
 
         $role->update([
@@ -143,11 +114,6 @@ class RolesController extends Controller
         if (isset($validated['permissions'])) {
             $permissions = Permission::whereIn('id', $validated['permissions'])->get();
             $role->syncPermissions($permissions);
-        }
-
-        // Sync page permissions
-        if (isset($validated['page_permissions'])) {
-            $this->syncPagePermissions($role, $validated['page_permissions']);
         }
 
         return redirect()
@@ -173,44 +139,11 @@ class RolesController extends Controller
                 ->route('roles.index')
                 ->with('error', 'Cannot delete role with assigned users');
         }
-
-        // Delete page permissions for this role
-        PermissionOverride::where('role_id', $role->id)->delete();
         
         $role->delete();
 
         return redirect()
             ->route('roles.index')
             ->with('success', 'Role deleted successfully');
-    }
-
-    /**
-     * Sync page permissions for a role
-     */
-    protected function syncPagePermissions(Role $role, array $pagePermissions)
-    {
-        // Delete existing page permissions for this role
-        PermissionOverride::where('role_id', $role->id)->delete();
-
-        // Create new page permissions
-        foreach ($pagePermissions as $pageName => $actions) {
-            $pagePermission = PagePermission::firstOrCreate([
-                'page_name' => $pageName,
-            ], [
-                'description' => ucfirst($pageName) . ' page',
-                'requires_admin' => true,
-            ]);
-
-            foreach ($actions as $action => $enabled) {
-                if ($enabled) {
-                    PermissionOverride::create([
-                        'page_permission_id' => $pagePermission->id,
-                        'role_id' => $role->id,
-                        'permission_type' => $action,
-                        'granted_by' => auth()->id(),
-                    ]);
-                }
-            }
-        }
     }
 }

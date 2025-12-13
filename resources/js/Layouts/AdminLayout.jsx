@@ -41,7 +41,7 @@ const AdminLayout = ({ breadcrumb, children }) => {
     return (
         <div className="wrapper h-screen overflow-hidden flex flex-col">
             {/* Navbar */}
-            <nav className="main-header py-3 navbar navbar-expand navbar-white navbar-light">
+            <nav className="main-header py-3 navbar navbar-expand navbar-white navbar-light border-b border-gray-200 shadow-sm bg-white">
                 <ul className="navbar-nav">
                     <li className="nav-item">
                         <a
@@ -51,7 +51,7 @@ const AdminLayout = ({ breadcrumb, children }) => {
                             role="button"
                         >
                             {/* <i className="fas fa-bars"></i> */}
-                            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 border px-2 py-2 rounded-xl">
+                            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 border border-gray-300 px-2 py-2 rounded-xl hover:bg-gray-50 hover:border-gray-400 hover:shadow-sm transition-all duration-200 ease-in-out hover:scale-105 active:scale-95">
                                 <svg
                                     className="block"
                                     width="16"
@@ -85,7 +85,7 @@ const AdminLayout = ({ breadcrumb, children }) => {
                 </div> */}
 
                 {/* Right navbar links */}
-                <ul className="navbar-nav ml-auto mr-2">
+                <ul className="navbar-nav ml-auto mr-2 flex items-center gap-3">
                     {/* Language Switcher */}
                     <li>
                         <LanguageSwitcher lang={lang} setLang={setLang} />
@@ -97,35 +97,40 @@ const AdminLayout = ({ breadcrumb, children }) => {
                         ref={dropdownRef}
                     >
                         <button
-                            className="nav-link btn btn-link d-flex align-items-center p-2 border-0 bg-transparent"
+                            className="nav-link btn btn-link d-flex align-items-center px-3 py-2 border border-gray-300 rounded-2xl bg-white hover:bg-gray-50 hover:shadow-md transition-all duration-200 ease-in-out hover:scale-105 active:scale-95"
                             onClick={() => setDropdownOpen(!dropdownOpen)}
                             style={{ outline: "none", boxShadow: "none" }}
                         >
                             <img
                                 src={"/images/person-icon.svg"}
-                                className="mr-2 h-8 w-8 overflow-hidden rounded-full"
+                                className="mr-2 h-8 w-8 overflow-hidden rounded-full border-2 border-blue-200"
                                 alt="User avatar"
                             />
-                            <span className="text-theme-sm mr-1 block font-medium">
+                            <span className="text-sm mr-2 block font-semibold text-gray-700">
                                 {auth?.user?.name}
                             </span>
                             <i
-                                className={`fas fa-chevron-down ml-[0.1rem] transition-transform transform scale-[0.7] ${
+                                className={`fas fa-chevron-down ml-1 transition-transform duration-200 ease-in-out transform scale-[0.7] text-gray-500 ${
                                     dropdownOpen ? "rotate-180" : ""
                                 }`}
                             />
                         </button>
 
                         {dropdownOpen && (
-                            <div className="absolute right-[0.4rem] mt-2 mx-auto max-w-xl bg-white border border-gray-200 rounded-xl shadow-sm z-50">
+                            <div className="absolute right-0 mt-2 w-64 bg-white border border-gray-200 rounded-2xl shadow-lg z-50 overflow-hidden">
                                 {/* User Info Header */}
-                                <div className="px-4 py-3 border-b border-gray-200">
+                                <div className="px-4 py-3 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
                                     <div className="flex items-center gap-3">
+                                        <img
+                                            src={"/images/person-icon.svg"}
+                                            className="h-12 w-12 overflow-hidden rounded-full border-2 border-blue-300 shadow-sm"
+                                            alt="User avatar"
+                                        />
                                         <div className="flex flex-col">
-                                            <span className="text-sm font-medium text-gray-800">
+                                            <span className="text-sm font-bold text-gray-900">
                                                 {auth?.user?.name}
                                             </span>
-                                            <span className="text-sm text-gray-500">
+                                            <span className="text-xs text-gray-600">
                                                 {auth?.user?.email}
                                             </span>
                                         </div>
@@ -137,18 +142,18 @@ const AdminLayout = ({ breadcrumb, children }) => {
                                     <Link
                                         href={route("profile.edit")}
                                         onClick={() => setDropdownOpen(false)}
-                                        className="flex items-center px-3 py-2 text-sm text-blue-900 hover:bg-gray-100 hover:scale-105 hover:shadow-sm rounded-xl transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
+                                        className="flex items-center px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-700 rounded-xl transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                                     >
-                                        <i className="fas fa-user-circle w-4 mr-3 text-gray-500"></i>
+                                        <i className="fas fa-user-circle w-4 mr-3 text-blue-500"></i>
                                         My Account
                                     </Link>
-                                    <hr className="my-1 border-gray-200" />
+                                    <hr className="my-1.5 border-gray-200" />
                                     <Link
                                         method="post"
                                         href={route("logout")}
                                         as="button"
                                         onClick={() => setDropdownOpen(false)}
-                                        className="flex items-center w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 hover:scale-105 hover:shadow-sm rounded-xl transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
+                                        className="flex items-center w-full text-left px-3 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 rounded-xl transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                                     >
                                         <i className="fas fa-sign-out-alt w-4 mr-3 text-red-500"></i>
                                         Sign Out
@@ -164,9 +169,8 @@ const AdminLayout = ({ breadcrumb, children }) => {
             <MenuSideBar lang={lang} setLang={setLang} />
 
             {/* Main content */}
-            <div className="content-wrapper flex-1 px-2 overflow-y-auto">
-                {breadcrumb && breadcrumb}
-                <section className="content px-2">{children}</section>
+            <div className="content-wrapper flex-1 overflow-y-auto bg-gray-50">
+                <section className="content p-6">{children}</section>
             </div>
         </div>
     );

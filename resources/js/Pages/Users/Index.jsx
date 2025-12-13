@@ -206,17 +206,16 @@ export default function UserPage({
     return (
         <AdminLayout breadcrumb={<Breadcrumb header={headWeb} links={linksBreadcrumb} />}>
             <Head title={headWeb} />
-            <section className="content">
-                <div className="container-fluid">
-                    {/* Stats Cards - Using our new StatsCard component */}
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            
+            {/* Stats Cards - Using our new StatsCard component */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                         {stats.map((stat, index) => (
                             <StatsCard key={index} {...stat} />
                         ))}
                     </div>
 
                     {/* Main Card */}
-                    <div className="bg-white rounded-xl shadow-sm p-6">
+                    <div className="bg-white rounded-2xl shadow-sm p-6">
                         {/* Header with Search and Actions */}
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                             <h2 className="text-xl font-bold text-gray-800">
@@ -424,7 +423,7 @@ export default function UserPage({
                                                 setUserPermissions(userPermissions.filter((id) => id !== perm.id));
                                             }
                                         }}
-                                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                        className="rounded-lg border-gray-300 text-blue-600 focus:ring-blue-500"
                                     />
                                     <span className="text-sm text-gray-700">{perm.name}</span>
                                 </label>
@@ -503,6 +502,7 @@ export default function UserPage({
                     </form>
                 </div>
             </Modal>
+            </div>
         </AdminLayout>
     );
 }

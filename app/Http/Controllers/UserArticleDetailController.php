@@ -49,7 +49,7 @@ class UserArticleDetailController extends Controller
         // Calculate summary metrics
         $summaryMetrics = $this->calculateSummaryMetrics($sessionTimeline);
 
-        return Inertia::render('Users/ArticleDetail', [
+        return Inertia::render('Users/UserArticleAnalytics', [
             'user' => [
                 'id' => $user->id,
                 'name' => $user->name,

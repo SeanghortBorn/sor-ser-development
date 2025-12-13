@@ -189,7 +189,7 @@ export default function IndexPage() {
             <Head title={headWeb} />
             <section className="content">
                 <div className="container-fluid">
-                    <div className="bg-white shadow-sm rounded-xl overflow-hidden border border-gray-200 mb-12">
+                    <div className="bg-white shadow-sm rounded-2xl overflow-hidden border border-gray-200 mb-12">
                         <div className="px-6 py-4 border-b flex flex-col md:flex-row justify-between items-center gap-3">
                             <h3 className="text-xl font-semibold">{headWeb}</h3>
                             <div className="flex items-center gap-3 ml-auto">
@@ -308,7 +308,7 @@ export default function IndexPage() {
                                                     type="checkbox"
                                                     checked={isAllVisibleSelected}
                                                     onChange={selectAllVisible}
-                                                    className="w-4 h-4 rounded border-gray-300"
+                                                    className="w-4 h-4 rounded-lg border-gray-300"
                                                 />
                                             </th>
                                         )}
@@ -349,7 +349,7 @@ export default function IndexPage() {
                                                             type="checkbox"
                                                             checked={selectedIds.includes(u.id)}
                                                             onChange={() => toggleSelect(u.id)}
-                                                            className="w-4 h-4 rounded border-gray-300"
+                                                            className="w-4 h-4 rounded-lg border-gray-300"
                                                         />
                                                     </td>
                                                 )}

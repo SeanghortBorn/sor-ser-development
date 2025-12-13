@@ -73,9 +73,8 @@ export default function ArticlesPage({ articles, search = "" }) {
     return (
         <AdminLayout breadcrumb={<Breadcrumb header={headWeb} links={linksBreadcrumb} />}>
             <Head title={headWeb} />
-            <section className="content">
-                <div className="container-fluid">
-                    <div className="bg-white rounded-xl shadow-sm p-6">
+            
+            <div className="bg-white rounded-2xl shadow-sm p-6">
                         {/* Header with Search and Add Button */}
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                             <h2 className="text-xl font-bold text-gray-800">Articles</h2>
@@ -249,7 +248,7 @@ export default function ArticlesPage({ articles, search = "" }) {
                                 ) : isTextFile(viewTarget.file.title) && fileTextPreview ? (
                                     <div className="mt-4">
                                         <h4 className="font-semibold text-sm text-gray-700 mb-2">Preview:</h4>
-                                        <pre className="bg-white border rounded p-3 text-xs max-h-64 overflow-auto">
+                                        <pre className="bg-white border rounded-xl p-3 text-xs max-h-64 overflow-auto">
                                             {fileTextPreview}
                                         </pre>
                                     </div>
@@ -296,6 +295,7 @@ export default function ArticlesPage({ articles, search = "" }) {
                     </div>
                 </div>
             </Modal>
+            </div>
         </AdminLayout>
     );
 }

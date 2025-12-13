@@ -47,6 +47,11 @@ class PermissionService
         // 2. Check Spatie permission: "page_name.action"
         $permission = "{$pageName}.{$action}";
 
+        // Check if the permission exists first to avoid exceptions
+        if (!Permission::where('name', $permission)->exists()) {
+            return false;
+        }
+
         return $user->hasPermissionTo($permission);
     }
 
@@ -60,6 +65,11 @@ class PermissionService
     {
         $blockPermission = "{$pageName}.block";
 
+        // Check if the permission exists first to avoid exceptions
+        if (!Permission::where('name', $blockPermission)->exists()) {
+            return false;
+        }
+
         return $user->hasPermissionTo($blockPermission);
     }
 
@@ -69,6 +79,11 @@ class PermissionService
     public function canViewOwn(User $user, string $pageName): bool
     {
         $permission = "{$pageName}.own";
+
+        // Check if the permission exists first to avoid exceptions
+        if (!Permission::where('name', $permission)->exists()) {
+            return false;
+        }
 
         return $user->hasPermissionTo($permission);
     }

@@ -270,9 +270,8 @@ export default function HomophonesPage({ homophones, search = "" }) {
             breadcrumb={<Breadcrumb header={headWeb} links={linksBreadcrumb} />}
         >
             <Head title={headWeb} />
-            <section className="content">
-                <div className="container-fluid">
-                    <div className="bg-white shadow-sm rounded-xl overflow-hidden border border-gray-200 mb-12">
+            
+            <div className="bg-white shadow-sm rounded-2xl overflow-hidden border border-gray-200">
                         <div className="px-6 py-4 border-b flex items-center justify-between">
                             <h3 className="text-xl font-semibold">
                                 Homophones
@@ -435,7 +434,7 @@ export default function HomophonesPage({ homophones, search = "" }) {
                                                                 "homophones.edit",
                                                                 item.id
                                                             )}
-                                                            className="px-3 py-1 rounded bg-blue-500 text-white text-xs hover:bg-blue-600"
+                                                            className="px-3 py-1 rounded-xl bg-blue-500 text-white text-xs hover:bg-blue-600 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                                                         >
                                                             Edit
                                                         </Link>
@@ -446,7 +445,7 @@ export default function HomophonesPage({ homophones, search = "" }) {
                                                                     item
                                                                 )
                                                             }
-                                                            className="px-3 py-1 rounded bg-red-500 text-white text-xs hover:bg-red-600"
+                                                            className="px-3 py-1 rounded-xl bg-red-500 text-white text-xs hover:bg-red-600 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                                                         >
                                                             Delete
                                                         </button>
@@ -716,7 +715,7 @@ export default function HomophonesPage({ homophones, search = "" }) {
                                                     <h4 className="font-medium text-sm text-gray-700 mb-2">
                                                         Existing in Database
                                                     </h4>
-                                                    <div className="bg-white p-3 rounded border">
+                                                    <div className="bg-white p-3 rounded-xl border">
                                                         <div className="text-sm">
                                                             <strong>Word:</strong> {dup.existing.word}
                                                         </div>
@@ -734,7 +733,7 @@ export default function HomophonesPage({ homophones, search = "" }) {
                                                     <h4 className="font-medium text-sm text-gray-700 mb-2">
                                                         New from Import
                                                     </h4>
-                                                    <div className="bg-white p-3 rounded border border-blue-300">
+                                                    <div className="bg-white p-3 rounded-xl border border-blue-300">
                                                         <div className="text-sm">
                                                             <strong>Word:</strong> {dup.new.word}
                                                         </div>
@@ -815,8 +814,6 @@ export default function HomophonesPage({ homophones, search = "" }) {
                             </div>
                         )}
                     </div>
-                </div>
-            </section>
         </AdminLayout>
     );
 }

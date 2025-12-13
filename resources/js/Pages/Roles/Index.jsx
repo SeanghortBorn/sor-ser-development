@@ -101,9 +101,8 @@ export default function RolePage({ roles, search: searchProp = "" }) {
             breadcrumb={<Breadcrumb header={headWeb} links={linksBreadcrumb} />}
         >
             <Head title={headWeb} />
-            <section className="content">
-                <div className="container-fluid sm:px-6 lg:px-8 mb-12">
-                    <div className="bg-white shadow-sm rounded-xl overflow-hidden border border-gray-200">
+            
+            <div className="bg-white shadow-sm rounded-2xl overflow-hidden border border-gray-200">
                         {/* Header */}
                         <div className="px-4 sm:px-6 py-4 border-b flex flex-col sm:flex-row justify-between items-center gap-3">
                             <h3 className="text-xl sm:text-lg font-semibold text-gray-800">
@@ -344,7 +343,7 @@ export default function RolePage({ roles, search: searchProp = "" }) {
                                                     {perms.map((perm, idx) => (
                                                         <span
                                                             key={perm.id || idx}
-                                                            className="inline-block bg-blue-100 text-blue-700 rounded px-2.5 py-1 text-xs font-medium"
+                                                            className="inline-block bg-blue-100 text-blue-700 rounded-xl px-2.5 py-1 text-xs font-medium"
                                                         >
                                                             {formatPermissionName(
                                                                 perm.name
@@ -414,6 +413,7 @@ export default function RolePage({ roles, search: searchProp = "" }) {
                     </div>
                 </form>
             </Modal>
+            </div>
         </AdminLayout>
     );
 }

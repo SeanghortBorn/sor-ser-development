@@ -2,34 +2,27 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\PagePermission;
-use App\Services\PermissionService;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
 class PermissionManagementController extends Controller
 {
-    protected PermissionService $permissionService;
-
-    public function __construct(PermissionService $permissionService)
-    {
-        $this->permissionService = $permissionService;
-    }
-
     /**
      * Display permission management page
      */
     public function index()
     {
-        $pages = PagePermission::with(['overrides.role', 'overrides.user'])->get();
-        $roles = Role::all();
-        $actions = ['view', 'create', 'update', 'delete', 'block', 'own'];
+        $permissions = Permission::orderBy('name')->get();
+        $roles = Role::with('permissions')->get();
+        $users = User::with('roles', 'permissions')->get(['id', 'name', 'email']);
 
         return Inertia::render('Permissions/Index', [
-            'pages' => $pages,
+            'permissions' => $permissions,
             'roles' => $roles,
-            'actions' => $actions,
+            'users' => $users,
         ]);
     }
 
@@ -39,19 +32,16 @@ class PermissionManagementController extends Controller
     public function grantToRole(Request $request)
     {
         $request->validate([
-            'page_name' => 'required|string',
+            'permission_id' => 'required|exists:permissions,id',
             'role_id' => 'required|exists:roles,id',
-            'action' => 'required|in:view,create,update,delete,block,own',
         ]);
 
-        $this->permissionService->grantToRole(
-            $request->page_name,
-            $request->role_id,
-            $request->action,
-            auth()->user()
-        );
+        $role = Role::findById($request->role_id);
+        $permission = Permission::findById($request->permission_id);
+        
+        $role->givePermissionTo($permission);
 
-        return redirect()->back()->with('success', 'Permission granted successfully');
+        return redirect()->back()->with('success', 'Permission granted to role successfully');
     }
 
     /**
@@ -60,19 +50,16 @@ class PermissionManagementController extends Controller
     public function grantToUser(Request $request)
     {
         $request->validate([
-            'page_name' => 'required|string',
+            'permission_id' => 'required|exists:permissions,id',
             'user_id' => 'required|exists:users,id',
-            'action' => 'required|in:view,create,update,delete,block,own',
         ]);
 
-        $this->permissionService->grantToUser(
-            $request->page_name,
-            $request->user_id,
-            $request->action,
-            auth()->user()
-        );
+        $user = User::findOrFail($request->user_id);
+        $permission = Permission::findById($request->permission_id);
+        
+        $user->givePermissionTo($permission);
 
-        return redirect()->back()->with('success', 'Permission granted successfully');
+        return redirect()->back()->with('success', 'Permission granted to user successfully');
     }
 
     /**
@@ -81,18 +68,16 @@ class PermissionManagementController extends Controller
     public function revokeFromRole(Request $request)
     {
         $request->validate([
-            'page_name' => 'required|string',
+            'permission_id' => 'required|exists:permissions,id',
             'role_id' => 'required|exists:roles,id',
-            'action' => 'required|in:view,create,update,delete,block,own',
         ]);
 
-        $this->permissionService->revokeFromRole(
-            $request->page_name,
-            $request->role_id,
-            $request->action
-        );
+        $role = Role::findById($request->role_id);
+        $permission = Permission::findById($request->permission_id);
+        
+        $role->revokePermissionTo($permission);
 
-        return redirect()->back()->with('success', 'Permission revoked successfully');
+        return redirect()->back()->with('success', 'Permission revoked from role successfully');
     }
 
     /**
@@ -101,17 +86,15 @@ class PermissionManagementController extends Controller
     public function revokeFromUser(Request $request)
     {
         $request->validate([
-            'page_name' => 'required|string',
+            'permission_id' => 'required|exists:permissions,id',
             'user_id' => 'required|exists:users,id',
-            'action' => 'required|in:view,create,update,delete,block,own',
         ]);
 
-        $this->permissionService->revokeFromUser(
-            $request->page_name,
-            $request->user_id,
-            $request->action
-        );
+        $user = User::findOrFail($request->user_id);
+        $permission = Permission::findById($request->permission_id);
+        
+        $user->revokePermissionTo($permission);
 
-        return redirect()->back()->with('success', 'Permission revoked successfully');
+        return redirect()->back()->with('success', 'Permission revoked from user successfully');
     }
 }

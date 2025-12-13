@@ -1,16 +1,11 @@
 import Breadcrumb from '@/Components/Breadcrumb';
-import DangerButton from '@/Components/DangerButton';
 import Modal from '@/Components/Modal';
-import NavLink from '@/Components/NavLink';
 import Pagination from '@/Components/Pagination';
-import PrimaryButton from '@/Components/PrimaryButton';
-import SecondaryButton from '@/Components/SecondaryButton';
-import SecondaryButtonLink from '@/Components/SecondaryButtonLink';
 import AdminLayout from '@/Layouts/AdminLayout';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
 import moment from 'moment';
 import { useState } from 'react';
+import { Plus, Pencil, Trash2, Layers, Calendar } from 'lucide-react';
 
 export default function CategoriesPage({ categoryData }) {
     const datasList = categoryData.data;
@@ -28,6 +23,7 @@ export default function CategoriesPage({ categoryData }) {
         setDeleteData('name', data.name)
         setConfirmingDataDeletion(true);
     };
+    
     const closeModal = () => {
         setConfirmingDataDeletion(false);
         setDataEdit({})
@@ -40,94 +36,160 @@ export default function CategoriesPage({ categoryData }) {
         destroy(route('categories.destroy', dataEdit.id), {
             preserveScroll: true,
             onSuccess: () => closeModal(),
-            onError: () => passwordInput.current.focus(),
             onFinish: () => reset(),
         });
     };
+    
     const headWeb = 'Category List'
     const linksBreadcrumb = [{ title: 'Home', url: '/' }, { title: headWeb, url: '' }];
 
     return (
-        <AdminLayout breadcrumb={<Breadcrumb header={headWeb} links={linksBreadcrumb} />} >
+        <AdminLayout breadcrumb={<Breadcrumb header={headWeb} links={linksBreadcrumb} />}>
             <Head title={headWeb} />
-            <section className="content">
-                <div className="row">
-                    <div className="col-md-12">
-                        <div className="card card-outline card-info">
-                            <div className="card-header">
-                                <h3 className="card-title">
-                                    Datalist Management
-                                </h3>
-                                <div className="card-tools">
-                                    <div className="input-group input-group-sm" style={{ width: '150px' }}>
-                                        <input type="text" name="table_search" className="form-control float-right" placeholder="Search" />
-                                        <div className="input-group-append">
-                                            <button type="submit" className="btn btn-default">
-                                                <i className="fas fa-search"></i>
-                                            </button>
-                                        </div>
-                                    </div>
+            
+            {/* Stats Card */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div className="bg-white px-3 pb-2 pt-3 border-l-4 border-blue-100 shadow-sm rounded-2xl flex flex-col hover:shadow-md transition-all duration-200">
+                            <div className="flex items-center justify-between">
+                                <p className="text-gray-800 text-base font-semibold">Total Categories</p>
+                                <div className="text-blue-500">
+                                    <Layers className="w-7 h-7" />
                                 </div>
                             </div>
-                            <div className="card-body table-responsive p-0">
-                                <table className="table table-hover text-nowrap">
-                                    <thead>
-                                        <tr>
-                                            <th>#ID</th>
-                                            <th>Title</th>
-                                            <th>Order</th>
-                                            <th>Created At</th>
-                                            <th>Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {datasList.length > 0 ?
-                                            datasList.map((item, k) => (
-                                                <tr key={k}>
-                                                    <td>{item?.id}</td>
-                                                    <td>{item?.name}</td>
-                                                    <td>{item?.view_order}</td>
-                                                    <td>{moment(item?.created_at).format("DD/MM/YYYY")}</td>
-                                                    <td width={'170px'}>
-                                                        <Link href={route('categories.edit', item.id)} class="btn btn-info btn-xs mr-2">
-                                                            <i className='fas fa-edit'></i> Edit
-                                                        </Link>
-                                                        <button onClick={() => confirmDataDeletion(item)} type="button" class="btn btn-danger btn-xs">
-                                                            <i className='fas fa-trash'></i> Delete
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            ))
-                                            :
-                                            <tr>
-                                                <td colSpan={5}>There are no record!</td>
-                                            </tr>
-                                        }
-                                    </tbody>
-                                </table>
-                                <Modal show={confirmingDataDeletion} onClose={closeModal}>
-                                    <form onSubmit={deleteDataRow} className="p-6">
-                                        <h2 className="text-lg font-medium text-gray-900">
-                                            Confirmation!
-                                        </h2>
-                                        <p className="mt-1 text-sm text-gray-600">
-                                            Are you sure you want to delete <span className='text-lg font-medium'>{deleteData.name}</span>?
-                                        </p>
-                                        <div className="mt-6 flex justify-end">
-                                            <SecondaryButton onClick={closeModal}>No</SecondaryButton>
-                                            <DangerButton className="ms-3" disabled={processing}>Yes</DangerButton>
-                                        </div>
-                                    </form>
-                                </Modal>
-                            </div>
-
-                            <div className="card-footer clearfix">
-                                <Pagination links={categoryData.links} />
+                            <div>
+                                <h2 className="text-lg font-bold text-gray-900">{categoryData.total || datasList.length}</h2>
+                                <p className="text-xs text-gray-500 mt-1">All categories in the system</p>
                             </div>
                         </div>
                     </div>
+
+                    {/* Main Table Card */}
+                    <div className="bg-white shadow-sm rounded-2xl overflow-hidden border border-gray-200">
+                        {/* Header */}
+                        <div className="px-6 py-4 border-b flex flex-col md:flex-row justify-between items-center gap-3">
+                            <h3 className="text-xl font-semibold">Category Management</h3>
+                            <div className="flex items-center gap-3 ml-auto">
+                                {/* Add Category Button */}
+                                <Link
+                                    href={route('categories.create')}
+                                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm text-white bg-green-600 hover:bg-green-500 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
+                                >
+                                    <Plus className="w-4 h-4" />
+                                    Add Category
+                                </Link>
+                            </div>
+                        </div>
+
+                        {/* Table */}
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left border-collapse">
+                                <thead className="bg-gradient-to-r from-blue-500 to-blue-600 text-white text-sm">
+                                    <tr>
+                                        <th className="py-3 px-4">#ID</th>
+                                        <th className="py-3 px-4">Name</th>
+                                        <th className="py-3 px-4">View Order</th>
+                                        <th className="py-3 px-4">Created At</th>
+                                        <th className="py-3 px-4 text-center">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="text-sm text-gray-700">
+                                    {datasList.length > 0 ? (
+                                        datasList.map((item, k) => (
+                                            <tr key={k} className="border-t hover:bg-gray-50 transition-all duration-200">
+                                                <td className="py-3 px-4 font-semibold">{item?.id}</td>
+                                                <td className="py-3 px-4">
+                                                    <p className="font-medium text-gray-900">{item?.name}</p>
+                                                </td>
+                                                <td className="py-3 px-4">
+                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                        {item?.view_order}
+                                                    </span>
+                                                </td>
+                                                <td className="py-3 px-4">
+                                                    <div className="flex items-center gap-1.5 text-gray-600">
+                                                        <Calendar className="w-3.5 h-3.5" />
+                                                        {moment(item?.created_at).format("DD/MM/YYYY")}
+                                                    </div>
+                                                </td>
+                                                <td className="py-3 px-4 text-center">
+                                                    <div className="flex justify-center gap-2">
+                                                        {/* Edit Button */}
+                                                        <div className="relative group">
+                                                            <Link
+                                                                href={route('categories.edit', item.id)}
+                                                                className="inline-flex items-center gap-1.5 px-2 py-2 text-sm font-medium rounded-xl bg-blue-500 text-white hover:bg-blue-600 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
+                                                            >
+                                                                <Pencil className="w-4 h-4" />
+                                                            </Link>
+                                                            <div className="absolute bottom-full mb-2 hidden group-hover:block bg-white text-gray-800 text-xs px-3 py-1 rounded-xl shadow-sm border">
+                                                                Edit Category
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Delete Button */}
+                                                        <div className="relative group">
+                                                            <button
+                                                                onClick={() => confirmDataDeletion(item)}
+                                                                className="inline-flex items-center gap-1.5 px-2 py-2 text-sm font-medium rounded-xl bg-red-500 text-white hover:bg-red-600 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
+                                                            >
+                                                                <Trash2 className="w-4 h-4" />
+                                                            </button>
+                                                            <div className="absolute bottom-full mb-2 hidden group-hover:block bg-white text-gray-800 text-xs px-3 py-1 rounded-xl shadow-sm border">
+                                                                Delete Category
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    ) : (
+                                        <tr>
+                                            <td colSpan={5} className="py-8 text-center text-gray-500">
+                                                No categories found
+                                            </td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {/* Footer with Pagination */}
+                        <div className="px-6 py-4 border-t bg-gray-50">
+                            <Pagination links={categoryData.links} />
+                        </div>
+                    </div>
+
+                    {/* Delete Confirmation Modal */}
+                    <Modal show={confirmingDataDeletion} onClose={closeModal}>
+                        <form onSubmit={deleteDataRow} className="p-6">
+                            <h2 className="text-lg font-medium text-gray-900">
+                                Confirm Deletion
+                            </h2>
+                            <p className="mt-1 text-sm text-gray-600">
+                                Are you sure you want to delete <span className='text-lg font-medium text-red-600'>{deleteData.name}</span>?
+                            </p>
+                            <p className="mt-2 text-xs text-gray-500">
+                                This action cannot be undone.
+                            </p>
+                            <div className="mt-6 flex justify-end gap-3">
+                                <button
+                                    type="button"
+                                    onClick={closeModal}
+                                    className="px-4 py-2 text-sm font-medium rounded-xl text-gray-700 border-2 hover:bg-gray-50 hover:border-gray-300 transition duration-200"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={processing}
+                                    className="px-4 py-2 text-sm font-medium rounded-xl text-white bg-red-600 hover:bg-red-700 transition duration-200 disabled:opacity-50"
+                                >
+                                    {processing ? 'Deleting...' : 'Delete'}
+                                </button>
+                            </div>
+                        </form>
+                    </Modal>
                 </div>
-            </section>
         </AdminLayout>
     );
 }
