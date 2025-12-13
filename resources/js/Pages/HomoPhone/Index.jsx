@@ -834,7 +834,12 @@ export default function HomophonesPage({ homophones, search = "" }) {
                         {/* Pagination */}
                         {homophones.total > 10 && (
                             <div className="mt-6 mb-6">
-                                <Pagination links={homophones.links} />
+                                <Pagination 
+                                    links={homophones.links}
+                                    currentPage={homophones.current_page}
+                                    total={homophones.total}
+                                    perPage={homophones.per_page}
+                                />
                             </div>
                         )}
                     </div>
