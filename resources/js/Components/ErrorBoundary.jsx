@@ -89,7 +89,7 @@ class ErrorBoundary extends Component {
             // Default fallback UI
             return (
                 <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-                    <div className="max-w-lg w-full bg-white rounded-lg shadow-lg p-8">
+                    <div className="max-w-lg w-full bg-white rounded-xl shadow-sm p-8">
                         {/* Icon */}
                         <div className="flex justify-center mb-4">
                             <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
@@ -114,7 +114,7 @@ class ErrorBoundary extends Component {
 
                         {/* Error Details (Development only or if showDetails is true) */}
                         {(import.meta.env.DEV || showDetails) && error && (
-                            <details className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                            <details className="mb-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
                                 <summary className="cursor-pointer text-sm font-medium text-gray-700 mb-2">
                                     Error Details
                                 </summary>
@@ -138,7 +138,7 @@ class ErrorBoundary extends Component {
                         <div className="space-y-3">
                             <button
                                 onClick={this.handleReset}
-                                className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+                                className="w-full bg-blue-600 text-white py-3 px-4 rounded-xl font-medium hover:bg-blue-700 transition-all duration-200 ease-in-out flex items-center justify-center gap-2"
                             >
                                 <RefreshCw size={18} />
                                 Try Again
@@ -146,7 +146,7 @@ class ErrorBoundary extends Component {
 
                             <button
                                 onClick={this.handleReload}
-                                className="w-full bg-white text-gray-700 py-3 px-4 rounded-lg font-medium border border-gray-300 hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
+                                className="w-full bg-white text-gray-700 py-3 px-4 rounded-xl font-medium border border-gray-300 hover:bg-gray-50 transition-all duration-200 ease-in-out flex items-center justify-center gap-2"
                             >
                                 <RefreshCw size={18} />
                                 Reload Page
@@ -154,7 +154,7 @@ class ErrorBoundary extends Component {
 
                             <button
                                 onClick={this.handleGoHome}
-                                className="w-full bg-white text-gray-700 py-3 px-4 rounded-lg font-medium border border-gray-300 hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
+                                className="w-full bg-white text-gray-700 py-3 px-4 rounded-xl font-medium border border-gray-300 hover:bg-gray-50 transition-all duration-200 ease-in-out flex items-center justify-center gap-2"
                             >
                                 <Home size={18} />
                                 Go to Homepage

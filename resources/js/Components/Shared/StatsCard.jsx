@@ -28,10 +28,10 @@ export default function StatsCard({
     const Icon = LucideIcons[icon] || LucideIcons.Circle;
 
     return (
-        <div className={`bg-white px-3 pb-2 pt-3 border-l-4 ${borderColor} shadow-sm rounded-xl flex flex-col hover:shadow-md transition-all duration-200 ${className}`}>
+        <div className={`bg-white px-3 pb-2 pt-3 border-l-4 ${borderColor} shadow-sm rounded-xl flex flex-col hover:shadow-sm transition-all duration-200 ${className}`}>
             <div className="flex items-center justify-between">
                 <p className="text-gray-800 text-base font-semibold">{label}</p>
-                <div className={`${bgColor} p-2 rounded-lg`}>
+                <div className={`${bgColor} p-2 rounded-xl`}>
                     <Icon className={`w-7 h-7 ${color}`} />
                 </div>
             </div>

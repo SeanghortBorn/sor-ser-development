@@ -59,9 +59,9 @@ const QuizQuestion = ({ question, onAnswer, progress }) => {
     };
 
     return (
-        <div className="bg-white dark:bg-gray-800 shadow-lg rounded-xl p-6 max-w-xl mx-auto animate-fadeIn">
+        <div className="bg-white dark:bg-gray-800 shadow-sm rounded-xl p-6 max-w-xl mx-auto animate-fadeIn">
             <div className="mb-4">
-                <div className="bg-gray-200 h-2 rounded">
+                <div className="bg-gray-200 h-2 rounded-xl">
                     <div
                         className="bg-blue-500 h-2 rounded transition-all duration-500"
                         style={{ width: `${progress}%` }}
@@ -85,7 +85,7 @@ const QuizQuestion = ({ question, onAnswer, progress }) => {
                                         className="mr-2"
                                     />
                                     <span
-                                        className={`py-2 px-4 rounded border cursor-pointer transition-all duration-300 ${
+                                        className={`py-2 px-4 rounded-xl border cursor-pointer transition-all duration-300 ${
                                             isSelected
                                                 ? "bg-blue-500 text-white border-blue-500"
                                                 : "bg-white dark:bg-gray-700 hover:bg-blue-50 dark:hover:bg-blue-900"
@@ -98,7 +98,7 @@ const QuizQuestion = ({ question, onAnswer, progress }) => {
                         })}
                         <button
                             onClick={handleSubmitCheckboxes}
-                            className="mt-4 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded transition"
+                            className="mt-4 bg-blue-500 hover:bg-blue-600 hover:scale-105 hover:shadow-sm text-white font-semibold py-2 px-4 rounded transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                             disabled={!Array.isArray(selected) || selected.length === 0}
                         >
                             Submit Answers
@@ -114,7 +114,7 @@ const QuizQuestion = ({ question, onAnswer, progress }) => {
                                     <select
                                         value={matched}
                                         onChange={e => handleSelectMatch(pair.left, e.target.value)}
-                                        className="flex-1 px-3 py-2 rounded border shadow-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                                        className="flex-1 px-3 py-2 rounded-xl border shadow-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
                                     >
                                         <option value="">Select match</option>
                                         {(question.options || []).map((opt, rIdx) => (
@@ -127,7 +127,7 @@ const QuizQuestion = ({ question, onAnswer, progress }) => {
                         <button
                             onClick={handleSubmitMatching}
                             disabled={!(selected && selected.length === (question.options || []).length)}
-                            className="mt-4 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded transition"
+                            className="mt-4 bg-blue-500 hover:bg-blue-600 hover:scale-105 hover:shadow-sm text-white font-semibold py-2 px-4 rounded transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                         >
                             Submit Matching
                         </button>
@@ -138,7 +138,7 @@ const QuizQuestion = ({ question, onAnswer, progress }) => {
                         {question.options.map((option, index) => {
                             const isSelected = selected === option;
                             const baseClass =
-                                "py-2 px-4 rounded border cursor-pointer transition-all duration-300";
+                                "py-2 px-4 rounded-xl border cursor-pointer transition-all duration-300";
                             const selectedClass = isSelected
                                 ? option === question.answer
                                     ? "bg-green-500 text-white border-green-500"

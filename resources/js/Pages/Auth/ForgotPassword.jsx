@@ -19,7 +19,7 @@ export default function ForgotPassword({ status }) {
 
             <div className="fixed inset-0 flex items-center justify-center z-10">
                 <div
-                    className="relative bg-white rounded-2xl w-full max-w-xl shadow-xl"
+                    className="relative bg-white rounded-xl w-full max-w-xl shadow-sm"
                     style={{
                         boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.18)",
                         border: "1px solid #e5e7eb",
@@ -28,7 +28,7 @@ export default function ForgotPassword({ status }) {
                     {/* Close button */}
                     <button
                         type="button"
-                        className="absolute top-5 right-6 text-gray-400 hover:text-gray-600 text-2xl z-10"
+                        className="absolute top-5 right-6 text-gray-400  text-2xl z-10"
                         aria-label="Close"
                         onClick={() => window.history.back()}
                     >
@@ -63,7 +63,7 @@ export default function ForgotPassword({ status }) {
                                         setData("email", e.target.value)
                                     }
                                     placeholder="Enter your email"
-                                    className="w-full px-3 py-[12px] border border-gray-300 rounded-xl transition-colors text-gray-600 focus:ring-3 focus:ring-gray-100 focus:outline-none text-[16px] font-medium"
+                                    className="w-full px-3 py-[12px] border border-gray-300 rounded-xl transition-all duration-200 ease-in-out text-gray-600 focus:ring-3 focus:ring-gray-100 focus:outline-none text-[16px] font-medium"
                                 />
                                 <InputError
                                     message={errors.email}

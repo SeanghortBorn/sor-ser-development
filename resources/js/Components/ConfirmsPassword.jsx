@@ -114,14 +114,14 @@ export default function ConfirmsPassword({ onConfirmed, children }) {
                         <button
                             type="button"
                             onClick={closeModal}
-                            className="rounded-[10px] border-2 border-gray-300 px-8 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold disabled:opacity-60"
+                            className="rounded-xl border-2 border-gray-300 px-8 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold disabled:opacity-60"
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
                             disabled={confirming}
-                            className="rounded-[10px] px-9 py-1 bg-blue-600 text-white font-semibold hover:bg-blue-700 transition disabled:opacity-60"
+                            className="rounded-xl px-9 py-1 bg-blue-600 text-white font-semibold hover:bg-blue-700 transition disabled:opacity-60"
                         >
                             {confirming ? "Confirming..." : "Confirm"}
                         </button>

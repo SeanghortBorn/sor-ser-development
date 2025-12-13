@@ -8,7 +8,7 @@ export default function CompletionModal({ show, completionData, onClose }) {
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full mx-4">
+            <div className="bg-white rounded-xl shadow-sm p-8 max-w-md w-full mx-4">
                 <div className="text-center">
                     <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4">
                         <svg
@@ -42,7 +42,7 @@ export default function CompletionModal({ show, completionData, onClose }) {
                     {/* Additional Metrics */}
                     <div className="grid grid-cols-2 gap-4 mb-6">
                         {/* Total Time */}
-                        <div className="bg-gray-50 rounded-lg p-3">
+                        <div className="bg-gray-50 rounded-xl p-3">
                             <div className="text-2xl font-bold text-gray-800">
                                 {completionData.totalTimeSpent
                                     ? `${Math.floor(completionData.totalTimeSpent / 60)}:${(completionData.totalTimeSpent % 60).toString().padStart(2, '0')}`
@@ -52,7 +52,7 @@ export default function CompletionModal({ show, completionData, onClose }) {
                         </div>
 
                         {/* Deleted Characters */}
-                        <div className="bg-gray-50 rounded-lg p-3">
+                        <div className="bg-gray-50 rounded-xl p-3">
                             <div className="text-2xl font-bold text-gray-800">
                                 {completionData.deletedCharsCount || 0}
                             </div>
@@ -63,10 +63,10 @@ export default function CompletionModal({ show, completionData, onClose }) {
                     {/* Deleted Characters Detail */}
                     {completionData.deletedCharsDetail && completionData.deletedCharsDetail.length > 0 && (
                         <details className="mb-6 text-left">
-                            <summary className="cursor-pointer text-sm text-gray-700 font-medium hover:text-gray-900">
+                            <summary className="cursor-pointer text-sm text-gray-700 font-medium ">
                                 View Deleted Characters Detail ({completionData.deletedCharsDetail.length} deletions)
                             </summary>
-                            <div className="mt-3 max-h-32 overflow-y-auto bg-gray-50 rounded-lg p-3 space-y-2">
+                            <div className="mt-3 max-h-32 overflow-y-auto bg-gray-50 rounded-xl p-3 space-y-2">
                                 {completionData.deletedCharsDetail.map((deletion, idx) => (
                                     <div key={idx} className="text-xs text-gray-600 border-b border-gray-200 pb-2 last:border-0">
                                         <span className="font-mono bg-red-100 text-red-700 px-1 rounded">
@@ -119,7 +119,7 @@ export default function CompletionModal({ show, completionData, onClose }) {
                                 }
                             }, 300);
                         }}
-                        className="w-full px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-semibold transition-colors"
+                        className="w-full px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-semibold transition-all duration-200 ease-in-out"
                     >
                         Continue
                     </button>

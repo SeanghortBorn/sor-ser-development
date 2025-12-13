@@ -79,7 +79,7 @@ export default function AuthLayoutSplit({ children, image = null, brandTitle = n
                 </div>
 
                 {/* Forms Container */}
-                <div className="flex flex-col justify-center items-center flex-1 p-8 sm:p-12 min-h-full">
+                <div className="flex items-start justify-center p-8 sm:p-12 pt-12 sm:pt-16 pb-16">
                     <div className="w-full max-w-md">
                         {children}
                     </div>

@@ -15,7 +15,7 @@ export default function index() {
             {/* Hero Section */}
             <div className="min-h-screen mt-12 flex flex-col items-center justify-center">
                 <PageContainer>
-                    <div className="bg-blue-600 rounded-2xl w-full py-16 px-8 flex flex-col items-center text-center">
+                    <div className="bg-blue-600 rounded-xl w-full py-16 px-8 flex flex-col items-center text-center">
                     <h1 className="font-sans text-white text-3xl md:text-5xl font-semibold mb-3">
                         Experience a new way of learning with {BRAND_CONSTANTS.NAME.FULL}
                     </h1>
@@ -25,15 +25,15 @@ export default function index() {
 
                     <div className="flex gap-6">
                         <Link href="/homophone-check">
-                            <button className="relative z-10 font-sans text-white font-semibold border-2 border-white rounded-full px-8 py-2 text-[18px] transition duration-300 ease-in-out hover:bg-white group">
-                                <span className="transition duration-300 group-hover:text-gray-700">
+                            <button className="relative z-10 font-sans text-white font-semibold border-2 border-white rounded-xl px-8 py-2 text-[18px] transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95 hover:bg-white group">
+                                <span className="transition duration-300 group-">
                                     Start Practicing
                                 </span>
                             </button>
                         </Link>
                         {/* <Link href="/quiz-practice">
                             <button className="relative z-10 font-sans text-white font-semibold border-2 border-white rounded-full px-8 py-2 text-[18px] transition duration-300 ease-in-out hover:bg-white group">
-                                <span className="transition duration-300 group-hover:text-gray-700">
+                                <span className="transition duration-300 group-">
                                     Start Practicing
                                 </span>
                             </button>
@@ -191,7 +191,7 @@ export default function index() {
 
                 {/* CTA */}
                 <PageContainer>
-                    <section className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl p-8 md:p-12 text-white shadow-xl w-full mb-20">
+                    <section className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl p-8 md:p-12 text-white shadow-sm w-full mb-20">
                     <div className="flex flex-col md:flex-row items-center justify-between gap-6">
                         <div className="flex-1">
                             <h3 className="text-2xl md:text-3xl font-bold mb-3">
@@ -204,7 +204,7 @@ export default function index() {
                         <div className="flex flex-col sm:flex-row gap-4">
                             <a
                                 href="/auth"
-                                className="px-4 py-2 bg-white text-blue-600 rounded-xl font-semibold hover:shadow-lg hover:scale-105 transition-all text-center text-sm"
+                                className="px-4 py-2 bg-white text-blue-600 rounded-xl font-semibold transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95 text-center text-sm"
                             >
                                 Get Started
                             </a>

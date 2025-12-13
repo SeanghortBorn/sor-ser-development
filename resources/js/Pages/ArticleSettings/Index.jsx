@@ -99,7 +99,7 @@ export default function ArticleSettingsIndex({ auth, articles, articleOptions })
 
             <div className="py-12">
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                    <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                    <div className="bg-white overflow-hidden shadow-sm rounded-xl">
                         <div className="p-6">
                             <h2 className="text-2xl font-bold mb-6">Article Progression Settings</h2>
                             
@@ -108,7 +108,7 @@ export default function ArticleSettingsIndex({ auth, articles, articleOptions })
                                 const currentData = formData[article.id] || article.setting;
 
                                 return (
-                                    <div key={article.id} className="border rounded-lg mb-4">
+                                    <div key={article.id} className="border rounded-xl mb-4">
                                         {/* Header */}
                                         <div
                                             className="p-4 hover:bg-gray-50 flex justify-between items-center"
@@ -122,7 +122,7 @@ export default function ArticleSettingsIndex({ auth, articles, articleOptions })
                                                         className={`p-0.5 rounded transition ${
                                                             index === 0
                                                                 ? 'text-gray-300 cursor-not-allowed'
-                                                                : 'text-gray-600 hover:bg-gray-200 hover:text-gray-900'
+                                                                : 'text-gray-600 hover:bg-gray-200 '
                                                         }`}
                                                         title="Move up"
                                                     >
@@ -136,7 +136,7 @@ export default function ArticleSettingsIndex({ auth, articles, articleOptions })
                                                         className={`p-0.5 rounded transition ${
                                                             index === articles.length - 1
                                                                 ? 'text-gray-300 cursor-not-allowed'
-                                                                : 'text-gray-600 hover:bg-gray-200 hover:text-gray-900'
+                                                                : 'text-gray-600 hover:bg-gray-200 '
                                                         }`}
                                                         title="Move down"
                                                     >

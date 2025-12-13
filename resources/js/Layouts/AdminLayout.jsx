@@ -51,7 +51,7 @@ const AdminLayout = ({ breadcrumb, children }) => {
                             role="button"
                         >
                             {/* <i className="fas fa-bars"></i> */}
-                            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 border px-2 py-2 rounded-lg">
+                            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 border px-2 py-2 rounded-xl">
                                 <svg
                                     className="block"
                                     width="16"
@@ -79,7 +79,7 @@ const AdminLayout = ({ breadcrumb, children }) => {
                         <input
                             type="text"
                             placeholder="Search or type command..."
-                            className="h-10 w-full rounded-lg border xl:w-[430px] border-gray-200 bg-white py-2.5 pr-14 pl-12 text-base font-sans text-gray-900"
+                            className="h-10 w-full rounded-xl border xl:w-[430px] border-gray-200 bg-white py-2.5 pr-14 pl-12 text-base font-sans text-gray-900"
                         />
                     </div>
                 </div> */}
@@ -117,7 +117,7 @@ const AdminLayout = ({ breadcrumb, children }) => {
                         </button>
 
                         {dropdownOpen && (
-                            <div className="absolute right-[0.4rem] mt-2 mx-auto max-w-xl bg-white border border-gray-200 rounded-xl shadow-lg z-50">
+                            <div className="absolute right-[0.4rem] mt-2 mx-auto max-w-xl bg-white border border-gray-200 rounded-xl shadow-sm z-50">
                                 {/* User Info Header */}
                                 <div className="px-4 py-3 border-b border-gray-200">
                                     <div className="flex items-center gap-3">
@@ -137,7 +137,7 @@ const AdminLayout = ({ breadcrumb, children }) => {
                                     <Link
                                         href={route("profile.edit")}
                                         onClick={() => setDropdownOpen(false)}
-                                        className="flex items-center px-3 py-2 text-sm text-blue-900 hover:bg-gray-100 rounded-lg transition"
+                                        className="flex items-center px-3 py-2 text-sm text-blue-900 hover:bg-gray-100 hover:scale-105 hover:shadow-sm rounded-xl transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                                     >
                                         <i className="fas fa-user-circle w-4 mr-3 text-gray-500"></i>
                                         My Account
@@ -148,7 +148,7 @@ const AdminLayout = ({ breadcrumb, children }) => {
                                         href={route("logout")}
                                         as="button"
                                         onClick={() => setDropdownOpen(false)}
-                                        className="flex items-center w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition"
+                                        className="flex items-center w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 hover:scale-105 hover:shadow-sm rounded-xl transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                                     >
                                         <i className="fas fa-sign-out-alt w-4 mr-3 text-red-500"></i>
                                         Sign Out

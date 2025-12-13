@@ -156,7 +156,7 @@ export default function VerifyOTP({ email }) {
                     <>
                         {/* Success Message */}
                         {successMessage && (
-                            <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                            <div className="p-3 bg-green-50 border border-green-200 rounded-xl">
                                 <p className="text-sm text-green-700">{successMessage}</p>
                             </div>
                         )}
@@ -181,7 +181,7 @@ export default function VerifyOTP({ email }) {
 
                         {/* Error Message */}
                         {error && (
-                            <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                            <div className="p-3 bg-red-50 border border-red-200 rounded-xl">
                                 <p className="text-sm text-red-700">{error}</p>
                             </div>
                         )}
@@ -190,7 +190,7 @@ export default function VerifyOTP({ email }) {
                         <button
                             onClick={() => handleSubmit()}
                             disabled={loading || otp.some(d => !d)}
-                            className={`w-full bg-blue-600 hover:bg-blue-700 hover:shadow-lg hover:scale-105 text-white font-semibold py-3 px-6 ${LAYOUT_CONSTANTS.ROUNDED.MEDIUM} transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-none flex items-center justify-center gap-2`}
+                            className={`w-full bg-blue-600 hover:bg-blue-700 hover:shadow-sm hover:scale-105 text-white font-semibold py-3 px-6 ${LAYOUT_CONSTANTS.ROUNDED.MEDIUM} transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-none flex items-center justify-center gap-2`}
                         >
                             {loading ? (
                                 <>
@@ -213,7 +213,7 @@ export default function VerifyOTP({ email }) {
                                 <button
                                     onClick={handleResend}
                                     disabled={resending}
-                                    className="text-blue-600 hover:text-blue-700 hover:scale-110 font-semibold transition-all duration-300 disabled:opacity-50"
+                                    className="text-blue-600  hover:scale-110 font-semibold transition-all duration-300 disabled:opacity-50"
                                 >
                                     {resending ? 'Sending...' : 'Resend Code'}
                                 </button>

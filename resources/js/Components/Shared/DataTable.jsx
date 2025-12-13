@@ -44,7 +44,7 @@ export default function DataTable({
                         data.map((row, rowIndex) => (
                             <tr
                                 key={row.id || rowIndex}
-                                className="hover:bg-gray-50 transition"
+                                className="hover:bg-gray-50 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                             >
                                 {columns.map((column) => (
                                     <td

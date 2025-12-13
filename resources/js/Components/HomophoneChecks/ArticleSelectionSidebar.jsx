@@ -78,7 +78,7 @@ const ArticleSelectionSidebar = memo(({
                         placeholder="Search articles..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                 </div>
             </div>
@@ -92,7 +92,7 @@ const ArticleSelectionSidebar = memo(({
                 <div className="flex gap-2 mt-2">
                     <button
                         onClick={() => setFilterStatus('all')}
-                        className={`flex-1 px-3 py-1.5 text-xs font-medium rounded transition-colors ${
+                        className={`flex-1 px-3 py-1.5 text-xs font-medium rounded transition-all duration-200 ease-in-out ${
                             filterStatus === 'all'
                                 ? 'bg-blue-600 text-white'
                                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -102,7 +102,7 @@ const ArticleSelectionSidebar = memo(({
                     </button>
                     <button
                         onClick={() => setFilterStatus('completed')}
-                        className={`flex-1 px-3 py-1.5 text-xs font-medium rounded transition-colors flex items-center justify-center gap-1 ${
+                        className={`flex-1 px-3 py-1.5 text-xs font-medium rounded transition-all duration-200 ease-in-out flex items-center justify-center gap-1 ${
                             filterStatus === 'completed'
                                 ? 'bg-green-600 text-white'
                                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -113,7 +113,7 @@ const ArticleSelectionSidebar = memo(({
                     </button>
                     <button
                         onClick={() => setFilterStatus('incomplete')}
-                        className={`flex-1 px-3 py-1.5 text-xs font-medium rounded transition-colors flex items-center justify-center gap-1 ${
+                        className={`flex-1 px-3 py-1.5 text-xs font-medium rounded transition-all duration-200 ease-in-out flex items-center justify-center gap-1 ${
                             filterStatus === 'incomplete'
                                 ? 'bg-blue-600 text-white'
                                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -147,7 +147,7 @@ const ArticleSelectionSidebar = memo(({
                                     setSearchQuery('');
                                     setFilterStatus('all');
                                 }}
-                                className="mt-3 text-sm text-blue-600 hover:text-blue-700"
+                                className="mt-3 text-sm text-blue-600 "
                             >
                                 Clear filters
                             </button>

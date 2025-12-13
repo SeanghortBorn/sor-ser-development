@@ -36,7 +36,7 @@ const MetricCard = memo(({
     };
 
     return (
-        <div className={`border rounded-lg ${sizeClasses[size]} ${colorClasses[color]}`}>
+        <div className={`border rounded-xl ${sizeClasses[size]} ${colorClasses[color]}`}>
             <div className="flex items-center justify-between">
                 <div className="flex-1">
                     <p className="text-sm font-medium opacity-75">{label}</p>

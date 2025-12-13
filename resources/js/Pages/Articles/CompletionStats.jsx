@@ -17,28 +17,28 @@ export default function CompletionStats({ auth, article, stats, completed_users,
             <div className="p-6">
                     {/* Statistics Overview */}
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                        <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+                        <div className="bg-white overflow-hidden shadow-sm rounded-xl p-6">
                             <div className="text-sm font-medium text-gray-500">Total Users</div>
                             <div className="mt-2 text-3xl font-bold text-gray-900">
                                 {stats.total_users}
                             </div>
                         </div>
 
-                        <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+                        <div className="bg-white overflow-hidden shadow-sm rounded-xl p-6">
                             <div className="text-sm font-medium text-gray-500">Completed</div>
                             <div className="mt-2 text-3xl font-bold text-green-600">
                                 {stats.completed_count}
                             </div>
                         </div>
 
-                        <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+                        <div className="bg-white overflow-hidden shadow-sm rounded-xl p-6">
                             <div className="text-sm font-medium text-gray-500">Not Completed</div>
                             <div className="mt-2 text-3xl font-bold text-orange-600">
                                 {stats.not_completed_count}
                             </div>
                         </div>
 
-                        <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+                        <div className="bg-white overflow-hidden shadow-sm rounded-xl p-6">
                             <div className="text-sm font-medium text-gray-500">Completion Rate</div>
                             <div className="mt-2 text-3xl font-bold text-blue-600">
                                 {stats.completion_rate}%
@@ -47,7 +47,7 @@ export default function CompletionStats({ auth, article, stats, completed_users,
                     </div>
 
                     {/* Completed Users Table */}
-                    <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
+                    <div className="bg-white overflow-hidden shadow-sm rounded-xl mb-6">
                         <div className="p-6 border-b border-gray-200">
                             <h3 className="text-lg font-semibold text-gray-900">
                                 Completed Users ({stats.completed_count})
@@ -130,7 +130,7 @@ export default function CompletionStats({ auth, article, stats, completed_users,
                     </div>
 
                     {/* Not Completed Users Table */}
-                    <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                    <div className="bg-white overflow-hidden shadow-sm rounded-xl">
                         <div className="p-6 border-b border-gray-200">
                             <h3 className="text-lg font-semibold text-gray-900">
                                 Not Completed Users ({stats.not_completed_count})

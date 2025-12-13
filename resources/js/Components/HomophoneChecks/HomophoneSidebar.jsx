@@ -875,7 +875,7 @@ export default function HomophoneSidebar({
             : 0;
 
         return (
-            <div className="w-96 rounded-xl border border-gray-200 bg-white h-[75vh] flex flex-col overflow-hidden shadow-sm">
+            <div className="w-96 rounded-xl border border-gray-200 bg-white h-[75vh] flex flex-col overflow-hidden transition-shadow duration-200 hover:shadow-sm">
                 <div className="px-6 pt-4 pb-2 border-gray-200">
                     {/* Live Progress Bar - Compact with inline criteria */}
                     {selectedArticle && (
@@ -908,18 +908,18 @@ export default function HomophoneSidebar({
                     {/* Filter Buttons */}
                     {isChecking ? (
                         <div className="flex items-center space-x-2 animate-pulse mb-1">
-                            <div className="h-8 w-20 bg-slate-200 rounded-lg"></div>
-                            <div className="h-8 w-28 bg-slate-200 rounded-lg"></div>
+                            <div className="h-8 w-20 bg-slate-200 rounded-xl"></div>
+                            <div className="h-8 w-28 bg-slate-200 rounded-xl"></div>
                         </div>
                     ) : (
                         <div className="flex items-center space-x-2">
-                            <button className="text-sm text-blue-900 px-3 py-1.5 font-medium flex items-center hover:bg-gray-100 rounded-lg transition">
+                            <button className="text-sm text-blue-900 px-3 py-1.5 font-medium flex items-center hover:bg-gray-100 rounded-xl transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95">
                                 All{" "}
                                 <span className="text-xs bg-gray-200 rounded-full px-2 py-0.5 ml-2">
                                     {filteredDifferences.length}
                                 </span>
                             </button>
-                            <button className="text-sm text-green-600 px-3 py-1.5 font-medium flex items-center hover:bg-gray-100 rounded-lg transition">
+                            <button className="text-sm text-green-600 px-3 py-1.5 font-medium flex items-center hover:bg-gray-100 rounded-xl transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95">
                                 Differences{" "}
                                 <span className="text-xs bg-gray-200 rounded-full px-2 py-0.5 ml-2">
                                     {filteredDifferences.length}
@@ -936,7 +936,7 @@ export default function HomophoneSidebar({
                         // 🟦 Skeleton Loader (replaces spinner)
                         <div className="space-y-4 animate-pulse">
                             {/* Header Skeleton */}
-                            <div className="flex justify-between items-center border border-gray-200 rounded-xl px-4 py-2 bg-white shadow-sm">
+                            <div className="flex justify-between items-center border border-gray-200 rounded-xl px-4 py-2 bg-white transition-shadow duration-200 hover:shadow-sm">
                                 <div className="h-4 w-40 bg-slate-200 rounded"></div>
                                 <div className="h-6 w-20 bg-slate-300 rounded-full"></div>
                             </div>
@@ -964,7 +964,7 @@ export default function HomophoneSidebar({
                         <>
                             {/* Actual Comparison Results */}
                             {filteredDifferences.length > 0 && (
-                                <div className="flex justify-between items-center border border-gray-200 rounded-xl px-4 py-2 bg-white shadow-sm">
+                                <div className="flex justify-between items-center border border-gray-200 rounded-xl px-4 py-2 bg-white transition-shadow duration-200 hover:shadow-sm">
                                     <span className="flex items-center">
                                         <span className="text-red-500 text-sm font-semibold">
                                             {filteredDifferences.length}{" "}
@@ -975,7 +975,7 @@ export default function HomophoneSidebar({
                                         </span>
                                     </span>
                                     {/* <button
-                                        className="border border-green-500 text-green-600 px-3 py-1 rounded-full text-xs font-medium hover:bg-green-50 transition"
+                                        className="border border-green-500 text-green-600 px-3 py-1 rounded-full text-xs font-medium hover:bg-green-50 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                                         onClick={handleAcceptAll}
                                     >
                                         Accept all
@@ -988,7 +988,7 @@ export default function HomophoneSidebar({
                                 <div
                                     key={`${item.index_compared}-${item.type}`}
                                     onClick={() => handleCardClick(diffIndex)}
-                                    className={`bg-white rounded-xl p-3 border shadow-sm cursor-pointer transition ${
+                                    className={`bg-white rounded-xl p-3 border transition-shadow duration-200 hover:shadow-sm cursor-pointer transition ${
                                         diffIndex === 0
                                             ? "border-blue-500 border-2"
                                             : "border-gray-200"
@@ -1050,7 +1050,7 @@ export default function HomophoneSidebar({
 
                                     <div className="flex space-x-2">
                                         <button
-                                            className="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-full flex items-center text-xs font-medium transition"
+                                            className="bg-green-600 hover:bg-green-700 hover:scale-105 hover:shadow-sm text-white px-3 py-1.5 rounded-full flex items-center text-xs font-medium transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                                             onClick={(e) => {
                                                 e.stopPropagation();
                                                 handleAcceptOrDismiss(
@@ -1063,7 +1063,7 @@ export default function HomophoneSidebar({
                                             Accept
                                         </button>
                                         <button
-                                            className="flex items-center text-gray-700 hover:text-red-600 px-3 rounded-full border-2 hover:bg-red-50 text-xs font-medium transition"
+                                            className="flex items-center text-gray-700  px-3 rounded-full border-2 hover:bg-red-50 text-xs font-medium transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                                             onClick={(e) => {
                                                 e.stopPropagation();
                                                 handleAcceptOrDismiss(
@@ -1114,7 +1114,7 @@ export default function HomophoneSidebar({
                                     )}
                                 </h3>
                                 <button
-                                    className="text-gray-500 hover:text-gray-700"
+                                    className="text-gray-500 "
                                     onClick={closeExplain}
                                     aria-label="Close"
                                 >
@@ -1152,7 +1152,7 @@ export default function HomophoneSidebar({
                                             <button
                                                 type="button"
                                                 onClick={closeExplain}
-                                                className="rounded-[10px] border-2 border-gray-300 px-8 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold"
+                                                className="rounded-xl border-2 border-gray-300 px-8 py-1 text-gray-700 hover:bg-gray-100 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95 font-semibold"
                                             >
                                                 Close
                                             </button>
@@ -1163,7 +1163,7 @@ export default function HomophoneSidebar({
                                                     onClick={
                                                         handleExplainAction
                                                     }
-                                                    className="rounded-[10px] px-9 py-1 bg-green-600 text-white font-semibold hover:bg-green-700 transition"
+                                                    className="rounded-xl px-9 py-1 bg-green-600 text-white font-semibold hover:bg-green-700 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                                                 >
                                                     Accept
                                                 </button>
@@ -1174,7 +1174,7 @@ export default function HomophoneSidebar({
                                                     onClick={
                                                         handleExplainAction
                                                     }
-                                                    className="rounded-[10px] px-9 py-1 bg-red-600 text-white font-semibold hover:bg-red-700 transition"
+                                                    className="rounded-xl px-9 py-1 bg-red-600 text-white font-semibold hover:bg-red-700 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                                                 >
                                                     Ignore
                                                 </button>
@@ -1287,7 +1287,7 @@ export default function HomophoneSidebar({
                                             <button
                                                 type="button"
                                                 onClick={closeExplain}
-                                                className="rounded-[10px] border-2 border-gray-300 px-8 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold"
+                                                className="rounded-xl border-2 border-gray-300 px-8 py-1 text-gray-700 hover:bg-gray-100 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95 font-semibold"
                                             >
                                                 Close
                                             </button>
@@ -1297,7 +1297,7 @@ export default function HomophoneSidebar({
                                                     onClick={
                                                         handleExplainAction
                                                     }
-                                                    className="rounded-[10px] px-9 py-1 bg-green-600 text-white font-semibold hover:bg-green-700 transition disabled:opacity-60"
+                                                    className="rounded-xl px-9 py-1 bg-green-600 text-white font-semibold hover:bg-green-700 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
                                                 >
                                                     Accept
                                                 </button>
@@ -1308,7 +1308,7 @@ export default function HomophoneSidebar({
                                                     onClick={
                                                         handleExplainAction
                                                     }
-                                                    className="rounded-[10px] px-9 py-1 bg-red-600 text-white font-semibold hover:bg-red-700 transition"
+                                                    className="rounded-xl px-9 py-1 bg-red-600 text-white font-semibold hover:bg-red-700 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                                                 >
                                                     Ignore
                                                 </button>
@@ -1329,7 +1329,7 @@ export default function HomophoneSidebar({
     }
 
     return (
-        <div className="w-96 rounded-xl border border-gray-200 bg-white h-[75vh] flex flex-col overflow-hidden shadow-sm">
+        <div className="w-96 rounded-xl border border-gray-200 bg-white h-[75vh] flex flex-col overflow-hidden transition-shadow duration-200 hover:shadow-sm">
             <div className="px-6 pt-4 pb-2 border-gray-200">
                 {/* Header */}
                 {isChecking ? (
@@ -1350,18 +1350,18 @@ export default function HomophoneSidebar({
                 {/* Filter Buttons */}
                 {isChecking ? (
                     <div className="flex items-center space-x-2 animate-pulse mb-1">
-                        <div className="h-8 w-20 bg-slate-200 rounded-lg"></div>
-                        <div className="h-8 w-28 bg-slate-200 rounded-lg"></div>
+                        <div className="h-8 w-20 bg-slate-200 rounded-xl"></div>
+                        <div className="h-8 w-28 bg-slate-200 rounded-xl"></div>
                     </div>
                 ) : (
                     <div className="flex items-center space-x-2">
-                        <button className="text-sm text-blue-900 px-3 py-1.5 font-medium flex items-center hover:bg-gray-100 rounded-lg transition">
+                        <button className="text-sm text-blue-900 px-3 py-1.5 font-medium flex items-center hover:bg-gray-100 hover:scale-105 hover:shadow-sm rounded-xl transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95">
                             All{" "}
                             <span className="text-xs bg-gray-200 rounded-full px-2 py-0.5 ml-2">
                                 0
                             </span>
                         </button>
-                        <button className="text-sm text-green-600 px-3 py-1.5 font-medium flex items-center hover:bg-gray-100 rounded-lg transition">
+                        <button className="text-sm text-green-600 px-3 py-1.5 font-medium flex items-center hover:bg-gray-100 hover:scale-105 hover:shadow-sm rounded-xl transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95">
                             Grammar{" "}
                             <span className="text-xs bg-gray-200 rounded-full px-2 py-0.5 ml-2">
                                 0
@@ -1378,7 +1378,7 @@ export default function HomophoneSidebar({
                     // 🟦 Skeleton Loader (replaces spinner)
                     <div className="space-y-4 animate-pulse">
                         {/* Header Skeleton */}
-                        <div className="flex justify-between items-center border border-gray-200 rounded-xl px-4 py-2 bg-white shadow-sm">
+                        <div className="flex justify-between items-center border border-gray-200 rounded-xl px-4 py-2 bg-white transition-shadow duration-200 hover:shadow-sm">
                             <div className="h-4 w-40 bg-slate-200 rounded"></div>
                             <div className="h-6 w-20 bg-slate-300 rounded-full"></div>
                         </div>

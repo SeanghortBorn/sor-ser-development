@@ -49,7 +49,7 @@ export default function Index({ auth, pages, roles, actions }) {
 
             <div className="p-6">
                     {/* Grant Permission Section */}
-                    <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
+                    <div className="bg-white overflow-hidden shadow-sm rounded-xl mb-6">
                         <div className="p-6">
                             <h3 className="text-lg font-semibold mb-4">Grant Permission</h3>
                             
@@ -107,7 +107,7 @@ export default function Index({ auth, pages, roles, actions }) {
                                     <button
                                         onClick={handleGrantPermission}
                                         disabled={processing}
-                                        className="w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+                                        className="w-full bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700 disabled:opacity-50"
                                     >
                                         Grant Permission
                                     </button>
@@ -117,7 +117,7 @@ export default function Index({ auth, pages, roles, actions }) {
                     </div>
 
                     {/* Current Permissions Section */}
-                    <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                    <div className="bg-white overflow-hidden shadow-sm rounded-xl">
                         <div className="p-6">
                             <h3 className="text-lg font-semibold mb-4">Current Permissions</h3>
                             
@@ -157,7 +157,7 @@ export default function Index({ auth, pages, roles, actions }) {
                                                         <td className="px-4 py-2">
                                                             <button
                                                                 onClick={() => handleRevokePermission(override)}
-                                                                className="text-red-600 hover:text-red-800 text-sm"
+                                                                className="text-red-600  text-sm"
                                                             >
                                                                 Revoke
                                                             </button>

@@ -319,7 +319,7 @@ export default function AnalyticsSection() {
     return (
         <div className="mb-8 mt-4">
             <div className="grid grid-cols-1 lg:grid-cols-1 gap-4 mt-4">
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
+                <div className="bg-white rounded-xl shadow-sm border border-gray-100">
                     <div className="p-6 border-b border-gray-100">
                         <h2 className="text-lg font-semibold text-gray-800">
                             Recent Grammar Checks
@@ -373,7 +373,7 @@ export default function AnalyticsSection() {
                                     itemsToRender.map((item, index) => (
                                         <tr
                                             key={item.id}
-                                            className="hover:bg-gray-50 transition-colors"
+                                            className="hover:bg-gray-50 transition-all duration-200 ease-in-out"
                                         >
                                             <td className="px-4 py-3 font-medium text-gray-800">
                                                 {recentArticles.length - (startIndex + index)}
@@ -395,7 +395,7 @@ export default function AnalyticsSection() {
                                                         setModalItem(item);
                                                         setShowModal(true);
                                                     }}
-                                                    className="rounded-[10px] border-2 border-blue-500 px-3 py-1 text-blue-700 hover:bg-blue-500 hover:text-white transition font-medium"
+                                                    className="rounded-xl border-2 border-blue-500 px-3 py-1 text-blue-700 hover:bg-blue-500  transition font-medium"
                                                 >
                                                     View
                                                 </button>
@@ -445,7 +445,7 @@ export default function AnalyticsSection() {
                             <div className="font-medium text-slate-500 mb-2">
                                 Recent Events
                             </div>
-                            <div className="w-full bg-white border rounded-lg">
+                            <div className="w-full bg-white border rounded-xl">
                                 {loadingComparisonActivities ? (
                                     <div className="p-3 text-sm text-gray-500">
                                         Loading recent events…
@@ -641,7 +641,7 @@ export default function AnalyticsSection() {
                                     setShowModal(false);
                                     setModalItem(null);
                                 }}
-                                className="rounded-[10px] border-2 border-gray-300 px-6 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold"
+                                className="rounded-xl border-2 border-gray-300 px-6 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold"
                             >
                                 Close
                             </button>
@@ -655,7 +655,7 @@ export default function AnalyticsSection() {
                 {totalPages > 1 && (
                     <div className="flex items-center justify-center space-x-2">
                         <button
-                            className="px-3 py-1.5 rounded-md border bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                            className="px-3 py-1.5 rounded-xl border bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                             onClick={() =>
                                 setCurrentPage((p) => Math.max(1, p - 1))
                             }
@@ -671,7 +671,7 @@ export default function AnalyticsSection() {
                             ).map((page) => (
                                 <button
                                     key={page}
-                                    className={`px-3 py-1.5 rounded-md border transition ${
+                                    className={`px-3 py-1.5 rounded-xl border transition ${
                                         page === currentPage
                                             ? "bg-blue-500 text-white border-blue-500"
                                             : "bg-white text-gray-700 hover:bg-gray-100"
@@ -684,7 +684,7 @@ export default function AnalyticsSection() {
                         </div>
 
                         <button
-                            className="px-3 py-1.5 rounded-md border bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                            className="px-3 py-1.5 rounded-xl border bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                             onClick={() =>
                                 setCurrentPage((p) =>
                                     Math.min(totalPages, p + 1)

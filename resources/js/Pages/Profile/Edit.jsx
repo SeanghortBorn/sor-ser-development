@@ -32,22 +32,22 @@ export default function Edit({ mustVerifyEmail, status, user }) {
 
                     <div className="mb-12">
                         <div className="mx-auto max-w-7xl">
-                            <div className="bg-white border border-gray-200 rounded-2xl p-8">
+                            <div className="bg-white border border-gray-200 rounded-xl p-8">
                                 {/* Personal Information card */}
-                                <div className="bg-white border border-gray-200 rounded-2xl p-6 mb-8">
+                                <div className="bg-white border border-gray-200 rounded-xl p-6 mb-8">
                                     <UpdateProfileInformationForm
                                         mustVerifyEmail={mustVerifyEmail}
                                         status={status}
                                     />
                                 </div>
                                 {/* Other cards */}
-                                <div className="bg-white border border-gray-200 rounded-2xl p-6 mb-8">
+                                <div className="bg-white border border-gray-200 rounded-xl p-6 mb-8">
                                     <UpdatePasswordForm />
                                 </div>
-                                <div className="bg-white border border-gray-200 rounded-2xl p-6 mb-8">
+                                <div className="bg-white border border-gray-200 rounded-xl p-6 mb-8">
                                     <TwoFactorAuthenticationForm />
                                 </div>
-                                <div className="bg-white border border-gray-200 rounded-2xl p-6">
+                                <div className="bg-white border border-gray-200 rounded-xl p-6">
                                     <DeleteUserForm />
                                 </div>
                             </div>
@@ -70,7 +70,7 @@ export default function Edit({ mustVerifyEmail, status, user }) {
                             {/* Profile Cards Grid */}
                             <div className="space-y-6">
                                 {/* Personal Information */}
-                                <div className={`bg-white border border-gray-200 ${LAYOUT_CONSTANTS.ROUNDED.LARGE} p-6 md:p-8 shadow-sm hover:shadow-md transition-shadow`}>
+                                <div className={`bg-white border border-gray-200 ${LAYOUT_CONSTANTS.ROUNDED.LARGE} p-6 md:p-8 shadow-sm hover:shadow-sm transition-shadow`}>
                                     <div className="flex items-center mb-6">
                                         <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mr-4">
                                             <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -86,7 +86,7 @@ export default function Edit({ mustVerifyEmail, status, user }) {
                                 </div>
 
                                 {/* Security - Password */}
-                                <div className={`bg-white border border-gray-200 ${LAYOUT_CONSTANTS.ROUNDED.LARGE} p-6 md:p-8 shadow-sm hover:shadow-md transition-shadow`}>
+                                <div className={`bg-white border border-gray-200 ${LAYOUT_CONSTANTS.ROUNDED.LARGE} p-6 md:p-8 shadow-sm hover:shadow-sm transition-shadow`}>
                                     <div className="flex items-center mb-6">
                                         <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center mr-4">
                                             <svg className="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -99,7 +99,7 @@ export default function Edit({ mustVerifyEmail, status, user }) {
                                 </div>
 
                                 {/* Two-Factor Authentication */}
-                                <div className={`bg-white border border-gray-200 ${LAYOUT_CONSTANTS.ROUNDED.LARGE} p-6 md:p-8 shadow-sm hover:shadow-md transition-shadow`}>
+                                <div className={`bg-white border border-gray-200 ${LAYOUT_CONSTANTS.ROUNDED.LARGE} p-6 md:p-8 shadow-sm hover:shadow-sm transition-shadow`}>
                                     <div className="flex items-center mb-6">
                                         <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mr-4">
                                             <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

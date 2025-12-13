@@ -140,7 +140,7 @@ const EditorSection = memo(({
                             <button
                                 onClick={handleReset}
                                 disabled={!userText || isChecking}
-                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 ease-in-out flex items-center gap-2"
                                 type="button"
                             >
                                 <RotateCcw size={16} />
@@ -152,8 +152,8 @@ const EditorSection = memo(({
                                 onClick={handleCheck}
                                 disabled={!canCheck || isChecking || !userText.trim()}
                                 className={`
-                                    px-6 py-2 text-sm font-medium rounded-lg
-                                    transition-colors flex items-center gap-2
+                                    px-6 py-2 text-sm font-medium rounded-xl
+                                    transition-all duration-200 ease-in-out flex items-center gap-2
                                     ${canCheck && !isChecking && userText.trim()
                                         ? 'bg-blue-600 text-white hover:bg-blue-700'
                                         : 'bg-gray-300 text-gray-500 cursor-not-allowed'
@@ -178,7 +178,7 @@ const EditorSection = memo(({
 
                     {/* Hints */}
                     {!userText && (
-                        <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                        <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-xl">
                             <p className="text-xs text-blue-700">
                                 💡 <strong>Tip:</strong> Type the article text as accurately as possible.
                                 Your accuracy will be compared with the original text when you click "Check Text".
@@ -187,7 +187,7 @@ const EditorSection = memo(({
                     )}
 
                     {userText && wordCount < targetWordCount * 0.8 && (
-                        <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                        <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-xl">
                             <p className="text-xs text-yellow-700">
                                 ⚠️ <strong>Notice:</strong> You've typed {wordCount} words, but the article has {targetWordCount} words.
                                 Try to type the complete article for best results.

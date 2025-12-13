@@ -10,7 +10,7 @@ export default function Index({ auth, users, canViewAll }) {
         <AdminLayout breadcrumb={<Breadcrumb header={title} links={breadcrumbLinks} />}>
             <Head title={title} />
 
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                 <div className="p-6">
                             <table className="w-full">
                                 <thead>
@@ -30,7 +30,7 @@ export default function Index({ auth, users, canViewAll }) {
                                             <td className="text-center py-3">
                                                 <Link
                                                     href={route('user-progress.show', user.id)}
-                                                    className="text-blue-600 hover:text-blue-800"
+                                                    className="text-blue-600 "
                                                 >
                                                     View Details
                                                 </Link>

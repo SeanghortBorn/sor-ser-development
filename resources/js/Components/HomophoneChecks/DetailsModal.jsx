@@ -45,7 +45,7 @@ export default function DetailsModal({
                 <div className="flex justify-end mt-4">
                     <button
                         onClick={onClose}
-                        className="rounded-[10px] border-2 border-gray-300 px-6 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold"
+                        className="rounded-xl border-2 border-gray-300 px-6 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold"
                     >
                         Close
                     </button>

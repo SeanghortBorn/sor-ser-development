@@ -91,7 +91,7 @@ export default function HeaderNavbar() {
 
     const userRole = getUserRole();
 
-    const isActive = (path) => currentUrl.startsWith(path) ? "text-blue-600 font-semibold" : "text-gray-700 hover:text-blue-600";
+    const isActive = (path) => currentUrl.startsWith(path) ? "text-blue-600 font-semibold" : "text-gray-700 ";
 
     return (
         <header className="sticky top-0 z-50 w-full bg-white border-b border-gray-200">
@@ -106,37 +106,30 @@ export default function HeaderNavbar() {
                     <div className="hidden sm:flex items-center gap-1 flex-1 justify-center" style={{display: window.innerWidth >= 640 ? 'flex' : 'none'}}>
                         <Link
                             href="/home"
-                            className={`px-2 sm:px-3 py-2 rounded-lg font-medium transition-all duration-200 whitespace-nowrap ${isActive("/home")}`}
+                            className={`px-2 sm:px-3 py-2 rounded-xl font-medium transition-all duration-200 whitespace-nowrap ${isActive("/home")}`}
                         >
                             Home
                         </Link>
 
                         <Link
                             href="/library"
-                            className={`px-2 sm:px-3 py-2 rounded-lg font-medium transition-all duration-200 whitespace-nowrap ${isActive("/library")}`}
+                            className={`px-2 sm:px-3 py-2 rounded-xl font-medium transition-all duration-200 whitespace-nowrap ${isActive("/library")}`}
                         >
                             Your History
                         </Link>
 
                         <Link
                             href="/homophone-check"
-                            className={`px-2 sm:px-3 py-2 rounded-lg font-medium transition-all duration-200 whitespace-nowrap ${isActive("/homophone-check")}`}
+                            className={`px-2 sm:px-3 py-2 rounded-xl font-medium transition-all duration-200 whitespace-nowrap ${isActive("/homophone-check")}`}
                         >
                             Homophone Check
                         </Link>
 
                         <Link
                             href="/quiz-practice"
-                            className={`px-2 sm:px-3 py-2 rounded-lg font-medium transition-all duration-200 whitespace-nowrap ${isActive("/quiz-practice")}`}
+                            className={`px-2 sm:px-3 py-2 rounded-xl font-medium transition-all duration-200 whitespace-nowrap ${isActive("/quiz-practice")}`}
                         >
                             Quiz & Practice
-                        </Link>
-
-                        <Link
-                            href="/contacts"
-                            className={`px-2 sm:px-3 py-2 rounded-lg font-medium transition-all duration-200 whitespace-nowrap ${isActive("/contacts")}`}
-                        >
-                            Contacts
                         </Link>
                     </div>
 
@@ -149,7 +142,7 @@ export default function HeaderNavbar() {
                                 (Array.isArray(auth.user.roles_list) && auth.user.roles_list.length > 0) ? (
                                     <Link
                                         href={route("dashboard")}
-                                        className="hidden sm:flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-2 px-4 rounded-lg transition shadow-sm hover:shadow-md"
+                                        className="hidden sm:flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-2 px-4 rounded-xl transition shadow-sm hover:shadow-sm"
                                     >
                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
@@ -159,7 +152,7 @@ export default function HeaderNavbar() {
                                 ) : (
                                     <Link
                                         href="/subscribe"
-                                        className="hidden sm:flex items-center gap-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold py-2 px-4 rounded-lg transition shadow-sm hover:shadow-md"
+                                        className="hidden sm:flex items-center gap-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold py-2 px-4 rounded-xl transition shadow-sm hover:shadow-sm"
                                     >
                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -172,7 +165,7 @@ export default function HeaderNavbar() {
                                 <div className="relative" ref={dropdownRef}>
                                     <button
                                         onClick={() => setDropdownOpen(!dropdownOpen)}
-                                        className="flex items-center gap-2 hover:bg-gray-50 rounded-lg py-2 px-2 sm:px-3 transition"
+                                        className="flex items-center gap-2 hover:bg-gray-50 hover:scale-105 hover:shadow-sm rounded-xl py-2 px-2 sm:px-3 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                                     >
                                         <img
                                             src="/images/person-icon.svg"
@@ -198,7 +191,7 @@ export default function HeaderNavbar() {
                                     </button>
 
                                     {dropdownOpen && (
-                                        <div className={`absolute right-0 mt-2 w-72 bg-white border border-gray-200 ${LAYOUT_CONSTANTS.ROUNDED.LARGE} shadow-lg z-50 overflow-hidden`}>
+                                        <div className={`absolute right-0 mt-2 w-72 bg-white border border-gray-200 ${LAYOUT_CONSTANTS.ROUNDED.LARGE} shadow-sm z-50 overflow-hidden`}>
                                             {/* User Info Header */}
                                             <div className="px-4 py-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
                                                 <div className="flex items-center gap-3">
@@ -242,7 +235,7 @@ export default function HeaderNavbar() {
                                                         href={route("verification.send.otp")}
                                                         method="post"
                                                         as="button"
-                                                        className={`w-full text-xs bg-yellow-600 hover:bg-yellow-700 text-white font-semibold py-1.5 px-3 ${LAYOUT_CONSTANTS.ROUNDED.SMALL} transition`}
+                                                        className={`w-full text-xs bg-yellow-600 hover:bg-yellow-700 hover:scale-105 hover:shadow-sm text-white font-semibold py-1.5 px-3 ${LAYOUT_CONSTANTS.ROUNDED.SMALL} transition`}
                                                     >
                                                         Verify Email
                                                     </Link>
@@ -283,13 +276,13 @@ export default function HeaderNavbar() {
                             <>
                                 <Link
                                     href={route("auth")}
-                                    className="hidden sm:inline-block text-gray-700 hover:text-blue-600 font-medium px-4 py-2 rounded-lg hover:bg-gray-50 transition"
+                                    className="hidden sm:inline-block text-gray-700  font-medium px-4 py-2 rounded-xl hover:bg-gray-50 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                                 >
                                     Sign In
                                 </Link>
                                 <Link
                                     href={route("auth")}
-                                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-2 px-6 rounded-lg transition shadow-sm hover:shadow-md"
+                                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-2 px-6 rounded-xl transition shadow-sm hover:shadow-sm"
                                 >
                                     Get Started
                                 </Link>
@@ -298,7 +291,7 @@ export default function HeaderNavbar() {
 
                         {/* Mobile Hamburger Menu */}
                         <button
-                            className="sm:hidden p-2 rounded-lg hover:bg-gray-100 transition"
+                            className="sm:hidden p-2 rounded-xl hover:bg-gray-100 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                             id="mobile-menu-toggle"
                             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                         >
@@ -318,13 +311,13 @@ export default function HeaderNavbar() {
             {mobileMenuOpen && (
                 <div
                     id="mobile-menu"
-                    className="sm:hidden border-t border-gray-200 bg-white shadow-lg"
+                    className="sm:hidden border-t border-gray-200 bg-white shadow-sm"
                 >
                     <PageContainer className="py-4">
                         <div className="flex flex-col gap-1">
                             <Link
                                 href="/home"
-                                className={`py-3 px-4 rounded-lg font-medium transition-colors ${isActive("/home")} hover:bg-gray-50`}
+                                className={`py-3 px-4 rounded-xl font-medium transition-all duration-200 ease-in-out ${isActive("/home")} hover:bg-gray-50`}
                                 onClick={() => setMobileMenuOpen(false)}
                             >
                                 Home
@@ -332,7 +325,7 @@ export default function HeaderNavbar() {
 
                             <Link
                                 href="/library"
-                                className={`py-3 px-4 rounded-lg font-medium transition-colors ${isActive("/library")} hover:bg-gray-50`}
+                                className={`py-3 px-4 rounded-xl font-medium transition-all duration-200 ease-in-out ${isActive("/library")} hover:bg-gray-50`}
                                 onClick={() => setMobileMenuOpen(false)}
                             >
                                 Your History
@@ -340,7 +333,7 @@ export default function HeaderNavbar() {
 
                             <Link
                                 href="/homophone-check"
-                                className={`py-3 px-4 rounded-lg font-medium transition-colors ${isActive("/homophone-check")} hover:bg-gray-50`}
+                                className={`py-3 px-4 rounded-xl font-medium transition-all duration-200 ease-in-out ${isActive("/homophone-check")} hover:bg-gray-50`}
                                 onClick={() => setMobileMenuOpen(false)}
                             >
                                 Homophone Check
@@ -348,18 +341,10 @@ export default function HeaderNavbar() {
 
                             <Link
                                 href="/quiz-practice"
-                                className={`py-3 px-4 rounded-lg font-medium transition-colors ${isActive("/quiz-practice")} hover:bg-gray-50`}
+                                className={`py-3 px-4 rounded-xl font-medium transition-all duration-200 ease-in-out ${isActive("/quiz-practice")} hover:bg-gray-50`}
                                 onClick={() => setMobileMenuOpen(false)}
                             >
                                 Quiz & Practice
-                            </Link>
-
-                            <Link
-                                href="/contacts"
-                                className={`py-3 px-4 rounded-lg font-medium transition-colors ${isActive("/contacts")} hover:bg-gray-50`}
-                                onClick={() => setMobileMenuOpen(false)}
-                            >
-                                Contacts
                             </Link>
 
                             {/* Mobile Auth Actions */}
@@ -370,7 +355,7 @@ export default function HeaderNavbar() {
                                     (Array.isArray(auth.user.roles_list) && auth.user.roles_list.length > 0) ? (
                                         <Link
                                             href={route("dashboard")}
-                                            className="py-3 px-4 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold text-center hover:from-blue-700 hover:to-indigo-700 transition-all"
+                                            className="py-3 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold text-center hover:from-blue-700 hover:to-indigo-700 transition-all"
                                             onClick={() => setMobileMenuOpen(false)}
                                         >
                                             Dashboard
@@ -378,7 +363,7 @@ export default function HeaderNavbar() {
                                     ) : (
                                         <Link
                                             href="/subscribe"
-                                            className="py-3 px-4 rounded-lg bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold text-center hover:from-orange-600 hover:to-orange-700 transition-all"
+                                            className="py-3 px-4 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold text-center hover:from-orange-600 hover:to-orange-700 transition-all"
                                             onClick={() => setMobileMenuOpen(false)}
                                         >
                                             Upgrade
@@ -386,7 +371,7 @@ export default function HeaderNavbar() {
                                     )}
                                     <Link
                                         href={route("profile.edit")}
-                                        className="py-3 px-4 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors"
+                                        className="py-3 px-4 rounded-xl text-gray-700 font-medium hover:bg-gray-50 transition-all duration-200 ease-in-out"
                                         onClick={() => setMobileMenuOpen(false)}
                                     >
                                         My Account
@@ -395,7 +380,7 @@ export default function HeaderNavbar() {
                                         method="post"
                                         href={route("logout")}
                                         as="button"
-                                        className="py-3 px-4 rounded-lg text-red-600 font-medium text-center hover:bg-red-50 transition-colors"
+                                        className="py-3 px-4 rounded-xl text-red-600 font-medium text-center hover:bg-red-50 transition-all duration-200 ease-in-out"
                                         onClick={() => setMobileMenuOpen(false)}
                                     >
                                         Sign Out
@@ -406,14 +391,14 @@ export default function HeaderNavbar() {
                                     <hr className="my-2 border-gray-200" />
                                     <Link
                                         href={route("auth")}
-                                        className="py-3 px-4 rounded-lg text-gray-700 font-medium text-center hover:bg-gray-50 transition-colors"
+                                        className="py-3 px-4 rounded-xl text-gray-700 font-medium text-center hover:bg-gray-50 transition-all duration-200 ease-in-out"
                                         onClick={() => setMobileMenuOpen(false)}
                                     >
                                         Sign In
                                     </Link>
                                     <Link
                                         href={route("auth")}
-                                        className="py-3 px-4 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold text-center hover:from-blue-700 hover:to-indigo-700 transition-all"
+                                        className="py-3 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold text-center hover:from-blue-700 hover:to-indigo-700 transition-all"
                                         onClick={() => setMobileMenuOpen(false)}
                                     >
                                         Get Started

@@ -91,7 +91,7 @@ export default function QuizModal({
             {!showResult && (
                 <div className="flex flex-col h-full">
                     <div className="flex items-center justify-between p-4 border-b">
-                        <button onClick={handleClose} className="w-10 h-10 flex items-center justify-center hover:bg-gray-100 rounded-lg transition-colors">
+                        <button onClick={handleClose} className="w-10 h-10 flex items-center justify-center hover:bg-gray-100 hover:scale-105 hover:shadow-sm rounded-xl transition-all duration-200 ease-in-out">
                             <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                             </svg>
@@ -99,9 +99,9 @@ export default function QuizModal({
 
                         <div className="flex-1 mx-4">
                             <div className="flex items-center gap-2">
-                                <div className="flex-1 bg-gray-200 h-3 rounded-full overflow-hidden">
+                                <div className="flex-1 bg-gray-200 h-3 rounded-xl overflow-hidden">
                                     <motion.div
-                                        className="bg-green-500 h-full rounded-full"
+                                        className="bg-green-500 h-full rounded-xl"
                                         initial={{ width: 0 }}
                                         animate={{ width: `${((currentQuestionIdx + 1) / currentQuiz.questions.length) * 100}%` }}
                                         transition={{ duration: 0.3 }}
@@ -136,7 +136,7 @@ export default function QuizModal({
                                                     key={oIdx}
                                                     onClick={() => !showFeedback && handleAnswerSelect(opt)}
                                                     disabled={showFeedback}
-                                                    className={`w-full flex items-center p-4 rounded-2xl border-2 transition-all text-left ${showFeedback && isSelected
+                                                    className={`w-full flex items-center p-4 rounded-xl border-2 transition-all text-left ${showFeedback && isSelected
                                                         ? isCorrect
                                                             ? 'bg-green-100 border-green-500'
                                                             : 'bg-red-100 border-red-500'
@@ -167,7 +167,7 @@ export default function QuizModal({
                                                     key={vIdx}
                                                     onClick={() => !showFeedback && handleAnswerSelect(val)}
                                                     disabled={showFeedback}
-                                                    className={`w-full flex items-center justify-between p-5 rounded-2xl border-3 transition-all ${showFeedback && isSelected
+                                                    className={`w-full flex items-center justify-between p-5 rounded-xl border-3 transition-all ${showFeedback && isSelected
                                                         ? isCorrect
                                                             ? 'bg-green-100 border-green-500'
                                                             : 'bg-red-100 border-red-500'
@@ -241,14 +241,14 @@ export default function QuizModal({
                                                                 handleAnswerSelect(newSel);
                                                             }}
                                                             disabled={showFeedback}
-                                                            className={`w-full flex items-center gap-4 p-4 rounded-2xl border-2 transition-all text-left ${showFeedback && isSelected
+                                                            className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all text-left ${showFeedback && isSelected
                                                                 ? 'bg-green-50 border-green-500'
                                                                 : isSelected
                                                                     ? 'bg-blue-50 border-blue-500'
                                                                     : 'bg-white border-gray-300 hover:border-gray-400 hover:bg-gray-50'
                                                                 } ${showFeedback ? 'cursor-not-allowed' : 'cursor-pointer'}`}
                                                         >
-                                                            <div className={`w-6 h-6 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-all ${showFeedback && isSelected
+                                                            <div className={`w-6 h-6 rounded-xl border-2 flex items-center justify-center flex-shrink-0 transition-all ${showFeedback && isSelected
                                                                 ? 'bg-green-500 border-green-500'
                                                                 : isSelected
                                                                     ? 'bg-blue-500 border-blue-500'
@@ -281,7 +281,7 @@ export default function QuizModal({
                                                         value={selectedAnswer || ""}
                                                         onChange={(e) => handleAnswerSelect(e.target.value)}
                                                         disabled={showFeedback}
-                                                        className={`w-full px-6 py-5 border-2 text-gray-800 text-lg focus:outline-none transition-all rounded-2xl ${showFeedback
+                                                        className={`w-full px-6 py-5 border-2 text-gray-800 text-lg focus:outline-none transition-all rounded-xl ${showFeedback
                                                             ? isCorrect
                                                                 ? 'border-green-500 bg-green-50'
                                                                 : 'border-red-500 bg-red-50'
@@ -395,7 +395,7 @@ export default function QuizModal({
                                 <button
                                     onClick={handleContinue}
                                     className={`px-8 py-3 rounded-full font-bold text-white text-lg flex-shrink-0 ${isCorrect ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'
-                                        } transition-colors`}
+                                        } transition-all duration-200 ease-in-out`}
                                 >
                                     {currentQuestionIdx === currentQuiz.questions.length - 1 ? 'Finish' : 'Continue'}
                                 </button>
@@ -446,13 +446,13 @@ export default function QuizModal({
                         <div className="space-y-3 mb-8">
                             <button
                                 onClick={() => setReviewMode(true)}
-                                className="w-full py-4 px-6 rounded-full border-2 border-gray-300 text-gray-700 font-semibold text-lg hover:bg-gray-50 transition-colors"
+                                className="w-full py-4 px-6 rounded-full border-2 border-gray-300 text-gray-700 font-semibold text-lg hover:bg-gray-50 transition-all duration-200 ease-in-out"
                             >
                                 Review
                             </button>
                             <button
                                 onClick={onStartAgain}
-                                className="w-full py-4 px-6 rounded-full border-2 border-gray-300 text-gray-700 font-semibold text-lg hover:bg-gray-50 transition-colors"
+                                className="w-full py-4 px-6 rounded-full border-2 border-gray-300 text-gray-700 font-semibold text-lg hover:bg-gray-50 transition-all duration-200 ease-in-out"
                             >
                                 Restart
                             </button>
@@ -461,7 +461,7 @@ export default function QuizModal({
                         <div className="pt-8 border-t">
                             <button
                                 onClick={onDone}
-                                className="text-blue-600 font-semibold hover:underline"
+                                className="text-blue-600 font-semibold hover:underline transition-all duration-200 ease-in-out hover:scale-105"
                             >
                                 Quit
                             </button>
@@ -475,13 +475,13 @@ export default function QuizModal({
                     {/* Sticky Header */}
                     <div className="sticky top-0 bg-white border-b z-10 p-4">
                         <div className="max-w-3xl mx-auto flex items-center justify-between">
-                            <button onClick={() => setReviewMode(false)} className="text-gray-600 hover:text-gray-800">
+                            <button onClick={() => setReviewMode(false)} className="text-gray-600 ">
                                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                                 </svg>
                             </button>
                             <h2 className="text-xl font-bold text-gray-800">Answers Review</h2>
-                            <button onClick={handleClose} className="text-gray-600 hover:text-gray-800">
+                            <button onClick={handleClose} className="text-gray-600 ">
                                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                                 </svg>
@@ -501,7 +501,7 @@ export default function QuizModal({
                             const isCorrect = !!user.isCorrect;
 
                             return (
-                                <div key={idx} className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+                                <div key={idx} className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
                                     <div className={`p-4 ${isCorrect ? 'bg-green-50' : 'bg-white'}`}>
                                         {/* Question Header */}
                                         <div className="flex items-start gap-3 mb-3">
@@ -548,7 +548,7 @@ export default function QuizModal({
                                                 const isCorrectChoice = cq.correct_answer === opt;
                                                 if (!isUserChoice && !isCorrectChoice) return null;
                                                 return (
-                                                    <div key={i} className={`px-3 py-2 rounded-md border ${isCorrectChoice ? 'border-green-400 bg-green-50 text-green-700' : isUserChoice ? 'border-red-400 bg-red-50 text-red-700' : 'border-gray-200'}`}>
+                                                    <div key={i} className={`px-3 py-2 rounded-xl border ${isCorrectChoice ? 'border-green-400 bg-green-50 text-green-700' : isUserChoice ? 'border-red-400 bg-red-50 text-red-700' : 'border-gray-200'}`}>
                                                         {opt}
                                                     </div>
                                                 );
@@ -560,14 +560,14 @@ export default function QuizModal({
                                                     <p className="font-semibold">Your answer:</p>
                                                     <div className="flex flex-wrap gap-2">
                                                         {(Array.isArray(user.answer) ? user.answer : []).map((opt, i) => (
-                                                            <span key={i} className="px-2 py-1 rounded-md bg-red-50 border border-red-400 text-red-700">{opt}</span>
+                                                            <span key={i} className="px-2 py-1 rounded-xl bg-red-50 border border-red-400 text-red-700">{opt}</span>
                                                         ))}
                                                         {(!user.answer || user.answer.length === 0) && <span className="text-gray-400">—</span>}
                                                     </div>
                                                     <p className="font-semibold mt-1">Correct answer:</p>
                                                     <div className="flex flex-wrap gap-2">
                                                         {(Array.isArray(cq.correct_answer) ? cq.correct_answer : []).map((opt, i) => (
-                                                            <span key={i} className="px-2 py-1 rounded-md bg-green-50 border border-green-400 text-green-700">{opt}</span>
+                                                            <span key={i} className="px-2 py-1 rounded-xl bg-green-50 border border-green-400 text-green-700">{opt}</span>
                                                         ))}
                                                     </div>
                                                 </div>

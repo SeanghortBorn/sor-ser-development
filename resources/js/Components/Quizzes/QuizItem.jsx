@@ -9,7 +9,7 @@ const QuizItem = ({ quiz }) => {
 
     if (!quiz || !quiz.questions || quiz.questions.length === 0) {
         return (
-            <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+            <div className="bg-white dark:bg-gray-800 shadow-sm rounded-xl p-6">
                 <h2 className="text-xl font-semibold mb-2">{quiz?.title || "Untitled Quiz"}</h2>
                 <p className="text-gray-600 dark:text-gray-300">
                     This quiz has no questions yet.
@@ -31,7 +31,7 @@ const QuizItem = ({ quiz }) => {
     const currentQ = quiz.questions[currentQuestion];
 
     return (
-        <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+        <div className="bg-white dark:bg-gray-800 shadow-sm rounded-xl p-6">
             <h2 className="text-xl font-semibold mb-2">{quiz.title}</h2>
             {quiz.description && (
                 <p className="text-gray-600 dark:text-gray-300 mb-4">

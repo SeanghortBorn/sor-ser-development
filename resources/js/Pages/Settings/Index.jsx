@@ -32,7 +32,7 @@ export default function SystemSettings({ roles, settings }) {
         <AdminLayout breadcrumb={<Breadcrumb header={title} links={breadcrumbLinks} />}>
             <Head title={title} />
 
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                 {/* Content */}
                 <form onSubmit={handleSave} className="p-6">
                     <div className="space-y-6">
@@ -54,7 +54,7 @@ export default function SystemSettings({ roles, settings }) {
                             <select
                                 value={selectedRoleId}
                                 onChange={(e) => setSelectedRoleId(e.target.value)}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 required
                             >
                                 <option value="">Select a role...</option>
@@ -70,7 +70,7 @@ export default function SystemSettings({ roles, settings }) {
                         </div>
 
                         {/* Info Box */}
-                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
                             <h4 className="text-sm font-medium text-blue-900 mb-2">
                                 📌 Important Notes:
                             </h4>
@@ -91,7 +91,7 @@ export default function SystemSettings({ roles, settings }) {
                                 {roles.map((role) => (
                                     <div
                                         key={role.id}
-                                        className={`px-3 py-2 rounded-lg border ${
+                                        className={`px-3 py-2 rounded-xl border ${
                                             role.id == selectedRoleId
                                                 ? 'bg-blue-50 border-blue-300 text-blue-900'
                                                 : 'bg-gray-50 border-gray-200 text-gray-700'
@@ -116,7 +116,7 @@ export default function SystemSettings({ roles, settings }) {
                         <button
                             type="submit"
                             disabled={saving || !selectedRoleId}
-                            className={`inline-flex items-center px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-medium ${LAYOUT_CONSTANTS.ROUNDED.MEDIUM} transition-colors`}
+                            className={`inline-flex items-center px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-medium ${LAYOUT_CONSTANTS.ROUNDED.MEDIUM} transition-all duration-200 ease-in-out`}
                         >
                             <Save className="w-4 h-4 mr-2" />
                             {saving ? 'Saving...' : 'Save Settings'}
@@ -126,7 +126,7 @@ export default function SystemSettings({ roles, settings }) {
             </div>
 
             {/* Help Section */}
-            <div className="mt-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+            <div className="mt-6 bg-yellow-50 border border-yellow-200 rounded-xl p-4">
                 <h4 className="text-sm font-medium text-yellow-900 mb-2">
                     💡 How to Create New Roles
                 </h4>

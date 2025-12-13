@@ -248,7 +248,7 @@ export default function Index({ articles: initialArticles = [], userRole }) {
                 <ErrorBoundary
                     fallback={
                         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                            <div className="bg-white rounded-lg p-6 max-w-md">
+                            <div className="bg-white rounded-xl p-6 max-w-md">
                                 <p className="text-lg font-semibold text-gray-900 mb-2">
                                     Comparison Error
                                 </p>
@@ -257,7 +257,7 @@ export default function Index({ articles: initialArticles = [], userRole }) {
                                 </p>
                                 <button
                                     onClick={handleDismiss}
-                                    className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700"
+                                    className="w-full bg-blue-600 text-white py-2 px-4 rounded-xl hover:bg-blue-700"
                                 >
                                     Close
                                 </button>

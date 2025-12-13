@@ -7,7 +7,7 @@ export default function AuthenticationCard({ logo, children }) {
                 {logo}
             </div>
 
-            <div className="w-full sm:max-w-md mt-6 px-6 py-4 bg-white shadow-md overflow-hidden sm:rounded-lg">
+            <div className="w-full sm:max-w-md mt-6 px-6 py-4 bg-white shadow-sm overflow-hidden rounded-xl">
                 {children}
             </div>
         </div>

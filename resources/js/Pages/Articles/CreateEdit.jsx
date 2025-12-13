@@ -189,7 +189,7 @@ export default function ArticlesCreateEdit({ datas, isEdit }) {
                                     type="text"
                                     value={form.title}
                                     onChange={handleChange}
-                                    className={`w-full border rounded-md px-3 py-2 ${
+                                    className={`w-full border rounded-xl px-3 py-2 ${
                                         errors.title ? "border-red-500" : ""
                                     }`}
                                     placeholder="Enter article title"
@@ -205,7 +205,7 @@ export default function ArticlesCreateEdit({ datas, isEdit }) {
                                     Select File <span> </span>
                                 </label>
                                 <div
-                                    className="flex items-center justify-center h-32 border-2 border-dashed border-gray-300 rounded-xl hover:border-blue-500 cursor-pointer relative bg-gray-50 hover:bg-blue-50 transition"
+                                    className="flex items-center justify-center h-32 border-2 border-dashed border-gray-300 rounded-xl hover:border-blue-500 cursor-pointer relative bg-gray-50 hover:bg-blue-50 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                                     onClick={() => {
                                         if (fileInputRef.current)
                                             fileInputRef.current.click();
@@ -235,7 +235,7 @@ export default function ArticlesCreateEdit({ datas, isEdit }) {
                                         <div className="text-sm text-gray-500 pointer-events-none">
                                             Select a file or drag here
                                         </div>
-                                        <div className="inline-block px-3 py-1 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 transition pointer-events-none">
+                                        <div className="inline-block px-3 py-1 bg-blue-600 text-white rounded-xl text-sm hover:bg-blue-700 transition pointer-events-none">
                                             {form.file
                                                 ? "Change file"
                                                 : "Select a file"}
@@ -248,9 +248,9 @@ export default function ArticlesCreateEdit({ datas, isEdit }) {
                                     </div>
                                 )}
                                 {previewFile && (
-                                    <div className="flex items-center justify-between bg-gray-50 border rounded-xl p-3 mt-3 hover:bg-gray-100 transition">
+                                    <div className="flex items-center justify-between bg-gray-50 border rounded-xl p-3 mt-3 hover:bg-gray-100 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95">
                                         <div className="flex items-center space-x-3">
-                                            <div className="bg-green-100 p-2 rounded-lg flex items-center justify-center text-green-600">
+                                            <div className="bg-green-100 p-2 rounded-xl flex items-center justify-center text-green-600">
                                                 <svg
                                                     xmlns="http://www.w3.org/2000/svg"
                                                     width="24"
@@ -281,7 +281,7 @@ export default function ArticlesCreateEdit({ datas, isEdit }) {
                                         </div>
                                         <button
                                             onClick={() => setPreviewFile(null)}
-                                            className="ml-4 text-gray-400 hover:text-gray-600 flex items-center justify-center"
+                                            className="ml-4 text-gray-400  flex items-center justify-center"
                                         >
                                             ✕
                                         </button>
@@ -293,7 +293,7 @@ export default function ArticlesCreateEdit({ datas, isEdit }) {
                                     Upload Audio <span></span>
                                 </label>
                                 <div
-                                    className="flex items-center justify-center h-32 border-2 border-dashed border-gray-300 rounded-xl hover:border-blue-500 cursor-pointer relative bg-gray-50 hover:bg-blue-50 transition"
+                                    className="flex items-center justify-center h-32 border-2 border-dashed border-gray-300 rounded-xl hover:border-blue-500 cursor-pointer relative bg-gray-50 hover:bg-blue-50 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                                     onClick={() => {
                                         if (audioInputRef.current)
                                             audioInputRef.current.click();
@@ -323,7 +323,7 @@ export default function ArticlesCreateEdit({ datas, isEdit }) {
                                         <div className="text-sm text-gray-500 pointer-events-none">
                                             Select an audio file or drag here
                                         </div>
-                                        <div className="inline-block px-3 py-1 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 transition pointer-events-none">
+                                        <div className="inline-block px-3 py-1 bg-blue-600 text-white rounded-xl text-sm hover:bg-blue-700 transition pointer-events-none">
                                             {form.audio
                                                 ? "Change Audio"
                                                 : "Select Audio"}
@@ -336,9 +336,9 @@ export default function ArticlesCreateEdit({ datas, isEdit }) {
                                     </div>
                                 )}
                                 {previewAudio && (
-                                    <div className="flex items-center justify-between bg-gray-50 border rounded-xl p-3 mt-3 hover:bg-gray-100 transition">
+                                    <div className="flex items-center justify-between bg-gray-50 border rounded-xl p-3 mt-3 hover:bg-gray-100 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95">
                                         <div className="flex items-center space-x-3">
-                                            <div className="bg-blue-100 p-2 rounded-lg flex items-center justify-center text-blue-600">
+                                            <div className="bg-blue-100 p-2 rounded-xl flex items-center justify-center text-blue-600">
                                                 <svg
                                                     xmlns="http://www.w3.org/2000/svg"
                                                     className="h-6 w-6"
@@ -373,7 +373,7 @@ export default function ArticlesCreateEdit({ datas, isEdit }) {
                                                     src={previewAudio}
                                                     controls
                                                     preload="metadata"
-                                                    className="w-96 border rounded-3xl"
+                                                    className="w-96 border rounded-xl"
                                                 />
                                             </div>
                                         </div>
@@ -381,7 +381,7 @@ export default function ArticlesCreateEdit({ datas, isEdit }) {
                                             onClick={() =>
                                                 setPreviewAudio(null)
                                             }
-                                            className="ml-4 text-gray-400 hover:text-gray-600 flex items-center justify-center"
+                                            className="ml-4 text-gray-400  flex items-center justify-center"
                                         >
                                             ✕
                                         </button>
@@ -391,13 +391,13 @@ export default function ArticlesCreateEdit({ datas, isEdit }) {
                             <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-6 mt-6 border-t border-gray-200">
                                 <Link
                                     href={route("articles.index")}
-                                    className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-[10px] text-gray-600 border-2 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 transition duration-200"
+                                    className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-xl text-gray-600 border-2 hover:bg-gray-50 hover:border-gray-300  transition duration-200"
                                 >
                                     Cancel
                                 </Link>
                                 <button
                                     type="submit"
-                                    className="inline-flex items-center justify-center px-8 py-2 text-sm font-medium rounded-[10px] text-white bg-gradient-to-r from-blue-500 to-blue-500 transition duration-200 hover:from-blue-500 hover:to-blue-600"
+                                    className="inline-flex items-center justify-center px-8 py-2 text-sm font-medium rounded-xl text-white bg-gradient-to-r from-blue-500 to-blue-500 transition duration-200 hover:from-blue-500 hover:to-blue-600"
                                     disabled={processing}
                                 >
                                     {processing

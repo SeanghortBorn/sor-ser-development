@@ -20,7 +20,7 @@ export default function ArticleSelector({
                     }}
                     disabled={!article.can_access}
                     className={`
-                        w-full p-3 rounded-lg border text-left transition-all
+                        w-full p-3 rounded-xl border text-left transition-all
                         ${selectedArticle?.id === article.id
                             ? "border-blue-500 bg-blue-50"
                             : "border-gray-200"

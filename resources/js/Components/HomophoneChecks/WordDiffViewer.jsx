@@ -79,7 +79,7 @@ const WordDiffViewer = memo(({
                         <span className="w-2 h-2 bg-blue-500 rounded-full" />
                         Original Text
                     </h4>
-                    <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 min-h-[200px]">
+                    <div className="p-4 bg-gray-50 rounded-xl border border-gray-200 min-h-[200px]">
                         <div className="flex flex-wrap gap-2">
                             {originalWords.map((word, index) => {
                                 const status = getWordStatus(index);
@@ -108,7 +108,7 @@ const WordDiffViewer = memo(({
                         <span className="w-2 h-2 bg-purple-500 rounded-full" />
                         Your Text
                     </h4>
-                    <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 min-h-[200px]">
+                    <div className="p-4 bg-gray-50 rounded-xl border border-gray-200 min-h-[200px]">
                         <div className="flex flex-wrap gap-2">
                             {userWords.map((word, index) => {
                                 const status = getWordStatus(index);

@@ -7,7 +7,7 @@ import PageContainer from "@/Components/Shared/PageContainer";
 export default function HomophoneCheck() {
     const { auth } = usePage().props;
     return (
-        <PageContainer className="mt-10">
+        <PageContainer className="pt-3 pb-4">
             {auth.user ? (
                 <>
                     <div className="text-center ">
@@ -44,7 +44,7 @@ export default function HomophoneCheck() {
                     {/* Features Grid */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         {/* AI at Every Step */}
-                        <div className="bg-gray-100 rounded-2xl p-6">
+                        <div className="bg-gray-100 rounded-xl p-6">
                             <div className="flex items-center gap-3 mb-4">
                                 <Brain className="text-pink-500" size={28} />
                                 <h2 className="text-xl font-semibold text-gray-600">
@@ -97,7 +97,7 @@ export default function HomophoneCheck() {
                         {/* Right side features */}
                         <div className="space-y-9">
                             {/* Lightning Fast */}
-                            <div className="bg-gray-100 rounded-2xl p-6">
+                            <div className="bg-gray-100 rounded-xl p-6">
                                 <div className="flex items-center gap-3 mb-4">
                                     <Zap
                                         className="text-orange-500"
@@ -117,7 +117,7 @@ export default function HomophoneCheck() {
                             </div>
 
                             {/* Features for Everyone */}
-                            <div className="bg-gray-100 rounded-2xl p-6">
+                            <div className="bg-gray-100 rounded-xl p-6">
                                 <div className="flex items-center gap-3 mb-4">
                                     <Rocket
                                         className="text-pink-500"
@@ -131,7 +131,7 @@ export default function HomophoneCheck() {
                                     Whether you're a student, teacher, or
                                     professional, SorSer makes writing easier
                                     and more accurate.{" "}
-                                    <span className="text-blue-600 cursor-pointer hover:underline">
+                                    <span className="text-blue-600 cursor-pointer hover:underline transition-all duration-200 ease-in-out hover:scale-105">
                                         Try it out
                                     </span>{" "}
                                     to experience real-time grammar, spelling,

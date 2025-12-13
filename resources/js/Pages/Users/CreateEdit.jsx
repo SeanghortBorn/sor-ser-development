@@ -166,11 +166,11 @@ export default function UsersCreateEdit({ user, roles }) {
                                         </svg>
                                     </button>
                                     {DropUpOpen && (
-                                        <div className="absolute right-0 bottom-full mb-2 w-full bg-white border border-gray-200 rounded-xl shadow-lg z-50 max-h-60 overflow-y-auto hide-scrollbar">
+                                        <div className="absolute right-0 bottom-full mb-2 w-full bg-white border border-gray-200 rounded-xl shadow-sm z-50 max-h-60 overflow-y-auto hide-scrollbar">
                                             <div className="px-2 py-2 space-y-1">
                                                 <button
                                                     type="button"
-                                                    className={`flex items-center gap-2 w-full text-left px-4 py-2 text-sm rounded-lg transition ${
+                                                    className={`flex items-center gap-2 w-full text-left px-4 py-2 text-sm rounded-xl transition ${
                                                         !data.roles[0]
                                                             ? "bg-blue-100 text-blue-700 font-bold"
                                                             : "hover:bg-gray-100 text-gray-700"
@@ -183,7 +183,7 @@ export default function UsersCreateEdit({ user, roles }) {
                                                     <button
                                                         key={role.id}
                                                         type="button"
-                                                        className={`flex items-center gap-2 w-full text-left px-4 py-2 text-sm rounded-lg transition ${
+                                                        className={`flex items-center gap-2 w-full text-left px-4 py-2 text-sm rounded-xl transition ${
                                                             data.roles[0] === role.id
                                                                 ? "bg-blue-100 text-blue-700 font-bold"
                                                                 : "hover:bg-gray-100 text-gray-700"
@@ -204,7 +204,7 @@ export default function UsersCreateEdit({ user, roles }) {
                             <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-6 mt-6 border-t border-gray-200">
                                 <Link
                                     href={route("users.index")}
-                                    className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-xl text-gray-600 border-2 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 transition duration-200"
+                                    className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-xl text-gray-600 border-2 hover:bg-gray-50 hover:border-gray-300  transition duration-200"
                                 >
                                     Cancel
                                 </Link>

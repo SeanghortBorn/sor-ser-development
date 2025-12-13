@@ -23,12 +23,12 @@ const ArticleCard = memo(({
         <div
             onClick={handleClick}
             className={`
-                p-4 rounded-lg border-2 transition-all cursor-pointer
+                p-4 rounded-xl border-2 transition-all cursor-pointer
                 ${isSelected
                     ? 'border-blue-500 bg-blue-50'
                     : 'border-gray-200 hover:border-gray-300 bg-white'
                 }
-                ${isLocked ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-md'}
+                ${isLocked ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-sm'}
             `}
             role="button"
             tabIndex={isLocked ? -1 : 0}

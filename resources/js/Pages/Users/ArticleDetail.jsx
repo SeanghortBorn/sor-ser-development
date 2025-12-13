@@ -62,7 +62,7 @@ export default function ArticleDetail({
                             articleId: article.id,
                             format: 'csv'
                         })}
-                        className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors shadow-sm"
+                        className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 hover:scale-105 hover:shadow-sm text-white rounded-xl transition-all duration-200 ease-in-out shadow-sm"
                     >
                         <Download className="w-4 h-4 mr-2" />
                         Export CSV
@@ -73,7 +73,7 @@ export default function ArticleDetail({
                             articleId: article.id,
                             format: 'json'
                         })}
-                        className="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors shadow-sm"
+                        className="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 hover:scale-105 hover:shadow-sm text-white rounded-xl transition-all duration-200 ease-in-out shadow-sm"
                     >
                         <Download className="w-4 h-4 mr-2" />
                         Export JSON
@@ -84,7 +84,7 @@ export default function ArticleDetail({
                                 articleId: article.id,
                                 format: 'xml'
                             })}
-                            className="inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors shadow-sm"
+                            className="inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 hover:scale-105 hover:shadow-sm text-white rounded-xl transition-all duration-200 ease-in-out shadow-sm"
                         >
                             <Download className="w-4 h-4 mr-2" />
                             Export XML
@@ -93,7 +93,7 @@ export default function ArticleDetail({
 
                 {/* Summary Metrics Cards */}
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                        <div className="bg-white rounded-lg shadow p-6">
+                        <div className="bg-white rounded-xl shadow-sm p-6">
                             <div className="flex items-center justify-between mb-2">
                                 <span className="text-sm font-medium text-gray-600">Total Attempts</span>
                                 <FileText className="w-5 h-5 text-blue-600" />
@@ -103,7 +103,7 @@ export default function ArticleDetail({
                             </div>
                         </div>
 
-                        <div className="bg-white rounded-lg shadow p-6">
+                        <div className="bg-white rounded-xl shadow-sm p-6">
                             <div className="flex items-center justify-between mb-2">
                                 <span className="text-sm font-medium text-gray-600">Learning Gain</span>
                                 {getTrendIcon(summaryMetrics.learning_gain)}
@@ -117,7 +117,7 @@ export default function ArticleDetail({
                             </div>
                         </div>
 
-                        <div className="bg-white rounded-lg shadow p-6">
+                        <div className="bg-white rounded-xl shadow-sm p-6">
                             <div className="flex items-center justify-between mb-2">
                                 <span className="text-sm font-medium text-gray-600">Best Accuracy</span>
                                 <CheckCircle className="w-5 h-5 text-green-600" />
@@ -127,7 +127,7 @@ export default function ArticleDetail({
                             </div>
                         </div>
 
-                        <div className="bg-white rounded-lg shadow p-6">
+                        <div className="bg-white rounded-xl shadow-sm p-6">
                             <div className="flex items-center justify-between mb-2">
                                 <span className="text-sm font-medium text-gray-600">Avg Accuracy</span>
                             </div>
@@ -139,7 +139,7 @@ export default function ArticleDetail({
 
                     {/* Comparison Metrics (if available) */}
                     {comparisonMetrics.has_comparison && (
-                        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg shadow-md p-6">
+                        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl shadow-sm p-6">
                             <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                                 <TrendingUp className="w-5 h-5 mr-2 text-blue-600" />
                                 First vs Latest Attempt Comparison
@@ -168,7 +168,7 @@ export default function ArticleDetail({
 
                                 <div>
                                     <div className="text-sm font-medium text-gray-600 mb-2">Effect Size (Cohen's d)</div>
-                                    <div className="text-2xl font-bold text-purple-600">
+                                    <div className="text-2xl font-bold text-purple-600 transition-all duration-200 ease-in-out hover:scale-105">
                                         {comparisonMetrics.effect_size_cohens_d}
                                     </div>
                                     <div className="text-xs text-gray-500 mt-1">
@@ -181,7 +181,7 @@ export default function ArticleDetail({
                     )}
 
                     {/* Learning Curve Chart */}
-                    <div className="bg-white rounded-lg shadow p-6">
+                    <div className="bg-white rounded-xl shadow-sm p-6">
                         <h3 className="text-lg font-semibold text-gray-900 mb-4">Learning Curve: Accuracy Progression</h3>
                         <ResponsiveContainer width="100%" height={300}>
                             <LineChart data={sessionTimeline}>
@@ -214,7 +214,7 @@ export default function ArticleDetail({
                     </div>
 
                     {/* Error Evolution Chart */}
-                    <div className="bg-white rounded-lg shadow p-6">
+                    <div className="bg-white rounded-xl shadow-sm p-6">
                         <h3 className="text-lg font-semibold text-gray-900 mb-4">Error Pattern Evolution</h3>
                         <ResponsiveContainer width="100%" height={300}>
                             <AreaChart data={errorAnalysis.error_evolution}>
@@ -256,7 +256,7 @@ export default function ArticleDetail({
                         </ResponsiveContainer>
                         
                         <div className="mt-6 grid grid-cols-3 gap-4">
-                            <div className="bg-red-50 p-4 rounded-lg">
+                            <div className="bg-red-50 p-4 rounded-xl">
                                 <div className="text-sm font-medium text-gray-700">Error Reduction</div>
                                 <div className="text-2xl font-bold text-red-600">
                                     {errorAnalysis.error_reduction.reduction_percent}%
@@ -266,7 +266,7 @@ export default function ArticleDetail({
                                 </div>
                             </div>
 
-                            <div className="bg-orange-50 p-4 rounded-lg">
+                            <div className="bg-orange-50 p-4 rounded-xl">
                                 <div className="text-sm font-medium text-gray-700">Repeated Errors</div>
                                 <div className="text-2xl font-bold text-orange-600">
                                     {errorAnalysis.repeated_error_analysis.repeated_error_rate_percent}%
@@ -276,7 +276,7 @@ export default function ArticleDetail({
                                 </div>
                             </div>
 
-                            <div className="bg-blue-50 p-4 rounded-lg">
+                            <div className="bg-blue-50 p-4 rounded-xl">
                                 <div className="text-sm font-medium text-gray-700">Total Unique Errors</div>
                                 <div className="text-2xl font-bold text-blue-600">
                                     {errorAnalysis.repeated_error_analysis.unique_errors}
@@ -290,7 +290,7 @@ export default function ArticleDetail({
 
                     {/* Typing Fluency Evolution */}
                     {keystrokePatterns.typing_evolution && keystrokePatterns.typing_evolution.length > 0 && (
-                        <div className="bg-white rounded-lg shadow p-6">
+                        <div className="bg-white rounded-xl shadow-sm p-6">
                             <h3 className="text-lg font-semibold text-gray-900 mb-4">Typing Fluency Evolution</h3>
                             <ResponsiveContainer width="100%" height={300}>
                                 <LineChart data={keystrokePatterns.typing_evolution}>
@@ -317,7 +317,7 @@ export default function ArticleDetail({
                             <div className="mt-4 grid grid-cols-2 gap-4">
                                 <div className="bg-purple-50 p-4 rounded">
                                     <div className="text-sm font-medium text-gray-700">Speed Improvement</div>
-                                    <div className="text-xl font-bold text-purple-600">
+                                    <div className="text-xl font-bold text-purple-600 transition-all duration-200 ease-in-out hover:scale-105">
                                         {keystrokePatterns.trends.typing_speed_improvement_percent >= 0 ? '+' : ''}
                                         {keystrokePatterns.trends.typing_speed_improvement_percent}%
                                     </div>
@@ -334,7 +334,7 @@ export default function ArticleDetail({
 
                     {/* Audio Dependency Trend */}
                     {audioBehavior.audio_evolution && audioBehavior.audio_evolution.length > 0 && (
-                        <div className="bg-white rounded-lg shadow p-6">
+                        <div className="bg-white rounded-xl shadow-sm p-6">
                             <h3 className="text-lg font-semibold text-gray-900 mb-4">Audio Listening Behavior</h3>
                             <ResponsiveContainer width="100%" height={300}>
                                 <BarChart data={audioBehavior.audio_evolution}>
@@ -383,7 +383,7 @@ export default function ArticleDetail({
                     )}
 
                     {/* Detailed Session Table */}
-                    <div className="bg-white rounded-lg shadow overflow-hidden">
+                    <div className="bg-white rounded-xl shadow-sm overflow-hidden">
                         <div className="px-6 py-4 border-b border-gray-200">
                             <h3 className="text-lg font-semibold text-gray-900">Detailed Session History</h3>
                         </div>
@@ -451,7 +451,7 @@ export default function ArticleDetail({
                     </div>
 
                     {/* Thesis Analysis Notes */}
-                    <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg shadow p-6">
+                    <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl shadow-sm p-6">
                         <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center">
                             <AlertCircle className="w-5 h-5 mr-2 text-indigo-600" />
                             Key Insights for Thesis Analysis

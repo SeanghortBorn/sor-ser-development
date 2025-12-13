@@ -264,7 +264,7 @@ const TwoFactorAuthenticationForm = ({ className = "" }) => {
                                         login.
                                     </p>
                                 </div>
-                                <div className="grid gap-1 mt-4 px-4 py-4 font-mono text-sm bg-gray-100 rounded-lg">
+                                <div className="grid gap-1 mt-4 px-4 py-4 font-mono text-sm bg-gray-100 rounded-xl">
                                     {recoveryCodes.map((code) => (
                                         <div key={code}>{code}</div>
                                     ))}
@@ -282,7 +282,7 @@ const TwoFactorAuthenticationForm = ({ className = "" }) => {
                             <button
                                 type="button"
                                 disabled={enabling}
-                                className={`flex items-center space-x-2 px-4 py-2 rounded-[10px] border-2 border-blue-500 text-blue-700 hover:bg-blue-100 transition font-semibold disabled:opacity-60
+                                className={`flex items-center space-x-2 px-4 py-2 rounded-xl border-2 border-blue-500 text-blue-700 hover:bg-blue-100 transition font-semibold disabled:opacity-60
                                     ${
                                         enabling
                                             ? "opacity-50 cursor-not-allowed"
@@ -313,7 +313,7 @@ const TwoFactorAuthenticationForm = ({ className = "" }) => {
                                 <button
                                     type="button"
                                     disabled={disabling}
-                                    className={`flex items-center space-x-2 px-4 py-2 rounded-[10px] border-2 border-gray-300 text-gray-700 hover:bg-gray-100 transition font-semibold disabled:opacity-60
+                                    className={`flex items-center space-x-2 px-4 py-2 rounded-xl border-2 border-gray-300 text-gray-700 hover:bg-gray-100 transition font-semibold disabled:opacity-60
                                         ${
                                             disabling
                                                 ? "opacity-50 cursor-not-allowed"
@@ -332,7 +332,7 @@ const TwoFactorAuthenticationForm = ({ className = "" }) => {
                                     type="button"
                                     disabled={enabling || confirming2FA}
                                     onClick={confirmTwoFactorAuthentication}
-                                    className={`flex items-center space-x-2 px-4 py-2 rounded-[10px] bg-blue-600 text-blue-700 transition font-semibold disabled:opacity-60
+                                    className={`flex items-center space-x-2 px-4 py-2 rounded-xl bg-blue-600 text-blue-700 transition font-semibold disabled:opacity-60
                                         ${
                                             enabling || confirming2FA
                                                 ? "opacity-50 cursor-not-allowed"
@@ -352,7 +352,7 @@ const TwoFactorAuthenticationForm = ({ className = "" }) => {
                                     type="button"
                                     onClick={regenerateRecoveryCodes}
                                     disabled={regeneratingCodes}
-                                    className="flex items-center space-x-2 px-4 py-2 rounded-[10px] bg-blue-600 text-blue-700 hover:bg-blue-500 transition font-semibold disabled:opacity-60"
+                                    className="flex items-center space-x-2 px-4 py-2 rounded-xl bg-blue-600 text-blue-700 hover:bg-blue-500 transition font-semibold disabled:opacity-60"
                                 >
                                     <span className="text-sm text-white">
                                         {regeneratingCodes
@@ -366,7 +366,7 @@ const TwoFactorAuthenticationForm = ({ className = "" }) => {
                                 <ConfirmsPassword
                                     onConfirmed={fetchRecoveryCodes}
                                 >
-                                    <button className="flex items-center space-x-2 px-4 py-2 rounded-[10px] bg-blue-600 hover:bg-blue-500 text-blue-700 transition font-semibold disabled:opacity-60">
+                                    <button className="flex items-center space-x-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-blue-700 transition font-semibold disabled:opacity-60">
                                         <span className="text-sm text-white">
                                             Show Recovery Codes
                                         </span>

@@ -15,21 +15,15 @@ export default function Footer() {
                     </span>
                     <Link
                         href="#"
-                        className="text-gray-300 hover:text-white text-[16px] mb-2"
+                        className="text-gray-300  text-[16px] mb-2"
                     >
                         Our Plans
                     </Link>
                     <Link
                         href="#"
-                        className="text-gray-300 hover:text-white text-[16px] mb-2"
+                        className="text-gray-300  text-[16px] mb-2"
                     >
                         Help Center
-                    </Link>
-                    <Link
-                        href="#"
-                        className="text-gray-300 hover:text-white text-[16px]"
-                    >
-                        Contact
                     </Link>
                 </div>
                 <div className="flex flex-col gap-2">
@@ -38,13 +32,13 @@ export default function Footer() {
                     </span>
                     <Link
                         href="#"
-                        className="text-gray-300 hover:text-white text-[16px] mb-2"
+                        className="text-gray-300  text-[16px] mb-2"
                     >
                         Terms of Use
                     </Link>
                     <Link
                         href="#"
-                        className="text-gray-300 hover:text-white text-[16px] mb-2"
+                        className="text-gray-300  text-[16px] mb-2"
                     >
                         Privacy Policy
                     </Link>

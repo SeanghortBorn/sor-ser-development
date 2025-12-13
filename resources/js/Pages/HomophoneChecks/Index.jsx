@@ -646,9 +646,10 @@ export default function Index({ articles: initialArticles = [], userRole }) {
         <>
             <Head title="Homophone Check" />
             <HeaderNavbar />
-            <HomophoneCheck />
+            <div className="bg-gradient-to-b from-gray-50 to-white min-h-screen">
+                <HomophoneCheck />
 
-            <section className="relative py-4">
+                <section className="relative pb-1">
                 <PageContainer>
                     <div
                         className={`flex flex-row gap-4 transition-all duration-300 ${
@@ -658,7 +659,7 @@ export default function Index({ articles: initialArticles = [], userRole }) {
                         {/* Left Side - Document Editor - Wrapped in Error Boundary */}
                         <ErrorBoundary
                             fallback={
-                                <div className="flex-1 bg-white rounded-xl border border-red-200 shadow-sm p-6 h-[75vh] flex items-center justify-center">
+                                <div className="flex-1 bg-white rounded-xl border border-red-200 p-6 h-[75vh] flex items-center justify-center">
                                     <div className="text-center">
                                         <p className="text-lg font-semibold text-red-600 mb-2">Editor Error</p>
                                         <p className="text-sm text-gray-600">Failed to load editor. Please refresh the page.</p>
@@ -666,9 +667,9 @@ export default function Index({ articles: initialArticles = [], userRole }) {
                                 </div>
                             }
                         >
-                            <div className="flex-1 bg-white rounded-xl border border-gray-200 shadow-sm p-6 h-[75vh]">
+                            <div className="flex-1 bg-white rounded-xl border border-gray-200 p-4 md:p-6 h-[75vh] transition-shadow duration-200 hover:shadow-sm flex flex-col">
                                 {/* Title and Article Dropdown */}
-                                <div className="flex justify-between items-center mb-4">
+                                <div className="flex flex-row justify-between items-center mb-4 gap-3">
                                     {/* Audio Player */}
                                     {(selectedArticle?.audios_id || audioPlayer.audioUrl) ? (
                                         <div className="flex-1 mr-4">
@@ -680,7 +681,7 @@ export default function Index({ articles: initialArticles = [], userRole }) {
                                                 onEnded={audioPlayer.handleAudioEnded}
                                                 className="hidden"
                                             />
-                                            <div className="bg-white border border-gray-300 rounded-xl px-3 py-1 shadow-sm">
+                                            <div className="bg-white border border-gray-300 rounded-xl px-3 py-1 transition-all duration-200 ease-in-out hover:shadow-sm hover:border-gray-400">
                                                 <div className="flex items-center gap-3">
                                                     <button
                                                         onClick={audioPlayer.togglePlay}
@@ -752,10 +753,10 @@ export default function Index({ articles: initialArticles = [], userRole }) {
                                     )}
 
                                     {/* Article Dropdown */}
-                                    <div className="relative w-64" ref={dropdownRef}>
+                                    <div className="relative w-64 flex-shrink-0" ref={dropdownRef}>
                                         <button
                                             type="button"
-                                            className="w-full px-3 py-2.5 text-sm bg-white border border-gray-300 rounded-xl shadow-sm text-left flex justify-between items-center focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            className="w-full px-3 py-2.5 text-sm bg-white border border-gray-300 rounded-xl text-left flex justify-between items-center focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 ease-in-out hover:shadow-sm hover:border-gray-400"
                                             onClick={() => setDropdownOpen(!dropdownOpen)}
                                         >
                                             {selectedArticle ? selectedArticle.title : "Select an Article"}
@@ -763,12 +764,15 @@ export default function Index({ articles: initialArticles = [], userRole }) {
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                                             </svg>
                                         </button>
-                                        {dropdownOpen && (
-                                            <div className="absolute right-0 top-full mt-2 w-full bg-white border border-gray-200 rounded-xl shadow-lg z-50 max-h-60 overflow-y-auto hide-scrollbar">
-                                                <div className="px-2 py-2 space-y-1">
+                                        <div className={`absolute right-0 top-full mt-2 w-full bg-white border border-gray-200 rounded-xl shadow-sm z-50 max-h-60 overflow-y-auto hide-scrollbar transition-all duration-200 ease-in-out origin-top ${
+                                            dropdownOpen 
+                                                ? 'opacity-100 scale-100 translate-y-0 pointer-events-auto' 
+                                                : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'
+                                        }`}>
+                                            <div className="px-2 py-2 space-y-1">
                                                     <button
                                                         type="button"
-                                                        className={`w-full text-left px-4 py-2 text-sm rounded-xl transition ${!selectedArticle ? "bg-blue-100 text-blue-700 font-medium" : "hover:bg-gray-100 text-gray-700"}`}
+                                                        className={`w-full text-left px-4 py-2 text-sm rounded-xl transition-all duration-200 ease-in-out hover:scale-105 ${!selectedArticle ? "bg-blue-100 text-blue-700 font-medium" : "hover:bg-gray-100 text-gray-700"}`}
                                                         onClick={() => handleSelectArticle(null)}
                                                     >
                                                         Select an Article
@@ -778,7 +782,7 @@ export default function Index({ articles: initialArticles = [], userRole }) {
                                                             key={article.id}
                                                             type="button"
                                                             disabled={!article.can_access}
-                                                            className={`w-full text-left px-4 py-2 text-sm rounded-lg transition ${
+                                                            className={`w-full text-left px-4 py-2 text-sm rounded-xl transition-all duration-200 ease-in-out hover:scale-105 ${
                                                                 selectedArticle && selectedArticle.id === article.id
                                                                     ? "bg-blue-100 text-blue-700 font-medium"
                                                                     : article.can_access
@@ -812,15 +816,14 @@ export default function Index({ articles: initialArticles = [], userRole }) {
                                                         </button>
                                                     ))}
                                                 </div>
-                                            </div>
-                                        )}
+                                        </div>
                                     </div>
                                 </div>
 
                                 {/* Textarea */}
-                                <div className="relative mt-4">
+                                <div className="relative flex-1 mt-4">
                                     <textarea
-                                        className={`w-full h-[54vh] text-md bg-white border border-gray-200 rounded-xl py-3 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder-gray-500 resize-none overflow-y-auto hide-scrollbar ${
+                                        className={`w-full h-full text-md bg-white border border-gray-200 rounded-xl py-3 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder-gray-500 resize-none overflow-y-auto hide-scrollbar ${
                                             isZoomed ? "min-h-[50vh]" : ""
                                         }`}
                                         placeholder="Type your text here..."
@@ -839,7 +842,7 @@ export default function Index({ articles: initialArticles = [], userRole }) {
                                 </div>
 
                                 {/* Save Button */}
-                                <div className="flex justify-end items-center mt-1">
+                                <div className="flex justify-end items-center mt-2 flex-shrink-0">
                                     <button
                                         type="button"
                                         onClick={handleSaveClick}
@@ -849,13 +852,13 @@ export default function Index({ articles: initialArticles = [], userRole }) {
                                             !paragraph.trim() ||
                                             canAccessLibrary === null
                                         }
-                                        className={`px-6 py-1 rounded-xl font-medium transition ${
+                                        className={`px-6 py-1 rounded-xl font-medium transition-all duration-200 ease-in-out ${
                                             saving ||
                                             isChecking ||
                                             !paragraph.trim() ||
                                             canAccessLibrary === null
                                                 ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                                                : "bg-blue-600 text-white hover:bg-blue-700"
+                                                : "bg-blue-600 text-white hover:bg-blue-700 hover:scale-105 hover:shadow-sm active:scale-95"
                                         }`}
                                     >
                                         {saving || isChecking ? "Checking..." : "Save"}
@@ -888,6 +891,7 @@ export default function Index({ articles: initialArticles = [], userRole }) {
                     </div>
                 </PageContainer>
             </section>
+            </div>
 
             {/* Modals - Wrapped in Error Boundaries */}
             <ErrorBoundary fallback={null}>
@@ -953,7 +957,7 @@ export default function Index({ articles: initialArticles = [], userRole }) {
             {/* Account Modal */}
             {showAccountModal && (
                 <div className="absolute inset-0 bg-opacity-20 flex items-center justify-center z-10">
-                    <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8 w-full max-w-xl mx-4">
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 w-full max-w-xl mx-4">
                         <div className="text-center">
                             <h2 className="text-[24px] font-semibold text-gray-900 mb-2">
                                 Create an account to get started
@@ -964,7 +968,7 @@ export default function Index({ articles: initialArticles = [], userRole }) {
                             <div className="space-y-3">
                                 <a
                                     href={route("auth.google")}
-                                    className="w-full flex items-center justify-center gap-3 px-3 py-3 border-[3px] border-gray-200 rounded-2xl hover:bg-gray-50 transition-colors"
+                                    className="w-full flex items-center justify-center gap-3 px-3 py-3 border-[3px] border-gray-200 rounded-xl hover:bg-gray-50 transition-all duration-200 ease-in-out"
                                 >
                                     <svg className="w-5 h-5" viewBox="0 0 24 24">
                                         <path
@@ -991,7 +995,7 @@ export default function Index({ articles: initialArticles = [], userRole }) {
 
                                 <Link
                                     href={route("register")}
-                                    className="w-full flex items-center justify-center gap-3 px-3 py-3 border-[3px] border-gray-200 rounded-2xl hover:bg-gray-50 transition-colors"
+                                    className="w-full flex items-center justify-center gap-3 px-3 py-3 border-[3px] border-gray-200 rounded-xl hover:bg-gray-50 transition-all duration-200 ease-in-out"
                                 >
                                     <div className="w-5 h-5 flex items-center justify-center">
                                         <svg
@@ -1043,7 +1047,7 @@ export default function Index({ articles: initialArticles = [], userRole }) {
                         <button
                             type="button"
                             onClick={() => setShowBlockModal(false)}
-                            className="rounded-[10px] border-2 border-gray-300 px-8 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold"
+                            className="rounded-xl border-2 border-gray-300 px-8 py-1 text-gray-700 hover:bg-gray-100 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95 font-semibold"
                         >
                             Close
                         </button>

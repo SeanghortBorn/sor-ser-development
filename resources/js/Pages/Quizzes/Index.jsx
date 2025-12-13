@@ -113,7 +113,7 @@ export default function QuizList() {
                             return (
                                 <div
                                     key={idx}
-                                    className={`bg-white px-3 pb-2 pt-3 border-l-4 ${stat.borderColor} shadow-sm rounded-xl flex flex-col hover:shadow-md transition-all duration-200`}
+                                    className={`bg-white px-3 pb-2 pt-3 border-l-4 ${stat.borderColor} shadow-sm rounded-xl flex flex-col hover:shadow-sm transition-all duration-200`}
                                 >
                                     <div className="flex items-center justify-between">
                                         <p className="text-gray-800 text-base font-semibold">
@@ -137,14 +137,14 @@ export default function QuizList() {
                     </div>
 
                     {/* Quiz Table */}
-                    <div className="bg-white shadow-md rounded-xl overflow-hidden border border-gray-200 mb-12">
+                    <div className="bg-white shadow-sm rounded-xl overflow-hidden border border-gray-200 mb-12">
                         {/* Header */}
                         <div className="px-6 py-4 border-b flex flex-col md:flex-row justify-between items-center gap-3">
                             <h3 className="text-xl font-semibold">Quiz Management</h3>
                             <div className="flex items-center gap-3 ml-auto">
                                 {/* Search */}
                                 <form className="inline-block" onSubmit={(e) => e.preventDefault()}>
-                                    <div className="inline-flex items-center gap-2 px-3 rounded-xl border hover:shadow-lg transition text-sm bg-white">
+                                    <div className="inline-flex items-center gap-2 px-3 rounded-xl border hover:shadow-sm transition text-sm bg-white">
                                         <Search className="w-4 h-4 text-gray-500" />
                                         <input
                                             type="text"
@@ -158,7 +158,7 @@ export default function QuizList() {
 
                                 {/* Status Filter */}
                                 <select
-                                    className="px-3 py-2 rounded-xl border border-gray-300 bg-white hover:shadow-lg transition text-sm font-medium"
+                                    className="px-3 py-2 rounded-xl border border-gray-300 bg-white hover:shadow-sm transition text-sm font-medium"
                                     value={statusFilter}
                                     onChange={(e) => setStatusFilter(e.target.value)}
                                 >
@@ -170,7 +170,7 @@ export default function QuizList() {
                                 {/* Add Quiz */}
                                 <Link
                                     href={route("quizzes.create")}
-                                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm text-white bg-green-600 hover:bg-green-500 transition"
+                                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm text-white bg-green-600 hover:bg-green-500 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                                 >
                                     <Plus className="w-4 h-4" />
                                     Add Quiz
@@ -194,7 +194,7 @@ export default function QuizList() {
                                         filteredQuizzes.map((quiz) => (
                                             <tr
                                                 key={quiz.id}
-                                                className="border-t hover:bg-gray-50 transition"
+                                                className="border-t hover:bg-gray-50 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                                             >
                                                 <td className="py-3 px-4 font-semibold">{quiz.id}</td>
                                                 <td className="py-3 px-4">
@@ -222,11 +222,11 @@ export default function QuizList() {
                                                         <div className="relative group">
                                                             <Link
                                                                 href={route("quizzes.edit", quiz.id)}
-                                                                className="inline-flex items-center gap-1.5 px-2 py-2 text-sm font-medium rounded-xl bg-blue-500 text-white hover:bg-blue-600 transition"
+                                                                className="inline-flex items-center gap-1.5 px-2 py-2 text-sm font-medium rounded-xl bg-blue-500 text-white hover:bg-blue-600 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                                                             >
                                                                 <Edit2 className="w-4 h-4" />
                                                             </Link>
-                                                            <div className="absolute bottom-full mb-2 hidden group-hover:block bg-white text-gray-800 text-xs px-3 py-1 rounded-lg shadow-md border">
+                                                            <div className="absolute bottom-full mb-2 hidden group-hover:block bg-white text-gray-800 text-xs px-3 py-1 rounded-xl shadow-sm border">
                                                                 Edit Quiz
                                                             </div>
                                                         </div>
@@ -235,11 +235,11 @@ export default function QuizList() {
                                                         <div className="relative group">
                                                             <button
                                                                 onClick={() => openStatusModal(quiz)}
-                                                                className="inline-flex items-center gap-1.5 px-2 py-2 text-sm font-medium rounded-xl bg-purple-500 text-white hover:bg-purple-600 transition"
+                                                                className="inline-flex items-center gap-1.5 px-2 py-2 text-sm font-medium rounded-xl bg-purple-500 text-white hover:bg-purple-600 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                                                             >
                                                                 <RefreshCw className="w-4 h-4" />
                                                             </button>
-                                                            <div className="absolute bottom-full mb-2 hidden group-hover:block bg-white text-gray-800 text-xs px-3 py-1 rounded-lg shadow-md border">
+                                                            <div className="absolute bottom-full mb-2 hidden group-hover:block bg-white text-gray-800 text-xs px-3 py-1 rounded-xl shadow-sm border">
                                                                 Toggle Status
                                                             </div>
                                                         </div>
@@ -248,11 +248,11 @@ export default function QuizList() {
                                                         <div className="relative group">
                                                             <button
                                                                 onClick={() => openDeleteModal(quiz)}
-                                                                className="inline-flex items-center gap-1.5 px-2 py-2 text-sm font-medium rounded-xl bg-red-500 text-white hover:bg-red-400 transition"
+                                                                className="inline-flex items-center gap-1.5 px-2 py-2 text-sm font-medium rounded-xl bg-red-500 text-white hover:bg-red-400 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                                                             >
                                                                 <Trash2 className="w-4 h-4" />
                                                             </button>
-                                                            <div className="absolute bottom-full mb-2 hidden group-hover:block bg-white text-gray-800 text-xs px-3 py-1 rounded-lg shadow-md border">
+                                                            <div className="absolute bottom-full mb-2 hidden group-hover:block bg-white text-gray-800 text-xs px-3 py-1 rounded-xl shadow-sm border">
                                                                 Delete Quiz
                                                             </div>
                                                         </div>
@@ -314,14 +314,14 @@ export default function QuizList() {
                                         setDeleteTarget(null);
                                         setDeleteProcessing(false);
                                     }}
-                                    className="rounded-[10px] border-2 border-gray-300 px-8 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold"
+                                    className="rounded-xl border-2 border-gray-300 px-8 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold"
                                     disabled={deleteProcessing}
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
-                                    className="rounded-[10px] px-9 py-1 bg-red-600 text-white font-semibold hover:bg-red-700 transition"
+                                    className="rounded-xl px-9 py-1 bg-red-600 text-white font-semibold hover:bg-red-700 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                                     disabled={deleteProcessing}
                                 >
                                     {deleteProcessing ? "Deleting..." : "Delete"}
@@ -361,14 +361,14 @@ export default function QuizList() {
                                         setStatusTarget(null);
                                         setStatusProcessing(false);
                                     }}
-                                    className="rounded-[10px] border-2 border-gray-300 px-8 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold"
+                                    className="rounded-xl border-2 border-gray-300 px-8 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold"
                                     disabled={statusProcessing}
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
-                                    className="rounded-[10px] px-9 py-1 bg-purple-600 text-white font-semibold hover:bg-purple-700 transition"
+                                    className="rounded-xl px-9 py-1 bg-purple-600 text-white font-semibold hover:bg-purple-700 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                                     disabled={statusProcessing}
                                 >
                                     {statusProcessing ? "Processing..." : "Confirm"}

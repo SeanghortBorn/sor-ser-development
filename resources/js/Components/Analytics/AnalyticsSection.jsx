@@ -430,7 +430,7 @@ export default function AnalyticsSection() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                 <>
                     {/* Accuracy all homophone*/}
-                    <div className="bg-white px-3 pt-3 border-l-4 border-sky-100 shadow-sm rounded-xl flex flex-col hover:shadow-md transition-all duration-200">
+                    <div className="bg-white px-3 pt-3 border-l-4 border-sky-100 shadow-sm rounded-xl flex flex-col hover:shadow-sm transition-all duration-200">
                         <div className="flex items-center justify-between">
                             <p className="text-gray-800 text-base font-semibold">
                                 Homophone Accuracy
@@ -470,7 +470,7 @@ export default function AnalyticsSection() {
                     </div>
 
                     {/* Average Score (%) */}
-                    <div className="bg-white px-3 pt-3 border-l-4 border-amber-100 shadow-sm rounded-xl flex flex-col hover:shadow-md transition-all duration-200">
+                    <div className="bg-white px-3 pt-3 border-l-4 border-amber-100 shadow-sm rounded-xl flex flex-col hover:shadow-sm transition-all duration-200">
                         <div className="flex items-center justify-between">
                             <p className="text-gray-800 text-base font-semibold">
                                 Average Score
@@ -514,7 +514,7 @@ export default function AnalyticsSection() {
                     </div>
 
                     {/* Performance Growth */}
-                    <div className="bg-white px-3 pt-3 border-l-4 border-emerald-100 shadow-sm rounded-xl flex flex-col hover:shadow-md transition-all duration-200">
+                    <div className="bg-white px-3 pt-3 border-l-4 border-emerald-100 shadow-sm rounded-xl flex flex-col hover:shadow-sm transition-all duration-200">
                         <div className="flex items-center justify-between">
                             <p className="text-gray-800 text-base font-semibold">
                                 Performance Growth
@@ -552,7 +552,7 @@ export default function AnalyticsSection() {
                     </div>
 
                     {/* Study session*/}
-                    <div className="bg-white px-3 pt-3 border-l-4 border-indigo-300 shadow-sm rounded-xl flex flex-col hover:shadow-md transition-all duration-200">
+                    <div className="bg-white px-3 pt-3 border-l-4 border-indigo-300 shadow-sm rounded-xl flex flex-col hover:shadow-sm transition-all duration-200">
                         <div className="flex items-center justify-between">
                             <p className="text-gray-800 text-base font-semibold">
                                 Study Sessions
@@ -582,7 +582,7 @@ export default function AnalyticsSection() {
             
             {/* Grammar Checker Statistics Card */}
             <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
-                <div className="mt-6 mb-4 bg-white rounded-2xl shadow-sm border w-full border-gray-100 p-6">
+                <div className="mt-6 mb-4 bg-white rounded-xl shadow-sm border w-full border-gray-100 p-6">
                     {/* Header */}
                     <div className="flex items-center justify-between">
                         <div>
@@ -646,7 +646,7 @@ export default function AnalyticsSection() {
                     </div>
                 </div>
                 {/* Donut Chart */}
-                <div className="mt-6 mb-4 bg-white rounded-2xl shadow-sm border w-full border-gray-100 p-6">
+                <div className="mt-6 mb-4 bg-white rounded-xl shadow-sm border w-full border-gray-100 p-6">
                     {/* Header */}
                     <div className="flex items-center justify-between">
                         <div>
@@ -697,7 +697,7 @@ export default function AnalyticsSection() {
                             </div>
                         </div>
                     ) : (
-                        <div className="w-full h-[400px] flex flex-col items-center justify-center bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
+                        <div className="w-full h-[400px] flex flex-col items-center justify-center bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
                             <svg
                                 className="w-12 h-12 text-gray-400 mb-3"
                                 fill="none"

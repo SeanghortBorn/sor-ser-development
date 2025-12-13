@@ -60,7 +60,7 @@ const HomophoneCharts = () => {
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* === Radar Chart === */}
-            <div className="relative bg-white rounded-2xl shadow-sm border border-gray-100 w-full h-[65vh] p-6 flex flex-col overflow-hidden">
+            <div className="relative bg-white rounded-xl shadow-sm border border-gray-100 w-full h-[65vh] p-6 flex flex-col overflow-hidden">
                 {/* Header */}
                 <div className="flex items-center justify-between mb-6">
                     <div>
@@ -100,7 +100,7 @@ const HomophoneCharts = () => {
             </div>
 
             {/* === Donut Chart === */}
-            <div className="relative bg-white rounded-2xl shadow-md border border-gray-100 w-full h-[65vh] p-6 flex flex-col overflow-hidden transition-all duration-300 hover:shadow-lg">
+            <div className="relative bg-white rounded-xl shadow-sm border border-gray-100 w-full h-[65vh] p-6 flex flex-col overflow-hidden transition-all duration-300 hover:shadow-sm">
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div>

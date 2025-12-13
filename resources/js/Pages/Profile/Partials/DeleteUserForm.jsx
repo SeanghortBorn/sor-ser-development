@@ -62,7 +62,7 @@ export default function DeleteUserForm({ className = "" }) {
 
             <button
                 onClick={confirmUserDeletion}
-                className="flex items-center space-x-2 px-4 py-2 border-2 border-red-500 rounded-xl font-semibold text-red-500 hover:bg-red-50 transition-colors"
+                className="flex items-center space-x-2 px-4 py-2 border-2 border-red-500 rounded-xl font-semibold text-red-500 hover:bg-red-50 transition-all duration-200 ease-in-out"
             >
                 <svg
                     className="w-4 h-4 text-red-500"
@@ -128,14 +128,14 @@ export default function DeleteUserForm({ className = "" }) {
                         <button
                             type="button"
                             onClick={closeModal}
-                            className="rounded-[10px] border-2 border-gray-300 px-8 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold disabled:opacity-60"
+                            className="rounded-xl border-2 border-gray-300 px-8 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold disabled:opacity-60"
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
                             disabled={processing}
-                            className="rounded-[10px] px-9 py-1 bg-red-600 text-white font-semibold hover:bg-red-700 transition disabled:opacity-60"
+                            className="rounded-xl px-9 py-1 bg-red-600 text-white font-semibold hover:bg-red-700 transition disabled:opacity-60"
                         >
                             {processing ? "Deleting..." : "Delete Account"}
                         </button>

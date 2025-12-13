@@ -230,22 +230,7 @@ export default function Quiz() {
                 <QuizzesSection />
 
                 {canAccessLibrary !== true ? (
-                    <>
-                        <div className="flex justify-between items-center text-md">
-                            <span className="text-gray-500 text-md">
-                                Try it out above by using{" "}
-                                <span className="font-semibold">
-                                    handwritten notes.
-                                </span>
-                            </span>
-                            <span className="text-gray-500 text-md">
-                                Don't have any content? {""}
-                                <button className="text-blue-500 text-md hover:underline">
-                                    Create from scratch
-                                </button>
-                            </span>
-                        </div>
-                    </>
+                    <></>
                 ) : (
                     <div className="max-w-7xl mx-auto px-2">
                         {/* Welcome Screen */}
@@ -277,7 +262,7 @@ export default function Quiz() {
                                         initial={{ opacity: 0, scale: 0.98 }}
                                         animate={{ opacity: 1, scale: 1 }}
                                         whileHover={{ translateY: -6 }}
-                                        className="rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-md transition-all"
+                                        className="rounded-xl bg-white border border-gray-100 shadow-sm hover:shadow-sm transition-all"
                                     >
                                         <div className="p-4 md:p-6 flex flex-col justify-between h-full">
                                             <div className="flex items-start justify-between">
@@ -287,7 +272,7 @@ export default function Quiz() {
                                                         {`${quiz.questions?.length || 0} question${(quiz.questions?.length || 0) === 1 ? "" : "s"} • ${timeAgo(quiz.updated_at || quiz.created_at)}`}
                                                     </p>
                                                 </div>
-                                                <button type="button" className="p-1.5 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100">
+                                                <button type="button" className="p-1.5 text-gray-400  rounded-xl hover:bg-gray-100">
                                                     <svg className="w-5 h-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 6a1.5 1.5 0 110-3 1.5 1.5 0 010 3zm0 5a1.5 1.5 0 110-3 1.5 1.5 0 010 3zm0 5a1.5 1.5 0 110-3 1.5 1.5 0 010 3z"/></svg>
                                                 </button>
                                             </div>
@@ -302,7 +287,7 @@ export default function Quiz() {
                                                 )}
                                                 <button
                                                     onClick={() => handleStartQuiz(quiz)}
-                                                    className="px-4 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm"
+                                                    className="px-4 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 hover:scale-105 hover:shadow-sm text-white font-semibold text-sm"
                                                 >
                                                     Start
                                                 </button>
@@ -318,8 +303,8 @@ export default function Quiz() {
                             <motion.div
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
-                                className="bg-white shadow-lg"
-                                style={{ borderRadius: "20px" }}
+                                className="bg-white shadow-sm"
+                                style={{ borderRadius:"12px" }}
                             >
                                 {/* Compact Header */}
                                 <div
@@ -342,11 +327,11 @@ export default function Quiz() {
                                     {/* Progress Bar */}
                                     <div
                                         className="w-full bg-white bg-opacity-30 h-2 overflow-hidden"
-                                        style={{ borderRadius: "20px" }}
+                                        style={{ borderRadius:"12px" }}
                                     >
                                         <motion.div
                                             className="bg-white h-2"
-                                            style={{ borderRadius: "20px" }}
+                                            style={{ borderRadius:"12px" }}
                                             initial={{ width: 0 }}
                                             animate={{
                                                 width: `${
@@ -706,7 +691,7 @@ export default function Quiz() {
                                     {/* Compact Question Navigator */}
                                     <div
                                         className="flex flex-wrap gap-2 mt-4 p-3 bg-blue-50"
-                                        style={{ borderRadius: "20px" }}
+                                        style={{ borderRadius:"12px" }}
                                     >
                                         {currentQuiz.questions.map((_, idx) => (
                                             <button
@@ -723,7 +708,7 @@ export default function Quiz() {
                                                         ? "bg-blue-400 text-white hover:bg-blue-500"
                                                         : "bg-white text-blue-600 border border-blue-300 hover:bg-blue-100"
                                                 }`}
-                                                style={{ borderRadius: "20px" }}
+                                                style={{ borderRadius:"12px" }}
                                             >
                                                 {idx + 1}
                                             </button>
@@ -738,9 +723,9 @@ export default function Quiz() {
                                             className={`px-5 py-2 font-semibold transition-all text-sm ${
                                                 currentQuestionIdx === 0
                                                     ? "bg-blue-100 text-blue-300 cursor-not-allowed"
-                                                    : "bg-white border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white"
+                                                    : "bg-white border-2 border-blue-600 text-blue-600 hover:bg-blue-600 "
                                             }`}
-                                            style={{ borderRadius: "20px" }}
+                                            style={{ borderRadius:"12px" }}
                                         >
                                             Previous
                                         </button>
@@ -749,16 +734,16 @@ export default function Quiz() {
                                         currentQuiz.questions.length - 1 ? (
                                             <button
                                                 onClick={handleSubmitQuiz}
-                                                className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold transition-all text-sm"
-                                                style={{ borderRadius: "20px" }}
+                                                className="px-6 py-2 bg-blue-600 hover:bg-blue-700 hover:scale-105 hover:shadow-sm text-white font-semibold transition-all text-sm"
+                                                style={{ borderRadius:"12px" }}
                                             >
                                                 Submit Quiz
                                             </button>
                                         ) : (
                                             <button
                                                 onClick={handleNextQuestion}
-                                                className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold transition-all text-sm"
-                                                style={{ borderRadius: "20px" }}
+                                                className="px-6 py-2 bg-blue-600 hover:bg-blue-700 hover:scale-105 hover:shadow-sm text-white font-semibold transition-all text-sm"
+                                                style={{ borderRadius:"12px" }}
                                             >
                                                 Next
                                             </button>
@@ -773,7 +758,7 @@ export default function Quiz() {
                             <motion.div
                                 initial={{ opacity: 0, scale: 0.95 }}
                                 animate={{ opacity: 1, scale: 1 }}
-                                className="bg-white shadow-2xl rounded-2xl p-8 md:p-12 text-center border border-gray-200 max-w-2xl mx-auto"
+                                className="bg-white shadow-sm rounded-xl p-8 md:p-12 text-center border border-gray-200 max-w-2xl mx-auto"
                             >
                                 <motion.div
                                     initial={{ scale: 0 }}
@@ -827,7 +812,7 @@ export default function Quiz() {
                                 <div className="flex flex-col sm:flex-row justify-center gap-3">
                                     <button
                                         onClick={() => setReviewMode(true)}
-                                        className="px-6 py-3 rounded-lg bg-gray-600 hover:bg-gray-700 text-white font-semibold transition-all shadow-md hover:shadow-lg"
+                                        className="px-6 py-3 rounded-xl bg-gray-600 hover:bg-gray-700 hover:scale-105 hover:shadow-sm text-white font-semibold transition-all shadow-sm hover:shadow-sm"
                                     >
                                         Review Answers
                                     </button>
@@ -839,13 +824,13 @@ export default function Quiz() {
                                                 150
                                             );
                                         }}
-                                        className="px-6 py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold transition-all shadow-md hover:shadow-lg"
+                                        className="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 hover:scale-105 hover:shadow-sm text-white font-semibold transition-all shadow-sm hover:shadow-sm"
                                     >
                                         Try Again
                                     </button>
                                     <button
                                         onClick={handleDone}
-                                        className="px-6 py-3 rounded-lg bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-semibold transition-all shadow-md hover:shadow-lg"
+                                        className="px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-semibold transition-all shadow-sm hover:shadow-sm"
                                     >
                                         Done (Exit Quiz)
                                     </button>
@@ -858,7 +843,7 @@ export default function Quiz() {
                             <motion.div
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
-                                className="bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-200"
+                                className="bg-white shadow-sm rounded-xl overflow-hidden border border-gray-200"
                             >
                                 {/* Header */}
                                 <div className="bg-gradient-to-r from-orange-500 to-amber-600 text-white p-6 md:p-8">
@@ -908,7 +893,7 @@ export default function Quiz() {
                                                 </div>
 
                                                 <div className="space-y-3 text-sm">
-                                                    <div className="p-3 bg-white rounded-lg">
+                                                    <div className="p-3 bg-white rounded-xl">
                                                         <span className="font-semibold text-gray-800">
                                                             Your Answer:{" "}
                                                         </span>
@@ -949,7 +934,7 @@ export default function Quiz() {
                                                         </span>
                                                     </div>
                                                     {!user.isCorrect && (
-                                                        <div className="p-3 bg-white rounded-lg border-l-4 border-green-500">
+                                                        <div className="p-3 bg-white rounded-xl border-l-4 border-green-500">
                                                             <span className="font-semibold text-gray-800">
                                                                 Correct Answer:{" "}
                                                             </span>
@@ -998,19 +983,19 @@ export default function Quiz() {
                                 <div className="px-6 md:px-8 py-6 border-t border-gray-200 bg-gray-50 flex flex-col sm:flex-row justify-center gap-3">
                                     <button
                                         onClick={() => setReviewMode(false)}
-                                        className="px-6 py-2 rounded-lg border-2 border-gray-300 text-gray-700 hover:bg-gray-100 font-semibold transition-all"
+                                        className="px-6 py-2 rounded-xl border-2 border-gray-300 text-gray-700 hover:bg-gray-100 font-semibold transition-all"
                                     >
                                         Back to Result
                                     </button>
                                     <button
                                         onClick={handleRestart}
-                                        className="px-6 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold transition-all shadow-md hover:shadow-lg"
+                                        className="px-6 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 hover:scale-105 hover:shadow-sm text-white font-semibold transition-all shadow-sm hover:shadow-sm"
                                     >
                                         Try Another
                                     </button>
                                     <button
                                         onClick={handleDone}
-                                        className="px-6 py-2 rounded-lg bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-semibold transition-all shadow-md hover:shadow-lg"
+                                        className="px-6 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-semibold transition-all shadow-sm hover:shadow-sm"
                                     >
                                         Done
                                     </button>

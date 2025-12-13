@@ -29,22 +29,22 @@ export default function Login({ status, canResetPassword }) {
                     </p>
 
                     {/* Recommended: Link to new unified auth */}
-                    <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-xl">
                         <p className="text-sm text-blue-700">
-                            ✨ Try our new <a href={route('auth')} className="font-semibold underline hover:text-blue-800">streamlined sign-in experience</a>
+                            ✨ Try our new <a href={route('auth')} className="font-semibold underline ">streamlined sign-in experience</a>
                         </p>
                     </div>
                 </div>
 
                 {status && (
-                    <div className="p-3 text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg">
+                    <div className="p-3 text-sm text-green-700 bg-green-50 border border-green-200 rounded-xl">
                         {status}
                     </div>
                 )}
 
                 <a
                     href={route("auth.google")}
-                    className="w-full flex items-center justify-center gap-3 px-4 py-3 border-2 border-gray-300 rounded-xl hover:bg-gray-50 transition-colors"
+                    className="w-full flex items-center justify-center gap-3 px-4 py-3 border-2 border-gray-300 rounded-xl hover:bg-gray-50 transition-all duration-200 ease-in-out"
                 >
                     <svg className="w-5 h-5" viewBox="0 0 24 24">
                         <path
@@ -115,7 +115,7 @@ export default function Login({ status, canResetPassword }) {
                             <button
                                 type="button"
                                 onClick={() => setShowPassword(!showPassword)}
-                                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 "
                                 tabIndex={-1}
                             >
                                 {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
@@ -139,7 +139,7 @@ export default function Login({ status, canResetPassword }) {
 
                     <button
                         type="submit"
-                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full bg-blue-600 hover:bg-blue-700 hover:scale-105 hover:shadow-sm text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed"
                         disabled={processing}
                     >
                         {processing ? "Logging in..." : "Sign In"}
@@ -150,14 +150,14 @@ export default function Login({ status, canResetPassword }) {
                     {canResetPassword && (
                         <a
                             href={route("password.reset.otp")}
-                            className="text-blue-600 hover:text-blue-700 hover:underline font-medium"
+                            className="text-blue-600  hover:underline font-medium"
                         >
                             Forgot your password?
                         </a>
                     )}
                     <a
                         href={route("register")}
-                        className="text-blue-600 hover:text-blue-700 hover:underline font-medium"
+                        className="text-blue-600  hover:underline font-medium"
                     >
                         Create an account
                     </a>

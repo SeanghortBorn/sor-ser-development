@@ -26,7 +26,7 @@ export default function LiveProgressBar({
     const progressPercentage = Math.min(100, (currentAccuracy / minTypedWords) * 100);
 
     return (
-        <div className="bg-white border border-gray-200 rounded-lg p-3 shadow-sm">
+        <div className="bg-white border border-gray-200 rounded-xl p-3 shadow-sm">
             {/* Compact Header with Status */}
             <div className="flex justify-between items-center mb-2">
                 <h3 className="text-sm font-semibold text-gray-700">Progress to Unlock</h3>

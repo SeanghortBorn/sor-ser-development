@@ -279,7 +279,7 @@ export default function Library() {
                         <h2 className="text-[25px] text-blue-900 font-semibold">
                             Grammar Check
                         </h2>
-                        <button className="flex items-center gap-2 px-3 py-1 bg-orange-500 text-white rounded-[10px] hover:bg-orange-600 transition">
+                        <button className="flex items-center gap-2 px-3 py-1 bg-orange-500 text-white rounded-xl hover:bg-orange-600 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95">
                             <Plus size={16} />
                             Start New
                         </button>
@@ -289,7 +289,7 @@ export default function Library() {
                             {filteredDocuments.map((doc) => (
                                 <div
                                     key={doc.id}
-                                    className="border-2 border-gray-200 rounded-xl px-4 py-3 shadow hover:shadow-xl relative"
+                                    className="border-2 border-gray-200 rounded-xl px-4 py-3 shadow-sm hover:shadow-sm relative"
                                 >
                                     <div className="flex justify-between items-center">
                                         <h3 className="font-bold text-lg">
@@ -343,10 +343,10 @@ export default function Library() {
                                                 </svg>
                                             </button>
                                             {openDropdownId === doc.id && (
-                                                <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-xl shadow-lg z-50">
+                                                <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-xl shadow-sm z-50">
                                                     <div className="px-2 py-2 space-y-1">
                                                         <button
-                                                            className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-gray-700 rounded-lg transition"
+                                                            className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-gray-700 rounded-xl transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                                                             onClick={() =>
                                                                 openEditNameModal(
                                                                     doc
@@ -361,7 +361,7 @@ export default function Library() {
                                                             Edit Name
                                                         </button>
                                                         <button
-                                                            className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-gray-700 rounded-lg transition"
+                                                            className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-gray-700 rounded-xl transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                                                             onClick={() =>
                                                                 openEditTagsModal(
                                                                     doc
@@ -376,7 +376,7 @@ export default function Library() {
                                                             Edit Tags
                                                         </button>
                                                         <button
-                                                            className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-red-600 rounded-lg transition"
+                                                            className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-red-600 rounded-xl transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                                                             onClick={() =>
                                                                 openDeleteModal(
                                                                     doc
@@ -437,7 +437,7 @@ export default function Library() {
                                             Created on:{" "}
                                             {formatDate(doc.created_at)}
                                         </span>
-                                        <button className="text-blue-700 text-md hover:underline">
+                                        <button className="text-blue-700 text-md hover:underline transition-all duration-200 ease-in-out hover:scale-105">
                                             Open
                                         </button>
                                     </div>
@@ -450,7 +450,7 @@ export default function Library() {
                         <div className="p-6 text-center border rounded-xl">
                             <FileText
                                 size={32}
-                                className="text-orange-500 mb-2 hover:text-orange-600 mx-auto"
+                                className="text-orange-500 mb-2  mx-auto"
                             />
 
                             <h3 className="text-[22px] font-semibold mb-2">
@@ -462,7 +462,7 @@ export default function Library() {
                             </p>
 
                             <div className="flex justify-center gap-4">
-                                <button className="flex items-center gap-2 px-3 py-1 bg-orange-500 text-white rounded-lg hover:bg-orange-400 transition">
+                                <button className="flex items-center gap-2 px-3 py-1 bg-orange-500 text-white rounded-xl hover:bg-orange-400 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95">
                                     <Plus size={16} />
                                     Create First Tag
                                 </button>
@@ -482,7 +482,7 @@ export default function Library() {
                     >
                         <form
                             onSubmit={handleSaveEdit}
-                            className="bg-white rounded-2xl w-full max-w-lg"
+                            className="bg-white rounded-xl w-full max-w-lg"
                             onMouseDown={(e) => e.stopPropagation()}
                         >
                             <div className="flex justify-between items-center px-6 py-3">
@@ -513,7 +513,7 @@ export default function Library() {
                                     type="button"
                                     onClick={closeEditNameModal}
                                     disabled={savingEdit}
-                                    className="rounded-[15px] border-2 border-gray-300 px-8 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold disabled:opacity-60"
+                                    className="rounded-xl border-2 border-gray-300 px-8 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold disabled:opacity-60"
                                 >
                                     Cancel
                                 </button>
@@ -522,7 +522,7 @@ export default function Library() {
                                     disabled={
                                         savingEdit || !editingDocTitle.trim()
                                     }
-                                    className="rounded-[15px] px-9 py-1 bg-blue-600 text-white font-semibold hover:bg-blue-700 transition disabled:opacity-60"
+                                    className="rounded-xl px-9 py-1 bg-blue-600 text-white font-semibold hover:bg-blue-700 transition disabled:opacity-60"
                                 >
                                     {savingEdit ? "Saving..." : "Save"}
                                 </button>
@@ -542,7 +542,7 @@ export default function Library() {
                     >
                         <form
                             onSubmit={handleDeleteDoc}
-                            className="bg-white rounded-xl shadow-xl p-4 w-full max-w-xl"
+                            className="bg-white rounded-xl shadow-sm p-4 w-full max-w-xl"
                             onMouseDown={(e) => e.stopPropagation()}
                         >
                             <div className="flex justify-between items-center mb-2">
@@ -558,13 +558,13 @@ export default function Library() {
                                 <button
                                     type="button"
                                     onClick={() => setShowDeleteModal(false)}
-                                    className="rounded-[15px] border-2 border-gray-300 px-8 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold disabled:opacity-60"
+                                    className="rounded-xl border-2 border-gray-300 px-8 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold disabled:opacity-60"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
-                                    className="rounded-[15px] px-9 py-1 bg-red-500 text-white font-semibold hover:bg-red-600 transition disabled:opacity-60"
+                                    className="rounded-xl px-9 py-1 bg-red-500 text-white font-semibold hover:bg-red-600 transition disabled:opacity-60"
                                 >
                                     Delete
                                 </button>
@@ -584,7 +584,7 @@ export default function Library() {
                     >
                         <form
                             onSubmit={handleSaveTags}
-                            className="bg-white rounded-2xl w-full max-w-md shadow-xl"
+                            className="bg-white rounded-xl w-full max-w-md shadow-sm"
                             onMouseDown={(e) => e.stopPropagation()}
                         >
                             <div className="flex justify-between items-center px-6 py-3">
@@ -621,7 +621,7 @@ export default function Library() {
                                         }}
                                     >
                                         <span
-                                            className="w-6 h-6 rounded-md"
+                                            className="w-6 h-6 rounded-xl"
                                             style={{
                                                 backgroundColor: tag.color,
                                                 display: "inline-block",
@@ -637,7 +637,7 @@ export default function Library() {
                                 <button
                                     type="button"
                                     onClick={closeEditTagsModal}
-                                    className="rounded-[15px] border-2 border-gray-200 px-8 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold"
+                                    className="rounded-xl border-2 border-gray-200 px-8 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold"
                                     disabled={savingTags}
                                     style={{ minWidth: 110 }}
                                 >
@@ -645,7 +645,7 @@ export default function Library() {
                                 </button>
                                 <button
                                     type="submit"
-                                    className="rounded-[15px] px-9 py-1 bg-blue-600 text-white font-semibold hover:bg-blue-700 transition disabled:opacity-60"
+                                    className="rounded-xl px-9 py-1 bg-blue-600 text-white font-semibold hover:bg-blue-700 transition disabled:opacity-60"
                                     disabled={savingTags}
                                     style={{ minWidth: 110 }}
                                 >

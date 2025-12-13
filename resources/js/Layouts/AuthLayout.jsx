@@ -10,7 +10,7 @@ export default function AuthLayout({ title, children, showCloseButton = true }) 
             <WaveBackground />
 
             <div className="min-h-screen flex items-center justify-center p-4">
-                <div className="w-full max-w-6xl bg-white rounded-3xl shadow-2xl overflow-hidden">
+                <div className="w-full max-w-6xl bg-white rounded-xl shadow-sm overflow-hidden">
                     <div className="grid md:grid-cols-2 min-h-[600px]">
                         {/* Left Side - Branding Image & Message */}
                         <div className="hidden md:flex relative bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 p-12 flex-col justify-between">
@@ -66,7 +66,7 @@ export default function AuthLayout({ title, children, showCloseButton = true }) 
                             {showCloseButton && (
                                 <button
                                     type="button"
-                                    className="absolute top-6 right-6 text-gray-400 hover:text-gray-600 transition-colors"
+                                    className="absolute top-6 right-6 text-gray-400  transition-all duration-200 ease-in-out"
                                     onClick={() => window.history.back()}
                                     aria-label="Close"
                                 >

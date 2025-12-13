@@ -17,11 +17,11 @@ export default function SearchBar({
     className = "",
 }) {
     return (
-        <div className={`inline-flex items-center gap-2 px-3 rounded-xl border hover:shadow-lg transition text-sm bg-white ${className}`}>
+        <div className={`inline-flex items-center gap-2 px-3 rounded-xl border hover:shadow-sm transition text-sm bg-white ${className}`}>
             <Search className="w-4 h-4 text-gray-500" />
             <input
                 type="text"
-                className="px-2 w-[250px] py-2 rounded-[10px] border-none border-gray-300 text-sm focus:outline-none focus:ring-0"
+                className="px-2 w-[250px] py-2 rounded-xl border-none border-gray-300 text-sm focus:outline-none focus:ring-0"
                 placeholder={placeholder}
                 value={value}
                 onChange={onChange}

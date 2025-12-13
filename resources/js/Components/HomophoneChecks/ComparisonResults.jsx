@@ -104,7 +104,7 @@ const ComparisonResults = memo(({
             </div>
 
             {extraWords > 0 && (
-                <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                <div className="bg-orange-50 border border-orange-200 rounded-xl p-4">
                     <div className="flex items-center gap-2 text-orange-700">
                         <span className="text-sm font-medium">
                             You typed {extraWords} extra word{extraWords !== 1 ? 's' : ''}
@@ -119,8 +119,8 @@ const ComparisonResults = memo(({
                     onClick={onAccept}
                     disabled={!canAccept || isProcessing}
                     className={`
-                        flex-1 py-3 px-4 rounded-lg font-medium text-white
-                        transition-colors flex items-center justify-center gap-2
+                        flex-1 py-3 px-4 rounded-xl font-medium text-white
+                        transition-all duration-200 ease-in-out flex items-center justify-center gap-2
                         ${canAccept && !isProcessing
                             ? 'bg-green-600 hover:bg-green-700 cursor-pointer'
                             : 'bg-gray-300 cursor-not-allowed'
@@ -137,8 +137,8 @@ const ComparisonResults = memo(({
                     onClick={onDismiss}
                     disabled={isProcessing}
                     className={`
-                        flex-1 py-3 px-4 rounded-lg font-medium
-                        transition-colors flex items-center justify-center gap-2
+                        flex-1 py-3 px-4 rounded-xl font-medium
+                        transition-all duration-200 ease-in-out flex items-center justify-center gap-2
                         ${isProcessing
                             ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                             : 'bg-white border-2 border-gray-300 text-gray-700 hover:bg-gray-50'
@@ -152,7 +152,7 @@ const ComparisonResults = memo(({
 
             {/* Requirement Message */}
             {accuracy < 70 && (
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
                     <p className="text-sm text-yellow-800 text-center">
                         <strong>Note:</strong> You need at least 70% accuracy to unlock the next article.
                         {' '}You're {(70 - accuracy).toFixed(1)}% away from the goal.
@@ -161,7 +161,7 @@ const ComparisonResults = memo(({
             )}
 
             {accuracy >= 70 && (
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <div className="bg-green-50 border border-green-200 rounded-xl p-4">
                     <p className="text-sm text-green-800 text-center">
                         <strong>Great job!</strong> You've met the minimum requirement.
                         {accuracy >= 90 && ' You achieved excellent accuracy!'}

@@ -23,7 +23,7 @@ export default function Dashboard({ auth, stats, recentActivity, isAdmin }) {
                             {/* Stats Cards */}
                             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 mb-8">
                                 {/* Homophones Card */}
-                                <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+                                <div className="bg-white overflow-hidden shadow-sm rounded-xl p-6">
                                     <div className="flex items-center justify-between">
                                         <div>
                                             <p className="text-sm font-medium text-gray-600">
@@ -43,7 +43,7 @@ export default function Dashboard({ auth, stats, recentActivity, isAdmin }) {
                                 </div>
 
                                 {/* Quizzes Card */}
-                                <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+                                <div className="bg-white overflow-hidden shadow-sm rounded-xl p-6">
                                     <div className="flex items-center justify-between">
                                         <div>
                                             <p className="text-sm font-medium text-gray-600">
@@ -57,13 +57,13 @@ export default function Dashboard({ auth, stats, recentActivity, isAdmin }) {
                                             </p>
                                         </div>
                                         <div className="h-12 w-12 bg-purple-100 rounded-full flex items-center justify-center">
-                                            <i className="fas fa-question-circle text-purple-600 text-xl"></i>
+                                            <i className="fas fa-question-circle text-purple-600 text-xl transition-all duration-200 ease-in-out hover:scale-105"></i>
                                         </div>
                                     </div>
                                 </div>
 
                                 {/* Students Card */}
-                                <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+                                <div className="bg-white overflow-hidden shadow-sm rounded-xl p-6">
                                     <div className="flex items-center justify-between">
                                         <div>
                                             <p className="text-sm font-medium text-gray-600">
@@ -83,7 +83,7 @@ export default function Dashboard({ auth, stats, recentActivity, isAdmin }) {
                                 </div>
 
                                 {/* Sessions Card */}
-                                <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+                                <div className="bg-white overflow-hidden shadow-sm rounded-xl p-6">
                                     <div className="flex items-center justify-between">
                                         <div>
                                             <p className="text-sm font-medium text-gray-600">
@@ -104,7 +104,7 @@ export default function Dashboard({ auth, stats, recentActivity, isAdmin }) {
 
                                 {/* Articles Card */}
                                 {stats.articles && (
-                                    <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+                                    <div className="bg-white overflow-hidden shadow-sm rounded-xl p-6">
                                         <div className="flex items-center justify-between">
                                             <div>
                                                 <p className="text-sm font-medium text-gray-600">
@@ -126,7 +126,7 @@ export default function Dashboard({ auth, stats, recentActivity, isAdmin }) {
 
                                 {/* Users Card */}
                                 {stats.users && (
-                                    <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+                                    <div className="bg-white overflow-hidden shadow-sm rounded-xl p-6">
                                         <div className="flex items-center justify-between">
                                             <div>
                                                 <p className="text-sm font-medium text-gray-600">
@@ -148,7 +148,7 @@ export default function Dashboard({ auth, stats, recentActivity, isAdmin }) {
                             </div>
 
                             {/* Recent Activity */}
-                            <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+                            <div className="bg-white overflow-hidden shadow-sm rounded-xl p-6">
                                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
                                     Recent Activity
                                 </h3>
@@ -191,7 +191,7 @@ export default function Dashboard({ auth, stats, recentActivity, isAdmin }) {
                             {/* Student Stats */}
                             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 mb-8">
                                 {/* Articles Completed */}
-                                <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+                                <div className="bg-white overflow-hidden shadow-sm rounded-xl p-6">
                                     <div className="flex items-center justify-between">
                                         <div>
                                             <p className="text-sm font-medium text-gray-600">
@@ -208,7 +208,7 @@ export default function Dashboard({ auth, stats, recentActivity, isAdmin }) {
                                 </div>
 
                                 {/* Total Articles */}
-                                <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+                                <div className="bg-white overflow-hidden shadow-sm rounded-xl p-6">
                                     <div className="flex items-center justify-between">
                                         <div>
                                             <p className="text-sm font-medium text-gray-600">
@@ -225,7 +225,7 @@ export default function Dashboard({ auth, stats, recentActivity, isAdmin }) {
                                 </div>
 
                                 {/* Completion Rate */}
-                                <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+                                <div className="bg-white overflow-hidden shadow-sm rounded-xl p-6">
                                     <div className="flex items-center justify-between">
                                         <div>
                                             <p className="text-sm font-medium text-gray-600">
@@ -236,14 +236,14 @@ export default function Dashboard({ auth, stats, recentActivity, isAdmin }) {
                                             </p>
                                         </div>
                                         <div className="h-12 w-12 bg-purple-100 rounded-full flex items-center justify-center">
-                                            <i className="fas fa-percentage text-purple-600 text-xl"></i>
+                                            <i className="fas fa-percentage text-purple-600 text-xl transition-all duration-200 ease-in-out hover:scale-105"></i>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
                             {/* My Recent Activity */}
-                            <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+                            <div className="bg-white overflow-hidden shadow-sm rounded-xl p-6">
                                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
                                     My Recent Activity
                                 </h3>

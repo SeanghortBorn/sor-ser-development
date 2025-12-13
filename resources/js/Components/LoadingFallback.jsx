@@ -39,7 +39,7 @@ export const LoadingSpinner = ({ size = 'md', color = 'blue', text = '' }) => {
 export const LoadingSkeleton = ({ type = 'default' }) => {
     if (type === 'card') {
         return (
-            <div className="animate-pulse p-4 border border-gray-200 rounded-lg">
+            <div className="animate-pulse p-4 border border-gray-200 rounded-xl">
                 <div className="h-4 bg-gray-200 rounded w-3/4 mb-3" />
                 <div className="h-3 bg-gray-200 rounded w-1/2 mb-2" />
                 <div className="h-3 bg-gray-200 rounded w-2/3" />

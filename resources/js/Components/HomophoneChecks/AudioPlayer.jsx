@@ -35,7 +35,7 @@ export default function AudioPlayer({
                     {/* Play/Pause Button */}
                     <button
                         onClick={onTogglePlay}
-                        className="w-6 h-6 flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white rounded-full transition"
+                        className="w-6 h-6 flex items-center justify-center bg-blue-600 hover:bg-blue-700 hover:scale-105 hover:shadow-sm text-white rounded-full transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                     >
                         {isPlaying ? (
                             <svg
@@ -62,7 +62,7 @@ export default function AudioPlayer({
                         {/* Skip Backward 10s */}
                         <button
                             onClick={onSkipBackward}
-                            className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-full transition"
+                            className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 hover:scale-105 hover:shadow-sm rounded-full transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                             title="Back 10s"
                         >
                             <svg
@@ -91,7 +91,7 @@ export default function AudioPlayer({
                         {/* Skip Forward 10s */}
                         <button
                             onClick={onSkipForward}
-                            className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-full transition"
+                            className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 hover:scale-105 hover:shadow-sm rounded-full transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                             title="Forward 10s"
                         >
                             <svg

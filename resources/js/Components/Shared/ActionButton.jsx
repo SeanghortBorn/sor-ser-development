@@ -23,11 +23,11 @@ export default function ActionButton({
 
     const getVariantClasses = () => {
         const variants = {
-            blue: "bg-blue-500 hover:bg-blue-600 text-white",
-            green: "bg-green-500 hover:bg-green-600 text-white",
-            red: "bg-red-500 hover:bg-red-600 text-white",
-            yellow: "bg-yellow-500 hover:bg-yellow-600 text-white",
-            gray: "bg-gray-500 hover:bg-gray-600 text-white",
+            blue: "bg-blue-500 hover:bg-blue-600 hover:scale-105 hover:shadow-sm text-white",
+            green: "bg-green-500 hover:bg-green-600 hover:scale-105 hover:shadow-sm text-white",
+            red: "bg-red-500 hover:bg-red-600 hover:scale-105 hover:shadow-sm text-white",
+            yellow: "bg-yellow-500 hover:bg-yellow-600 hover:scale-105 hover:shadow-sm text-white",
+            gray: "bg-gray-500 hover:bg-gray-600 hover:scale-105 hover:shadow-sm text-white",
         };
         return variants[variant] || variants.blue;
     };
@@ -46,7 +46,7 @@ export default function ActionButton({
                 {Icon && <Icon className="w-4 h-4" />}
             </button>
             {tooltip && showTooltip && !disabled && (
-                <div className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-white text-gray-800 text-xs px-3 py-1 rounded-lg shadow-md border whitespace-nowrap z-10">
+                <div className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-white text-gray-800 text-xs px-3 py-1 rounded-xl shadow-sm border whitespace-nowrap z-10">
                     {tooltip}
                     <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
                         <div className="border-4 border-transparent border-t-white"></div>

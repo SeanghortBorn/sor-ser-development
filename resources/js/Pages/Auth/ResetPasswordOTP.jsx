@@ -192,53 +192,55 @@ export default function ResetPasswordOTP() {
         >
             <div className="space-y-6">
                 {/* Step Indicator */}
-                <div className="flex items-center justify-between mb-8">
-                    {steps.map((s, index) => {
-                        const Icon = s.icon;
-                        const isActive = step === s.number;
-                        const isCompleted = step > s.number;
+                <div className="max-w-md mx-auto mb-8">
+                    <div className="flex items-center w-full">
+                        {steps.map((s, index) => {
+                            const Icon = s.icon;
+                            const isActive = step === s.number;
+                            const isCompleted = step > s.number;
 
-                        return (
-                            <div key={s.number} className="w-full flex items-center">
-                                <div className="flex flex-col items-center">
-                                    <div
-                                        className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
-                                            isCompleted
-                                                ? 'bg-green-500 text-white'
-                                                : isActive
-                                                ? 'bg-blue-600 text-white'
-                                                : 'bg-gray-200 text-gray-500'
-                                        }`}
-                                    >
-                                        {isCompleted ? (
-                                            <CheckCircle className="w-6 h-6" />
-                                        ) : (
-                                            <Icon className="w-6 h-6" />
-                                        )}
+                            return (
+                                <>
+                                    <div key={s.number} className="flex flex-col items-center flex-shrink-0">
+                                        <div
+                                            className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
+                                                isCompleted
+                                                    ? 'bg-green-500 text-white'
+                                                    : isActive
+                                                    ? 'bg-blue-600 text-white'
+                                                    : 'bg-gray-200 text-gray-500'
+                                            }`}
+                                        >
+                                            {isCompleted ? (
+                                                <CheckCircle className="w-6 h-6" />
+                                            ) : (
+                                                <Icon className="w-6 h-6" />
+                                            )}
+                                        </div>
+                                        <span
+                                            className={`text-xs mt-2 font-medium whitespace-nowrap ${
+                                                isActive ? 'text-blue-600' : isCompleted ? 'text-green-600' : 'text-gray-500'
+                                            }`}
+                                        >
+                                            {s.title}
+                                        </span>
                                     </div>
-                                    <span
-                                        className={`text-xs mt-2 font-medium ${
-                                            isActive ? 'text-blue-600' : isCompleted ? 'text-green-600' : 'text-gray-500'
-                                        }`}
-                                    >
-                                        {s.title}
-                                    </span>
-                                </div>
-                                {index < steps.length - 1 && (
-                                    <div
-                                        className={`flex-1 h-1 mx-4 rounded ${
-                                            step > s.number ? 'bg-green-500' : 'bg-gray-200'
-                                        }`}
-                                    />
-                                )}
-                            </div>
-                        );
-                    })}
+                                    {index < steps.length - 1 && (
+                                        <div
+                                            className={`flex-1 h-1 mx-4 rounded ${
+                                                step > s.number ? 'bg-green-500' : 'bg-gray-200'
+                                            }`}
+                                        />
+                                    )}
+                                </>
+                            );
+                        })}
+                    </div>
                 </div>
                 
 
                 {/* Step Content */}
-                <div className="mt-8">
+                <div className="max-w-md mx-auto mt-8">
                     {/* Step 1: Email */}
                     {step === 1 && (
                         <div className="space-y-4">
@@ -270,7 +272,7 @@ export default function ResetPasswordOTP() {
                                 <button
                                     type="submit"
                                     disabled={loading}
-                                    className="w-full bg-blue-600 hover:bg-blue-700 hover:shadow-lg hover:scale-105 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-none flex items-center justify-center gap-2"
+                                    className="w-full bg-blue-600 hover:bg-blue-700 hover:shadow-sm hover:scale-105 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-none flex items-center justify-center gap-2"
                                 >
                                     {loading ? (
                                         <>
@@ -285,7 +287,7 @@ export default function ResetPasswordOTP() {
                                 <div className="text-center">
                                     <a
                                         href={route('auth')}
-                                        className="text-sm text-blue-600 hover:text-blue-700 hover:underline"
+                                        className="text-sm text-blue-600  hover:underline transition-all duration-200 ease-in-out hover:scale-105"
                                     >
                                         Back to Sign In
                                     </a>
@@ -322,7 +324,7 @@ export default function ResetPasswordOTP() {
                             </div>
 
                             {error && (
-                                <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                                <div className="p-3 bg-red-50 border border-red-200 rounded-xl">
                                     <p className="text-sm text-red-700">{error}</p>
                                 </div>
                             )}
@@ -330,7 +332,7 @@ export default function ResetPasswordOTP() {
                             <button
                                 onClick={() => handleVerifyOTP()}
                                 disabled={loading || otp.some(d => !d)}
-                                className="w-full bg-blue-600 hover:bg-blue-700 hover:shadow-lg hover:scale-105 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-none flex items-center justify-center gap-2"
+                                className="w-full bg-blue-600 hover:bg-blue-700 hover:shadow-sm hover:scale-105 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-none flex items-center justify-center gap-2"
                             >
                                 {loading ? (
                                     <>
@@ -350,7 +352,7 @@ export default function ResetPasswordOTP() {
                                     <button
                                         onClick={handleResend}
                                         disabled={resending}
-                                        className="text-blue-600 hover:text-blue-700 font-semibold disabled:opacity-50"
+                                        className="text-blue-600  font-semibold disabled:opacity-50"
                                     >
                                         {resending ? 'Sending...' : 'Resend Code'}
                                     </button>
@@ -388,7 +390,7 @@ export default function ResetPasswordOTP() {
                                         <button
                                             type="button"
                                             onClick={() => setShowPassword(!showPassword)}
-                                            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 "
                                             tabIndex={-1}
                                         >
                                             {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
@@ -411,7 +413,7 @@ export default function ResetPasswordOTP() {
                                 </div>
 
                                 {error && (
-                                    <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                                    <div className="p-3 bg-red-50 border border-red-200 rounded-xl">
                                         <p className="text-sm text-red-700">{error}</p>
                                     </div>
                                 )}
@@ -419,7 +421,7 @@ export default function ResetPasswordOTP() {
                                 <button
                                     type="submit"
                                     disabled={loading}
-                                    className="w-full bg-blue-600 hover:bg-blue-700 hover:shadow-lg hover:scale-105 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-none flex items-center justify-center gap-2"
+                                    className="w-full bg-blue-600 hover:bg-blue-700 hover:shadow-sm hover:scale-105 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-none flex items-center justify-center gap-2"
                                 >
                                     {loading ? (
                                         <>

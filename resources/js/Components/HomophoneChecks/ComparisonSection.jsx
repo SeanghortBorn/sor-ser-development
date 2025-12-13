@@ -39,7 +39,7 @@ const ComparisonSection = memo(({
 
     return (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-lg shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+            <div className="bg-white rounded-xl shadow-sm max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col">
                 {/* Header */}
                 <div className="flex items-center justify-between p-6 border-b border-gray-200">
                     <h2 className="text-2xl font-bold text-gray-900">
@@ -48,15 +48,15 @@ const ComparisonSection = memo(({
 
                     <div className="flex items-center gap-2">
                         {/* View Toggle */}
-                        <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
+                        <div className="flex items-center gap-1 bg-gray-100 rounded-xl p-1">
                             <button
                                 onClick={() => setViewMode('summary')}
                                 className={`
-                                    px-3 py-1.5 text-sm font-medium rounded transition-colors
+                                    px-3 py-1.5 text-sm font-medium rounded transition-all duration-200 ease-in-out
                                     flex items-center gap-1
                                     ${viewMode === 'summary'
                                         ? 'bg-white text-gray-900 shadow'
-                                        : 'text-gray-600 hover:text-gray-900'
+                                        : 'text-gray-600 '
                                     }
                                 `}
                             >
@@ -66,11 +66,11 @@ const ComparisonSection = memo(({
                             <button
                                 onClick={() => setViewMode('detailed')}
                                 className={`
-                                    px-3 py-1.5 text-sm font-medium rounded transition-colors
+                                    px-3 py-1.5 text-sm font-medium rounded transition-all duration-200 ease-in-out
                                     flex items-center gap-1
                                     ${viewMode === 'detailed'
                                         ? 'bg-white text-gray-900 shadow'
-                                        : 'text-gray-600 hover:text-gray-900'
+                                        : 'text-gray-600 '
                                     }
                                 `}
                             >
@@ -83,7 +83,7 @@ const ComparisonSection = memo(({
                         {onClose && (
                             <button
                                 onClick={onClose}
-                                className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors"
+                                className="p-2 text-gray-400  rounded-xl hover:bg-gray-100 transition-all duration-200 ease-in-out"
                                 aria-label="Close"
                             >
                                 <X size={24} />
@@ -141,8 +141,8 @@ const ComparisonSection = memo(({
                                 onClick={onAccept}
                                 disabled={!canAccept || isProcessing}
                                 className={`
-                                    flex-1 py-3 px-4 rounded-lg font-medium text-white
-                                    transition-colors flex items-center justify-center gap-2
+                                    flex-1 py-3 px-4 rounded-xl font-medium text-white
+                                    transition-all duration-200 ease-in-out flex items-center justify-center gap-2
                                     ${canAccept && !isProcessing
                                         ? 'bg-green-600 hover:bg-green-700'
                                         : 'bg-gray-300 cursor-not-allowed'
@@ -156,8 +156,8 @@ const ComparisonSection = memo(({
                                 onClick={onDismiss}
                                 disabled={isProcessing}
                                 className={`
-                                    flex-1 py-3 px-4 rounded-lg font-medium
-                                    transition-colors
+                                    flex-1 py-3 px-4 rounded-xl font-medium
+                                    transition-all duration-200 ease-in-out
                                     ${isProcessing
                                         ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                         : 'bg-white border-2 border-gray-300 text-gray-700 hover:bg-gray-50'

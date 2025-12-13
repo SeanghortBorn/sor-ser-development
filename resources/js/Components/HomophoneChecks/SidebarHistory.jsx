@@ -50,7 +50,7 @@ export default function SidebarHistory({
         <div className="w-68 h-[100vh] bg-white border-r flex flex-col p-3">
             {/* Top bar */}
             <div className="flex items-center justify-between mb-3">
-                <button className="text-2xl text-gray-500 hover:text-gray-700">
+                <button className="text-2xl text-gray-500 ">
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
                         width="24"
@@ -95,7 +95,7 @@ export default function SidebarHistory({
                         <input
                             type="text"
                             placeholder="Search"
-                            className="flex-1 w-full bg-transparent outline-none pl-3 pr-10 py-1 border border-gray-300 rounded-lg focus:border-blue-500"
+                            className="flex-1 w-full bg-transparent outline-none pl-3 pr-10 py-1 border border-gray-300 rounded-xl focus:border-blue-500"
                         />
                     </div>
                 </div>
@@ -107,7 +107,7 @@ export default function SidebarHistory({
                 <div className="mb-2 text-gray-500 text-sm">Previous Topics</div>
                 {Array.isArray(previousDocuments) && previousDocuments.length > 0 ?
                     previousDocuments.map((doc, idx) => (
-                        <div key={doc.id ?? idx} className="bg-gray-50 rounded-lg p-3 mb-2 cursor-pointer relative">
+                        <div key={doc.id ?? idx} className="bg-gray-50 rounded-xl p-3 mb-2 cursor-pointer relative">
                             <div className="flex justify-between items-center">
                                 <span className="font-bold text-[14px] text-gray-700">
                                     {doc.title}
@@ -138,7 +138,7 @@ export default function SidebarHistory({
                                         </svg>
                                     </button>
                                     {dropdownOpen === doc.id && (
-                                        <div className="absolute right-0 mt-2 w-32 bg-white border rounded shadow-lg z-10">
+                                        <div className="absolute right-0 mt-2 w-32 bg-white border rounded shadow-sm z-10">
                                             <button
                                                 className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 flex items-center"
                                                 onClick={() => handleRename(doc.id, doc.title)}

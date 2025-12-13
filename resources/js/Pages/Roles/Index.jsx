@@ -103,7 +103,7 @@ export default function RolePage({ roles, search: searchProp = "" }) {
             <Head title={headWeb} />
             <section className="content">
                 <div className="container-fluid sm:px-6 lg:px-8 mb-12">
-                    <div className="bg-white shadow-md rounded-xl overflow-hidden border border-gray-200">
+                    <div className="bg-white shadow-sm rounded-xl overflow-hidden border border-gray-200">
                         {/* Header */}
                         <div className="px-4 sm:px-6 py-4 border-b flex flex-col sm:flex-row justify-between items-center gap-3">
                             <h3 className="text-xl sm:text-lg font-semibold text-gray-800">
@@ -113,7 +113,7 @@ export default function RolePage({ roles, search: searchProp = "" }) {
                             <div className="flex items-center gap-3 w-full sm:w-auto">
                                 {/* Search Box */}
                                 <div className="relative flex-1 sm:flex-none">
-                                    <div className="inline-flex items-center gap-2 px-3 rounded-xl border border-gray-300 hover:shadow-lg transition text-sm bg-white w-full sm:w-auto">
+                                    <div className="inline-flex items-center gap-2 px-3 rounded-xl border border-gray-300 hover:shadow-sm transition text-sm bg-white w-full sm:w-auto">
                                         <Search className="w-4 h-4 text-gray-500" />
                                         <input
                                             type="text"
@@ -125,7 +125,7 @@ export default function RolePage({ roles, search: searchProp = "" }) {
                                         {searchTerm && (
                                             <button
                                                 onClick={clearSearch}
-                                                className="text-gray-400 hover:text-gray-600 transition"
+                                                className="text-gray-400  transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                                             >
                                                 <X className="w-4 h-4" />
                                             </button>
@@ -172,7 +172,7 @@ export default function RolePage({ roles, search: searchProp = "" }) {
                                         roles.data.map((role) => (
                                             <tr
                                                 key={role.id}
-                                                className="border-t hover:bg-gray-50 transition"
+                                                className="border-t hover:bg-gray-50 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                                             >
                                                 <td className="py-3 px-4 font-medium">
                                                     {role.id}
@@ -201,7 +201,7 @@ export default function RolePage({ roles, search: searchProp = "" }) {
                                                                             role
                                                                         )
                                                                     }
-                                                                    className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-cyan-600 rounded-lg hover:bg-cyan-700 transition"
+                                                                    className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-cyan-600 rounded-xl hover:bg-cyan-700 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                                                                 >
                                                                     <Eye className="w-3.5 h-3.5" />
                                                                 </button>
@@ -219,7 +219,7 @@ export default function RolePage({ roles, search: searchProp = "" }) {
                                                                             "roles.edit",
                                                                             role.id
                                                                         )}
-                                                                        className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition"
+                                                                        className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                                                                     >
                                                                         <Pencil className="w-3.5 h-3.5" />
                                                                     </Link>
@@ -239,7 +239,7 @@ export default function RolePage({ roles, search: searchProp = "" }) {
                                                                                 role
                                                                             )
                                                                         }
-                                                                        className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition"
+                                                                        className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-red-600 rounded-xl hover:bg-red-700 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                                                                         disabled={
                                                                             processing
                                                                         }
@@ -323,7 +323,7 @@ export default function RolePage({ roles, search: searchProp = "" }) {
                                 <span className="font-semibold text-gray-700 block mb-3">
                                     Permissions:
                                 </span>
-                                <div className="max-h-64 overflow-y-auto bg-gray-50 rounded-lg p-3">
+                                <div className="max-h-64 overflow-y-auto bg-gray-50 rounded-xl p-3">
                                     {Array.isArray(viewingRole.permissions) &&
                                     viewingRole.permissions.length > 0 ? (
                                         Object.entries(
@@ -366,7 +366,7 @@ export default function RolePage({ roles, search: searchProp = "" }) {
                             <button
                                 type="button"
                                 onClick={closeViewRole}
-                                className="rounded-[10px] border-2 border-gray-300 px-8 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold"
+                                className="rounded-xl border-2 border-gray-300 px-8 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold"
                             >
                                 Close
                             </button>
@@ -399,7 +399,7 @@ export default function RolePage({ roles, search: searchProp = "" }) {
                         <button
                             type="button"
                             onClick={closeModal}
-                            className="rounded-[10px] border-2 border-gray-300 px-8 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold"
+                            className="rounded-xl border-2 border-gray-300 px-8 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold"
                             disabled={processing}
                         >
                             Cancel
@@ -407,7 +407,7 @@ export default function RolePage({ roles, search: searchProp = "" }) {
                         <button
                             type="submit"
                             disabled={processing}
-                            className="px-5 py-1 bg-red-600 text-white font-medium rounded-[10px] hover:bg-red-700 transition disabled:opacity-60"
+                            className="px-5 py-1 bg-red-600 text-white font-medium rounded-xl hover:bg-red-700 transition disabled:opacity-60"
                         >
                             {processing ? "Deleting..." : "Delete"}
                         </button>

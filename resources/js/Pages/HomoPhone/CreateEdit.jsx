@@ -73,7 +73,7 @@ export default function HomophoneCreateEdit({ homophone }) {
             <Head title={headWeb} />
             <section className="content">
                 <div className="container-fluid">
-                    <div className="bg-white shadow-md rounded-[10px] overflow-hidden border border-gray-200 mb-12">
+                    <div className="bg-white shadow-sm rounded-xl overflow-hidden border border-gray-200 mb-12">
                         <div className="px-6 py-4 border-b bg-gray-50">
                             <div className="flex items-center justify-between">
                                 <div>
@@ -101,7 +101,7 @@ export default function HomophoneCreateEdit({ homophone }) {
                                         name="word"
                                         value={form.word}
                                         onChange={handleChange}
-                                        className="block w-full px-3 py-2 rounded-[10px] border border-gray-300 focus:ring-blue-200 focus:border-blue-400 placeholder-gray-400 focus:outline-none focus:ring-1"
+                                        className="block w-full px-3 py-2 rounded-xl border border-gray-300 focus:ring-blue-200 focus:border-blue-400 placeholder-gray-400 focus:outline-none focus:ring-1"
                                         placeholder="Enter word"
                                     />
                                 </div>
@@ -113,7 +113,7 @@ export default function HomophoneCreateEdit({ homophone }) {
                                         name="pos"
                                         value={form.pos}
                                         onChange={handleChange}
-                                        className="block w-full px-3 py-2 rounded-[10px] border border-gray-300 focus:ring-blue-200 focus:border-blue-400 placeholder-gray-400 focus:outline-none focus:ring-1"
+                                        className="block w-full px-3 py-2 rounded-xl border border-gray-300 focus:ring-blue-200 focus:border-blue-400 placeholder-gray-400 focus:outline-none focus:ring-1"
                                         placeholder="Enter part of speech"
                                     />
                                 </div>
@@ -125,7 +125,7 @@ export default function HomophoneCreateEdit({ homophone }) {
                                         name="pro"
                                         value={form.pro}
                                         onChange={handleChange}
-                                        className="block w-full px-3 py-2 rounded-[10px] border border-gray-300 focus:ring-blue-200 focus:border-blue-400 placeholder-gray-400 focus:outline-none focus:ring-1"
+                                        className="block w-full px-3 py-2 rounded-xl border border-gray-300 focus:ring-blue-200 focus:border-blue-400 placeholder-gray-400 focus:outline-none focus:ring-1"
                                         placeholder="Enter pronunciation"
                                     />
                                 </div>
@@ -137,7 +137,7 @@ export default function HomophoneCreateEdit({ homophone }) {
                                         name="definition"
                                         value={form.definition}
                                         onChange={handleChange}
-                                        className="block w-full px-3 py-2 rounded-[10px] border border-gray-300 focus:ring-blue-200 focus:border-blue-400 placeholder-gray-400 focus:outline-none focus:ring-1"
+                                        className="block w-full px-3 py-2 rounded-xl border border-gray-300 focus:ring-blue-200 focus:border-blue-400 placeholder-gray-400 focus:outline-none focus:ring-1"
                                         placeholder="Enter definition"
                                     />
                                 </div>
@@ -149,7 +149,7 @@ export default function HomophoneCreateEdit({ homophone }) {
                                         name="homophone"
                                         value={form.homophone}
                                         onChange={handleChange}
-                                        className="block w-full px-3 py-2 rounded-[10px] border border-gray-300 focus:ring-blue-200 focus:border-blue-400 placeholder-gray-400 focus:outline-none focus:ring-1"
+                                        className="block w-full px-3 py-2 rounded-xl border border-gray-300 focus:ring-blue-200 focus:border-blue-400 placeholder-gray-400 focus:outline-none focus:ring-1"
                                         placeholder="Enter homophones separated by commas"
                                     />
                                 </div>
@@ -161,7 +161,7 @@ export default function HomophoneCreateEdit({ homophone }) {
                                         name="phoneme"
                                         value={form.phoneme}
                                         onChange={handleChange}
-                                        className="block w-full px-3 py-2 rounded-[10px] border border-gray-300 focus:ring-blue-200 focus:border-blue-400 placeholder-gray-400 focus:outline-none focus:ring-1"
+                                        className="block w-full px-3 py-2 rounded-xl border border-gray-300 focus:ring-blue-200 focus:border-blue-400 placeholder-gray-400 focus:outline-none focus:ring-1"
                                         placeholder="Enter phoneme"
                                     />
                                 </div>
@@ -173,7 +173,7 @@ export default function HomophoneCreateEdit({ homophone }) {
                                         name="example"
                                         value={form.example}
                                         onChange={handleChange}
-                                        className="block w-full px-3 py-2 rounded-[10px] border border-gray-300 focus:ring-blue-200 focus:border-blue-400 placeholder-gray-400 focus:outline-none focus:ring-1 resize-none overflow-hidden"
+                                        className="block w-full px-3 py-2 rounded-xl border border-gray-300 focus:ring-blue-200 focus:border-blue-400 placeholder-gray-400 focus:outline-none focus:ring-1 resize-none overflow-hidden"
                                         rows="3"
                                         onInput={(e) => {
                                             e.target.style.height = "auto";
@@ -195,13 +195,13 @@ export default function HomophoneCreateEdit({ homophone }) {
                             <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-6 mt-6 border-t border-gray-200">
                                 <Link
                                     href={route("homophones.index")}
-                                    className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-[10px] text-gray-600 border-2 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 transition duration-200"
+                                    className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-xl text-gray-600 border-2 hover:bg-gray-50 hover:border-gray-300  transition duration-200"
                                 >
                                     Cancel
                                 </Link>
                                 <button
                                     type="submit"
-                                    className="inline-flex items-center justify-center px-8 py-2 text-sm font-medium rounded-[10px] text-white bg-gradient-to-r from-blue-500 to-blue-500 transition duration-200 hover:1rom-blue-500 hover:to-blue-600"
+                                    className="inline-flex items-center justify-center px-8 py-2 text-sm font-medium rounded-xl text-white bg-gradient-to-r from-blue-500 to-blue-500 transition duration-200 hover:1rom-blue-500 hover:to-blue-600"
                                     disabled={processing}
                                 >
                                     {processing
@@ -250,13 +250,13 @@ export default function HomophoneCreateEdit({ homophone }) {
                                         onClick={() =>
                                             setShowDeleteModal(false)
                                         }
-                                        className="rounded-[10px] border-2 border-gray-300 px-8 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold"
+                                        className="rounded-xl border-2 border-gray-300 px-8 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold"
                                     >
                                         Cancel
                                     </button>
                                     <button
                                         type="submit"
-                                        className="rounded-[10px] px-9 py-1 text-white font-semibold transition bg-red-600 hover:bg-red-700"
+                                        className="rounded-xl px-9 py-1 text-white font-semibold transition bg-red-600 hover:bg-red-700"
                                     >
                                         Delete
                                     </button>

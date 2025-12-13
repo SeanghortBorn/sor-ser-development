@@ -75,7 +75,7 @@ export default function ArticlesPage({ articles, search = "" }) {
             <Head title={headWeb} />
             <section className="content">
                 <div className="container-fluid">
-                    <div className="bg-white rounded-xl shadow-md p-6">
+                    <div className="bg-white rounded-xl shadow-sm p-6">
                         {/* Header with Search and Add Button */}
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                             <h2 className="text-xl font-bold text-gray-800">Articles</h2>
@@ -92,7 +92,7 @@ export default function ArticlesPage({ articles, search = "" }) {
                                 {can["article-create"] && can["article-list"] && (
                                     <Link
                                         href={route("articles.create")}
-                                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm text-white bg-green-600 hover:bg-green-500 transition"
+                                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm text-white bg-green-600 hover:bg-green-500 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                                     >
                                         <ClipboardPlus className="w-4 h-4" />
                                         Add Article
@@ -123,7 +123,7 @@ export default function ArticlesPage({ articles, search = "" }) {
                                         </tr>
                                     ) : (
                                         datasList.map((item) => (
-                                            <tr key={item.id} className="hover:bg-gray-50 transition">
+                                            <tr key={item.id} className="hover:bg-gray-50 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95">
                                                 <td className="px-4 py-3">{item.id}</td>
                                                 <td className="px-4 py-3 font-medium">{item.title}</td>
                                                 <td className="px-4 py-3">
@@ -236,7 +236,7 @@ export default function ArticlesPage({ articles, search = "" }) {
                     {viewTarget?.file && (
                         <div className="mb-6">
                             <h3 className="font-semibold text-gray-700 mb-2">File</h3>
-                            <div className="border rounded-lg p-4 bg-gray-50">
+                            <div className="border rounded-xl p-4 bg-gray-50">
                                 <p className="text-sm text-gray-600 mb-2">
                                     <strong>Filename:</strong> {viewTarget.file.title}
                                 </p>
@@ -271,7 +271,7 @@ export default function ArticlesPage({ articles, search = "" }) {
                     {viewTarget?.audio && (
                         <div className="mb-6">
                             <h3 className="font-semibold text-gray-700 mb-2">Audio</h3>
-                            <div className="border rounded-lg p-4 bg-gray-50">
+                            <div className="border rounded-xl p-4 bg-gray-50">
                                 <p className="text-sm text-gray-600 mb-3">
                                     <strong>Filename:</strong> {viewTarget.audio.title}
                                 </p>
@@ -289,7 +289,7 @@ export default function ArticlesPage({ articles, search = "" }) {
                     <div className="flex justify-end">
                         <button
                             onClick={() => setShowViewModal(false)}
-                            className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition"
+                            className="px-6 py-2 bg-gray-600 text-white rounded-xl hover:bg-gray-700 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                         >
                             Close
                         </button>

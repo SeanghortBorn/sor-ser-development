@@ -15,17 +15,17 @@ function MenuGroup({ label, icon, children, active }) {
         <div className="mb-2">
             <button
                 onClick={() => setOpen((prev) => !prev)}
-                className={`flex items-center w-full px-2 py-2.5 rounded-lg font-medium transition-all duration-300 group ${
+                className={`flex items-center w-full px-2 py-2.5 rounded-xl font-medium transition-all duration-300 group ${
                     open || active
                         ? "bg-blue-100 text-blue-700 border-l-4 border-blue-500"
-                        : "hover:bg-gray-50 text-gray-700 hover:text-gray-900"
+                        : "hover:bg-gray-50 text-gray-700 "
                 }`}
             >
                 <span
-                    className={`mr-3 transition-colors duration-300 ${
+                    className={`mr-3 transition-all duration-200 ease-in-out duration-300 ${
                         open || active
                             ? "text-blue-600"
-                            : "text-gray-400 group-hover:text-gray-600"
+                            : "text-gray-400 group-"
                     }`}
                 >
                     {icon}
@@ -39,7 +39,7 @@ function MenuGroup({ label, icon, children, active }) {
                     } ${
                         open || active
                             ? "text-blue-600"
-                            : "text-gray-400 group-hover:text-gray-600"
+                            : "text-gray-400 group-"
                     }`}
                     fill="none"
                     stroke="currentColor"
@@ -72,7 +72,7 @@ function MenuItem({ href, icon, label, active }) {
     return (
         <Link
             href={href}
-            className={`flex items-center px-2 py-2.5 rounded-lg font-medium transition-all duration-200 ${
+            className={`flex items-center px-2 py-2.5 rounded-xl font-medium transition-all duration-200 ${
                 active
                     ? "bg-blue-100 text-blue-700 border-l-4 border-blue-500"
                     : "hover:bg-gray-50 text-gray-700 border-l-4 border-transparent"
@@ -87,10 +87,10 @@ function MenuItem({ href, icon, label, active }) {
 
             {/* Label */}
             <span
-                className={`text-sm transition-colors duration-200 ${
+                className={`text-sm transition-all duration-200 ease-in-out duration-200 ${
                     active
                         ? "text-blue-700"
-                        : "text-gray-600 group-hover:text-gray-900"
+                        : "text-gray-600 group-"
                 }`}
             >
                 {label}

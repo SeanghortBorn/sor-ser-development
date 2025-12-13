@@ -138,7 +138,7 @@ export default function TagsSection({ onTagUpdate, onTagClick, allTags, fetchAll
                     Tags
                 </h2>
                 <button
-                    className="flex items-center gap-2 px-3 py-1 bg-orange-500 text-white rounded-[10px] hover:bg-orange-600 transition"
+                    className="flex items-center gap-2 px-3 py-1 bg-orange-500 text-white rounded-xl hover:bg-orange-600 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                     onClick={() => openTagModal()}
                 >
                     <Plus size={16} />
@@ -169,7 +169,7 @@ export default function TagsSection({ onTagUpdate, onTagClick, allTags, fetchAll
                                 }}
                             >
                                 <div
-                                    className="w-6 h-6 rounded-md flex-shrink-0 transition-transform duration-300"
+                                    className="w-6 h-6 rounded-xl flex-shrink-0 transition-transform duration-300"
                                     style={{
                                         backgroundColor: tag.color,
                                     }}
@@ -184,7 +184,7 @@ export default function TagsSection({ onTagUpdate, onTagClick, allTags, fetchAll
                                     ref={el => (dropdownRefs.current[tag.id] = el)}
                                 >
                                     <button
-                                        className="text-gray-400 text-xl cursor-pointer flex items-center hover:bg-gray-100 rounded-full"
+                                        className="text-gray-400 text-xl cursor-pointer flex items-center hover:bg-gray-100 hover:scale-105 hover:shadow-sm rounded-full"
                                         onClick={() =>
                                             setOpenDropdownId(
                                                 openDropdownId === tag.id
@@ -212,10 +212,10 @@ export default function TagsSection({ onTagUpdate, onTagClick, allTags, fetchAll
                                         </svg>
                                     </button>
                                     {openDropdownId === tag.id && (
-                                        <div className="absolute right-0 mt-2 w-36 bg-white rounded-xl shadow-lg z-50">
+                                        <div className="absolute right-0 mt-2 w-36 bg-white rounded-xl shadow-sm z-50">
                                             <div className="px-2 py-2 space-y-1">
                                                 <button
-                                                    className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-gray-700 rounded-lg transition"
+                                                    className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-gray-700 rounded-xl transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                                                     onClick={() => {
                                                         setOpenDropdownId(null);
                                                         openTagModal(tag);
@@ -229,7 +229,7 @@ export default function TagsSection({ onTagUpdate, onTagClick, allTags, fetchAll
                                                     Edit Tag
                                                 </button>
                                                 <button
-                                                    className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm hover:bg-red-100 text-red-600 rounded-lg transition"
+                                                    className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm hover:bg-red-100 text-red-600 rounded-xl transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                                                     onClick={() => {
                                                         setOpenDropdownId(null);
                                                         confirmDeleteTag(tag);
@@ -253,7 +253,7 @@ export default function TagsSection({ onTagUpdate, onTagClick, allTags, fetchAll
                     <div className="flex flex-col items-center justify-center p-4 rounded-xl border border-gray-100 text-center mb-9">
                         <Tags
                             size={32}
-                            className="text-orange-500 mb-2 hover:text-orange-600 mx-auto"
+                            className="text-orange-500 mb-2  mx-auto"
                         />
                         <h3 className="text-[22px] font-semibold mb-2">
                             No tags yet
@@ -262,7 +262,7 @@ export default function TagsSection({ onTagUpdate, onTagClick, allTags, fetchAll
                             Create tags to organize your flashcards and document
                         </p>
                         <button
-                            className="flex items-center gap-2 px-3 py-1 bg-orange-500 text-white rounded-[10px] hover:bg-orange-400 transition"
+                            className="flex items-center gap-2 px-3 py-1 bg-orange-500 text-white rounded-xl hover:bg-orange-400 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                             onClick={() => openTagModal()}
                         >
                             <Plus size={16} />
@@ -282,7 +282,7 @@ export default function TagsSection({ onTagUpdate, onTagClick, allTags, fetchAll
                 >
                     <form
                         onSubmit={saveTag}
-                        className="bg-white rounded-2xl w-full max-w-md"
+                        className="bg-white rounded-xl w-full max-w-md"
                         onMouseDown={(e) => e.stopPropagation()}
                     >
                         {/* Header */}
@@ -301,10 +301,10 @@ export default function TagsSection({ onTagUpdate, onTagClick, allTags, fetchAll
                                         type="button"
                                         tabIndex={-1}
                                         key={color}
-                                        className={`w-9 h-9 rounded-md border-2 transition-all duration-150 focus:outline-none
+                                        className={`w-9 h-9 rounded-xl border-2 transition-all duration-150 focus:outline-none
                                     ${
                                         tagColor === color
-                                            ? "border-blue-700 scale-110 shadow"
+                                            ? "border-blue-700 scale-110 shadow-sm"
                                             : "border-gray-200"
                                     }`}
                                         style={{ backgroundColor: color }}
@@ -331,14 +331,14 @@ export default function TagsSection({ onTagUpdate, onTagClick, allTags, fetchAll
                                 type="button"
                                 onClick={closeTagModal}
                                 disabled={saving}
-                                className="rounded-[10px] border-2 border-gray-300 px-8 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold disabled:opacity-60"
+                                className="rounded-xl border-2 border-gray-300 px-8 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold disabled:opacity-60"
                             >
                                 Cancel
                             </button>
                             <button
                                 type="submit"
                                 disabled={saving || !tagName.trim()}
-                                className="rounded-[10px] px-9 py-1 bg-blue-600 text-white font-semibold hover:bg-blue-700 transition disabled:opacity-60"
+                                className="rounded-xl px-9 py-1 bg-blue-600 text-white font-semibold hover:bg-blue-700 transition disabled:opacity-60"
                             >
                                 {saving
                                     ? editingTag
@@ -364,7 +364,7 @@ export default function TagsSection({ onTagUpdate, onTagClick, allTags, fetchAll
                 >
                     <form
                         onSubmit={handleDeleteTag}
-                        className="bg-white rounded-xl shadow-xl p-4 w-full max-w-xl"
+                        className="bg-white rounded-xl shadow-sm p-4 w-full max-w-xl"
                         onMouseDown={(e) => e.stopPropagation()}
                     >
                         <div className="flex justify-between items-center mb-2">
@@ -381,13 +381,13 @@ export default function TagsSection({ onTagUpdate, onTagClick, allTags, fetchAll
                             <button
                                 type="button"
                                 onClick={() => setShowDeleteModal(false)}
-                                className="rounded-[10px] border-2 border-gray-300 px-8 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold disabled:opacity-60"
+                                className="rounded-xl border-2 border-gray-300 px-8 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold disabled:opacity-60"
                             >
                                 Cancel
                             </button>
                             <button
                                 type="submit"
-                                className="rounded-[10px] px-9 py-1 bg-red-500 text-white font-semibold hover:bg-red-600 transition disabled:opacity-60"
+                                className="rounded-xl px-9 py-1 bg-red-500 text-white font-semibold hover:bg-red-600 transition disabled:opacity-60"
                             >
                                 Delete
                             </button>

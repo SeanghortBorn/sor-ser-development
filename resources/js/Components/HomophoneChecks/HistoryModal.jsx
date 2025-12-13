@@ -19,7 +19,7 @@ export default function HistoryModal({
                         Homophone History
                     </h3>
                     <button
-                        className="text-gray-500 hover:text-gray-700 text-lg mr-2"
+                        className="text-gray-500  text-lg mr-2"
                         onClick={onClose}
                     >
                         ✕
@@ -63,7 +63,7 @@ export default function HistoryModal({
                                 {historyItems.map((item, idx) => (
                                     <tr
                                         key={item.id}
-                                        className="hover:bg-gray-50 transition-colors"
+                                        className="hover:bg-gray-50 transition-all duration-200 ease-in-out"
                                     >
                                         <td className="px-4 py-3 font-medium text-gray-600">
                                             {idx + 1}
@@ -83,7 +83,7 @@ export default function HistoryModal({
                                         <td className="px-4 py-3 text-center">
                                             <button
                                                 type="button"
-                                                className="rounded-[10px] border-2 border-blue-500 px-3 py-1 text-blue-700 hover:bg-blue-500 hover:text-white transition font-medium"
+                                                className="rounded-xl border-2 border-blue-500 px-3 py-1 text-blue-700 hover:bg-blue-500  transition font-medium"
                                                 onClick={() => onViewItem(item)}
                                             >
                                                 View
@@ -99,7 +99,7 @@ export default function HistoryModal({
                 <div className="mt-6 flex justify-end px-6">
                     <button
                         onClick={onClose}
-                        className="rounded-[10px] border-2 border-gray-500 px-4 py-1 text-gray-600 hover:bg-gray-500 hover:text-white transition font-medium"
+                        className="rounded-xl border-2 border-gray-500 px-4 py-1 text-gray-600 hover:bg-gray-500  transition font-medium"
                     >
                         Close
                     </button>

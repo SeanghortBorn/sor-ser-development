@@ -25,7 +25,7 @@ export default function ConfirmationModal({
     processing = false,
 }) {
     const getConfirmButtonClass = () => {
-        const baseClass = "rounded-[10px] px-9 py-1 font-semibold hover:opacity-90 transition";
+        const baseClass = "rounded-xl px-9 py-1 font-semibold hover:opacity-90 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95";
 
         switch (confirmStyle) {
             case 'danger':
@@ -54,7 +54,7 @@ export default function ConfirmationModal({
                     <button
                         type="button"
                         onClick={onClose}
-                        className="rounded-[10px] border-2 border-gray-300 px-8 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold"
+                        className="rounded-xl border-2 border-gray-300 px-8 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold"
                         disabled={processing}
                     >
                         Cancel

@@ -196,7 +196,7 @@ const Dashboard = () => {
         const Icon = stat.icon;
         return (
             <div
-                className={`bg-white px-3 pb-2 pt-3 border-l-4 ${stat.borderColor} shadow-sm rounded-xl flex flex-col hover:shadow-md transition-shadow duration-200`}
+                className={`bg-white px-3 pb-2 pt-3 border-l-4 ${stat.borderColor} shadow-sm rounded-xl flex flex-col hover:shadow-sm transition-shadow duration-200`}
             >
                 <div className="flex items-center justify-between">
                     <p className="text-gray-800 text-sm font-semibold">

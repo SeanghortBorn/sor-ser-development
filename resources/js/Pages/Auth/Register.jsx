@@ -80,11 +80,11 @@ export default function Register() {
             <Head title="Sign Up" />
             <WaveBackground />
             <div className="fixed inset-0 flex items-center justify-center z-10">
-                <div className="relative bg-white rounded-2xl w-full max-w-3xl shadow-xl">
+                <div className="relative bg-white rounded-xl w-full max-w-3xl shadow-sm">
                     {/* Close Button */}
                     <button
                         type="button"
-                        className="absolute top-5 right-6 text-gray-400 hover:text-gray-600 text-2xl z-10"
+                        className="absolute top-5 right-6 text-gray-400  text-2xl z-10"
                         aria-label="Close"
                         onClick={() => window.history.back()}
                         style={{ background: "none", border: "none" }}
@@ -100,7 +100,7 @@ export default function Register() {
 
                         <a
                             href={route("auth.google")}
-                            className="w-full flex items-center justify-center gap-3 px-3 py-[14px] border-[3px] border-gray-200 rounded-2xl hover:bg-gray-50 transition-colors mb-3"
+                            className="w-full flex items-center justify-center gap-3 px-3 py-[14px] border-[3px] border-gray-200 rounded-xl hover:bg-gray-50 transition-all duration-200 ease-in-out mb-3"
                         >
                             <svg className="w-5 h-5" viewBox="0 0 24 24">
                                 <path
@@ -235,13 +235,13 @@ export default function Register() {
                                         </svg>
                                     </button>
                                     {khmerDropdownOpen && (
-                                        <div className="absolute left-0 top-full mt-2 w-full bg-white border border-gray-200 rounded-xl shadow-lg z-50 max-h-60 overflow-y-auto hide-scrollbar">
+                                        <div className="absolute left-0 top-full mt-2 w-full bg-white border border-gray-200 rounded-xl shadow-sm z-50 max-h-60 overflow-y-auto hide-scrollbar">
                                             <div className="px-2 py-2 space-y-1">
                                                 {khmerOptions.map((opt) => (
                                                     <button
                                                         key={opt.value}
                                                         type="button"
-                                                        className={`flex items-center w-full text-left px-4 py-2 text-[16px] rounded-lg transition ${
+                                                        className={`flex items-center w-full text-left px-4 py-2 text-[16px] rounded-xl transition ${
                                                             data.khmer_experience ===
                                                             opt.value
                                                                 ? "bg-blue-100 text-blue-700 font-bold"
@@ -316,13 +316,13 @@ export default function Register() {
                                         </svg>
                                     </button>
                                     {educationDropdownOpen && (
-                                        <div className="absolute left-0 top-full mt-2 w-full bg-white border border-gray-200 rounded-xl shadow-lg z-50 max-h-60 overflow-y-auto hide-scrollbar">
+                                        <div className="absolute left-0 top-full mt-2 w-full bg-white border border-gray-200 rounded-xl shadow-sm z-50 max-h-60 overflow-y-auto hide-scrollbar">
                                             <div className="px-2 py-2 space-y-1">
                                                 {educationOptions.map((opt) => (
                                                     <button
                                                         key={opt.value}
                                                         type="button"
-                                                        className={`flex items-center w-full text-left px-4 py-2 text-[16px] rounded-lg transition ${
+                                                        className={`flex items-center w-full text-left px-4 py-2 text-[16px] rounded-xl transition ${
                                                             data.education_level ===
                                                             opt.value
                                                                 ? "bg-blue-100 text-blue-700 font-bold"
@@ -400,7 +400,7 @@ export default function Register() {
                                         onClick={() =>
                                             setShowPassword(!showPassword)
                                         }
-                                        className="absolute right-4 top-[45px] text-gray-400 hover:text-gray-600"
+                                        className="absolute right-4 top-[45px] text-gray-400 "
                                         tabIndex={-1}
                                     >
                                         {showPassword ? (
@@ -442,7 +442,7 @@ export default function Register() {
                                     <button
                                         type="submit"
                                         disabled={processing}
-                                        className="w-1/3 border-2 border-blue-500 text-blue-600 hover:bg-[#f5f7ff] font-semibold py-2 rounded-xl transition text-md"
+                                        className="w-1/3 border-2 border-blue-500 text-blue-600 hover:bg-[#f5f7ff] font-semibold py-2 rounded-xl transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95 text-md disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
                                     >
                                         {processing
                                             ? "Registering..."

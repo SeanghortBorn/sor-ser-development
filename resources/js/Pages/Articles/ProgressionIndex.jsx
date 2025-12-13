@@ -94,7 +94,7 @@ export default function ProgressionIndex({ articles, progress, nextUnlock, curre
     const getArticleCardClass = (article) => {
         if (article.is_passed) return 'border-green-200 bg-green-50';
         if (article.is_completed) return 'border-blue-200 bg-blue-50';
-        if (article.is_available) return 'border-blue-300 bg-white hover:shadow-lg cursor-pointer';
+        if (article.is_available) return 'border-blue-300 bg-white hover:shadow-sm cursor-pointer';
         return 'border-gray-200 bg-gray-50 opacity-75';
     };
 
@@ -111,7 +111,7 @@ export default function ProgressionIndex({ articles, progress, nextUnlock, curre
 
                     {/* Flash Messages */}
                     {flash?.error && (
-                        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-red-700">
+                        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-2 text-red-700">
                             <AlertCircle className="w-5 h-5" />
                             {flash.error}
                         </div>
@@ -122,7 +122,7 @@ export default function ProgressionIndex({ articles, progress, nextUnlock, curre
                         {/* Total Progress */}
                         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
                             <div className="flex items-center gap-3">
-                                <div className="p-3 bg-blue-100 rounded-lg">
+                                <div className="p-3 bg-blue-100 rounded-xl">
                                     <Target className="w-6 h-6 text-blue-600" />
                                 </div>
                                 <div>
@@ -143,7 +143,7 @@ export default function ProgressionIndex({ articles, progress, nextUnlock, curre
                         {/* Completed */}
                         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
                             <div className="flex items-center gap-3">
-                                <div className="p-3 bg-green-100 rounded-lg">
+                                <div className="p-3 bg-green-100 rounded-xl">
                                     <CheckCircle className="w-6 h-6 text-green-600" />
                                 </div>
                                 <div>
@@ -158,7 +158,7 @@ export default function ProgressionIndex({ articles, progress, nextUnlock, curre
                         {/* In Progress */}
                         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
                             <div className="flex items-center gap-3">
-                                <div className="p-3 bg-orange-100 rounded-lg">
+                                <div className="p-3 bg-orange-100 rounded-xl">
                                     <Timer className="w-6 h-6 text-orange-600" />
                                 </div>
                                 <div>
@@ -173,7 +173,7 @@ export default function ProgressionIndex({ articles, progress, nextUnlock, curre
                         {/* Best Scores */}
                         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
                             <div className="flex items-center gap-3">
-                                <div className="p-3 bg-purple-100 rounded-lg">
+                                <div className="p-3 bg-purple-100 rounded-xl">
                                     <Trophy className="w-6 h-6 text-purple-600" />
                                 </div>
                                 <div>
@@ -195,7 +195,7 @@ export default function ProgressionIndex({ articles, progress, nextUnlock, curre
                             </h3>
                             <Link
                                 href={route('learn.articles.show', currentArticle.article.id)}
-                                className="block bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl shadow-lg p-6 text-white hover:from-blue-700 hover:to-blue-800 transition"
+                                className="block bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl shadow-sm p-6 text-white hover:from-blue-700 hover:to-blue-800 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                             >
                                 <div className="flex items-center justify-between">
                                     <div>
@@ -314,7 +314,7 @@ function ArticleCard({ item, index, getArticleStatusIcon, getArticleStatusText }
                         {item.article.title}
                     </h4>
                     {item.setting?.typing_mode === 'nlp_la' && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full text-xs">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full text-xs transition-all duration-200 ease-in-out hover:scale-105">
                             <BarChart2 className="w-3 h-3" />
                             Full
                         </span>

@@ -71,13 +71,13 @@ export default function UserProgress({
 
                     {/* Learning Metrics Overview */}
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                        <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+                        <div className="bg-white overflow-hidden shadow-sm rounded-xl p-6">
                             <p className="text-sm text-gray-600">Overall Accuracy</p>
                             <p className="text-3xl font-bold text-blue-600">
                                 {learningMetrics.overall_accuracy}%
                             </p>
                         </div>
-                        <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+                        <div className="bg-white overflow-hidden shadow-sm rounded-xl p-6">
                             <p className="text-sm text-gray-600">Progress Trend</p>
                             <p className={`text-2xl font-bold ${learningMetrics.progress_trend === 'Improving' ? 'text-green-600' :
                                     learningMetrics.progress_trend === 'Declining' ? 'text-red-600' :
@@ -86,13 +86,13 @@ export default function UserProgress({
                                 {learningMetrics.progress_trend}
                             </p>
                         </div>
-                        <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+                        <div className="bg-white overflow-hidden shadow-sm rounded-xl p-6">
                             <p className="text-sm text-gray-600">Total Attempts</p>
-                            <p className="text-3xl font-bold text-purple-600">
+                            <p className="text-3xl font-bold text-purple-600 transition-all duration-200 ease-in-out hover:scale-105">
                                 {learningMetrics.total_attempts}
                             </p>
                         </div>
-                        <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+                        <div className="bg-white overflow-hidden shadow-sm rounded-xl p-6">
                             <p className="text-sm text-gray-600">Improvement Rate</p>
                             <p className={`text-2xl font-bold ${learningMetrics.improvement_rate > 0 ? 'text-green-600' : 'text-red-600'
                                 }`}>
@@ -104,7 +104,7 @@ export default function UserProgress({
 
                     {/* Strengths and Weaknesses */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                        <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                        <div className="bg-white overflow-hidden shadow-sm rounded-xl">
                             <div className="p-6">
                                 <h3 className="text-lg font-semibold mb-3 text-green-700">Strengths</h3>
                                 {learningMetrics.strengths.length > 0 ? (
@@ -123,7 +123,7 @@ export default function UserProgress({
                                 )}
                             </div>
                         </div>
-                        <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                        <div className="bg-white overflow-hidden shadow-sm rounded-xl">
                             <div className="p-6">
                                 <h3 className="text-lg font-semibold mb-3 text-red-700">Areas for Improvement</h3>
                                 {learningMetrics.weaknesses.length > 0 ? (
@@ -145,7 +145,7 @@ export default function UserProgress({
                     </div>
 
                     {/* Daily Accuracy Trends Chart */}
-                    <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
+                    <div className="bg-white overflow-hidden shadow-sm rounded-xl mb-6">
                         <div className="p-6">
                             <h3 className="text-lg font-semibold mb-4">Daily Accuracy Trends (Last 30 Days)</h3>
                             {accuracyTrends.length > 0 ? (
@@ -172,7 +172,7 @@ export default function UserProgress({
                     </div>
 
                     {/* Correction Patterns Chart */}
-                    <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
+                    <div className="bg-white overflow-hidden shadow-sm rounded-xl mb-6">
                         <div className="p-6">
                             <h3 className="text-lg font-semibold mb-4">Correction Patterns (Accept vs Reject)</h3>
                             {correctionPatterns.length > 0 ? (
@@ -194,7 +194,7 @@ export default function UserProgress({
                     </div>
 
                     {/* Typing Activity Chart */}
-                    <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
+                    <div className="bg-white overflow-hidden shadow-sm rounded-xl mb-6">
                         <div className="p-6">
                             <h3 className="text-lg font-semibold mb-4">Typing Activity</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -231,7 +231,7 @@ export default function UserProgress({
                     </div>
 
                     {/* Audio Listening Behavior */}
-                    <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
+                    <div className="bg-white overflow-hidden shadow-sm rounded-xl mb-6">
                         <div className="p-6">
                             <h3 className="text-lg font-semibold mb-4">Audio Listening Behavior</h3>
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
@@ -268,7 +268,7 @@ export default function UserProgress({
                     </div>
 
                     {/* Articles Attempted Table */}
-                    <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                    <div className="bg-white overflow-hidden shadow-sm rounded-xl">
                         <div className="p-6">
                             <h3 className="text-lg font-semibold mb-4">Articles Attempted</h3>
                             {articlesAttempted.length > 0 ? (
@@ -325,7 +325,7 @@ export default function UserProgress({
                                                                 userId: user.id,
                                                                 articleId: article.article_id
                                                             })}
-                                                            className="inline-flex items-center px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md"
+                                                            className="inline-flex items-center px-3 py-1.5 bg-blue-600 hover:bg-blue-700 hover:scale-105 hover:shadow-sm text-white text-sm font-medium rounded-xl transition-all duration-200 ease-in-out duration-200 shadow-sm hover:shadow-sm"
                                                         >
                                                             <FileText className="w-4 h-4 mr-1.5" />
                                                             View Details

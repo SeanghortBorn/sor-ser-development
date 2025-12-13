@@ -17,7 +17,7 @@ const QuizResult = ({ quiz, attempt, onRestart, onDone }) => {
     else message = "Better luck next time!";
 
     return (
-        <div className="bg-white dark:bg-gray-800 shadow-lg rounded-xl p-6 max-w-4xl mx-auto animate-fadeIn">
+        <div className="bg-white dark:bg-gray-800 shadow-sm rounded-xl p-6 max-w-4xl mx-auto animate-fadeIn">
             {/* Summary Score */}
             {!reviewMode && (
                 <div className="text-center">
@@ -29,19 +29,19 @@ const QuizResult = ({ quiz, attempt, onRestart, onDone }) => {
                     <div className="flex justify-center gap-4">
                         <button
                             onClick={onRestart}
-                            className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded"
+                            className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-xl transition-all duration-200 ease-in-out active:scale-95"
                         >
                             Restart Quiz
                         </button>
                         <button
                             onClick={onDone}
-                            className="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded"
+                            className="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-xl transition-all duration-200 ease-in-out active:scale-95"
                         >
                             Done
                         </button>
                         <button
                             onClick={() => setReviewMode(true)}
-                            className="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded"
+                            className="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-xl transition-all duration-200 ease-in-out active:scale-95"
                         >
                             Review Answers
                         </button>
@@ -93,19 +93,19 @@ const QuizResult = ({ quiz, attempt, onRestart, onDone }) => {
                     <div className="flex justify-center gap-4 mt-6">
                         <button
                             onClick={onRestart}
-                            className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded"
+                            className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-xl transition-all duration-200 ease-in-out active:scale-95"
                         >
                             Restart Quiz
                         </button>
                         <button
                             onClick={onDone}
-                            className="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded"
+                            className="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-xl transition-all duration-200 ease-in-out active:scale-95"
                         >
                             Done
                         </button>
                         <button
                             onClick={() => setReviewMode(false)}
-                            className="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded"
+                            className="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-xl transition-all duration-200 ease-in-out active:scale-95"
                         >
                             Back to Result
                         </button>

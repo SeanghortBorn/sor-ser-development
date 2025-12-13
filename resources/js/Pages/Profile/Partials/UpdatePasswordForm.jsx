@@ -63,7 +63,7 @@ export default function UpdatePasswordForm({ className = "" }) {
                 </div>
                 <button
                     onClick={() => setShowPasswordModal(true)}
-                    className="flex items-center space-x-2 px-4 py-2 border-2 border-blue-500 rounded-xl font-semibold text-blue-600 hover:bg-blue-50 transition-colors"
+                    className="flex items-center space-x-2 px-4 py-2 border-2 border-blue-500 rounded-xl font-semibold text-blue-600 hover:bg-blue-50 transition-all duration-200 ease-in-out"
                 >
                     <svg
                         className="w-4 h-4 text-blue-500"
@@ -125,7 +125,7 @@ export default function UpdatePasswordForm({ className = "" }) {
                 >
                     <form
                         onSubmit={updatePassword}
-                        className="bg-white rounded-2xl w-full max-w-xl p-8 shadow-xl border border-gray-200"
+                        className="bg-white rounded-xl w-full max-w-xl p-8 shadow-sm border border-gray-200"
                         onMouseDown={(e) => e.stopPropagation()}
                     >
                         <h2 className="text-2xl font-bold text-gray-800 mb-2">
@@ -218,14 +218,14 @@ export default function UpdatePasswordForm({ className = "" }) {
                                 type="button"
                                 onClick={() => setShowPasswordModal(false)}
                                 disabled={processing}
-                                className="rounded-[10px] border-2 border-gray-300 px-8 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold disabled:opacity-60"
+                                className="rounded-xl border-2 border-gray-300 px-8 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold disabled:opacity-60"
                             >
                                 Cancel
                             </button>
                             <button
                                 type="submit"
                                 disabled={processing}
-                                className="rounded-[10px] px-9 py-1 bg-blue-600 text-white font-semibold hover:bg-blue-700 transition disabled:opacity-60"
+                                className="rounded-xl px-9 py-1 bg-blue-600 text-white font-semibold hover:bg-blue-700 transition disabled:opacity-60"
                             >
                                 {processing ? "Saving..." : "Save"}
                             </button>

@@ -99,7 +99,7 @@ export default function UpdateProfileInformation({
 
                     <button
                         onClick={() => setIsEditingInfo((v) => !v)}
-                        className="flex items-center space-x-2 px-4 py-2 border-2 border-blue-500 rounded-xl font-semibold text-blue-600 hover:bg-blue-50 transition-colors"
+                        className="flex items-center space-x-2 px-4 py-2 border-2 border-blue-500 rounded-xl font-semibold text-blue-600 hover:bg-blue-50 transition-all duration-200 ease-in-out"
                     >
                         <svg
                             className="w-4 h-4 text-blue-500"
@@ -174,7 +174,7 @@ export default function UpdateProfileInformation({
                 >
                     <form
                         onSubmit={submitInfo}
-                        className="bg-white w-full max-w-2xl p-8 shadow-xl border border-gray-200"
+                        className="bg-white w-full max-w-2xl p-8 shadow-sm border border-gray-200"
                         onMouseDown={(e) => e.stopPropagation()}
                     >
                         <h2 className="text-2xl font-bold text-gray-800 mb-2">
@@ -308,13 +308,13 @@ export default function UpdateProfileInformation({
                                         </svg>
                                     </button>
                                     {khmerDropdownOpen && (
-                                        <div className="absolute right-0 bottom-full mb-0 w-full bg-white border border-gray-200 rounded-xl shadow-lg z-50 max-h-60 overflow-y-auto hide-scrollbar">
+                                        <div className="absolute right-0 bottom-full mb-0 w-full bg-white border border-gray-200 rounded-xl shadow-sm z-50 max-h-60 overflow-y-auto hide-scrollbar">
                                             <div className="px-2 py-2 space-y-1">
                                                 {khmerOptions.map((opt) => (
                                                     <button
                                                         key={opt.value}
                                                         type="button"
-                                                        className={`flex items-center w-full text-left px-4 py-2 text-[16px] rounded-lg transition ${
+                                                        className={`flex items-center w-full text-left px-4 py-2 text-[16px] rounded-xl transition ${
                                                             infoForm.data
                                                                 .khmer_experience ===
                                                             opt.value
@@ -395,13 +395,13 @@ export default function UpdateProfileInformation({
                                         </svg>
                                     </button>
                                     {educationDropdownOpen && (
-                                        <div className="absolute right-0 bottom-full mb-1 w-full bg-white border border-gray-200 rounded-xl shadow-lg z-50 max-h-60 overflow-y-auto hide-scrollbar">
+                                        <div className="absolute right-0 bottom-full mb-1 w-full bg-white border border-gray-200 rounded-xl shadow-sm z-50 max-h-60 overflow-y-auto hide-scrollbar">
                                             <div className="px-2 py-2 space-y-1">
                                                 {educationOptions.map((opt) => (
                                                     <button
                                                         key={opt.value}
                                                         type="button"
-                                                        className={`flex items-center w-full text-left px-4 py-2 text-[16px] rounded-lg transition ${
+                                                        className={`flex items-center w-full text-left px-4 py-2 text-[16px] rounded-xl transition ${
                                                             infoForm.data
                                                                 .education_level ===
                                                             opt.value
@@ -443,7 +443,7 @@ export default function UpdateProfileInformation({
                                         href={route("verification.send")}
                                         method="post"
                                         as="button"
-                                        className="font-medium underline hover:text-blue-900"
+                                        className="font-medium underline "
                                     >
                                         Click here to re-send the verification
                                         email.
@@ -463,14 +463,14 @@ export default function UpdateProfileInformation({
                                 type="button"
                                 onClick={() => setIsEditingInfo(false)}
                                 disabled={infoForm.processing}
-                                className="rounded-[10px] border-2 border-gray-300 px-8 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold disabled:opacity-60"
+                                className="rounded-xl border-2 border-gray-300 px-8 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold disabled:opacity-60"
                             >
                                 Cancel
                             </button>
                             <button
                                 type="submit"
                                 disabled={infoForm.processing}
-                                className="rounded-[10px] px-9 py-1 bg-blue-600 text-white font-semibold hover:bg-blue-700 transition disabled:opacity-60"
+                                className="rounded-xl px-9 py-1 bg-blue-600 text-white font-semibold hover:bg-blue-700 transition disabled:opacity-60"
                             >
                                 {infoForm.processing ? "Saving..." : "Save"}
                             </button>

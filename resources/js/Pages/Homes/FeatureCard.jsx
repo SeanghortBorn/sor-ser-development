@@ -13,7 +13,7 @@ export const Icon = ({ children, className = "w-6 h-6" }) => (
 );
 
 export const FeatureCard = ({ title, bullets, icon }) => (
-    <div className="group bg-white rounded-xl p-6 hover:shadow-md transition-all duration-300 border border-gray-100">
+    <div className="group bg-white rounded-xl p-6 hover:shadow-sm transition-all duration-300 border border-gray-100">
         <div className="flex items-start gap-4 mb-4">
             <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center text-blue-600 transition-transform">
                 {icon}

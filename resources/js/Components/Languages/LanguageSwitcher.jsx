@@ -38,7 +38,7 @@ export default function LanguageSwitcher({ lang, setLang }) {
     };
 
     return (
-        <div className="nav-item dropdown position-relative border rounded-[10px] hover:shadow-md" ref={dropdownRef}>
+        <div className="nav-item dropdown position-relative border rounded-xl hover:shadow-sm" ref={dropdownRef}>
             <button
                 className="nav-link btn btn-link d-flex align-items-center p-2 bg-transparent"
                 onClick={() => setDropdownOpen((open) => !open)}
@@ -55,14 +55,14 @@ export default function LanguageSwitcher({ lang, setLang }) {
                 />
             </button>
             {dropdownOpen && (
-                <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-xl shadow-lg z-50">
+                <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-xl shadow-sm z-50">
                     <div className="px-2 py-2 space-y-1">
                         <button
                             className={`flex items-center gap-2 w-full text-left px-4 py-2 text-sm ${
                                 lang === "en"
                                     ? "bg-blue-100 text-blue-700 font-bold"
                                     : "hover:bg-gray-100 text-gray-700"
-                            } rounded-lg transition`}
+                            } rounded-xl transition`}
                             onClick={() => handleChangeLang("en")}
                         >
                             <span className="fi fi-us" title="English"></span>
@@ -73,7 +73,7 @@ export default function LanguageSwitcher({ lang, setLang }) {
                                 lang === "kh"
                                     ? "bg-blue-100 text-blue-700 font-bold"
                                     : "hover:bg-gray-100 text-gray-700"
-                            } rounded-lg transition`}
+                            } rounded-xl transition`}
                             onClick={() => handleChangeLang("kh")}
                         >
                             <span className="fi fi-kh" title="Khmer"></span>

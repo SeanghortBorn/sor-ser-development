@@ -363,7 +363,7 @@ export default function RoleCreateEdit({ role, permissions, pages = [] }) {
                                                     key={key}
                                                     type="button"
                                                     onClick={() => applyTemplate(key)}
-                                                    className={`p-3 rounded-lg border-2 transition-all text-left ${
+                                                    className={`p-3 rounded-xl border-2 transition-all text-left ${
                                                         selectedTemplate === key
                                                             ? "border-blue-500 bg-blue-100"
                                                             : "border-blue-200 bg-white hover:border-blue-400 hover:bg-blue-50"
@@ -389,10 +389,10 @@ export default function RoleCreateEdit({ role, permissions, pages = [] }) {
                                             <button
                                                 type="button"
                                                 onClick={() => setActiveTab("permissions")}
-                                                className={`pb-3 px-1 border-b-2 font-medium text-sm transition-colors ${
+                                                className={`pb-3 px-1 border-b-2 font-medium text-sm transition-all duration-200 ease-in-out ${
                                                     activeTab === "permissions"
                                                         ? "border-blue-500 text-blue-600"
-                                                        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                                                        : "border-transparent text-gray-500  hover:border-gray-300"
                                                 }`}
                                             >
                                                 Feature Permissions
@@ -403,10 +403,10 @@ export default function RoleCreateEdit({ role, permissions, pages = [] }) {
                                             <button
                                                 type="button"
                                                 onClick={() => setActiveTab("pages")}
-                                                className={`pb-3 px-1 border-b-2 font-medium text-sm transition-colors ${
+                                                className={`pb-3 px-1 border-b-2 font-medium text-sm transition-all duration-200 ease-in-out ${
                                                     activeTab === "pages"
                                                         ? "border-blue-500 text-blue-600"
-                                                        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                                                        : "border-transparent text-gray-500  hover:border-gray-300"
                                                 }`}
                                             >
                                                 Page Access Control
@@ -464,7 +464,7 @@ export default function RoleCreateEdit({ role, permissions, pages = [] }) {
                                                     return (
                                                         <div
                                                             key={module}
-                                                            className="bg-white border border-blue-100 rounded-xl shadow-sm hover:shadow-md transition-shadow"
+                                                            className="bg-white border border-blue-100 rounded-xl shadow-sm hover:shadow-sm transition-shadow"
                                                         >
                                                             <div className="p-4 border-b border-blue-100 bg-gradient-to-r from-blue-50 to-blue-50 rounded-t-xl">
                                                                 <div className="flex items-center justify-between">
@@ -584,11 +584,11 @@ export default function RoleCreateEdit({ role, permissions, pages = [] }) {
                                                     return (
                                                         <div
                                                             key={page.id}
-                                                            className="border border-gray-200 rounded-xl p-4 hover:border-blue-300 transition-colors"
+                                                            className="border border-gray-200 rounded-xl p-4 hover:border-blue-300 transition-all duration-200 ease-in-out"
                                                         >
                                                             <div className="flex items-start justify-between mb-3">
                                                                 <div className="flex items-center gap-3">
-                                                                    <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                                                                    <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
                                                                         <PageIcon className="w-5 h-5 text-blue-600" />
                                                                     </div>
                                                                     <div>
@@ -625,7 +625,7 @@ export default function RoleCreateEdit({ role, permissions, pages = [] }) {
                                                                             key={action.key}
                                                                             type="button"
                                                                             onClick={() => handlePagePermission(page.page_name, action.key)}
-                                                                            className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg border-2 text-sm font-medium transition-all ${
+                                                                            className={`inline-flex items-center gap-2 px-3 py-2 rounded-xl border-2 text-sm font-medium transition-all ${
                                                                                 isActive ? colorClasses[action.color] : inactiveClass
                                                                             } hover:scale-105`}
                                                                         >
@@ -655,7 +655,7 @@ export default function RoleCreateEdit({ role, permissions, pages = [] }) {
                                     <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-6 mt-6 border-t border-gray-200">
                                         <Link
                                             href={route("roles.index")}
-                                            className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-xl text-gray-700 border hover:bg-gray-200 hover:border-gray-400 hover:text-gray-900 transition duration-200"
+                                            className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-xl text-gray-700 border hover:bg-gray-200 hover:border-gray-400  transition duration-200"
                                         >
                                             <svg
                                                 className="w-4 h-4 mr-2"

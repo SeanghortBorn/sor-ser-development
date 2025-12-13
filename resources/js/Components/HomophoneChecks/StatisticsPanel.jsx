@@ -104,7 +104,7 @@ const StatisticsPanel = memo(({
 
             {/* Requirement Status */}
             {showTarget && (
-                <div className={`p-4 rounded-lg border-2 ${
+                <div className={`p-4 rounded-xl border-2 ${
                     meetsRequirement
                         ? 'bg-green-50 border-green-200'
                         : 'bg-yellow-50 border-yellow-200'

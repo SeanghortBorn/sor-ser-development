@@ -160,7 +160,7 @@ export default function QuizzesSection() {
                                 return (
                                     <div
                                         key={i}
-                                        className={`bg-white px-3 pb-2 pt-3 border-l-4 ${stat.borderColor} shadow-sm rounded-xl flex flex-col hover:shadow-md transition-all duration-200`}
+                                        className={`bg-white px-3 pb-2 pt-3 border-l-4 ${stat.borderColor} shadow-sm rounded-xl flex flex-col hover:shadow-sm transition-all duration-200`}
                                     >
                                         <div className="flex items-center justify-between">
                                             <p className="text-gray-800 text-base font-semibold">
@@ -186,7 +186,7 @@ export default function QuizzesSection() {
                         {/* Charts + Recent Quizzes */}
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                             {/* Chart */}
-                            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                                 <div className="flex items-center justify-between mb-4">
                                     <div>
                                         <h2 className="text-lg font-semibold text-gray-800">
@@ -244,7 +244,7 @@ export default function QuizzesSection() {
                             </div>
 
                             {/* Recent Quizzes Table */}
-                            <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
+                            <div className="bg-white rounded-xl shadow-sm border border-gray-100">
                                 <div className="p-6 border-b border-gray-100">
                                     <h2 className="text-lg font-semibold text-gray-800">Recent Quizzes</h2>
                                     <p className="text-sm text-gray-500">Your latest quiz history</p>
@@ -270,7 +270,7 @@ export default function QuizzesSection() {
                                         </thead>
                                         <tbody className="divide-y divide-gray-100">
                                             {recentQuizzes.map((quiz) => (
-                                                <tr key={quiz.id} className="hover:bg-gray-50 transition-colors">
+                                                <tr key={quiz.id} className="hover:bg-gray-50 transition-all duration-200 ease-in-out">
                                                     <td className="px-4 py-3 font-medium text-gray-800">
                                                         {quiz.id}
                                                     </td>
@@ -278,7 +278,7 @@ export default function QuizzesSection() {
                                                     <td className="px-4 py-3 text-gray-700">{quiz.score ?? '-'}</td>
                                                     <td className="px-4 py-3 text-center">
                                                         <span
-                                                            className={`inline-block px-3 py-1 text-xs font-semibold rounded-full ${
+                                                            className={`inline-block px-3 py-1 text-xs font-semibold rounded-xl ${
                                                                 statusColors[quiz.color]
                                                             }`}
                                                             title={`Score: ${quiz.score ?? '-'}%`}
@@ -315,8 +315,8 @@ export default function QuizzesSection() {
 
                     {/* Access Denied Modal Overlay */}
                     {canAccessLibrary === false && (
-                        <div className="absolute inset-0 bg-opacity-30 flex items-center justify-center z-10 rounded-2xl">
-                            <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8 w-full max-w-xl mx-4">
+                        <div className="absolute inset-0 bg-opacity-30 flex items-center justify-center z-10 rounded-xl">
+                            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 w-full max-w-xl mx-4">
                                 <div className="text-center">
                                     <h2 className="text-2xl font-semibold text-gray-900 mb-3">
                                         Upgrade to Access Quiz Practices
@@ -329,15 +329,9 @@ export default function QuizzesSection() {
                                     <div className="space-y-3">
                                         <Link
                                             href={route("profile.edit")}
-                                            className="block w-full px-4 py-3 border-2 border-blue-500 rounded-2xl text-blue-600 font-medium hover:bg-blue-50 transition-colors"
+                                            className="block w-full px-4 py-3 border-2 border-blue-500 rounded-xl text-blue-600 font-medium hover:bg-blue-50 transition-all duration-200 ease-in-out"
                                         >
                                             Go to Profile
-                                        </Link>
-                                        <Link
-                                            href={route("contacts")}
-                                            className="block w-full px-4 py-3 border-2 border-gray-300 rounded-2xl text-gray-700 font-medium hover:bg-gray-50 transition-colors"
-                                        >
-                                            Contact Support
                                         </Link>
                                     </div>
 
@@ -370,7 +364,7 @@ export default function QuizzesSection() {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-9">
                         {/* Left Feature */}
-                        <div className="bg-gray-100 rounded-2xl p-6">
+                        <div className="bg-gray-100 rounded-xl p-6">
                             <div className="flex items-center gap-3 mb-3">
                                 <Brain className="text-pink-500" size={28} />
                                 <h2 className="text-xl font-semibold text-gray-600">
@@ -407,7 +401,7 @@ export default function QuizzesSection() {
 
                         {/* Right Features */}
                         <div className="space-y-9">
-                            <div className="bg-gray-100 rounded-2xl p-6">
+                            <div className="bg-gray-100 rounded-xl p-6">
                                 <div className="flex items-center gap-3 mb-4">
                                     <Zap className="text-orange-500" size={28} />
                                     <h2 className="text-xl font-semibold text-gray-600">
@@ -420,7 +414,7 @@ export default function QuizzesSection() {
                                 </p>
                             </div>
 
-                            <div className="bg-gray-100 rounded-2xl p-6">
+                            <div className="bg-gray-100 rounded-xl p-6">
                                 <div className="flex items-center gap-3 mb-4">
                                     <Rocket className="text-pink-500" size={28} />
                                     <h2 className="text-xl font-semibold text-gray-600">
@@ -429,7 +423,7 @@ export default function QuizzesSection() {
                                 </div>
                                 <p className="text-gray-600">
                                     Teachers can{" "}
-                                    <Link href="/quizzes" className="text-blue-600 hover:underline">
+                                    <Link href="/quizzes" className="text-blue-600 hover:underline transition-all duration-200 ease-in-out hover:scale-105">
                                         create and manage quizzes
                                     </Link>
                                     , while students review answers and track progress — all in one

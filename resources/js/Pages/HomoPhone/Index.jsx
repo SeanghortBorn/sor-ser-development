@@ -272,18 +272,18 @@ export default function HomophonesPage({ homophones, search = "" }) {
             <Head title={headWeb} />
             <section className="content">
                 <div className="container-fluid">
-                    <div className="bg-white shadow-md rounded-xl overflow-hidden border border-gray-200 mb-12">
+                    <div className="bg-white shadow-sm rounded-xl overflow-hidden border border-gray-200 mb-12">
                         <div className="px-6 py-4 border-b flex items-center justify-between">
                             <h3 className="text-xl font-semibold">
                                 Homophones
                             </h3>
                             <div className="flex gap-2 items-center space-x-2">
                                 {/* Search input */}
-                                <div className="inline-flex items-center gap-2 px-3 rounded-xl border hover:shadow-lg transition text-sm bg-white">
+                                <div className="inline-flex items-center gap-2 px-3 rounded-xl border hover:shadow-sm transition text-sm bg-white">
                                     <Search className="w-4 h-4 text-gray-500" />
                                     <input
                                         type="text"
-                                        className="px-2 w-[250px] py-2 rounded-[10px] border-none border-gray-300 text-sm  focus:outline-none focus:ring-0"
+                                        className="px-2 w-[250px] py-2 rounded-xl border-none border-gray-300 text-sm  focus:outline-none focus:ring-0"
                                         placeholder="Search Word, POS, Pronunciation"
                                         value={searchTerm}
                                         onChange={handleSearch}
@@ -294,7 +294,7 @@ export default function HomophonesPage({ homophones, search = "" }) {
                                         {/* Dropdown Button */}
                                         <button
                                             type="button"
-                                            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm bg-blue-600 hover:bg-blue-500 text-white transition focus:outline-none focus:ring-1 focus:ring-gray-400"
+                                            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm bg-blue-600 hover:bg-blue-500 hover:scale-105 hover:shadow-sm text-white transition focus:outline-none focus:ring-1 focus:ring-gray-400"
                                             onClick={() =>
                                                 setDropdownOpen((open) => !open)
                                             }
@@ -311,14 +311,14 @@ export default function HomophonesPage({ homophones, search = "" }) {
 
                                         {/* Dropdown Menu */}
                                         {dropdownOpen && (
-                                            <div className="absolute right-0 mt-2 w-32 bg-white border-gray-200 rounded-xl shadow-lg z-50 animate-fade-in">
+                                            <div className="absolute right-0 mt-2 w-32 bg-white border-gray-200 rounded-xl shadow-sm z-50 animate-fade-in">
                                                 <div className="py-2 px-2">
                                                     {can[
                                                         "homophone-create"
                                                     ] && (
                                                         <button
                                                             type="button"
-                                                            className="flex items-center rounded-lg gap-2 w-full text-left px-3 py-2 text-sm hover:bg-blue-50 text-blue-700 transition"
+                                                            className="flex items-center rounded-xl gap-2 w-full text-left px-3 py-2 text-sm hover:bg-blue-50 text-blue-700 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                                                             onClick={() => {
                                                                 setShowImportModal(
                                                                     true
@@ -337,7 +337,7 @@ export default function HomophonesPage({ homophones, search = "" }) {
                                                     ] && (
                                                         <button
                                                             type="button"
-                                                            className="flex items-center rounded-lg gap-2 w-full text-left px-3 py-2 text-sm hover:bg-red-50 text-red-700 transition"
+                                                            className="flex items-center rounded-xl gap-2 w-full text-left px-3 py-2 text-sm hover:bg-red-50 text-red-700 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                                                             onClick={() => {
                                                                 setShowClearModal(
                                                                     true
@@ -361,7 +361,7 @@ export default function HomophonesPage({ homophones, search = "" }) {
                                                 href={route(
                                                     "homophones.create"
                                                 )}
-                                                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm text-white bg-green-600 hover:bg-green-500 transition"
+                                                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm text-white bg-green-600 hover:bg-green-500 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                                             >
                                                 <ClipboardPlus className="w-4 h-4" />
                                                 Add New
@@ -396,7 +396,7 @@ export default function HomophonesPage({ homophones, search = "" }) {
                                         datasList.map((item) => (
                                             <tr
                                                 key={item.id}
-                                                className="hover:bg-gray-50 transition"
+                                                className="hover:bg-gray-50 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                                             >
                                                 <td className="px-4 py-3">
                                                     {item.id}
@@ -494,14 +494,14 @@ export default function HomophonesPage({ homophones, search = "" }) {
                                             setDeleteTarget(null);
                                             setDeleteProcessing(false);
                                         }}
-                                        className="rounded-[10px] border-2 border-gray-300 px-8 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold"
+                                        className="rounded-xl border-2 border-gray-300 px-8 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold"
                                         disabled={deleteProcessing}
                                     >
                                         Cancel
                                     </button>
                                     <button
                                         type="submit"
-                                        className="rounded-[10px] px-9 py-1 text-white font-semibold transition bg-red-600 hover:bg-red-700"
+                                        className="rounded-xl px-9 py-1 text-white font-semibold transition bg-red-600 hover:bg-red-700"
                                         disabled={deleteProcessing}
                                     >
                                         {deleteProcessing
@@ -538,7 +538,7 @@ export default function HomophonesPage({ homophones, search = "" }) {
                                         Select File <span> </span>
                                     </label>
                                     <div
-                                        className="flex items-center justify-center h-32 border-2 border-dashed border-gray-300 rounded-xl hover:border-blue-500 cursor-pointer relative bg-gray-50 hover:bg-blue-50 transition"
+                                        className="flex items-center justify-center h-32 border-2 border-dashed border-gray-300 rounded-xl hover:border-blue-500 cursor-pointer relative bg-gray-50 hover:bg-blue-50 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                                         onClick={() => {
                                             if (fileInputRef.current)
                                                 fileInputRef.current.click();
@@ -571,7 +571,7 @@ export default function HomophonesPage({ homophones, search = "" }) {
                                                     ? selectedImportFile.name
                                                     : "Select a file or drag here"}
                                             </div>
-                                            <div className="inline-block px-3 py-1 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 transition pointer-events-none">
+                                            <div className="inline-block px-3 py-1 bg-blue-600 text-white rounded-xl text-sm hover:bg-blue-700 transition pointer-events-none">
                                                 {selectedImportFile
                                                     ? "Change file"
                                                     : "Select a file"}
@@ -596,14 +596,14 @@ export default function HomophonesPage({ homophones, search = "" }) {
                                             if (fileInputRef.current)
                                                 fileInputRef.current.value = "";
                                         }}
-                                        className="rounded-[10px] border-2 border-gray-300 px-8 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold"
+                                        className="rounded-xl border-2 border-gray-300 px-8 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold"
                                         disabled={importProcessing}
                                     >
                                         Cancel
                                     </button>
                                     <button
                                         type="submit"
-                                        className="rounded-[10px] px-8 py-1 bg-blue-600 text-white font-semibold hover:bg-blue-700 transition"
+                                        className="rounded-xl px-8 py-1 bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                                         disabled={
                                             importProcessing ||
                                             !selectedImportFile
@@ -648,14 +648,14 @@ export default function HomophonesPage({ homophones, search = "" }) {
                                             setShowClearModal(false);
                                             setClearProcessing(false);
                                         }}
-                                        className="rounded-[10px] border-2 border-gray-300 px-8 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold"
+                                        className="rounded-xl border-2 border-gray-300 px-8 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold"
                                         disabled={clearProcessing}
                                     >
                                         Cancel
                                     </button>
                                     <button
                                         type="submit"
-                                        className="rounded-[10px] px-9 py-1 text-white font-semibold transition bg-red-600 hover:bg-red-700"
+                                        className="rounded-xl px-9 py-1 text-white font-semibold transition bg-red-600 hover:bg-red-700"
                                         disabled={clearProcessing}
                                     >
                                         {clearProcessing
@@ -690,14 +690,14 @@ export default function HomophonesPage({ homophones, search = "" }) {
                                     <button
                                         type="button"
                                         onClick={handleReplaceAll}
-                                        className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition"
+                                        className="px-4 py-2 bg-blue-600 text-white text-sm rounded-xl hover:bg-blue-700 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                                     >
                                         Replace All
                                     </button>
                                     <button
                                         type="button"
                                         onClick={handleSkipAll}
-                                        className="px-4 py-2 bg-gray-600 text-white text-sm rounded-lg hover:bg-gray-700 transition"
+                                        className="px-4 py-2 bg-gray-600 text-white text-sm rounded-xl hover:bg-gray-700 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                                     >
                                         Skip All
                                     </button>
@@ -708,7 +708,7 @@ export default function HomophonesPage({ homophones, search = "" }) {
                                     {duplicates.map((dup, index) => (
                                         <div
                                             key={index}
-                                            className="border border-gray-200 rounded-lg p-4 bg-gray-50"
+                                            className="border border-gray-200 rounded-xl p-4 bg-gray-50"
                                         >
                                             <div className="grid grid-cols-2 gap-4 mb-3">
                                                 {/* Existing */}
@@ -753,7 +753,7 @@ export default function HomophonesPage({ homophones, search = "" }) {
                                                 <button
                                                     type="button"
                                                     onClick={() => handleDuplicateResolution(dup.key, 'replace')}
-                                                    className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition ${
+                                                    className={`flex-1 px-4 py-2 rounded-xl text-sm font-medium transition ${
                                                         duplicateResolutions[dup.key] === 'replace'
                                                             ? 'bg-blue-600 text-white'
                                                             : 'bg-white text-blue-600 border border-blue-600 hover:bg-blue-50'
@@ -764,7 +764,7 @@ export default function HomophonesPage({ homophones, search = "" }) {
                                                 <button
                                                     type="button"
                                                     onClick={() => handleDuplicateResolution(dup.key, 'skip')}
-                                                    className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition ${
+                                                    className={`flex-1 px-4 py-2 rounded-xl text-sm font-medium transition ${
                                                         duplicateResolutions[dup.key] === 'skip'
                                                             ? 'bg-gray-600 text-white'
                                                             : 'bg-white text-gray-600 border border-gray-600 hover:bg-gray-50'
@@ -787,7 +787,7 @@ export default function HomophonesPage({ homophones, search = "" }) {
                                             setDuplicates([]);
                                             setDuplicateResolutions({});
                                         }}
-                                        className="rounded-[10px] border-2 border-gray-300 px-8 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold"
+                                        className="rounded-xl border-2 border-gray-300 px-8 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold"
                                         disabled={importProcessing}
                                     >
                                         Back
@@ -795,7 +795,7 @@ export default function HomophonesPage({ homophones, search = "" }) {
                                     <button
                                         type="button"
                                         onClick={proceedWithImport}
-                                        className="rounded-[10px] px-8 py-1 bg-green-600 text-white font-semibold hover:bg-green-700 transition"
+                                        className="rounded-xl px-8 py-1 bg-green-600 text-white font-semibold hover:bg-green-700 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                                         disabled={importProcessing || Object.keys(duplicateResolutions).length === 0}
                                     >
                                         {importProcessing ? "Importing..." : "Proceed with Import"}

@@ -22,8 +22,8 @@ export default function index() {
                 {/* Plans */}
                 <div className="grid md:grid-cols-3 gap-8 max-w-6xl w-full">
                     {/* Basic Plan */}
-                    <div className="bg-white rounded-2xl shadow-sm border-gray-100 p-8 flex flex-col">
-                        <h2 className="text-xl font-bold text-purple-600">
+                    <div className="bg-white rounded-xl shadow-sm border-gray-100 p-8 flex flex-col">
+                        <h2 className="text-xl font-bold text-purple-600 transition-all duration-200 ease-in-out hover:scale-105">
                             Basic
                         </h2>
                         <p className="text-3xl font-extrabold mt-2">
@@ -38,15 +38,15 @@ export default function index() {
 
                         <ul className="space-y-3 flex-1">
                             <li className="flex items-center space-x-2 text-gray-700">
-                                <span className="text-purple-500">✔</span>
+                                <span className="text-purple-500 transition-all duration-200 ease-in-out hover:scale-105">✔</span>
                                 <span>Unlimited Non-AI Flashcards</span>
                             </li>
                             <li className="flex items-center space-x-2 text-gray-700">
-                                <span className="text-purple-500">✔</span>
+                                <span className="text-purple-500 transition-all duration-200 ease-in-out hover:scale-105">✔</span>
                                 <span>25 Exam Mode Answers</span>
                             </li>
                             <li className="flex items-center space-x-2 text-gray-700">
-                                <span className="text-purple-500">✔</span>
+                                <span className="text-purple-500 transition-all duration-200 ease-in-out hover:scale-105">✔</span>
                                 <span>25,000 Characters per Text Upload</span>
                             </li>
                             <li className="flex items-center space-x-2 text-gray-400">
@@ -65,7 +65,7 @@ export default function index() {
                     </div>
 
                     {/* Annual Plan */}
-                    <div className="bg-white rounded-2xl shadow-sm border-gray-100 p-8 flex flex-col">
+                    <div className="bg-white rounded-xl shadow-sm border-gray-100 p-8 flex flex-col">
                         <h2 className="text-xl font-bold text-pink-600">
                             Annual
                         </h2>
@@ -104,13 +104,13 @@ export default function index() {
                             </li>
                         </ul>
 
-                        <button className="mt-8 py-2 rounded-xl font-semibold bg-pink-500 text-white hover:bg-pink-600 transition">
+                        <button className="mt-8 py-2 rounded-xl font-semibold bg-pink-500 text-white hover:bg-pink-600 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95">
                             Subscribe
                         </button>
                     </div>
 
                     {/* Monthly Plan */}
-                    <div className="bg-white rounded-2xl shadow-sm border-gray-100 p-8 flex flex-col">
+                    <div className="bg-white rounded-xl shadow-sm border-gray-100 p-8 flex flex-col">
                         <h2 className="text-xl font-bold text-orange-600">
                             Monthly
                         </h2>
@@ -149,7 +149,7 @@ export default function index() {
                             </li>
                         </ul>
 
-                        <button className="mt-8 px-3 py-2 border-2 border-orange-400 font-semibold text-sm rounded-xl text-orange-400 hover:bg-orange-50 transition">
+                        <button className="mt-8 px-3 py-2 border-2 border-orange-400 font-semibold text-sm rounded-xl text-orange-400 hover:bg-orange-50 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95">
                             Subscribe
                         </button>
                     </div>
@@ -159,7 +159,7 @@ export default function index() {
                     Compare all features
                 </h1>
 
-                <div className="bg-white rounded-2xl shadow-sm border-none border-gray-100 max-w-6xl w-full px-2 py-3">
+                <div className="bg-white rounded-xl shadow-sm border-none border-gray-100 max-w-6xl w-full px-2 py-3">
                     <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse">
                             <thead>
@@ -254,7 +254,7 @@ export default function index() {
                     </div>
                 </div>
 
-                <div className="bg-white mt-6 shadow-md rounded-2xl py-4 px-4 w-full max-w-6xl">
+                <div className="bg-white mt-6 shadow-sm rounded-xl py-4 px-4 w-full max-w-6xl">
                     {/* Row with Toggle + Plans */}
                     <div className="grid grid-cols-4 items-center gap-16 text-center">
                         {/* Toggle Switch */}
@@ -288,7 +288,7 @@ export default function index() {
                             <p className="text-[#1d1d4f] font-semibold text-base">
                                 Free
                             </p>
-                            <button className="px-3 py-1 border-2 font-semibold text-sm rounded-xl text-gray-600 hover:bg-gray-100 transition">
+                            <button className="px-3 py-1 border-2 font-semibold text-sm rounded-xl text-gray-600 hover:bg-gray-100 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95">
                                 Get Started
                             </button>
                         </div>
@@ -302,7 +302,7 @@ export default function index() {
                                     / Month
                                 </span>
                             </p>
-                            <button className="px-3 py-1 border-2 font-semibold text-sm rounded-xl text-gray-600 hover:bg-gray-100 transition">
+                            <button className="px-3 py-1 border-2 font-semibold text-sm rounded-xl text-gray-600 hover:bg-gray-100 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95">
                                 Subscribe
                             </button>
                         </div>
@@ -316,7 +316,7 @@ export default function index() {
                                     / Month
                                 </span>
                             </p>
-                            <button className="px-3 py-1 border-2 font-semibold text-sm rounded-xl text-gray-600 hover:bg-gray-100 transition">
+                            <button className="px-3 py-1 border-2 font-semibold text-sm rounded-xl text-gray-600 hover:bg-gray-100 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95">
                                 Subscribe
                             </button>
                         </div>

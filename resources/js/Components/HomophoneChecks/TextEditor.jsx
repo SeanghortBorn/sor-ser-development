@@ -82,7 +82,7 @@ const TextEditor = memo(({
                 {onToggleZoom && (
                     <button
                         onClick={onToggleZoom}
-                        className="p-2 hover:bg-gray-200 rounded transition-colors"
+                        className="p-2 hover:bg-gray-200 hover:scale-105 hover:shadow-sm rounded transition-all duration-200 ease-in-out"
                         title={isZoomed ? 'Exit fullscreen' : 'Enter fullscreen'}
                         type="button"
                     >
