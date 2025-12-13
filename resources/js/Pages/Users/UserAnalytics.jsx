@@ -197,7 +197,7 @@ export default function IndexPage() {
                                 <div className="relative" ref={khmerRef}>
                                     <button
                                         type="button"
-                                        className="w-[180px] px-3 py-2 text-sm rounded-xl border bg-white shadow-sm flex justify-between items-center focus:outline-none"
+                                        className="w-[180px] px-3 py-2 text-sm rounded-2xl border bg-white shadow-sm flex justify-between items-center focus:outline-none transition-all duration-200"
                                         onClick={() => setKhmerOpen(!khmerOpen)}
                                     >
                                         {khmerOptions.find(o => o.value === selectedKhmer)?.label || "Select Experience Level"}
@@ -206,13 +206,13 @@ export default function IndexPage() {
                                         </svg>
                                     </button>
                                     {khmerOpen && (
-                                        <div className="absolute left-0 top-full mt-2 w-[180px] bg-white border border-gray-200 rounded-xl shadow-sm z-50 max-h-44 overflow-y-auto">
+                                        <div className="absolute left-0 top-full mt-2 w-[180px] bg-white border border-gray-200 rounded-2xl shadow-sm z-50 max-h-44 overflow-y-auto">
                                             <div className="px-2 py-2 space-y-1">
                                                 {khmerOptions.map(opt => (
                                                     <button
                                                         key={opt.value}
                                                         type="button"
-                                                        className={`w-full text-left px-4 py-2 text-[14px] rounded-xl transition ${selectedKhmer === opt.value ? "bg-blue-100 text-blue-700 font-bold" : "hover:bg-gray-100 text-gray-700"}`}
+                                                        className={`w-full text-left px-4 py-2 text-[14px] rounded-2xl transition-all duration-200 ${selectedKhmer === opt.value ? "bg-blue-100 text-blue-700 font-bold" : "hover:bg-gray-100 text-gray-700"}`}
                                                         onClick={() => { setSelectedKhmer(opt.value); setKhmerOpen(false); }}
                                                     >
                                                         {opt.label}
@@ -227,7 +227,7 @@ export default function IndexPage() {
                                 <div className="relative" ref={eduRef}>
                                     <button
                                         type="button"
-                                        className="w-[180px] px-3 py-2 text-sm rounded-xl border bg-white shadow-sm flex justify-between items-center focus:outline-none"
+                                        className="w-[180px] px-3 py-2 text-sm rounded-2xl border bg-white shadow-sm flex justify-between items-center focus:outline-none transition-all duration-200"
                                         onClick={() => setEduOpen(!eduOpen)}
                                     >
                                         {educationOptions.find(o => o.value === selectedEducation)?.label || "Select Education Level"}
@@ -236,13 +236,13 @@ export default function IndexPage() {
                                         </svg>
                                     </button>
                                     {eduOpen && (
-                                        <div className="absolute left-0 top-full mt-2 w-[180px] bg-white border border-gray-200 rounded-xl shadow-sm z-50 max-h-44 overflow-y-auto">
+                                        <div className="absolute left-0 top-full mt-2 w-[180px] bg-white border border-gray-200 rounded-2xl shadow-sm z-50 max-h-44 overflow-y-auto">
                                             <div className="px-2 py-2 space-y-1">
                                                 {educationOptions.map(opt => (
                                                     <button
                                                         key={opt.value}
                                                         type="button"
-                                                        className={`w-full text-left px-4 py-2 text-[14px] rounded-xl transition ${selectedEducation === opt.value ? "bg-blue-100 text-blue-700 font-bold" : "hover:bg-gray-100 text-gray-700"}`}
+                                                        className={`w-full text-left px-4 py-2 text-[14px] rounded-2xl transition-all duration-200 ${selectedEducation === opt.value ? "bg-blue-100 text-blue-700 font-bold" : "hover:bg-gray-100 text-gray-700"}`}
                                                         onClick={() => { setSelectedEducation(opt.value); setEduOpen(false); }}
                                                     >
                                                         {opt.label}
@@ -254,7 +254,7 @@ export default function IndexPage() {
                                 </div>
 
                                 {/* Search */}
-                                <div className="inline-flex items-center gap-2 px-3 rounded-xl border hover:shadow-sm transition text-sm bg-white">
+                                <div className="inline-flex items-center gap-2 px-3 rounded-2xl border hover:shadow-sm transition-all duration-200 text-sm bg-white">
                                     <Search className="w-4 h-4 text-gray-500" />
                                     <input
                                         value={searchTerm}
@@ -268,7 +268,7 @@ export default function IndexPage() {
                                 {/* Select Button */}
                                 <button
                                     onClick={() => setShowCheckbox(!showCheckbox)}
-                                    className="w-28 px-3 py-2 text-sm font-medium rounded-xl bg-blue-600 text-white hover:bg-blue-500 transition flex items-center justify-center gap-2"
+                                    className="w-28 px-3 py-2 text-sm font-medium rounded-2xl bg-blue-600 text-white hover:bg-blue-500 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95 flex items-center justify-center gap-2"
                                 >
                                     {showCheckbox ? (
                                         <>
@@ -289,7 +289,7 @@ export default function IndexPage() {
                                         setExportScope(selectedIds.length > 0 ? "selected" : "filtered");
                                         setModalOpen(true);
                                     }}
-                                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm text-white bg-green-600 hover:bg-green-500 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
+                                    className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl font-semibold text-sm text-white bg-green-600 hover:bg-green-500 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                                 >
                                     <FileUp className="w-4 h-4" /> Export
                                     {selectedIds.length > 0 && ` (${selectedIds.length})`}
@@ -308,7 +308,7 @@ export default function IndexPage() {
                                                     type="checkbox"
                                                     checked={isAllVisibleSelected}
                                                     onChange={selectAllVisible}
-                                                    className="w-4 h-4 rounded-lg border-gray-300"
+                                                    className="w-4 h-4 rounded-2xl border-gray-300 transition-all duration-200"
                                                 />
                                             </th>
                                         )}
@@ -342,14 +342,14 @@ export default function IndexPage() {
                                         </tr>
                                     ) : (
                                         pageItems.map(u => (
-                                            <tr key={u.id} className="border-t hover:bg-gray-50 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95">
+                                            <tr key={u.id} className="border-t hover:bg-blue-50 transition-all duration-200">
                                                 {showCheckbox && (
                                                     <td className="py-3 px-6">
                                                         <input
                                                             type="checkbox"
                                                             checked={selectedIds.includes(u.id)}
                                                             onChange={() => toggleSelect(u.id)}
-                                                            className="w-4 h-4 rounded-lg border-gray-300"
+                                                            className="w-4 h-4 rounded-2xl border-gray-300 transition-all duration-200"
                                                         />
                                                     </td>
                                                 )}
@@ -373,8 +373,8 @@ export default function IndexPage() {
                                                 <td className="py-3 px-8">{u.avg_pause || "N/A"}</td>
                                                 <td className="py-3 px-8">
                                                     <div className="flex gap-2">
-                                                        <button onClick={() => exportSingle(u)} className="px-2 py-1 rounded-xl text-sm border bg-green-500 hover:bg-green-600 transition-all duration-200 ease-in-out text-gray-50">JSON</button>
-                                                        <button onClick={() => { setFileType("xml"); exportSingle(u); }} className="px-2 py-1 rounded-xl text-sm border bg-green-500 hover:bg-green-600 transition-all duration-200 ease-in-out text-gray-50">XML</button>
+                                                        <button onClick={() => exportSingle(u)} className="px-2 py-1 rounded-2xl text-sm border bg-green-500 hover:bg-green-600 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95 text-gray-50">JSON</button>
+                                                        <button onClick={() => { setFileType("xml"); exportSingle(u); }} className="px-2 py-1 rounded-2xl text-sm border bg-green-500 hover:bg-green-600 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95 text-gray-50">XML</button>
                                                     </div>
                                                 </td>
                                             </tr>
@@ -388,9 +388,9 @@ export default function IndexPage() {
                         <div className="mt-4 px-6 py-3 border-t border-gray-100">
                             {totalPages > 1 && (
                                 <div className="flex justify-center gap-2">
-                                    <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="px-3 py-1 border rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95 disabled:hover:scale-100">Previous</button>
+                                    <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="px-3 py-1 border rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95 disabled:hover:scale-100">Previous</button>
                                     <span className="px-3 py-1">Page {page} of {totalPages}</span>
-                                    <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages} className="px-3 py-1 border rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95 disabled:hover:scale-100">Next</button>
+                                    <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages} className="px-3 py-1 border rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95 disabled:hover:scale-100">Next</button>
                                 </div>
                             )}
                         </div>
@@ -414,7 +414,7 @@ export default function IndexPage() {
                                 value={fileName}
                                 onChange={e => setFileName(e.target.value)}
                                 placeholder="Enter file name"
-                                className="w-full px-3 py-2 border rounded-xl focus:ring-1 focus:ring-blue-500"
+                                className="w-full px-3 py-2 border rounded-2xl focus:ring-1 focus:ring-blue-500 transition-all duration-200"
                             />
                         </div>
                         <div className="w-40">
@@ -422,7 +422,7 @@ export default function IndexPage() {
                             <select
                                 value={fileType}
                                 onChange={e => setFileType(e.target.value)}
-                                className="w-full px-3 py-2 border rounded-xl"
+                                className="w-full px-3 py-2 border rounded-2xl transition-all duration-200"
                             >
                                 <option value="json">JSON</option>
                                 <option value="xml">XML</option>
@@ -460,13 +460,13 @@ export default function IndexPage() {
                     <div className="flex justify-between gap-3">
                         <button
                             onClick={() => setModalOpen(false)}
-                            className="px-4 py-1 border-2 border-gray-300 rounded-xl text-gray-700 hover:bg-gray-100 font-semibold"
+                            className="px-4 py-1 border-2 border-gray-300 rounded-2xl text-gray-700 hover:bg-gray-100 transition-all duration-200 ease-in-out hover:shadow-sm font-semibold"
                         >
                             Cancel
                         </button>
                         <button
                             onClick={handleExport}
-                            className="px-4 py-1 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700"
+                            className="px-4 py-1 bg-green-600 text-white rounded-2xl font-semibold hover:bg-green-700 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                         >
                             Export {exportScope === "selected" ? "Selected" : "All"}
                         </button>

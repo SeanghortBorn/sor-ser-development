@@ -168,7 +168,7 @@ export default function ArticleDetail({
 
                                 <div>
                                     <div className="text-sm font-medium text-gray-600 mb-2">Effect Size (Cohen's d)</div>
-                                    <div className="text-2xl font-bold text-purple-600 transition-all duration-200 ease-in-out hover:scale-105">
+                                    <div className="text-2xl font-bold text-purple-600">
                                         {comparisonMetrics.effect_size_cohens_d}
                                     </div>
                                     <div className="text-xs text-gray-500 mt-1">
@@ -206,7 +206,7 @@ export default function ArticleDetail({
                                 />
                             </LineChart>
                         </ResponsiveContainer>
-                        <div className="mt-3 text-sm text-gray-600 bg-blue-50 p-3 rounded-xl">
+                        <div className="mt-3 text-sm text-gray-600 bg-blue-50 p-3 rounded-2xl">
                             <strong>Interpretation:</strong> {summaryMetrics.learning_gain > 0 
                                 ? `Positive learning trajectory with ${summaryMetrics.learning_gain}% improvement. This indicates successful skill acquisition.`
                                 : 'Performance remains stable or declined. May need additional support or practice.'}
@@ -317,7 +317,7 @@ export default function ArticleDetail({
                             <div className="mt-3 grid grid-cols-2 gap-4">
                                 <div className="bg-purple-50 p-3 rounded-2xl">
                                     <div className="text-sm font-medium text-gray-700">Speed Improvement</div>
-                                    <div className="text-xl font-bold text-purple-600 transition-all duration-200 ease-in-out hover:scale-105">
+                                    <div className="text-xl font-bold text-purple-600">
                                         {keystrokePatterns.trends.typing_speed_improvement_percent >= 0 ? '+' : ''}
                                         {keystrokePatterns.trends.typing_speed_improvement_percent}%
                                     </div>
@@ -356,7 +356,7 @@ export default function ArticleDetail({
                             <div className="mt-3 bg-yellow-50 p-3 rounded-2xl">
                                 <div className="text-sm font-medium text-gray-700 mb-1">Dependency Trend</div>
                                 <div className="flex items-center space-x-2">
-                                    <div className={`px-3 py-1 rounded-full text-sm font-medium ${
+                                    <div className={`px-3 py-1 rounded-2xl text-sm font-medium ${
                                         audioBehavior.dependency_trend.trend === 'declining' 
                                             ? 'bg-green-100 text-green-700'
                                             : audioBehavior.dependency_trend.trend === 'increasing'
@@ -424,7 +424,7 @@ export default function ArticleDetail({
                                                 {formatDate(session.session_date)}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
-                                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getAccuracyColor(session.accuracy_percent)}`}>
+                                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-2xl text-xs font-medium ${getAccuracyColor(session.accuracy_percent)}`}>
                                                     {session.accuracy_percent}%
                                                 </span>
                                             </td>

@@ -1,15 +1,27 @@
 import ApplicationLogo from '@/Components/ApplicationLogo';
-import Dropdown from '@/Components/Dropdown';
 import NavLink from '@/Components/NavLink';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
 import { Link, usePage } from '@inertiajs/react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import ProfileCard from '@/Components/Shared/ProfileCard';
+import { AnimatePresence, motion } from 'framer-motion';
 
 export default function AuthenticatedLayout({ header, children }) {
     const user = usePage().props.auth.user;
 
-    const [showingNavigationDropdown, setShowingNavigationDropdown] =
-        useState(false);
+    const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+    const dropdownRef = useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+                setDropdownOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     return (
         <div className="min-h-screen bg-gray-100">
@@ -59,48 +71,56 @@ export default function AuthenticatedLayout({ header, children }) {
                             </div>
                         </div>
 
-                        <div className="hidden sm:ms-6 sm:flex sm:items-center">
+                        <div className="hidden sm:ms-6 sm:flex sm:items-center" ref={dropdownRef}>
                             <div className="relative ms-3">
-                                <Dropdown>
-                                    <Dropdown.Trigger>
-                                        <span className="inline-flex rounded-xl">
-                                            <button
-                                                type="button"
-                                                className="inline-flex items-center rounded-xl border border-transparent bg-white px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition duration-150 ease-in-out  focus:outline-none"
-                                            >
-                                                {user.name}
+                                <button
+                                    type="button"
+                                    className="inline-flex items-center rounded-xl bg-white px-3 py-2 text-sm font-medium leading-4 text-gray-700 hover:bg-gray-50 hover:shadow-sm transition duration-150 ease-in-out"
+                                    onClick={() => setDropdownOpen((v) => !v)}
+                                >
+                                    <img src="/images/person-icon.svg" className="h-9 w-9 rounded-full mr-2" alt="User avatar" />
+                                    <span className="mr-2">{user.name}</span>
+                                    <svg className={`h-4 w-4 text-gray-500 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </button>
 
-                                                <svg
-                                                    className="-me-0.5 ms-2 h-4 w-4"
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    viewBox="0 0 20 20"
-                                                    fill="currentColor"
-                                                >
-                                                    <path
-                                                        fillRule="evenodd"
-                                                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                                        clipRule="evenodd"
-                                                    />
-                                                </svg>
-                                            </button>
-                                        </span>
-                                    </Dropdown.Trigger>
-
-                                    <Dropdown.Content>
-                                        <Dropdown.Link
-                                            href={route('profile.edit')}
+                                <AnimatePresence>
+                                    {dropdownOpen && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: -6, scale: 0.98 }}
+                                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                                            exit={{ opacity: 0, y: -6, scale: 0.98 }}
+                                            transition={{ type: 'spring', stiffness: 260, damping: 20 }}
+                                            className="absolute right-0 mt-2 w-[340px] bg-white border border-gray-200 rounded-2xl shadow-lg z-50 overflow-hidden origin-top-right"
                                         >
-                                            Profile
-                                        </Dropdown.Link>
-                                        <Dropdown.Link
-                                            href={route('logout')}
-                                            method="post"
-                                            as="button"
-                                        >
-                                            Log Out
-                                        </Dropdown.Link>
-                                    </Dropdown.Content>
-                                </Dropdown>
+                                            <ProfileCard
+                                                user={user}
+                                                className="border-0 p-4"
+                                                actions={(
+                                                    <div className="flex gap-3">
+                                                        <Link
+                                                            href={route('profile.edit')}
+                                                            onClick={() => setDropdownOpen(false)}
+                                                            className="flex-1 inline-flex items-center justify-center px-3 py-2 text-sm font-medium rounded-xl text-gray-700 border hover:bg-gray-50 transition-all"
+                                                        >
+                                                            Profile
+                                                        </Link>
+                                                        <Link
+                                                            method="post"
+                                                            href={route('logout')}
+                                                            as="button"
+                                                            onClick={() => setDropdownOpen(false)}
+                                                            className="flex-1 inline-flex items-center justify-center px-3 py-2 text-sm font-medium rounded-xl text-white bg-red-600 hover:bg-red-700 transition-all"
+                                                        >
+                                                            Log Out
+                                                        </Link>
+                                                    </div>
+                                                )}
+                                            />
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
                             </div>
                         </div>
 

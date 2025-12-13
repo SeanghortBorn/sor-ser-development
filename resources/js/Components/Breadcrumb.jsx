@@ -3,9 +3,7 @@ import { ChevronRight, Home } from "lucide-react";
 
 export default function Breadcrumb(props) {
     return (
-        <section className="content-header mb-4">
-            <div className="container-fluid">
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-200 px-6 py-4 transition-all duration-200 hover:shadow-md">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 px-6 py-4 transition-all duration-200 hover:shadow-md">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                         <div>
                             <h1 className="text-2xl font-bold text-gray-900 mb-1">{props?.header}</h1>
@@ -40,7 +38,5 @@ export default function Breadcrumb(props) {
                         </div>
                     </div>
                 </div>
-            </div>
-        </section>
     );
 }

@@ -44,7 +44,7 @@ export default function UserProgress({
                                 </div>
                                 <div>
                                     <p className="text-sm text-gray-600">Status</p>
-                                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded ${user.status === 'Active'
+                                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-2xl ${user.status === 'Active'
                                             ? 'bg-green-100 text-green-800'
                                             : 'bg-red-100 text-red-800'
                                         }`}>
@@ -88,7 +88,7 @@ export default function UserProgress({
                         </div>
                         <div className="bg-white overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 rounded-2xl p-8">
                             <p className="text-sm text-gray-600">Total Attempts</p>
-                            <p className="text-3xl font-bold text-purple-600 transition-all duration-200 ease-in-out hover:scale-105">
+                            <p className="text-3xl font-bold text-purple-600">
                                 {learningMetrics.total_attempts}
                             </p>
                         </div>
@@ -202,7 +202,7 @@ export default function UserProgress({
                                     <p className="text-sm text-gray-600">Total Characters Typed</p>
                                     <p className="text-2xl font-bold">{typingActivity.total_characters.toLocaleString()}</p>
                                 </div>
-                                <div className="bg-gray-50 p-4 rounded">
+                                <div className="bg-gray-50 p-6 rounded-2xl">
                                     <p className="text-sm text-gray-600">Average Per Session</p>
                                     <p className="text-2xl font-bold">{typingActivity.average_per_session}</p>
                                 </div>
@@ -268,7 +268,7 @@ export default function UserProgress({
                     </div>
 
                     {/* Articles Attempted Table */}
-                    <div className="bg-white overflow-hidden shadow-sm rounded-xl">
+                    <div className="bg-white overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 rounded-2xl">
                         <div className="p-6">
                             <h3 className="text-lg font-semibold mb-4">Articles Attempted</h3>
                             {articlesAttempted.length > 0 ? (
@@ -306,7 +306,7 @@ export default function UserProgress({
                                                         {article.attempts}
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded ${article.best_accuracy >= 80 ? 'bg-green-100 text-green-800' :
+                                                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-2xl ${article.best_accuracy >= 80 ? 'bg-green-100 text-green-800' :
                                                                 article.best_accuracy >= 60 ? 'bg-yellow-100 text-yellow-800' :
                                                                     'bg-red-100 text-red-800'
                                                             }`}>
@@ -325,7 +325,7 @@ export default function UserProgress({
                                                                 userId: user.id,
                                                                 articleId: article.article_id
                                                             })}
-                                                            className="inline-flex items-center px-3 py-1.5 bg-blue-600 hover:bg-blue-700 hover:scale-105 hover:shadow-sm text-white text-sm font-medium rounded-xl transition-all duration-200 ease-in-out duration-200 shadow-sm hover:shadow-sm"
+                                                            className="inline-flex items-center px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-2xl transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-md active:scale-95 shadow-sm"
                                                         >
                                                             <FileText className="w-4 h-4 mr-1.5" />
                                                             View Details

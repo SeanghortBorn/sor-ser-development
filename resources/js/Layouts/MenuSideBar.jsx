@@ -15,7 +15,7 @@ function MenuGroup({ label, icon, children, active }) {
         <div className="mb-1.5">
             <button
                 onClick={() => setOpen((prev) => !prev)}
-                className={`flex items-center w-full px-3 py-2.5 rounded-2xl font-medium transition-all duration-200 ease-in-out group ${
+                className={`flex items-center w-full px-3 py-2.5 !rounded-xl font-medium transition-all duration-200 ease-in-out group ${
                     open || active
                         ? "bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700 shadow-sm hover:shadow-md"
                         : "hover:bg-gray-50 text-gray-700 hover:shadow-sm"
@@ -72,20 +72,22 @@ function MenuItem({ href, icon, label, active }) {
     return (
         <Link
             href={href}
-            className={`flex items-center px-3 py-2 rounded-2xl font-medium transition-all duration-200 ease-in-out group ${
+            className={`flex items-center px-3 py-2 !rounded-xl font-medium transition-all duration-200 ease-in-out group ${
                 active
                     ? "bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700 shadow-sm"
                     : "hover:bg-gray-50 text-gray-700 hover:shadow-sm"
             } hover:scale-[1.02] hover:translate-x-1 active:scale-[0.98]`}
         >
-            {/* Icon */}
-            <span
-                className={`mr-3 transition-all duration-200 ease-in-out ${
-                    active ? "text-blue-600 scale-110" : "text-gray-400 group-hover:text-gray-600"
-                }`}
-            >
-                {icon}
-            </span>
+            {/* Icon - only show if provided */}
+            {icon && (
+                <span
+                    className={`mr-3 transition-all duration-200 ease-in-out ${
+                        active ? "text-blue-600 scale-110" : "text-gray-400 group-hover:text-gray-600"
+                    }`}
+                >
+                    {icon}
+                </span>
+            )}
 
             {/* Label */}
             <span
@@ -129,7 +131,7 @@ function safeRoute(name, params = {}) {
 /* ----------------------------
  * Sidebar Component
  * ---------------------------- */
-export default function MenuSideBar({ lang, setLang }) {
+export default function MenuSideBar({ lang, setLang, open = true }) {
     const { auth } = usePage().props;
     const can = auth?.can ?? {};
     const routeName = route().current();    const isAdmin = auth?.user?.roles_list?.some(role => role.name === 'Admin') ?? false;
@@ -353,11 +355,11 @@ export default function MenuSideBar({ lang, setLang }) {
     };
 
     return (
-        <aside className="main-sidebar bg-gradient-to-b from-white to-gray-50 border-r border-gray-200 w-64 fixed h-full overflow-y-auto pb-4 shadow-sm">
+        <aside className={`bg-gradient-to-b from-white to-gray-50 border-r border-gray-200 w-64 fixed h-full overflow-y-auto pb-4 shadow-sm z-20 left-0 top-0 transform transition-transform duration-200 ${open ? 'translate-x-0' : '-translate-x-64'}`}>
             {/* ----------------------------
              * Header / Logo
              * ---------------------------- */}
-            <div className="px-4 py-4 border-b border-gray-200 mt-2 mb-1 bg-white shadow-sm">
+            <div className="px-4 h-16 flex items-center border-b border-gray-200 bg-white shadow-sm">
                 <div className="flex items-center gap-3">
                     <Link
                         href="/"
@@ -370,9 +372,6 @@ export default function MenuSideBar({ lang, setLang }) {
                     <div className="flex-1">
                         <div className="text-base font-bold text-blue-700 leading-tight">
                             {BRAND_CONSTANTS.NAME.SHORT}
-                        </div>
-                        <div className="text-xs text-gray-500 leading-tight font-medium">
-                            Application
                         </div>
                     </div>
                 </div>

@@ -62,7 +62,7 @@ export default function UsersCreateEdit({ user, roles }) {
         <AdminLayout breadcrumb={<Breadcrumb header={headWeb} links={linksBreadcrumb} />}>
             <Head title={headWeb} />
             <div className="bg-gradient-to-br from-slate-50 to-blue-50/30 mb-12">
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-all duration-200">
                     <div className="p-6">
                         <div className="mb-4">
                             <h1 className="text-2xl font-bold text-gray-800">{headWeb}</h1>
@@ -84,7 +84,7 @@ export default function UsersCreateEdit({ user, roles }) {
                                     placeholder="Enter user name"
                                     value={data.name}
                                     onChange={(e) => setData("name", e.target.value)}
-                                    className={`block mt-2 w-full px-3 py-[11px] text-sm rounded-xl border ${
+                                    className={`block mt-2 w-full px-3 py-[11px] text-sm rounded-2xl border ${
                                         errors.name
                                             ? "border-red-300 focus:ring-red-200 focus:border-red-400"
                                             : "border-gray-300 focus:ring-blue-200 focus:border-blue-400"
@@ -105,7 +105,7 @@ export default function UsersCreateEdit({ user, roles }) {
                                     placeholder="Enter email"
                                     value={data.email}
                                     onChange={(e) => setData("email", e.target.value)}
-                                    className={`block mt-2 w-full px-3 py-[11px] text-sm rounded-xl border ${
+                                    className={`block mt-2 w-full px-3 py-[11px] text-sm rounded-2xl border ${
                                         errors.email
                                             ? "border-red-300 focus:ring-red-200 focus:border-red-400"
                                             : "border-gray-300 focus:ring-blue-200 focus:border-blue-400"
@@ -127,7 +127,7 @@ export default function UsersCreateEdit({ user, roles }) {
                                         placeholder="Enter password"
                                         value={data.password}
                                         onChange={(e) => setData("password", e.target.value)}
-                                        className={`block mt-2 w-full px-3 py-[11px] text-sm rounded-xl border ${
+                                        className={`block mt-2 w-full px-3 py-[11px] text-sm rounded-2xl border ${
                                             errors.password
                                                 ? "border-red-300 focus:ring-red-200 focus:border-red-400"
                                                 : "border-gray-300 focus:ring-blue-200 focus:border-blue-400"
@@ -145,7 +145,7 @@ export default function UsersCreateEdit({ user, roles }) {
                                 <div className="relative w-1/3" ref={dropdownRef}>
                                     <button
                                         type="button"
-                                        className={`w-full px-3 py-2 text-sm rounded-xl border bg-white shadow-sm text-left flex justify-between items-center focus:outline-none focus:ring-2 ${
+                                        className={`w-full px-3 py-2 text-sm rounded-2xl border bg-white shadow-sm text-left flex justify-between items-center focus:outline-none focus:ring-2 transition-all duration-200 ${
                                             errors.roles
                                                 ? "border-red-300 focus:ring-red-200 focus:border-red-400"
                                                 : "border-gray-300 focus:ring-blue-200 focus:border-blue-400"
@@ -166,11 +166,11 @@ export default function UsersCreateEdit({ user, roles }) {
                                         </svg>
                                     </button>
                                     {DropUpOpen && (
-                                        <div className="absolute right-0 bottom-full mb-2 w-full bg-white border border-gray-200 rounded-xl shadow-sm z-50 max-h-60 overflow-y-auto hide-scrollbar">
+                                        <div className="absolute right-0 bottom-full mb-2 w-full bg-white border border-gray-200 rounded-2xl shadow-sm z-50 max-h-60 overflow-y-auto hide-scrollbar">
                                             <div className="px-2 py-2 space-y-1">
                                                 <button
                                                     type="button"
-                                                    className={`flex items-center gap-2 w-full text-left px-4 py-2 text-sm rounded-xl transition ${
+                                                    className={`flex items-center gap-2 w-full text-left px-4 py-2 text-sm rounded-2xl transition-all duration-200 ${
                                                         !data.roles[0]
                                                             ? "bg-blue-100 text-blue-700 font-bold"
                                                             : "hover:bg-gray-100 text-gray-700"
@@ -183,7 +183,7 @@ export default function UsersCreateEdit({ user, roles }) {
                                                     <button
                                                         key={role.id}
                                                         type="button"
-                                                        className={`flex items-center gap-2 w-full text-left px-4 py-2 text-sm rounded-xl transition ${
+                                                        className={`flex items-center gap-2 w-full text-left px-4 py-2 text-sm rounded-2xl transition-all duration-200 ${
                                                             data.roles[0] === role.id
                                                                 ? "bg-blue-100 text-blue-700 font-bold"
                                                                 : "hover:bg-gray-100 text-gray-700"
@@ -204,14 +204,14 @@ export default function UsersCreateEdit({ user, roles }) {
                             <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-6 mt-6 border-t border-gray-200">
                                 <Link
                                     href={route("users.index")}
-                                    className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-xl text-gray-600 border-2 hover:bg-gray-50 hover:border-gray-300  transition duration-200"
+                                    className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-2xl text-gray-600 border-2 hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 ease-in-out hover:shadow-sm"
                                 >
                                     Cancel
                                 </Link>
                                 <button
                                     type="submit"
                                     disabled={processing}
-                                    className="inline-flex items-center justify-center px-6 py-2 text-sm font-medium rounded-xl text-white bg-gradient-to-r from-blue-500 to-blue-500 shadow-sm transition duration-200 hover:from-blue-500 hover:to-blue-600 disabled:opacity-70 disabled:cursor-not-allowed"
+                                    className="inline-flex items-center justify-center px-6 py-2 text-sm font-medium rounded-2xl text-white bg-gradient-to-r from-blue-500 to-blue-500 shadow-sm transition-all duration-200 ease-in-out hover:from-blue-500 hover:to-blue-600 hover:scale-105 hover:shadow-md active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:scale-100"
                                 >
                                     {processing
                                         ? (user.id ? "Updating..." : "Saving...")

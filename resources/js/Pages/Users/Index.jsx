@@ -233,7 +233,7 @@ export default function UserPage({
                                 {/* Trashed Toggle */}
                                 <button
                                     onClick={toggleTrashedView}
-                                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm text-white bg-gray-600 hover:bg-gray-500 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
+                                    className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl font-semibold text-sm text-white bg-gray-600 hover:bg-gray-500 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                                 >
                                     {showTrashed ? "View Active" : "View Deleted"}
                                 </button>
@@ -242,7 +242,7 @@ export default function UserPage({
                                 {can["user-create"] && !showTrashed && (
                                     <Link
                                         href={route("users.create")}
-                                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm text-white bg-green-600 hover:bg-green-500 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
+                                        className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl font-semibold text-sm text-white bg-green-600 hover:bg-green-500 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                                     >
                                         <UserPlus className="w-4 h-4" />
                                         Add User
@@ -283,7 +283,7 @@ export default function UserPage({
                                                     {user.roles?.length > 0 ? (
                                                         <div className="flex flex-wrap gap-1">
                                                             {user.roles.map((role) => (
-                                                                <span key={role.id} className="px-2.5 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold">
+                                                                <span key={role.id} className="px-2.5 py-1 bg-blue-100 text-blue-700 rounded-2xl text-xs font-semibold">
                                                                     {role.name}
                                                                 </span>
                                                             ))}
@@ -296,12 +296,12 @@ export default function UserPage({
                                                     {user.permissions?.length > 0 ? (
                                                         <div className="flex flex-wrap gap-1">
                                                             {user.permissions.slice(0, 2).map((perm) => (
-                                                                <span key={perm.id} className="px-2.5 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">
+                                                                <span key={perm.id} className="px-2.5 py-1 bg-green-100 text-green-700 rounded-2xl text-xs font-semibold">
                                                                     {perm.name}
                                                                 </span>
                                                             ))}
                                                             {user.permissions.length > 2 && (
-                                                                <span className="px-2.5 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-semibold">
+                                                                <span className="px-2.5 py-1 bg-gray-100 text-gray-700 rounded-2xl text-xs font-semibold">
                                                                     +{user.permissions.length - 2}
                                                                 </span>
                                                             )}
@@ -312,11 +312,11 @@ export default function UserPage({
                                                 </td>
                                                 <td className="px-6 py-4">
                                                     {user.blocked ? (
-                                                        <span className="px-2.5 py-1 bg-red-100 text-red-700 rounded-full text-xs font-semibold">
+                                                        <span className="px-2.5 py-1 bg-red-100 text-red-700 rounded-2xl text-xs font-semibold">
                                                             Blocked
                                                         </span>
                                                     ) : (
-                                                        <span className="px-2.5 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">
+                                                        <span className="px-2.5 py-1 bg-green-100 text-green-700 rounded-2xl text-xs font-semibold">
                                                             Active
                                                         </span>
                                                     )}
@@ -422,7 +422,7 @@ export default function UserPage({
                                                 setUserPermissions(userPermissions.filter((id) => id !== perm.id));
                                             }
                                         }}
-                                        className="rounded-lg border-gray-300 text-blue-600 focus:ring-blue-500"
+                                        className="rounded-2xl border-gray-300 text-blue-600 focus:ring-blue-500 transition-all duration-200"
                                     />
                                     <span className="text-sm text-gray-700">{perm.name}</span>
                                 </label>
@@ -432,7 +432,7 @@ export default function UserPage({
                             <button
                                 type="button"
                                 onClick={removePermission}
-                                className="rounded-xl border-2 border-red-300 px-6 py-1 text-red-600 hover:bg-red-50 transition font-semibold"
+                                className="rounded-2xl border-2 border-red-300 px-6 py-1 text-red-600 hover:bg-red-50 transition-all duration-200 ease-in-out hover:shadow-sm font-semibold"
                                 disabled={permProcessing}
                             >
                                 Remove All
@@ -441,14 +441,14 @@ export default function UserPage({
                                 <button
                                     type="button"
                                     onClick={() => setShowPermissionModal(false)}
-                                    className="rounded-xl border-2 border-gray-300 px-8 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold"
+                                    className="rounded-2xl border-2 border-gray-300 px-8 py-1 text-gray-700 hover:bg-gray-100 transition-all duration-200 ease-in-out hover:shadow-sm font-semibold"
                                     disabled={permProcessing}
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
-                                    className="rounded-xl px-9 py-1 bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
+                                    className="rounded-2xl px-9 py-1 bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                                     disabled={permProcessing}
                                 >
                                     {permProcessing ? "Saving..." : "Save"}
@@ -474,7 +474,7 @@ export default function UserPage({
                                 type="password"
                                 value={resetPassword}
                                 onChange={(e) => setResetPassword(e.target.value)}
-                                className="w-full rounded-xl border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                                className="w-full rounded-2xl border-gray-300 focus:border-blue-500 focus:ring-blue-500 transition-all duration-200"
                                 placeholder="Enter new password"
                             />
                             {resetError && (
@@ -485,14 +485,14 @@ export default function UserPage({
                             <button
                                 type="button"
                                 onClick={() => setShowResetModal(false)}
-                                className="rounded-xl border-2 border-gray-300 px-8 py-1 text-gray-700 hover:bg-gray-100 transition font-semibold"
+                                className="rounded-2xl border-2 border-gray-300 px-8 py-1 text-gray-700 hover:bg-gray-100 transition-all duration-200 ease-in-out hover:shadow-sm font-semibold"
                                 disabled={resetProcessing}
                             >
                                 Cancel
                             </button>
                             <button
                                 type="submit"
-                                className="rounded-xl px-9 py-1 bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
+                                className="rounded-2xl px-9 py-1 bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                                 disabled={resetProcessing}
                             >
                                 {resetProcessing ? "Resetting..." : "Reset Password"}
