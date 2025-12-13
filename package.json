@@ -13,7 +13,10 @@
         "test:ui": "vitest --ui",
         "test:coverage": "vitest --coverage",
         "bump-semver": "node .github/scripts/bump_semver.js",
-        "gen-changelog": "node .github/scripts/generate_changelog.js"
+        "gen-changelog": "node .github/scripts/generate_changelog.js",
+        "release:preview": "node .github/scripts/analyze_commits.js && cat .release_info.json",
+        "release:notes": "node .github/scripts/analyze_commits.js && node .github/scripts/bump_version_auto.js && node .github/scripts/generate_release_notes.js && cat RELEASE_NOTES.md",
+        "commit:help": "bash .github/scripts/commit-help.sh"
     },
     "devDependencies": {
         "@tailwindcss/forms": "^0.5.10",

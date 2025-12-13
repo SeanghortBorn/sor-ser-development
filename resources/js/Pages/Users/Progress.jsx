@@ -1,5 +1,6 @@
 import React from 'react';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import AdminLayout from '@/Layouts/AdminLayout';
+import Breadcrumb from '@/Components/Breadcrumb';
 import { Head, Link } from '@inertiajs/react';
 import {
     LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid,
@@ -17,33 +18,20 @@ export default function UserProgress({
     audioBehavior,
     learningMetrics
 }) {
+    const breadcrumbLinks = [
+        { title: 'Home', url: '/' },
+        { title: 'Users', url: route('users.index') },
+        { title: `${user.name} Progress`, url: '' }
+    ];
+
     return (
-        <AuthenticatedLayout user={auth.user}>
+        <AdminLayout breadcrumb={<Breadcrumb header={`${user.name} - Progress`} links={breadcrumbLinks} />}>
             <Head title={`${user.name} - Progress Dashboard`} />
 
-            <div className="py-12">
-                <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                    {/* Header with Back Button */}
-                    <div className="mb-6 flex items-center justify-between">
+            <div className="p-6">
+                {/* Header with Back Button */}
+                <div className="mb-6 flex items-center justify-between">
                         <div>
-                            <h2 className="text-2xl font-bold text-gray-900">
-                                User Progress Dashboard
-                            </h2>
-                            <p className="mt-1 text-sm text-gray-600">
-                                Comprehensive learning analytics for {user.name}
-                            </p>
-                        </div>
-                        <Link
-                            href={route('users.index')}
-                            className="inline-flex items-center px-4 py-2 bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700"
-                        >
-                            ← Back to Users
-                        </Link>
-                    </div>
-
-                    {/* User Profile Summary */}
-                    <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
-                        <div className="p-6 bg-white border-b border-gray-200">
                             <h3 className="text-lg font-semibold mb-4">User Profile</h3>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div>
@@ -353,8 +341,7 @@ export default function UserProgress({
                             )}
                         </div>
                     </div>
-                </div>
             </div>
-        </AuthenticatedLayout>
+        </AdminLayout>
     );
 }

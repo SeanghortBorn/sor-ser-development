@@ -1,6 +1,7 @@
 import React from 'react';
 import { Head, Link } from '@inertiajs/react';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import AdminLayout from '@/Layouts/AdminLayout';
+import Breadcrumb from '@/Components/Breadcrumb';
 import {
     LineChart, Line, BarChart, Bar, AreaChart, Area,
     XAxis, YAxis, CartesianGrid, Tooltip, Legend,
@@ -49,52 +50,34 @@ export default function ArticleDetail({
     };
 
     return (
-        <AuthenticatedLayout
-            user={auth.user}
-            header={
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                        <Link
-                            href={route('users.progress', user.id)}
-                            className="inline-flex items-center px-3 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors"
-                        >
-                            <ArrowLeft className="w-4 h-4 mr-2" />
-                            Back to Progress
-                        </Link>
-                        <div>
-                            <h2 className="font-semibold text-xl text-gray-800 leading-tight">
-                                Article Detail Analytics
-                            </h2>
-                            <p className="text-sm text-gray-600 mt-1">
-                                {user.name} • {article.title}
-                            </p>
-                        </div>
-                    </div>
-                    
-                    {/* Export buttons */}
-                    <div className="flex space-x-2">
-                        <a
-                            href={route('users.articles.export', {
-                                userId: user.id,
-                                articleId: article.id,
-                                format: 'csv'
-                            })}
-                            className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors shadow-sm"
-                        >
-                            <Download className="w-4 h-4 mr-2" />
-                            Export CSV
-                        </a>
-                        <a
-                            href={route('users.articles.export', {
-                                userId: user.id,
-                                articleId: article.id,
-                                format: 'json'
-                            })}
-                            className="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors shadow-sm"
-                        >
-                            <Download className="w-4 h-4 mr-2" />
-                            Export JSON
-                        </a>
+        <AdminLayout breadcrumb={<Breadcrumb header={`${article.title} - ${user.name}`} links={[{ title: 'Home', url: '/' }, { title: 'Users', url: route('users.index') }, { title: 'Article Detail', url: '' }]} />}>
+            <Head title={`${article.title} - ${user.name} Detail`} />
+
+            <div className="p-6">
+                {/* Export buttons */}
+                <div className="flex space-x-2 mb-6">
+                    <a
+                        href={route('users.articles.export', {
+                            userId: user.id,
+                            articleId: article.id,
+                            format: 'csv'
+                        })}
+                        className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors shadow-sm"
+                    >
+                        <Download className="w-4 h-4 mr-2" />
+                        Export CSV
+                    </a>
+                    <a
+                        href={route('users.articles.export', {
+                            userId: user.id,
+                            articleId: article.id,
+                            format: 'json'
+                        })}
+                        className="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors shadow-sm"
+                    >
+                        <Download className="w-4 h-4 mr-2" />
+                        Export JSON
+                    </a>
                         <a
                             href={route('users.articles.export', {
                                 userId: user.id,
@@ -107,15 +90,8 @@ export default function ArticleDetail({
                             Export XML
                         </a>
                     </div>
-                </div>
-            }
-        >
-            <Head title={`Article Analysis: ${article.title}`} />
 
-            <div className="py-8">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-                    
-                    {/* Summary Metrics Cards */}
+                {/* Summary Metrics Cards */}
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                         <div className="bg-white rounded-lg shadow p-6">
                             <div className="flex items-center justify-between mb-2">
@@ -504,8 +480,7 @@ export default function ArticleDetail({
                         </div>
                     </div>
 
-                </div>
             </div>
-        </AuthenticatedLayout>
+        </AdminLayout>
     );
 }

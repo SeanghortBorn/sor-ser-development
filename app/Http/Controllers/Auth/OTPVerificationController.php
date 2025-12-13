@@ -57,19 +57,24 @@ class OTPVerificationController extends Controller
         }
 
         if ($this->otpService->verifyOTP($user, $request->otp)) {
-            // Mark email as verified
+            // Mark email as verified - this updates the database
             $this->otpService->markEmailAsVerified($user);
 
-            // Refresh the user instance to get updated data
+            // IMPORTANT: Refresh from database to get updated data
             $user->refresh();
 
-            // Force session to update with fresh user data
+            // Update Laravel's authenticated user session
             Auth::setUser($user);
+
+            // Force session save to ensure data persists
+            $request->session()->put('user', $user);
+            $request->session()->save();
 
             return response()->json([
                 'success' => true,
                 'message' => 'Email verified successfully',
                 'redirect' => route('homophone-check.index'),
+                'user' => $user->toArray(), // Include updated user data in response
             ]);
         }
 

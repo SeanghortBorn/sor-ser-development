@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Head, Link, usePage } from '@inertiajs/react';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import AdminLayout from '@/Layouts/AdminLayout';
+import Breadcrumb from '@/Components/Breadcrumb';
 import {
     BookOpen,
     Lock,
@@ -102,20 +103,11 @@ export default function ProgressionIndex({ articles, progress, nextUnlock, curre
     // ═══════════════════════════════════════════════════════════════════
 
     return (
-        <AuthenticatedLayout
-            header={
-                <div className="flex justify-between items-center">
-                    <h2 className="font-semibold text-xl text-gray-800 leading-tight flex items-center gap-2">
-                        <BookOpen className="w-6 h-6" />
-                        My Learning Journey
-                    </h2>
-                </div>
-            }
-        >
-            <Head title="Learning Articles" />
+        <AdminLayout breadcrumb={<Breadcrumb header="Article Settings" links={[{ title: "Home", url: "/" }, { title: "Article Settings", url: "" }]} />}>
+            <Head title="Article Settings" />
 
-            <div className="py-6">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="p-6">
+                <div className="space-y-6">
 
                     {/* Flash Messages */}
                     {flash?.error && (
@@ -291,7 +283,7 @@ export default function ProgressionIndex({ articles, progress, nextUnlock, curre
 
                 </div>
             </div>
-        </AuthenticatedLayout>
+        </AdminLayout>
     );
 }
 

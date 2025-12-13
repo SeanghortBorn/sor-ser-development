@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
 import AdminLayout from "@/Layouts/AdminLayout";
+import Breadcrumb from "@/Components/Breadcrumb";
 import { Head } from "@inertiajs/react";
 import { TrendingUp, Users, BookOpen, Activity, BarChart3 } from "lucide-react";
 import {
@@ -219,22 +220,10 @@ const Dashboard = () => {
     };
 
     return (
-        <AdminLayout>
+        <AdminLayout breadcrumb={<Breadcrumb header={userIsAdmin ? 'Admin Dashboard' : 'My Dashboard'} links={[{ title: 'Home', url: '/' }, { title: userIsAdmin ? 'Admin Dashboard' : 'My Dashboard', url: '' }]} />}>
             <Head title="Dashboard" />
 
-            <div className="bg-gray-50 min-h-screen p-6">
-                {/* Header */}
-                <div className="mb-6">
-                    <h1 className="text-2xl font-bold text-gray-900">
-                        {userIsAdmin ? 'Admin Dashboard' : 'My Dashboard'}
-                    </h1>
-                    <p className="text-gray-600 text-sm mt-1">
-                        {userIsAdmin 
-                            ? "Welcome back! Here's your homophone learning analytics."
-                            : "Welcome back! Here's your personal learning progress."
-                        }
-                    </p>
-                </div>
+            <div className="p-6">
 
                 {/* KPI Stats Grid */}
                 <div className={`grid grid-cols-1 ${userIsAdmin ? 'md:grid-cols-2 lg:grid-cols-3' : 'md:grid-cols-3'} gap-4 mb-6`}>

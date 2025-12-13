@@ -67,6 +67,11 @@ class GoogleController extends Controller
                 'email_verified_at' => now(),
             ]);
 
+            // Assign default 'user' role to new Google signup users (same as manual signup)
+            if ($newUser && \Spatie\Permission\Models\Role::where('name', 'user')->exists()) {
+                $newUser->assignRole('user');
+            }
+
             Auth::login($newUser);
             return redirect()->intended(route('homophone-check.index'));
 

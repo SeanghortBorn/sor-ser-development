@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
 import { router } from "@inertiajs/react";
-import AuthLayout from "@/Layouts/AuthLayout";
+import AuthLayoutSplit from "@/Layouts/AuthLayoutSplit";
 import InputError from "@/Components/InputError";
 import axios from "axios";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { LAYOUT_CONSTANTS } from "@/constants/layout";
 
 export default function UnifiedAuth() {
     const [step, setStep] = useState("email"); // 'email', 'password', 'signup'
     const [email, setEmail] = useState("");
-    const [emailConfirmation, setEmailConfirmation] = useState("");
     const [password, setPassword] = useState("");
     const [passwordConfirmation, setPasswordConfirmation] = useState("");
     const [name, setName] = useState("");
@@ -20,13 +20,6 @@ export default function UnifiedAuth() {
     const [loading, setLoading] = useState(false);
     const [errors, setErrors] = useState({});
     const [message, setMessage] = useState("");
-
-    // Auto-sync password confirmation
-    useEffect(() => {
-        if (step === "signup") {
-            setPasswordConfirmation(password);
-        }
-    }, [password, step]);
 
     const handleEmailSubmit = async (e) => {
         e.preventDefault();
@@ -88,9 +81,9 @@ export default function UnifiedAuth() {
         e.preventDefault();
         setErrors({});
 
-        // Validate email confirmation
-        if (email !== emailConfirmation) {
-            setErrors({ email_confirmation: "Email addresses do not match" });
+        // Validate password confirmation
+        if (password !== passwordConfirmation) {
+            setErrors({ password_confirmation: "Passwords do not match" });
             return;
         }
 
@@ -126,7 +119,6 @@ export default function UnifiedAuth() {
 
     const resetToEmail = () => {
         setStep("email");
-        setEmailConfirmation("");
         setPassword("");
         setPasswordConfirmation("");
         setName("");
@@ -138,7 +130,20 @@ export default function UnifiedAuth() {
     };
 
     return (
-        <AuthLayout title="Sign In">
+        <AuthLayoutSplit 
+            brandTitle="SOR-SER"
+            brandSubtitle="Khmer Learning Platform"
+            brandMessage={{
+                title: "Master Khmer Writing",
+                description: "Improve your Khmer writing skills with interactive exercises, real-time feedback, and personalized learning paths.",
+                features: [
+                    { icon: "✓", text: "Interactive homophone checker" },
+                    { icon: "✓", text: "Real-time grammar feedback" },
+                    { icon: "✓", text: "Personalized learning path" },
+                    { icon: "✓", text: "Track your progress" }
+                ]
+            }}
+        >
             <div className="space-y-6">
                 {/* Header */}
                 <div>
@@ -149,7 +154,7 @@ export default function UnifiedAuth() {
                     </h2>
                     <a
                         href={route("auth.google")}
-                        className="duration-500 group hover:bg-blue-600 w-full flex items-center justify-center gap-3 px-4 py-3 border border-gray-300 rounded-xl transition-all my-5"
+                        className="group hover:bg-blue-600 hover:border-blue-600 hover:shadow-md hover:scale-105 w-full flex items-center justify-center gap-3 px-4 py-3 border border-gray-300 rounded-xl transition-all duration-300 my-5"
                     >
                         <svg className="w-5 h-5" viewBox="0 0 24 24">
                             <path
@@ -169,7 +174,7 @@ export default function UnifiedAuth() {
                                 d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                             />
                         </svg>
-                        <span className="group-hover:text-white text-gray-700 transition-colors duration-800 font-medium">
+                        <span className="text-gray-700 group-hover:text-white transition-colors duration-300 font-medium">
                             Continue with Google
                         </span>
                     </a>
@@ -195,7 +200,7 @@ export default function UnifiedAuth() {
                                 type="email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-base"
+                                className={`w-full px-4 py-3 border border-gray-300 ${LAYOUT_CONSTANTS.ROUNDED.MEDIUM} focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-base`}
                                 placeholder="Enter your email"
                                 required
                                 autoFocus
@@ -209,7 +214,7 @@ export default function UnifiedAuth() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full bg-blue-600 hover:bg-blue-700 duration-700 text-white font-semibold py-3 px-6 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                            className={`w-full bg-blue-600 hover:bg-blue-700 hover:shadow-lg hover:scale-105 text-white font-semibold py-3 px-6 ${LAYOUT_CONSTANTS.ROUNDED.MEDIUM} transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-none flex items-center justify-center gap-2`}
                         >
                             {loading ? (
                                 <>
@@ -262,7 +267,7 @@ export default function UnifiedAuth() {
                                     onChange={(e) =>
                                         setPassword(e.target.value)
                                     }
-                                    className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-base"
+                                    className={`w-full px-4 py-3 pr-12 border border-gray-300 ${LAYOUT_CONSTANTS.ROUNDED.MEDIUM} focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-base`}
                                     placeholder="Enter your password"
                                     required
                                     autoFocus
@@ -307,7 +312,7 @@ export default function UnifiedAuth() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                            className={`w-full bg-blue-600 hover:bg-blue-700 hover:shadow-lg hover:scale-105 text-white font-semibold py-3 px-6 ${LAYOUT_CONSTANTS.ROUNDED.MEDIUM} transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-none flex items-center justify-center gap-2`}
                         >
                             {loading ? (
                                 <>
@@ -332,7 +337,7 @@ export default function UnifiedAuth() {
 
                 {/* Signup Step */}
                 {step === "signup" && (
-                    <form onSubmit={handleSignup} className="space-y-4">
+                    <form onSubmit={handleSignup} className="space-y-4 pt-6 pb-8">
                         <div>
                             <div className="flex items-center justify-between mb-2">
                                 <label className="block text-sm font-semibold text-gray-700">
@@ -346,31 +351,9 @@ export default function UnifiedAuth() {
                                     Change email
                                 </button>
                             </div>
-                            <div className="text-sm text-gray-600 px-4 py-3 bg-gray-50 rounded-xl mb-3">
+                            <div className={`text-sm text-gray-600 px-4 py-3 bg-gray-50 ${LAYOUT_CONSTANTS.ROUNDED.MEDIUM} mb-3`}>
                                 {email}
                             </div>
-
-                            <label
-                                htmlFor="email_confirmation"
-                                className="block text-sm font-semibold text-gray-700 mb-2"
-                            >
-                                Confirm Email Address
-                            </label>
-                            <input
-                                id="email_confirmation"
-                                type="email"
-                                value={emailConfirmation}
-                                onChange={(e) =>
-                                    setEmailConfirmation(e.target.value)
-                                }
-                                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-base"
-                                placeholder="Re-enter your email"
-                                required
-                            />
-                            <InputError
-                                message={errors.email_confirmation}
-                                className="mt-2"
-                            />
                         </div>
 
                         <div>
@@ -388,7 +371,7 @@ export default function UnifiedAuth() {
                                     onChange={(e) =>
                                         setPassword(e.target.value)
                                     }
-                                    className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-base"
+                                    className={`w-full px-4 py-3 pr-12 border border-gray-300 ${LAYOUT_CONSTANTS.ROUNDED.MEDIUM} focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-base`}
                                     placeholder="Create a strong password"
                                     required
                                     autoFocus
@@ -410,6 +393,46 @@ export default function UnifiedAuth() {
                             </div>
                             <InputError
                                 message={errors.password}
+                                className="mt-2"
+                            />
+                        </div>
+
+                        <div>
+                            <label
+                                htmlFor="password_confirmation"
+                                className="block text-sm font-semibold text-gray-700 mb-2"
+                            >
+                                Confirm Password
+                            </label>
+                            <div className="relative">
+                                <input
+                                    id="password_confirmation"
+                                    type={showPassword ? "text" : "password"}
+                                    value={passwordConfirmation}
+                                    onChange={(e) =>
+                                        setPasswordConfirmation(e.target.value)
+                                    }
+                                    className={`w-full px-4 py-3 pr-12 border border-gray-300 ${LAYOUT_CONSTANTS.ROUNDED.MEDIUM} focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-base`}
+                                    placeholder="Re-enter your password"
+                                    required
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        setShowPassword(!showPassword)
+                                    }
+                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                    tabIndex={-1}
+                                >
+                                    {showPassword ? (
+                                        <EyeOff className="w-5 h-5" />
+                                    ) : (
+                                        <Eye className="w-5 h-5" />
+                                    )}
+                                </button>
+                            </div>
+                            <InputError
+                                message={errors.password_confirmation}
                                 className="mt-2"
                             />
                         </div>
@@ -436,7 +459,7 @@ export default function UnifiedAuth() {
                                         onChange={(e) =>
                                             setName(e.target.value)
                                         }
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
+                                        className={`w-full px-4 py-2 border border-gray-300 ${LAYOUT_CONSTANTS.ROUNDED.SMALL} focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm`}
                                         placeholder="Your name"
                                     />
                                 </div>
@@ -456,7 +479,7 @@ export default function UnifiedAuth() {
                                             onChange={(e) =>
                                                 setAge(e.target.value)
                                             }
-                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
+                                            className={`w-full px-4 py-2 border border-gray-300 ${LAYOUT_CONSTANTS.ROUNDED.SMALL} focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm`}
                                             placeholder="Age"
                                         />
                                     </div>
@@ -476,7 +499,7 @@ export default function UnifiedAuth() {
                                                     e.target.value
                                                 )
                                             }
-                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
+                                            className={`w-full px-4 py-2 border border-gray-300 ${LAYOUT_CONSTANTS.ROUNDED.SMALL} focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm`}
                                         >
                                             <option value="">Select</option>
                                             <option value="Primary">
@@ -514,7 +537,7 @@ export default function UnifiedAuth() {
                                         onChange={(e) =>
                                             setKhmerExperience(e.target.value)
                                         }
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
+                                        className={`w-full px-4 py-2 border border-gray-300 ${LAYOUT_CONSTANTS.ROUNDED.SMALL} focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm`}
                                     >
                                         <option value="">Select</option>
                                         <option value="None">None</option>
@@ -534,7 +557,7 @@ export default function UnifiedAuth() {
                         </div>
 
                         {errors.general && (
-                            <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                            <div className={`p-3 bg-red-50 border border-red-200 ${LAYOUT_CONSTANTS.ROUNDED.SMALL}`}>
                                 <p className="text-sm text-red-700">
                                     {errors.general}
                                 </p>
@@ -544,7 +567,7 @@ export default function UnifiedAuth() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                            className={`w-full bg-blue-600 hover:bg-blue-700 hover:shadow-lg hover:scale-105 text-white font-semibold py-3 px-6 ${LAYOUT_CONSTANTS.ROUNDED.MEDIUM} transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-none flex items-center justify-center gap-2`}
                         >
                             {loading ? (
                                 <>
@@ -558,6 +581,6 @@ export default function UnifiedAuth() {
                     </form>
                 )}
             </div>
-        </AuthLayout>
+        </AuthLayoutSplit>
     );
 }

@@ -33,5 +33,13 @@ export const LAYOUT_CONSTANTS = {
     CONTAINER_CLASSES: {
         DEFAULT: 'max-w-7xl mx-auto px-6 sm:px-8 md:px-12 lg:px-16',
         ADMIN: 'max-w-full px-2 md:px-4 lg:px-6',
+    },
+
+    // Standardized Rounded Corners (Use consistently across app)
+    ROUNDED: {
+        SMALL: 'rounded-lg',      // 8px - small buttons, badges
+        MEDIUM: 'rounded-xl',     // 12px - cards, inputs, modals
+        LARGE: 'rounded-2xl',     // 16px - major cards, containers
+        FULL: 'rounded-full'      // 9999px - circular elements (avatars)
     }
 };

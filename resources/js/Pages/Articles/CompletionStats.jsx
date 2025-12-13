@@ -1,32 +1,20 @@
 import React from 'react';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import AdminLayout from '@/Layouts/AdminLayout';
+import Breadcrumb from '@/Components/Breadcrumb';
 import { Head, Link } from '@inertiajs/react';
 
 export default function CompletionStats({ auth, article, stats, completed_users, not_completed_users }) {
+    const breadcrumbLinks = [
+        { title: 'Home', url: '/' },
+        { title: 'Articles', url: route('articles.index') },
+        { title: 'Completion Stats', url: '' }
+    ];
+
     return (
-        <AuthenticatedLayout
-            user={auth.user}
-            header={
-                <div className="flex items-center justify-between">
-                    <div>
-                        <Link
-                            href={route('articles.index')}
-                            className="text-sm text-gray-600 hover:text-gray-900 mb-2 inline-block"
-                        >
-                            ← Back to Articles
-                        </Link>
-                        <h2 className="font-semibold text-xl text-gray-800 leading-tight">
-                            Article Completion Stats
-                        </h2>
-                        <p className="text-sm text-gray-600 mt-1">{article.title}</p>
-                    </div>
-                </div>
-            }
-        >
+        <AdminLayout breadcrumb={<Breadcrumb header={`${article.title} - Stats`} links={breadcrumbLinks} />}>
             <Head title={`Completion Stats - ${article.title}`} />
 
-            <div className="py-12">
-                <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div className="p-6">
                     {/* Statistics Overview */}
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                         <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
@@ -199,8 +187,7 @@ export default function CompletionStats({ auth, article, stats, completed_users,
                             )}
                         </div>
                     </div>
-                </div>
             </div>
-        </AuthenticatedLayout>
+        </AdminLayout>
     );
 }

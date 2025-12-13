@@ -41,6 +41,7 @@ class User extends Authenticatable implements MustVerifyEmail, JWTSubject
         'otp_code',
         'otp_expires_at',
         'email_verification_sent_at',
+        'email_verified_at', // Allow mass assignment for OTP verification
     ];
 
     /**

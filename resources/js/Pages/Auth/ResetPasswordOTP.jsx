@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
-import AuthLayout from "@/Layouts/AuthLayout";
+import AuthLayoutSplit from "@/Layouts/AuthLayoutSplit";
+import { LAYOUT_CONSTANTS } from "@/constants/layout";
 import InputError from "@/Components/InputError";
 import axios from "axios";
 import { Loader2, Mail, Shield, Key, Eye, EyeOff, CheckCircle } from "lucide-react";
@@ -175,10 +176,23 @@ export default function ResetPasswordOTP() {
     };
 
     return (
-        <AuthLayout title="Reset Password">
+        <AuthLayoutSplit
+            brandTitle="SOR-SER"
+            brandSubtitle="Khmer Learning Platform"
+            brandMessage={{
+                title: "Reset Your Password",
+                description: "Follow the simple steps to reset your password and regain access to your account.",
+                features: [
+                    { icon: "✓", text: "Secure process" },
+                    { icon: "✓", text: "3 simple steps" },
+                    { icon: "✓", text: "Email verification" },
+                    { icon: "✓", text: "Instant access" }
+                ]
+            }}
+        >
             <div className="space-y-6">
-                {/* Progress Bar */}
-                <div className="flex items-center justify-center">
+                {/* Step Indicator */}
+                <div className="flex items-center justify-between mb-8">
                     {steps.map((s, index) => {
                         const Icon = s.icon;
                         const isActive = step === s.number;
@@ -256,7 +270,7 @@ export default function ResetPasswordOTP() {
                                 <button
                                     type="submit"
                                     disabled={loading}
-                                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                    className="w-full bg-blue-600 hover:bg-blue-700 hover:shadow-lg hover:scale-105 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-none flex items-center justify-center gap-2"
                                 >
                                     {loading ? (
                                         <>
@@ -316,7 +330,7 @@ export default function ResetPasswordOTP() {
                             <button
                                 onClick={() => handleVerifyOTP()}
                                 disabled={loading || otp.some(d => !d)}
-                                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                className="w-full bg-blue-600 hover:bg-blue-700 hover:shadow-lg hover:scale-105 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-none flex items-center justify-center gap-2"
                             >
                                 {loading ? (
                                     <>
@@ -405,7 +419,7 @@ export default function ResetPasswordOTP() {
                                 <button
                                     type="submit"
                                     disabled={loading}
-                                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                    className="w-full bg-blue-600 hover:bg-blue-700 hover:shadow-lg hover:scale-105 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-none flex items-center justify-center gap-2"
                                 >
                                     {loading ? (
                                         <>
@@ -421,6 +435,6 @@ export default function ResetPasswordOTP() {
                     )}
                 </div>
             </div>
-        </AuthLayout>
+        </AuthLayoutSplit>
     );
 }

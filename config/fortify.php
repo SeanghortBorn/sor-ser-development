@@ -131,7 +131,7 @@ return [
     |
     */
 
-    'views' => true,
+    'views' => false,
 
     /*
     |--------------------------------------------------------------------------
@@ -145,7 +145,7 @@ return [
     */
 
     'features' => [
-        Features::registration(),
+        // Features::registration(),  // Disabled - using custom UnifiedAuth
         Features::resetPasswords(),
         # Features::emailVerification(),
         Features::updateProfileInformation(),

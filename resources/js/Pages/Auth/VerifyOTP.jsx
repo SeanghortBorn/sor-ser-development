@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { router, usePage } from "@inertiajs/react";
-import AuthLayout from "@/Layouts/AuthLayout";
+import AuthLayoutSplit from "@/Layouts/AuthLayoutSplit";
+import { LAYOUT_CONSTANTS } from "@/constants/layout";
 import axios from "axios";
 import { Loader2, Mail, CheckCircle } from "lucide-react";
 
@@ -123,23 +124,25 @@ export default function VerifyOTP({ email }) {
     };
 
     return (
-        <AuthLayout title="Verify Email" showCloseButton={false}>
-            <div className="space-y-6 text-center">
-                {/* Icon */}
-                <div className="flex justify-center">
-                    <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center">
-                        {success ? (
-                            <CheckCircle className="w-10 h-10 text-green-600" />
-                        ) : (
-                            <Mail className="w-10 h-10 text-blue-600" />
-                        )}
-                    </div>
-                </div>
-
+        <AuthLayoutSplit
+            brandTitle="SOR-SER"
+            brandSubtitle="Khmer Learning Platform"
+            brandMessage={{
+                title: "Verify Your Email",
+                description: "We sent a verification code to your email. Enter it below to continue.",
+                features: [
+                    { icon: "✓", text: "Secure verification" },
+                    { icon: "✓", text: "Quick and simple" },
+                    { icon: "✓", text: "One-time code" },
+                    { icon: "✓", text: "Valid for 10 minutes" }
+                ]
+            }}
+        >
+            <div className="space-y-6">
                 {/* Header */}
                 <div>
                     <h2 className="text-3xl font-bold text-gray-900">
-                        {success ? 'Verified!' : 'Verify Your Email'}
+                        {success ? 'Email Verified!' : 'Verify Your Email'}
                     </h2>
                     <p className="mt-2 text-sm text-gray-600">
                         {success
@@ -159,7 +162,7 @@ export default function VerifyOTP({ email }) {
                         )}
 
                         {/* OTP Input */}
-                        <div className="flex justify-center gap-3">
+                        <div className="flex justify-center gap-2">
                             {otp.map((digit, index) => (
                                 <input
                                     key={index}
@@ -170,7 +173,7 @@ export default function VerifyOTP({ email }) {
                                     value={digit}
                                     onChange={(e) => handleChange(index, e.target.value)}
                                     onKeyDown={(e) => handleKeyDown(index, e)}
-                                    className="w-12 h-14 text-center text-2xl font-bold border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+                                    className={`w-12 h-12 text-center text-xl font-bold border-2 ${LAYOUT_CONSTANTS.ROUNDED.MEDIUM} focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all ${error ? 'border-red-300' : 'border-gray-300'}`}
                                     autoFocus={index === 0}
                                 />
                             ))}
@@ -187,7 +190,7 @@ export default function VerifyOTP({ email }) {
                         <button
                             onClick={() => handleSubmit()}
                             disabled={loading || otp.some(d => !d)}
-                            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                            className={`w-full bg-blue-600 hover:bg-blue-700 hover:shadow-lg hover:scale-105 text-white font-semibold py-3 px-6 ${LAYOUT_CONSTANTS.ROUNDED.MEDIUM} transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-none flex items-center justify-center gap-2`}
                         >
                             {loading ? (
                                 <>
@@ -210,7 +213,7 @@ export default function VerifyOTP({ email }) {
                                 <button
                                     onClick={handleResend}
                                     disabled={resending}
-                                    className="text-blue-600 hover:text-blue-700 font-semibold disabled:opacity-50"
+                                    className="text-blue-600 hover:text-blue-700 hover:scale-110 font-semibold transition-all duration-300 disabled:opacity-50"
                                 >
                                     {resending ? 'Sending...' : 'Resend Code'}
                                 </button>
@@ -226,6 +229,6 @@ export default function VerifyOTP({ email }) {
                     </div>
                 )}
             </div>
-        </AuthLayout>
+        </AuthLayoutSplit>
     );
 }
