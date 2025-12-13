@@ -21,7 +21,7 @@ interface HomophoneRepositoryInterface extends RepositoryInterface
     /**
      * Get paginated homophones with search.
      */
-    public function getPaginatedWithSearch(?string $search = null, int $perPage = 10): LengthAwarePaginator;
+    public function getPaginatedWithSearch(?string $search = null, int $perPage = 10, string $sortBy = 'id', string $sortDir = 'asc', string $hasHomophones = ''): LengthAwarePaginator;
 
     /**
      * Get homophone with all relations.

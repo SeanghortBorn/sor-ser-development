@@ -35,21 +35,38 @@ class HomophoneRepository extends BaseRepository implements HomophoneRepositoryI
             ->get();
     }
 
-    public function getPaginatedWithSearch(?string $search = null, int $perPage = 10): LengthAwarePaginator
+    public function getPaginatedWithSearch(?string $search = null, int $perPage = 10, string $sortBy = 'id', string $sortDir = 'asc', string $hasHomophones = ''): LengthAwarePaginator
     {
         $query = Homophone::with('variants')
-            ->where('is_active', true)
-            ->orderBy('id', 'asc');
+            ->where('is_active', true);
 
+        // Search filter
         if ($search && trim($search) !== '') {
             $searchTerm = trim($search);
             $query->where(function ($q) use ($searchTerm) {
                 $q->where('word', 'like', "%{$searchTerm}%")
+                    ->orWhere('pos', 'like', "%{$searchTerm}%")
+                    ->orWhere('pro', 'like', "%{$searchTerm}%")
+                    ->orWhere('definition', 'like', "%{$searchTerm}%")
                     ->orWhereHas('variants', function ($subQ) use ($searchTerm) {
                         $subQ->where('variant_word', 'like', "%{$searchTerm}%");
                     });
             });
         }
+
+        // Filter by has homophones
+        if ($hasHomophones === 'yes') {
+            $query->has('variants');
+        } elseif ($hasHomophones === 'no') {
+            $query->doesntHave('variants');
+        }
+
+        // Sorting
+        $allowedSortFields = ['id', 'word', 'created_at'];
+        $sortField = in_array($sortBy, $allowedSortFields) ? $sortBy : 'id';
+        $sortDirection = in_array(strtolower($sortDir), ['asc', 'desc']) ? strtolower($sortDir) : 'asc';
+        
+        $query->orderBy($sortField, $sortDirection);
 
         return $query->paginate($perPage);
     }

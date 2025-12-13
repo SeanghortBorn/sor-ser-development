@@ -28,6 +28,18 @@ export default function HomophonesPage({ homophones, search = "" }) {
     const [parsedData, setParsedData] = useState(null);
     const [importProgress, setImportProgress] = useState(0);
     const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+    const [scanningForDuplicates, setScanningForDuplicates] = useState(false);
+    const [duplicateMessage, setDuplicateMessage] = useState("");
+    const [scanProgress, setScanProgress] = useState(0);
+    const [activeFilters, setActiveFilters] = useState({
+        pos: "",
+        hasHomophones: "",
+        sortBy: "id",
+        sortDir: "asc"
+    });
+        const [sortByDropdownOpen, setSortByDropdownOpen] = useState(false);
+        const [sortDirDropdownOpen, setSortDirDropdownOpen] = useState(false);
+        const [hasHomophonesDropdownOpen, setHasHomophonesDropdownOpen] = useState(false);
     const fileInputRef = useRef();
     const dropdownRef = useRef(null);
 
@@ -60,6 +72,17 @@ export default function HomophonesPage({ homophones, search = "" }) {
     // Scan for duplicates first
     const scanForDuplicates = async (data) => {
         try {
+            setScanningForDuplicates(true);
+            setScanProgress(0);
+            
+            // Start simulated progress
+            const progressInterval = setInterval(() => {
+                setScanProgress(prev => {
+                    if (prev >= 90) return prev;
+                    return prev + 5;
+                });
+            }, 300);
+            
             const response = await axios.post(
                 route("homophones.import") + "?scan=true",
                 data,
@@ -70,8 +93,17 @@ export default function HomophonesPage({ homophones, search = "" }) {
                 }
             );
 
+            clearInterval(progressInterval);
+            setScanProgress(100);
+            
+            setTimeout(() => {
+                setScanningForDuplicates(false);
+                setScanProgress(0);
+            }, 500);
+            
             if (response.data.has_duplicates) {
                 setDuplicates(response.data.duplicates);
+                setDuplicateMessage(response.data.message || "");
                 setShowDuplicateModal(true);
                 setImportProcessing(false);
                 return true; // Has duplicates
@@ -79,6 +111,8 @@ export default function HomophonesPage({ homophones, search = "" }) {
             return false; // No duplicates
         } catch (error) {
             console.error("Duplicate scan error:", error);
+            setScanningForDuplicates(false);
+            setScanProgress(0);
             setImportError("Failed to scan for duplicates.");
             setImportProcessing(false);
             return false;
@@ -281,14 +315,52 @@ export default function HomophonesPage({ homophones, search = "" }) {
     const handleSearch = (e) => {
         const value = e.target.value;
         setSearchTerm(value);
+        applyFilters({ search: value });
+    };
+
+    // Apply filters function
+    const applyFilters = (overrides = {}) => {
+        const filters = { ...activeFilters, ...overrides };
+        
+        const params = {};
+        if (searchTerm || overrides.search !== undefined) {
+            params.search = overrides.search !== undefined ? overrides.search : searchTerm;
+        }
+        if (filters.pos) params.pos = filters.pos;
+        if (filters.hasHomophones) params.hasHomophones = filters.hasHomophones;
+        if (filters.sortBy) params.sortBy = filters.sortBy;
+        if (filters.sortDir) params.sortDir = filters.sortDir;
+        
         router.get(
             route("homophones.index"),
-            { search: value },
+            params,
             {
                 preserveState: true,
                 replace: true,
             }
         );
+    };
+
+    // Handle filter changes
+    const handleFilterChange = (key, value) => {
+        const newFilters = { ...activeFilters, [key]: value };
+        setActiveFilters(newFilters);
+        applyFilters(newFilters);
+    };
+
+    // Clear all filters
+    const clearFilters = () => {
+        setActiveFilters({
+            pos: "",
+            hasHomophones: "",
+            sortBy: "id",
+            sortDir: "asc"
+        });
+        setSearchTerm("");
+        router.get(route("homophones.index"), {}, {
+            preserveState: true,
+            replace: true,
+        });
     };
 
     return (
@@ -317,14 +389,15 @@ export default function HomophonesPage({ homophones, search = "" }) {
                                         {/* Filter Dropdown Button */}
                                         <button
                                             type="button"
-                                            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm bg-gray-100 hover:bg-gray-200 hover:shadow-sm text-gray-700 transition focus:outline-none focus:ring-1 focus:ring-gray-400"
+                                            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-lg active:scale-95 focus:outline-none"
                                             onClick={() =>
                                                 setDropdownOpen((open) => !open)
                                             }
                                         >
+                                            <i className="fas fa-filter w-4 h-4" />
                                             <span>Filter</span>
                                             <i
-                                                className={`fas fa-chevron-down ml-1 transition-transform duration-200 ${
+                                                className={`fas fa-chevron-down transition-transform duration-300 ${
                                                     dropdownOpen
                                                         ? "rotate-180"
                                                         : ""
@@ -332,11 +405,162 @@ export default function HomophonesPage({ homophones, search = "" }) {
                                             />
                                         </button>
 
-                                        {/* Dropdown Menu - Empty for now, can be used for future filters */}
+                                        {/* Dropdown Menu */}
                                         {dropdownOpen && (
-                                            <div className="absolute left-0 mt-2 w-48 bg-white border border-gray-200 rounded-xl shadow-lg z-50 animate-fade-in">
-                                                <div className="py-2 px-2">
-                                                    <p className="px-3 py-2 text-sm text-gray-500">No filters available</p>
+                                            <div className="absolute left-0 mt-2 w-72 bg-white border border-gray-200 rounded-xl shadow-lg z-50 animate-fade-in">
+                                                <div className="p-4 space-y-4">
+                                                    {/* Sort By */}
+                                                    <div className="relative">
+                                                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                                            Sort By
+                                                        </label>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setSortByDropdownOpen(!sortByDropdownOpen)}
+                                                            className="w-full px-3 py-2 border border-gray-300 rounded-xl bg-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm font-medium text-gray-700 transition-all duration-200 hover:border-purple-400 flex items-center justify-between"
+                                                        >
+                                                            <span>
+                                                                {activeFilters.sortBy === "id" && "Order Added"}
+                                                                {activeFilters.sortBy === "word" && "Alphabetically"}
+                                                                {activeFilters.sortBy === "created_at" && "Date Created"}
+                                                            </span>
+                                                            <i className={`fas fa-chevron-down transition-transform duration-200 ${sortByDropdownOpen ? 'rotate-180' : ''}`} />
+                                                        </button>
+                                                        {sortByDropdownOpen && (
+                                                            <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden animate-fade-in">
+                                                                <div
+                                                                    onClick={() => {
+                                                                        handleFilterChange("sortBy", "id");
+                                                                        setSortByDropdownOpen(false);
+                                                                    }}
+                                                                    className="px-3 py-2 text-sm font-medium text-gray-700 hover:bg-purple-50 cursor-pointer transition-colors duration-150"
+                                                                >
+                                                                    Order Added
+                                                                </div>
+                                                                <div
+                                                                    onClick={() => {
+                                                                        handleFilterChange("sortBy", "word");
+                                                                        setSortByDropdownOpen(false);
+                                                                    }}
+                                                                    className="px-3 py-2 text-sm font-medium text-gray-700 hover:bg-purple-50 cursor-pointer transition-colors duration-150"
+                                                                >
+                                                                    Alphabetically
+                                                                </div>
+                                                                <div
+                                                                    onClick={() => {
+                                                                        handleFilterChange("sortBy", "created_at");
+                                                                        setSortByDropdownOpen(false);
+                                                                    }}
+                                                                    className="px-3 py-2 text-sm font-medium text-gray-700 hover:bg-purple-50 cursor-pointer transition-colors duration-150"
+                                                                >
+                                                                    Date Created
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </div>
+
+                                                    {/* Sort Direction */}
+                                                    <div className="relative">
+                                                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                                            Direction
+                                                        </label>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setSortDirDropdownOpen(!sortDirDropdownOpen)}
+                                                            className="w-full px-3 py-2 border border-gray-300 rounded-xl bg-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm font-medium text-gray-700 transition-all duration-200 hover:border-purple-400 flex items-center justify-between"
+                                                        >
+                                                            <span>
+                                                                {activeFilters.sortDir === "asc" && "Ascending"}
+                                                                {activeFilters.sortDir === "desc" && "Descending"}
+                                                            </span>
+                                                            <i className={`fas fa-chevron-down transition-transform duration-200 ${sortDirDropdownOpen ? 'rotate-180' : ''}`} />
+                                                        </button>
+                                                        {sortDirDropdownOpen && (
+                                                            <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden animate-fade-in">
+                                                                <div
+                                                                    onClick={() => {
+                                                                        handleFilterChange("sortDir", "asc");
+                                                                        setSortDirDropdownOpen(false);
+                                                                    }}
+                                                                    className="px-3 py-2 text-sm font-medium text-gray-700 hover:bg-purple-50 cursor-pointer transition-colors duration-150"
+                                                                >
+                                                                    Ascending
+                                                                </div>
+                                                                <div
+                                                                    onClick={() => {
+                                                                        handleFilterChange("sortDir", "desc");
+                                                                        setSortDirDropdownOpen(false);
+                                                                    }}
+                                                                    className="px-3 py-2 text-sm font-medium text-gray-700 hover:bg-purple-50 cursor-pointer transition-colors duration-150"
+                                                                >
+                                                                    Descending
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </div>
+
+                                                    {/* Has Homophones Filter */}
+                                                    <div className="relative">
+                                                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                                            Has Homophones
+                                                        </label>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setHasHomophonesDropdownOpen(!hasHomophonesDropdownOpen)}
+                                                            className="w-full px-3 py-2 border border-gray-300 rounded-xl bg-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm font-medium text-gray-700 transition-all duration-200 hover:border-purple-400 flex items-center justify-between"
+                                                        >
+                                                            <span>
+                                                                {activeFilters.hasHomophones === "" && "All"}
+                                                                {activeFilters.hasHomophones === "yes" && "With Homophones"}
+                                                                {activeFilters.hasHomophones === "no" && "Without Homophones"}
+                                                            </span>
+                                                            <i className={`fas fa-chevron-down transition-transform duration-200 ${hasHomophonesDropdownOpen ? 'rotate-180' : ''}`} />
+                                                        </button>
+                                                        {hasHomophonesDropdownOpen && (
+                                                            <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden animate-fade-in">
+                                                                <div
+                                                                    onClick={() => {
+                                                                        handleFilterChange("hasHomophones", "");
+                                                                        setHasHomophonesDropdownOpen(false);
+                                                                    }}
+                                                                    className="px-3 py-2 text-sm font-medium text-gray-700 hover:bg-purple-50 cursor-pointer transition-colors duration-150"
+                                                                >
+                                                                    All
+                                                                </div>
+                                                                <div
+                                                                    onClick={() => {
+                                                                        handleFilterChange("hasHomophones", "yes");
+                                                                        setHasHomophonesDropdownOpen(false);
+                                                                    }}
+                                                                    className="px-3 py-2 text-sm font-medium text-gray-700 hover:bg-purple-50 cursor-pointer transition-colors duration-150"
+                                                                >
+                                                                    With Homophones
+                                                                </div>
+                                                                <div
+                                                                    onClick={() => {
+                                                                        handleFilterChange("hasHomophones", "no");
+                                                                        setHasHomophonesDropdownOpen(false);
+                                                                    }}
+                                                                    className="px-3 py-2 text-sm font-medium text-gray-700 hover:bg-purple-50 cursor-pointer transition-colors duration-150"
+                                                                >
+                                                                    Without Homophones
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </div>
+
+                                                    {/* Clear Filters */}
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            clearFilters();
+                                                            setDropdownOpen(false);
+                                                        }}
+                                                        className="w-full px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 rounded-xl transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-lg active:scale-95 flex items-center justify-center gap-2"
+                                                    >
+                                                        <i className="fas fa-times-circle" />
+                                                        Clear Filters
+                                                    </button>
                                                 </div>
                                             </div>
                                         )}
@@ -385,51 +609,55 @@ export default function HomophonesPage({ homophones, search = "" }) {
                             <table className="min-w-full table-auto">
                                 <thead className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm">
                                     <tr>
-                                        <th className="px-6 py-4 font-semibold">ID</th>
-                                        <th className="px-6 py-4 font-semibold">Word</th>
-                                        <th className="px-6 py-4 font-semibold">POS</th>
-                                        <th className="px-6 py-4 font-semibold">
+                                        <th className="px-4 py-4 font-semibold w-16">No.</th>
+                                        <th className="px-4 py-4 font-semibold w-32">Word</th>
+                                        <th className="px-4 py-4 font-semibold w-20">POS</th>
+                                        <th className="px-4 py-4 font-semibold w-32">
                                             Pronunciation
                                         </th>
-                                        <th className="px-6 py-4 font-semibold">
+                                        <th className="px-4 py-4 font-semibold w-64">
                                             Definition
                                         </th>
-                                        <th className="px-6 py-4 font-semibold">Example</th>
-                                        <th className="px-6 py-4 font-semibold">Phoneme</th>
-                                        <th className="px-6 py-4 font-semibold">
+                                        <th className="px-4 py-4 font-semibold w-48">Example</th>
+                                        <th className="px-4 py-4 font-semibold w-24">Phoneme</th>
+                                        <th className="px-4 py-4 font-semibold w-32">
                                             Homophones
                                         </th>
-                                        <th className="px-6 py-4 font-semibold">Actions</th>
+                                        <th className="px-4 py-4 font-semibold w-32">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody className="text-sm divide-y divide-gray-200 bg-white">
                                     {datasList.length > 0 ? (
-                                        datasList.map((item) => (
+                                        datasList.map((item, index) => {
+                                            const currentPage = homophones?.current_page || 1;
+                                            const perPage = homophones?.per_page || 10;
+                                            const orderNumber = (currentPage - 1) * perPage + index + 1;
+                                            return (
                                             <tr
                                                 key={item.id}
                                                 className="hover:bg-blue-50 transition-all duration-200">
-                                                <td className="px-6 py-4 font-medium text-gray-900">
-                                                    {item.id}
+                                                <td className="px-4 py-4 font-medium text-gray-900 text-center">
+                                                    {orderNumber}
                                                 </td>
-                                                <td className="px-6 py-4 font-medium text-gray-900">
+                                                <td className="px-4 py-4 font-medium text-gray-900">
                                                     {item.word}
                                                 </td>
-                                                <td className="px-6 py-4 text-gray-700">
+                                                <td className="px-4 py-4 text-gray-700 text-center">
                                                     {item.pos}
                                                 </td>
-                                                <td className="px-6 py-4 text-gray-700">
+                                                <td className="px-4 py-4 text-gray-700">
                                                     {item.pro}
                                                 </td>
-                                                <td className="px-6 py-4 text-gray-700">
+                                                <td className="px-4 py-4 text-gray-700">
                                                     {item.definition}
                                                 </td>
-                                                <td className="px-6 py-4 text-gray-700">
+                                                <td className="px-4 py-4 text-gray-700">
                                                     {item.example}
                                                 </td>
-                                                <td className="px-6 py-4 text-gray-700">
+                                                <td className="px-4 py-4 text-gray-700 text-center">
                                                     {item.phoneme}
                                                 </td>
-                                                <td className="px-6 py-4 text-gray-700">
+                                                <td className="px-4 py-4 text-gray-700">
                                                     {Array.isArray(
                                                         item.homophone
                                                     )
@@ -438,7 +666,7 @@ export default function HomophonesPage({ homophones, search = "" }) {
                                                           )
                                                         : ""}
                                                 </td>
-                                                <td className="px-6 py-4">
+                                                <td className="px-4 py-4">
                                                     <div className="flex gap-2 justify-center">
                                                         <Link
                                                             href={route(
@@ -463,7 +691,8 @@ export default function HomophonesPage({ homophones, search = "" }) {
                                                     </div>
                                                 </td>
                                             </tr>
-                                        ))
+                                            );
+                                        })
                                     ) : (
                                         <tr>
                                             <td
@@ -479,48 +708,57 @@ export default function HomophonesPage({ homophones, search = "" }) {
                         </div>
 
                         {/* Delete confirmation modal */}
-                        <Modal
-                            show={showDeleteModal}
-                            onClose={() => {
-                                setShowDeleteModal(false);
-                                setDeleteTarget(null);
-                                setDeleteProcessing(false);
-                            }}
-                            maxWidth="lg"
-                        >
-                            <form onSubmit={confirmDelete} className="p-6">
-                                <h2 className="text-lg font-semibold text-gray-800 mb-2">
-                                    Delete Homophone
-                                </h2>
-                                <p className="text-gray-700 mb-4">
-                                    Are you sure you want to delete "
-                                    {deleteTarget?.word}"?
-                                </p>
-                                <div className="flex justify-between gap-3">
-                                    <button
-                                        type="button"
-                                        onClick={() => {
+                        {showDeleteModal && (
+                            <div className="fixed inset-0 z-50 flex items-center justify-center">
+                                {/* Backdrop with blur */}
+                                <div 
+                                    className="absolute inset-0 bg-gray-900/50 backdrop-blur-sm"
+                                    onClick={() => {
+                                        if (!deleteProcessing) {
                                             setShowDeleteModal(false);
                                             setDeleteTarget(null);
                                             setDeleteProcessing(false);
-                                        }}
-                                        className="rounded-2xl border-2 border-gray-300 px-8 py-2 text-gray-700 hover:bg-gray-100 transition font-semibold"
-                                        disabled={deleteProcessing}
-                                    >
-                                        Cancel
-                                    </button>
-                                    <button
-                                        type="submit"
-                                        className="rounded-2xl px-9 py-2 text-white font-semibold transition bg-red-600 hover:bg-red-700"
-                                        disabled={deleteProcessing}
-                                    >
-                                        {deleteProcessing
-                                            ? "Deleting..."
-                                            : "Delete"}
-                                    </button>
+                                        }
+                                    }}
+                                />
+                                
+                                {/* Modal Content */}
+                                <div className="relative bg-white rounded-2xl shadow-xl max-w-lg w-full mx-4 z-10 animate-fade-in">
+                                    <form onSubmit={confirmDelete} className="p-6">
+                                        <h2 className="text-lg font-semibold text-gray-800 mb-2">
+                                            Delete Homophone
+                                        </h2>
+                                        <p className="text-gray-700 mb-4">
+                                            Are you sure you want to delete "
+                                            {deleteTarget?.word}"?
+                                        </p>
+                                        <div className="flex justify-between gap-3">
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setShowDeleteModal(false);
+                                                    setDeleteTarget(null);
+                                                    setDeleteProcessing(false);
+                                                }}
+                                                className="rounded-2xl border-2 border-gray-300 px-8 py-2 text-gray-700 hover:bg-gray-100 transition font-semibold"
+                                                disabled={deleteProcessing}
+                                            >
+                                                Cancel
+                                            </button>
+                                            <button
+                                                type="submit"
+                                                className="rounded-2xl px-9 py-2 text-white font-semibold transition bg-red-600 hover:bg-red-700"
+                                                disabled={deleteProcessing}
+                                            >
+                                                {deleteProcessing
+                                                    ? "Deleting..."
+                                                    : "Delete"}
+                                            </button>
+                                        </div>
+                                    </form>
                                 </div>
-                            </form>
-                        </Modal>
+                            </div>
+                        )}
 
                         {/* Import Modal with backdrop blur */}
                         {showImportModal && (
@@ -550,19 +788,36 @@ export default function HomophonesPage({ homophones, search = "" }) {
                                             file with homophone data.
                                         </p>
                                         
-                                        {importProcessing ? (
+                                        {importProcessing || scanningForDuplicates ? (
                                             /* Progress Animation */
                                             <div className="py-8">
                                                 <div className="flex flex-col items-center justify-center space-y-4">
                                                     <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
-                                                    <p className="text-gray-700 font-medium">Importing homophones...</p>
-                                                    <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-                                                        <div 
-                                                            className="bg-blue-600 h-full transition-all duration-300 ease-out"
-                                                            style={{ width: `${importProgress}%` }}
-                                                        ></div>
-                                                    </div>
-                                                    <p className="text-sm text-gray-500">{importProgress}%</p>
+                                                    <p className="text-gray-700 font-medium">
+                                                        {scanningForDuplicates ? "Scanning for duplicates..." : "Importing homophones..."}
+                                                    </p>
+                                                    {importProcessing && (
+                                                        <>
+                                                            <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                                                                <div 
+                                                                    className="bg-blue-600 h-full transition-all duration-300 ease-out"
+                                                                    style={{ width: `${importProgress}%` }}
+                                                                ></div>
+                                                            </div>
+                                                            <p className="text-sm text-gray-500">{importProgress}%</p>
+                                                        </>
+                                                    )}
+                                                    {scanningForDuplicates && (
+                                                        <>
+                                                            <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                                                                <div 
+                                                                    className="bg-blue-600 h-full transition-all duration-300 ease-out"
+                                                                    style={{ width: `${scanProgress}%` }}
+                                                                ></div>
+                                                            </div>
+                                                            <p className="text-sm text-gray-500">Scanning: {scanProgress}%</p>
+                                                        </>
+                                                    )}
                                                 </div>
                                             </div>
                                         ) : (
@@ -615,7 +870,7 @@ export default function HomophonesPage({ homophones, search = "" }) {
                                             </div>
                                         )}
                                         
-                                        {!importProcessing && (
+                                        {!importProcessing && !scanningForDuplicates && (
                                             <div className="flex justify-end gap-3 mt-6">
                                                 <button
                                                     type="button"
@@ -645,72 +900,88 @@ export default function HomophonesPage({ homophones, search = "" }) {
                         )}
 
                         {/* Clear All confirmation modal */}
-                        <Modal
-                            show={showClearModal}
-                            onClose={() => {
-                                setShowClearModal(false);
-                                setClearProcessing(false);
-                            }}
-                            maxWidth="lg"
-                        >
-                            <form
-                                onSubmit={(e) => {
-                                    e.preventDefault();
-                                    handleClearAll();
-                                }}
-                                className="p-6"
-                            >
-                                <h2 className="text-lg font-semibold text-gray-800 mb-2">
-                                    Clear All Homophones
-                                </h2>
-                                <p className="text-gray-700 mb-4">
-                                    Are you sure you want to{" "}
-                                    <b>delete all homophones</b>? This action
-                                    cannot be undone.
-                                </p>
-                                <div className="flex justify-between gap-3">
-                                    <button
-                                        type="button"
-                                        onClick={() => {
+                        {showClearModal && (
+                            <div className="fixed inset-0 z-50 flex items-center justify-center">
+                                {/* Backdrop with blur */}
+                                <div 
+                                    className="absolute inset-0 bg-gray-900/50 backdrop-blur-sm"
+                                    onClick={() => {
+                                        if (!clearProcessing) {
                                             setShowClearModal(false);
                                             setClearProcessing(false);
+                                        }
+                                    }}
+                                />
+                                
+                                {/* Modal Content */}
+                                <div className="relative bg-white rounded-2xl shadow-xl max-w-lg w-full mx-4 z-10 animate-fade-in">
+                                    <form
+                                        onSubmit={(e) => {
+                                            e.preventDefault();
+                                            handleClearAll();
                                         }}
-                                        className="rounded-2xl border-2 border-gray-300 px-8 py-2 text-gray-700 hover:bg-gray-100 transition font-semibold"
-                                        disabled={clearProcessing}
+                                        className="p-6"
                                     >
-                                        Cancel
-                                    </button>
-                                    <button
-                                        type="submit"
-                                        className="rounded-2xl px-9 py-2 text-white font-semibold transition bg-red-600 hover:bg-red-700"
-                                        disabled={clearProcessing}
-                                    >
-                                        {clearProcessing
-                                            ? "Clearing..."
-                                            : "Clear All"}
-                                    </button>
+                                        <h2 className="text-lg font-semibold text-gray-800 mb-2">
+                                            Clear All Homophones
+                                        </h2>
+                                        <p className="text-gray-700 mb-4">
+                                            Are you sure you want to{" "}
+                                            <b>delete all homophones</b>? This action
+                                            cannot be undone.
+                                        </p>
+                                        <div className="flex justify-between gap-3">
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setShowClearModal(false);
+                                                    setClearProcessing(false);
+                                                }}
+                                                className="rounded-2xl border-2 border-gray-300 px-8 py-2 text-gray-700 hover:bg-gray-100 transition font-semibold"
+                                                disabled={clearProcessing}
+                                            >
+                                                Cancel
+                                            </button>
+                                            <button
+                                                type="submit"
+                                                className="rounded-2xl px-9 py-2 text-white font-semibold transition bg-red-600 hover:bg-red-700"
+                                                disabled={clearProcessing}
+                                            >
+                                                {clearProcessing
+                                                    ? "Clearing..."
+                                                    : "Clear All"}
+                                            </button>
+                                        </div>
+                                    </form>
                                 </div>
-                            </form>
-                        </Modal>
+                            </div>
+                        )}
 
                         {/* Duplicate Resolution Modal */}
-                        <Modal
-                            show={showDuplicateModal}
-                            onClose={() => {
-                                setShowDuplicateModal(false);
-                                setDuplicates([]);
-                                setDuplicateResolutions({});
-                                setImportProcessing(false);
-                            }}
-                            maxWidth="4xl"
-                        >
-                            <div className="p-6">
+                        {showDuplicateModal && (
+                            <div className="fixed inset-0 z-50 flex items-center justify-center">
+                                {/* Backdrop - clicking it should NOT close modal during important operations */}
+                                <div 
+                                    className="absolute inset-0 bg-gray-900/50 backdrop-blur-sm"
+                                />
+                                
+                                {/* Modal Content - make it scrollable */}
+                                <div className="relative bg-white rounded-2xl shadow-xl max-w-4xl w-full mx-4 z-10 animate-fade-in max-h-[90vh] overflow-y-auto">
+                                    <div className="p-6">
                                 <h2 className="text-lg font-semibold text-gray-800 mb-2">
                                     Duplicate Homophones Found
                                 </h2>
-                                <p className="text-gray-700 mb-4">
+                                <p className="text-gray-700 mb-2">
                                     Found {duplicates.length} duplicate(s). Choose whether to replace the existing entries or skip importing them.
                                 </p>
+                                {duplicateMessage && (
+                                    <div className="bg-yellow-50 border border-yellow-200 rounded-xl px-4 py-2 mb-4">
+                                        <p className="text-sm text-yellow-800">
+                                            <i className="fas fa-info-circle mr-2"></i>
+                                            {duplicateMessage}
+                                        </p>
+                                    </div>
+                                )}
 
                                 {/* Bulk Actions */}
                                 <div className="flex gap-2 mb-4">
@@ -828,8 +1099,10 @@ export default function HomophonesPage({ homophones, search = "" }) {
                                         {importProcessing ? "Importing..." : "Proceed with Import"}
                                     </button>
                                 </div>
+                                    </div>
+                                </div>
                             </div>
-                        </Modal>
+                        )}
 
                         {/* Pagination */}
                         {homophones.total > 10 && (
@@ -842,8 +1115,8 @@ export default function HomophonesPage({ homophones, search = "" }) {
                                 />
                             </div>
                         )}
-                    </div>
-                    
+                </div>
+                
             {/* Success Message */}
             {showSuccessMessage && (
                 <div className="fixed top-4 right-4 z-50 animate-fade-in">

@@ -22,8 +22,12 @@ class Homophone extends Model
      */
     protected $fillable = [
         'word',
+        'pos',
+        'pro',
         'definition',
         'pronunciation',
+        'example',
+        'phoneme',
         'explanation',
         'examples',
         'is_active',

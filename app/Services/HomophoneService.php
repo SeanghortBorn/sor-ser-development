@@ -24,9 +24,9 @@ class HomophoneService
     /**
      * Get paginated homophones with optional search.
      */
-    public function getPaginated(?string $search = null, int $perPage = 10): LengthAwarePaginator
+    public function getPaginated(?string $search = null, int $perPage = 10, string $sortBy = 'id', string $sortDir = 'asc', string $hasHomophones = ''): LengthAwarePaginator
     {
-        return $this->homophoneRepository->getPaginatedWithSearch($search, $perPage);
+        return $this->homophoneRepository->getPaginatedWithSearch($search, $perPage, $sortBy, $sortDir, $hasHomophones);
     }
 
     /**
@@ -52,8 +52,12 @@ class HomophoneService
     {
         $homophoneData = [
             'word' => $data['word'],
+            'pos' => $data['pos'] ?? null,
+            'pro' => $data['pro'] ?? null,
             'pronunciation' => $data['pro'] ?? $data['phoneme'] ?? $data['pos'] ?? null,
             'definition' => $data['definition'] ?? null,
+            'example' => $data['example'] ?? null,
+            'phoneme' => $data['phoneme'] ?? null,
             'examples' => isset($data['example']) ? [$data['example']] : null,
             'is_active' => true,
         ];
@@ -70,8 +74,12 @@ class HomophoneService
     {
         $homophoneData = [
             'word' => $data['word'],
+            'pos' => $data['pos'] ?? null,
+            'pro' => $data['pro'] ?? null,
             'pronunciation' => $data['pro'] ?? $data['phoneme'] ?? $data['pos'] ?? null,
             'definition' => $data['definition'] ?? null,
+            'example' => $data['example'] ?? null,
+            'phoneme' => $data['phoneme'] ?? null,
             'examples' => isset($data['example']) ? [$data['example']] : null,
         ];
 
@@ -150,13 +158,15 @@ class HomophoneService
         return [
             'id' => $homophone->id,
             'word' => $homophone->word,
-            'pos' => $homophone->pronunciation,
-            'pro' => $homophone->pronunciation,
+            'pos' => $homophone->pos,
+            'pro' => $homophone->pro,
             'definition' => $homophone->definition,
-            'example' => is_array($homophone->examples)
-                ? implode(', ', $homophone->examples)
-                : ($homophone->examples ?? ''),
-            'phoneme' => $homophone->pronunciation,
+            'example' => $homophone->example ?? (
+                is_array($homophone->examples)
+                    ? implode(', ', $homophone->examples)
+                    : ($homophone->examples ?? '')
+            ),
+            'phoneme' => $homophone->phoneme,
             'homophone' => $homophone->variant_words,
             'is_active' => $homophone->is_active,
             'created_at' => $homophone->created_at,

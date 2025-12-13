@@ -20,8 +20,11 @@ class HomophoneController extends Controller
     public function index(Request $request)
     {
         $search = trim($request->query('search', ''));
+        $sortBy = $request->query('sortBy', 'id');
+        $sortDir = $request->query('sortDir', 'asc');
+        $hasHomophones = $request->query('hasHomophones', '');
 
-        $homophones = $this->homophoneService->getPaginated($search, 10);
+        $homophones = $this->homophoneService->getPaginated($search, 10, $sortBy, $sortDir, $hasHomophones);
 
         // Transform data for frontend compatibility
         $homophones->through(function ($homophone) {
@@ -166,9 +169,9 @@ class HomophoneController extends Controller
                         'pos' => $data['pos'] ?? $data['POS'] ?? null,
                         'pro' => $data['pro'] ?? $data['Pronunciation'] ?? null,
                         'definition' => $data['definition'] ?? $data['Definition'] ?? null,
-                        'example' => $data['example'] ?? $data['Example'] ?? '',
-                        'phoneme' => $data['phoneme'] ?? $data['Phoneme'] ?? '',
-                        'homophone' => $data['homophone'] ?? [],
+                        'example' => $data['example'] ?? $data['Example'] ?? null,
+                        'phoneme' => $data['phoneme'] ?? $data['Phoneme'] ?? null,
+                        'homophone' => $data['homophone'] ?? $data['Homophone'] ?? [],
                     ];
 
                     if (empty($normalized['word']) || empty($normalized['definition'])) {
@@ -196,8 +199,12 @@ class HomophoneController extends Controller
                             // Update existing homophone
                             $homophonesToUpdate[$existingId] = [
                                 'word' => $normalized['word'],
+                                'pos' => $normalized['pos'],
+                                'pro' => $normalized['pro'],
                                 'pronunciation' => $pronunciation,
                                 'definition' => $normalized['definition'],
+                                'example' => $normalized['example'],
+                                'phoneme' => $normalized['phoneme'],
                                 'examples' => $normalized['example'] ? json_encode([$normalized['example']]) : null,
                                 'updated_at' => $now,
                             ];
@@ -214,8 +221,12 @@ class HomophoneController extends Controller
                     // Prepare homophone for batch insert
                     $homophonesToInsert[] = [
                         'word' => $normalized['word'],
-                        'pronunciation' => $normalized['pro'] ?? $normalized['phoneme'] ?? $normalized['pos'],
+                        'pos' => $normalized['pos'],
+                        'pro' => $normalized['pro'],
+                        'pronunciation' => $pronunciation,
                         'definition' => $normalized['definition'],
+                        'example' => $normalized['example'],
+                        'phoneme' => $normalized['phoneme'],
                         'examples' => $normalized['example'] ? json_encode([$normalized['example']]) : null,
                         'is_active' => true,
                         'created_at' => $now,
@@ -321,7 +332,39 @@ class HomophoneController extends Controller
      */
     private function scanForDuplicates($homophones, $normalize)
     {
-        // Build existing homophones map (word + pronunciation)
+        // For large datasets, limit the number of items to scan
+        $maxDuplicatesToReturn = 100; // Only return first 100 duplicates for UI performance
+        
+        // Build a list of words to check more efficiently
+        $wordsToCheck = [];
+        $wordIndex = [];
+        
+        foreach ($homophones as $index => $data) {
+            $word = $data['word'] ?? $data['Word'] ?? null;
+            $pronunciation = $data['pro'] ?? $data['Pronunciation'] ?? $data['pos'] ?? $data['POS'] ?? $data['phoneme'] ?? $data['Phoneme'] ?? null;
+            
+            if (empty($word)) {
+                continue;
+            }
+            
+            $normalizedKey = $normalize($word) . '|' . $normalize($pronunciation ?? '');
+            
+            $wordsToCheck[] = [
+                'index' => $index,
+                'word' => $word,
+                'pronunciation' => $pronunciation,
+                'definition' => $data['definition'] ?? $data['Definition'] ?? null,
+                'normalized_key' => $normalizedKey,
+            ];
+            
+            // Build index for O(1) lookup
+            if (!isset($wordIndex[$normalizedKey])) {
+                $wordIndex[$normalizedKey] = [];
+            }
+            $wordIndex[$normalizedKey][] = count($wordsToCheck) - 1;
+        }
+
+        // Get all existing homophones at once (optimized query)
         $existingHomophones = Homophone::select('id', 'word', 'pronunciation', 'definition')
             ->get()
             ->mapWithKeys(function ($item) use ($normalize) {
@@ -335,39 +378,41 @@ class HomophoneController extends Controller
             })
             ->toArray();
 
+        // Find duplicates efficiently using the index
         $duplicates = [];
-
-        foreach ($homophones as $index => $data) {
-            $word = $data['word'] ?? $data['Word'] ?? null;
-            $pronunciation = $data['pro'] ?? $data['Pronunciation'] ?? $data['pos'] ?? $data['POS'] ?? $data['phoneme'] ?? $data['Phoneme'] ?? null;
-            $definition = $data['definition'] ?? $data['Definition'] ?? null;
-
-            if (empty($word)) {
-                continue;
-            }
-
-            $duplicateKey = $normalize($word) . '|' . $normalize($pronunciation ?? '');
-
-            if (isset($existingHomophones[$duplicateKey])) {
-                $existing = $existingHomophones[$duplicateKey];
-                $duplicates[] = [
-                    'key' => $duplicateKey,
-                    'index' => $index,
-                    'new' => [
-                        'word' => $word,
-                        'pronunciation' => $pronunciation,
-                        'definition' => $definition,
-                    ],
-                    'existing' => $existing,
-                ];
+        foreach ($existingHomophones as $key => $existing) {
+            if (isset($wordIndex[$key])) {
+                foreach ($wordIndex[$key] as $wordIdx) {
+                    $item = $wordsToCheck[$wordIdx];
+                    $duplicates[] = [
+                        'key' => $key,
+                        'index' => $item['index'],
+                        'new' => [
+                            'word' => $item['word'],
+                            'pronunciation' => $item['pronunciation'],
+                            'definition' => $item['definition'],
+                        ],
+                        'existing' => $existing,
+                    ];
+                    
+                    // Stop if we've reached the max duplicates to return
+                    if (count($duplicates) >= $maxDuplicatesToReturn) {
+                        break 2;
+                    }
+                }
             }
         }
 
+        $totalDuplicates = count($duplicates);
+        $hasMore = $totalDuplicates >= $maxDuplicatesToReturn;
+
         return response()->json([
-            'has_duplicates' => count($duplicates) > 0,
-            'duplicate_count' => count($duplicates),
+            'has_duplicates' => $totalDuplicates > 0,
+            'duplicate_count' => $totalDuplicates,
             'duplicates' => $duplicates,
             'total_items' => count($homophones),
+            'has_more_duplicates' => $hasMore,
+            'message' => $hasMore ? "Showing first {$maxDuplicatesToReturn} duplicates. More exist." : null,
         ]);
     }
 
