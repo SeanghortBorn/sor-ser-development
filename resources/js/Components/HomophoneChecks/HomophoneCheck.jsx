@@ -7,17 +7,17 @@ import PageContainer from "@/Components/Shared/PageContainer";
 export default function HomophoneCheck() {
     const { auth } = usePage().props;
     return (
-        <PageContainer className="pt-3 pb-4">
+        <PageContainer className="pt-6 pb-8">
             {auth.user ? (
                 <>
-                    <div className="text-center ">
+                    <div className="text-center mb-8">
                         <h1 className="text-2xl md:text-3xl font-semibold text-gray-600">
                             Master your Khmer word usage with {" "}
                             <span className="text-blue-500 font-semibold">
                                 {BRAND_CONSTANTS.NAME.SHORT}
                             </span>
                         </h1>
-                        <p className="text-gray-600 mt-4 max-w-6xl mx-auto">
+                        <p className="text-gray-600 mt-2 max-w-6xl mx-auto">
                             Your smart assistant that helps you avoid repeated mistakes, choose the correct homophones, and develop clearer, more confident Khmer writing.
                         </p>
                     </div>
@@ -25,7 +25,7 @@ export default function HomophoneCheck() {
             ) : (
                 <>
                     {/* Header Section */}
-                    <div className="text-center mb-9">
+                    <div className="text-center mb-6">
                         <h1 className="text-2xl md:text-3xl font-semibold text-gray-600">
                             Triple your productivity with the{" "}
                             <span className="text-blue-500 font-semibold">
@@ -42,17 +42,17 @@ export default function HomophoneCheck() {
                     </div>
 
                     {/* Features Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {/* AI at Every Step */}
-                        <div className="bg-gray-100 rounded-xl p-6">
-                            <div className="flex items-center gap-3 mb-4">
+                        <div className="bg-gray-100 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-200">
+                            <div className="flex items-center gap-3 mb-3">
                                 <Brain className="text-pink-500" size={28} />
                                 <h2 className="text-xl font-semibold text-gray-600">
                                     How To Use SorSer Tool
                                 </h2>
                             </div>
 
-                            <p className="text-gray-600 mb-6">
+                            <p className="text-gray-600 mb-4">
                                 SorSer's AI helps you write better by detecting
                                 and fixing grammar, spelling, and punctuation
                                 mistakes as you type. It works in real time, so
@@ -60,12 +60,12 @@ export default function HomophoneCheck() {
                                 care of corrections.
                             </p>
 
-                            <div className="bg-white border rounded-xl p-3">
+                            <div className="bg-white border rounded-2xl p-3 shadow-sm">
                                 <p className="text-gray-500 text-sm font-medium">
                                     Sample Grammar Checker
                                 </p>
 
-                                <div className="mt-1 p-3 rounded-xl border border-gray-200">
+                                <div className="mt-1 p-3 rounded-2xl border border-gray-200">
                                     <p className="font-medium text-gray-800 mb-1">
                                         Typing Your Sentence:
                                     </p>
@@ -95,10 +95,10 @@ export default function HomophoneCheck() {
                         </div>
 
                         {/* Right side features */}
-                        <div className="space-y-9">
+                        <div className="space-y-4">
                             {/* Lightning Fast */}
-                            <div className="bg-gray-100 rounded-xl p-6">
-                                <div className="flex items-center gap-3 mb-4">
+                            <div className="bg-gray-100 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-200">
+                                <div className="flex items-center gap-3 mb-3">
                                     <Zap
                                         className="text-orange-500"
                                         size={28}
@@ -117,8 +117,8 @@ export default function HomophoneCheck() {
                             </div>
 
                             {/* Features for Everyone */}
-                            <div className="bg-gray-100 rounded-xl p-6">
-                                <div className="flex items-center gap-3 mb-4">
+                            <div className="bg-gray-100 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-200">
+                                <div className="flex items-center gap-3 mb-3">
                                     <Rocket
                                         className="text-pink-500"
                                         size={28}

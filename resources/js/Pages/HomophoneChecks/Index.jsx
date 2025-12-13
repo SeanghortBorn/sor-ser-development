@@ -649,7 +649,7 @@ export default function Index({ articles: initialArticles = [], userRole }) {
             <div className="bg-gradient-to-b from-gray-50 to-white min-h-screen">
                 <HomophoneCheck />
 
-                <section className="relative pb-1">
+                <section className="relative pb-8">
                 <PageContainer>
                     <div
                         className={`flex flex-row gap-4 transition-all duration-300 ${
@@ -659,7 +659,7 @@ export default function Index({ articles: initialArticles = [], userRole }) {
                         {/* Left Side - Document Editor - Wrapped in Error Boundary */}
                         <ErrorBoundary
                             fallback={
-                                <div className="flex-1 bg-white rounded-xl border border-red-200 p-6 h-[75vh] flex items-center justify-center">
+                                <div className="flex-1 bg-white rounded-2xl border border-red-200 p-4 h-[75vh] flex items-center justify-center shadow-sm">
                                     <div className="text-center">
                                         <p className="text-lg font-semibold text-red-600 mb-2">Editor Error</p>
                                         <p className="text-sm text-gray-600">Failed to load editor. Please refresh the page.</p>
@@ -667,9 +667,9 @@ export default function Index({ articles: initialArticles = [], userRole }) {
                                 </div>
                             }
                         >
-                            <div className="flex-1 bg-white rounded-xl border border-gray-200 p-4 md:p-6 h-[75vh] transition-shadow duration-200 hover:shadow-sm flex flex-col">
+                            <div className="flex-1 bg-white rounded-2xl border border-gray-200 p-4 h-[75vh] transition-shadow duration-200 hover:shadow-md shadow-sm flex flex-col">
                                 {/* Title and Article Dropdown */}
-                                <div className="flex flex-row justify-between items-center mb-4 gap-3">
+                                <div className="flex flex-row justify-between items-center mb-3 gap-3">
                                     {/* Audio Player */}
                                     {(selectedArticle?.audios_id || audioPlayer.audioUrl) ? (
                                         <div className="flex-1 mr-4">
@@ -681,7 +681,7 @@ export default function Index({ articles: initialArticles = [], userRole }) {
                                                 onEnded={audioPlayer.handleAudioEnded}
                                                 className="hidden"
                                             />
-                                            <div className="bg-white border border-gray-300 rounded-xl px-3 py-1 transition-all duration-200 ease-in-out hover:shadow-sm hover:border-gray-400">
+                                            <div className="bg-white border border-gray-300 rounded-2xl px-3 py-1 transition-all duration-200 ease-in-out hover:shadow-md hover:border-gray-400 shadow-sm">
                                                 <div className="flex items-center gap-3">
                                                     <button
                                                         onClick={audioPlayer.togglePlay}

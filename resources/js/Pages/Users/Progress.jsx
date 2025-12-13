@@ -28,12 +28,12 @@ export default function UserProgress({
         <AdminLayout breadcrumb={<Breadcrumb header={`${user.name} - Progress`} links={breadcrumbLinks} />}>
             <Head title={`${user.name} - Progress Dashboard`} />
 
-            <div className="p-6">
+            <div className="p-8">
                 {/* Header with Back Button */}
-                <div className="mb-6 flex items-center justify-between">
+                <div className="mb-8 flex items-center justify-between">
                         <div>
-                            <h3 className="text-lg font-semibold mb-4">User Profile</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <h3 className="text-lg font-semibold mb-6">User Profile</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 <div>
                                     <p className="text-sm text-gray-600">Name</p>
                                     <p className="font-semibold">{user.name}</p>
@@ -70,14 +70,14 @@ export default function UserProgress({
                     </div>
 
                     {/* Learning Metrics Overview */}
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                        <div className="bg-white overflow-hidden shadow-sm rounded-xl p-6">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                        <div className="bg-white overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 rounded-2xl p-8">
                             <p className="text-sm text-gray-600">Overall Accuracy</p>
                             <p className="text-3xl font-bold text-blue-600">
                                 {learningMetrics.overall_accuracy}%
                             </p>
                         </div>
-                        <div className="bg-white overflow-hidden shadow-sm rounded-xl p-6">
+                        <div className="bg-white overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 rounded-2xl p-8">
                             <p className="text-sm text-gray-600">Progress Trend</p>
                             <p className={`text-2xl font-bold ${learningMetrics.progress_trend === 'Improving' ? 'text-green-600' :
                                     learningMetrics.progress_trend === 'Declining' ? 'text-red-600' :
@@ -86,13 +86,13 @@ export default function UserProgress({
                                 {learningMetrics.progress_trend}
                             </p>
                         </div>
-                        <div className="bg-white overflow-hidden shadow-sm rounded-xl p-6">
+                        <div className="bg-white overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 rounded-2xl p-8">
                             <p className="text-sm text-gray-600">Total Attempts</p>
                             <p className="text-3xl font-bold text-purple-600 transition-all duration-200 ease-in-out hover:scale-105">
                                 {learningMetrics.total_attempts}
                             </p>
                         </div>
-                        <div className="bg-white overflow-hidden shadow-sm rounded-xl p-6">
+                        <div className="bg-white overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 rounded-2xl p-8">
                             <p className="text-sm text-gray-600">Improvement Rate</p>
                             <p className={`text-2xl font-bold ${learningMetrics.improvement_rate > 0 ? 'text-green-600' : 'text-red-600'
                                 }`}>
@@ -103,10 +103,10 @@ export default function UserProgress({
                     </div>
 
                     {/* Strengths and Weaknesses */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                        <div className="bg-white overflow-hidden shadow-sm rounded-xl">
-                            <div className="p-6">
-                                <h3 className="text-lg font-semibold mb-3 text-green-700">Strengths</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                        <div className="bg-white overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 rounded-2xl">
+                            <div className="p-8">
+                                <h3 className="text-lg font-semibold mb-4 text-green-700">Strengths</h3>
                                 {learningMetrics.strengths.length > 0 ? (
                                     <ul className="space-y-2">
                                         {learningMetrics.strengths.map((strength, index) => (
@@ -123,9 +123,9 @@ export default function UserProgress({
                                 )}
                             </div>
                         </div>
-                        <div className="bg-white overflow-hidden shadow-sm rounded-xl">
-                            <div className="p-6">
-                                <h3 className="text-lg font-semibold mb-3 text-red-700">Areas for Improvement</h3>
+                        <div className="bg-white overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 rounded-2xl">
+                            <div className="p-8">
+                                <h3 className="text-lg font-semibold mb-4 text-red-700">Areas for Improvement</h3>
                                 {learningMetrics.weaknesses.length > 0 ? (
                                     <ul className="space-y-2">
                                         {learningMetrics.weaknesses.map((weakness, index) => (
@@ -145,9 +145,9 @@ export default function UserProgress({
                     </div>
 
                     {/* Daily Accuracy Trends Chart */}
-                    <div className="bg-white overflow-hidden shadow-sm rounded-xl mb-6">
-                        <div className="p-6">
-                            <h3 className="text-lg font-semibold mb-4">Daily Accuracy Trends (Last 30 Days)</h3>
+                    <div className="bg-white overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 rounded-2xl mb-8">
+                        <div className="p-8">
+                            <h3 className="text-lg font-semibold mb-6">Daily Accuracy Trends (Last 30 Days)</h3>
                             {accuracyTrends.length > 0 ? (
                                 <ResponsiveContainer width="100%" height={300}>
                                     <LineChart data={accuracyTrends}>
@@ -172,9 +172,9 @@ export default function UserProgress({
                     </div>
 
                     {/* Correction Patterns Chart */}
-                    <div className="bg-white overflow-hidden shadow-sm rounded-xl mb-6">
-                        <div className="p-6">
-                            <h3 className="text-lg font-semibold mb-4">Correction Patterns (Accept vs Reject)</h3>
+                    <div className="bg-white overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 rounded-2xl mb-8">
+                        <div className="p-8">
+                            <h3 className="text-lg font-semibold mb-6">Correction Patterns (Accept vs Reject)</h3>
                             {correctionPatterns.length > 0 ? (
                                 <ResponsiveContainer width="100%" height={300}>
                                     <BarChart data={correctionPatterns}>
@@ -194,11 +194,11 @@ export default function UserProgress({
                     </div>
 
                     {/* Typing Activity Chart */}
-                    <div className="bg-white overflow-hidden shadow-sm rounded-xl mb-6">
-                        <div className="p-6">
-                            <h3 className="text-lg font-semibold mb-4">Typing Activity</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                                <div className="bg-gray-50 p-4 rounded">
+                    <div className="bg-white overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 rounded-2xl mb-8">
+                        <div className="p-8">
+                            <h3 className="text-lg font-semibold mb-6">Typing Activity</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                <div className="bg-gray-50 p-6 rounded-2xl">
                                     <p className="text-sm text-gray-600">Total Characters Typed</p>
                                     <p className="text-2xl font-bold">{typingActivity.total_characters.toLocaleString()}</p>
                                 </div>
@@ -231,23 +231,23 @@ export default function UserProgress({
                     </div>
 
                     {/* Audio Listening Behavior */}
-                    <div className="bg-white overflow-hidden shadow-sm rounded-xl mb-6">
-                        <div className="p-6">
-                            <h3 className="text-lg font-semibold mb-4">Audio Listening Behavior</h3>
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                                <div className="bg-gray-50 p-4 rounded">
+                    <div className="bg-white overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 rounded-2xl mb-8">
+                        <div className="p-8">
+                            <h3 className="text-lg font-semibold mb-6">Audio Listening Behavior</h3>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6">
+                                <div className="bg-gray-50 p-6 rounded-2xl">
                                     <p className="text-sm text-gray-600">Total Plays</p>
                                     <p className="text-2xl font-bold">{audioBehavior.total_plays}</p>
                                 </div>
-                                <div className="bg-gray-50 p-4 rounded">
+                                <div className="bg-gray-50 p-6 rounded-2xl">
                                     <p className="text-sm text-gray-600">Rewinds</p>
                                     <p className="text-2xl font-bold">{audioBehavior.total_rewinds}</p>
                                 </div>
-                                <div className="bg-gray-50 p-4 rounded">
+                                <div className="bg-gray-50 p-6 rounded-2xl">
                                     <p className="text-sm text-gray-600">Fast Forwards</p>
                                     <p className="text-2xl font-bold">{audioBehavior.total_forwards}</p>
                                 </div>
-                                <div className="bg-gray-50 p-4 rounded">
+                                <div className="bg-gray-50 p-6 rounded-2xl">
                                     <p className="text-sm text-gray-600">Avg Position</p>
                                     <p className="text-2xl font-bold">{audioBehavior.avg_playback_position}s</p>
                                 </div>
