@@ -51,7 +51,7 @@ const AdminLayout = ({ breadcrumb, children }) => {
                             role="button"
                         >
                             {/* <i className="fas fa-bars"></i> */}
-                            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 border border-gray-300 px-2 py-2 rounded-xl hover:bg-gray-50 hover:border-gray-400 hover:shadow-sm transition-all duration-200 ease-in-out hover:scale-105 active:scale-95">
+                            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 border border-gray-300 px-2 py-2 rounded-2xl hover:bg-gray-50 hover:border-gray-400 hover:shadow-sm transition-all duration-200 ease-in-out hover:scale-105 active:scale-95">
                                 <svg
                                     className="block"
                                     width="16"
@@ -142,7 +142,7 @@ const AdminLayout = ({ breadcrumb, children }) => {
                                     <Link
                                         href={route("profile.edit")}
                                         onClick={() => setDropdownOpen(false)}
-                                        className="flex items-center px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-700 rounded-xl transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
+                                        className="flex items-center px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-700 rounded-2xl transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                                     >
                                         <i className="fas fa-user-circle w-4 mr-3 text-blue-500"></i>
                                         My Account
@@ -153,7 +153,7 @@ const AdminLayout = ({ breadcrumb, children }) => {
                                         href={route("logout")}
                                         as="button"
                                         onClick={() => setDropdownOpen(false)}
-                                        className="flex items-center w-full text-left px-3 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 rounded-xl transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
+                                        className="flex items-center w-full text-left px-3 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 rounded-2xl transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
                                     >
                                         <i className="fas fa-sign-out-alt w-4 mr-3 text-red-500"></i>
                                         Sign Out

@@ -72,7 +72,7 @@ function MenuItem({ href, icon, label, active }) {
     return (
         <Link
             href={href}
-            className={`flex items-center px-3 py-2 rounded-xl font-medium transition-all duration-200 ease-in-out group ${
+            className={`flex items-center px-3 py-2 rounded-2xl font-medium transition-all duration-200 ease-in-out group ${
                 active
                     ? "bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700 shadow-sm"
                     : "hover:bg-gray-50 text-gray-700 hover:shadow-sm"
