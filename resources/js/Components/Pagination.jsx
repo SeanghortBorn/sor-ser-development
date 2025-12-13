@@ -2,29 +2,52 @@ import React from 'react';
 import { Link } from '@inertiajs/react';
 
 export default function Pagination({ links }) {
+    if (!links || links.length <= 1) return null;
+
     return (
-        links?.length > 1 ? (
-            <ul className="pagination pagination-sm m-0 float-right">
-                {links.map((link, key) => (
-                    <li
+        <nav className="flex items-center justify-center gap-2">
+            {links.map((link, key) => {
+                const isActive = link.active;
+                const isDisabled = link.url === null;
+                
+                // Parse label to clean up Previous/Next text
+                let label = link.label;
+                if (label.includes('Previous')) label = '← Previous';
+                if (label.includes('Next')) label = 'Next →';
+
+                const baseClasses = "px-4 py-2 font-medium text-sm transition-all duration-200 ease-in-out";
+                const shapeClasses = "rounded-2xl";
+                
+                let stateClasses = "";
+                if (isDisabled) {
+                    stateClasses = "bg-gray-100 text-gray-400 cursor-not-allowed";
+                } else if (isActive) {
+                    stateClasses = "bg-blue-600 text-white shadow-sm";
+                } else {
+                    stateClasses = "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 hover:border-gray-400 hover:shadow-sm";
+                }
+
+                const className = `${baseClasses} ${shapeClasses} ${stateClasses}`;
+
+                if (isDisabled) {
+                    return (
+                        <span
+                            key={key}
+                            className={className}
+                            dangerouslySetInnerHTML={{ __html: label }}
+                        />
+                    );
+                }
+
+                return (
+                    <Link
                         key={key}
-                        className={`page-item ${link.active ? 'active' : ''} ${link.url === null ? 'disabled' : ''}`}
-                    >
-                        {link.url ? (
-                            <Link
-                                className="page-link"
-                                href={link.url}
-                                dangerouslySetInnerHTML={{ __html: link.label }}
-                            />
-                        ) : (
-                            <span
-                                className="page-link"
-                                dangerouslySetInnerHTML={{ __html: link.label }}
-                            />
-                        )}
-                    </li>
-                ))}
-            </ul>
-        ) : null
+                        href={link.url}
+                        className={className}
+                        dangerouslySetInnerHTML={{ __html: label }}
+                    />
+                );
+            })}
+        </nav>
     );
 }
