@@ -374,7 +374,6 @@ export default function QuizList() {
                             </div>
                         </form>
                     </Modal>
-                </div>
         </AdminLayout>
     );
 }

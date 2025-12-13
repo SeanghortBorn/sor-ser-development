@@ -283,8 +283,6 @@ export default function RolePage({ roles, search: searchProp = "" }) {
                             </div>
                         )}
                     </div>
-                </div>
-            </section>
 
             {/* View Role Modal */}
             <Modal show={!!viewingRole} onClose={closeViewRole} maxWidth="2xl">
@@ -413,7 +411,6 @@ export default function RolePage({ roles, search: searchProp = "" }) {
                     </div>
                 </form>
             </Modal>
-            </div>
         </AdminLayout>
     );
 }

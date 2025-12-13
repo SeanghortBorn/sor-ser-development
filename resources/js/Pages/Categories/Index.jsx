@@ -189,7 +189,6 @@ export default function CategoriesPage({ categoryData }) {
                             </div>
                         </form>
                     </Modal>
-                </div>
         </AdminLayout>
     );
 }

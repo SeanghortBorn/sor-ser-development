@@ -123,7 +123,6 @@ export default function SystemSettings({ roles, settings }) {
                                 </button>
                             </div>
                         </form>
-                    </div>
 
                     {/* Help Section */}
                     <div className="mt-6 bg-yellow-50 border border-yellow-200 rounded-xl p-4">
@@ -134,7 +133,6 @@ export default function SystemSettings({ roles, settings }) {
                             Go to <a href={route('roles.create')} className="underline font-medium">Roles → Create Role</a> to create custom roles with specific permissions. Then return here to set which role new users should receive.
                         </p>
                     </div>
-                </div>
             </div>
         </AdminLayout>
     );
