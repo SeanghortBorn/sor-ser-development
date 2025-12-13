@@ -4,8 +4,8 @@ import { ChevronRight, Home } from "lucide-react";
 export default function Breadcrumb(props) {
     return (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 px-6 py-4 transition-all duration-200 hover:shadow-md">
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                        <div>
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+                        <div className="text-center">
                             <h1 className="text-2xl font-bold text-gray-900 mb-1">{props?.header}</h1>
                             <p className="text-sm text-gray-500">Manage and monitor your {props?.header?.toLowerCase()}</p>
                         </div>

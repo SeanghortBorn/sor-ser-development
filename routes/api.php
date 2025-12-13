@@ -4,6 +4,7 @@ use App\Http\Controllers\AccuracyController;
 use App\Http\Controllers\KhmerCompareController;
 use App\Http\Controllers\KhmerSegmentController;
 use App\Http\Controllers\UserTypingActivityController;
+use App\Http\Controllers\UserAnalyticsController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
@@ -36,6 +37,9 @@ Route::post('/track/typing', [UserTypingActivityController::class, 'store']);
 
 Route::get('/user-homophone-accuracies', [AccuracyController::class, 'index']);
 Route::get('/user-comparison-activities', [UserActivityController::class, 'listComparisonActivities']);
+
+// User Analytics Export
+Route::post('/user-analytics/export', [UserAnalyticsController::class, 'exportDetailed']);
 
 Route::get('/quiz-attempts', function () {
     return QuizAttempt::all();

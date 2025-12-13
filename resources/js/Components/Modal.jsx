@@ -1,5 +1,4 @@
 import {
-    Dialog,
     DialogPanel,
     Transition,
     TransitionChild,
@@ -27,13 +26,18 @@ export default function Modal({
     }[maxWidth];
 
     return (
-        <Transition show={show} leave="duration-200">
-            <Dialog
-                as="div"
-                id="modal"
-                className="fixed inset-0 z-50 flex transform items-center overflow-y-auto px-4 py-6 transition-all sm:px-0"
-                onClose={close}
+        <Transition show={show} leave="duration-200" appear>
+            {/* Backdrop container */}
+            <div 
+                className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center"
+                onClick={(e) => {
+                    // Only close if clicking on the backdrop itself (not modal)
+                    if (closeable && e.target === e.currentTarget) {
+                        close();
+                    }
+                }}
             >
+                {/* Backdrop overlay */}
                 <TransitionChild
                     enter="ease-out duration-300"
                     enterFrom="opacity-0"
@@ -42,9 +46,10 @@ export default function Modal({
                     leaveFrom="opacity-100"
                     leaveTo="opacity-0"
                 >
-                    <div className="absolute inset-0 bg-gray-500/75" />
+                    <div className="absolute inset-0 bg-gray-500/75 pointer-events-none" />
                 </TransitionChild>
 
+                {/* Modal content */}
                 <TransitionChild
                     enter="ease-out duration-300"
                     enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
@@ -53,13 +58,16 @@ export default function Modal({
                     leaveFrom="opacity-100 translate-y-0 sm:scale-100"
                     leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                 >
-                    <DialogPanel
-                        className={`mb-6 transform overflow-hidden rounded-xl bg-white shadow-sm transition-all sm:mx-auto sm:w-full ${maxWidthClass}`}
+                    <div
+                        className={`relative w-full px-4 py-6 sm:px-0 ${maxWidthClass} pointer-events-auto`}
+                        onClick={(e) => e.stopPropagation()}
                     >
-                        {children}
-                    </DialogPanel>
+                        <div className="transform overflow-hidden rounded-xl bg-white shadow-xl transition-all w-full">
+                            {children}
+                        </div>
+                    </div>
                 </TransitionChild>
-            </Dialog>
+            </div>
         </Transition>
     );
 }
