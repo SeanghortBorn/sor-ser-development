@@ -37,14 +37,12 @@
         "@fortawesome/fontawesome-free": "^7.1.0",
         "@headlessui/react": "^2.2.9",
         "@inertiajs/react": "^2.2.20",
-        "@popperjs/core": "^2.11.8",
-        "admin-lte": "3.2",
         "axios": "^1.13.2",
-        "bootstrap": "^5.3.3",
+        
         "exceljs": "^4.4.0",
         "flag-icons": "^7.5.0",
         "framer-motion": "^12.23.25",
-        "jquery": "^3.7.1",
+        
         "lucide-react": "^0.556.0",
         "moment": "^2.30.1",
         "react": "^18.3.1",

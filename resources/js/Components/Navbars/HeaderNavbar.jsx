@@ -2,7 +2,8 @@ import React, { useEffect, useRef, useState } from "react";
 import { Link, usePage } from "@inertiajs/react";
 import Brand from '@/Components/Shared/Brand';
 import PageContainer from '@/Components/Shared/PageContainer';
-import { LAYOUT_CONSTANTS } from '@/constants/layout';
+import ProfileCard from '@/Components/Shared/ProfileCard';
+import { AnimatePresence, motion } from 'framer-motion';
 
 export default function HeaderNavbar() {
     const page = usePage();
@@ -165,23 +166,23 @@ export default function HeaderNavbar() {
                                 <div className="relative" ref={dropdownRef}>
                                     <button
                                         onClick={() => setDropdownOpen(!dropdownOpen)}
-                                        className="flex items-center gap-2 hover:bg-gray-50 hover:scale-105 hover:shadow-sm rounded-xl py-2 px-2 sm:px-3 transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-sm active:scale-95"
+                                        className="flex items-center gap-2 hover:bg-gray-50 hover:shadow-sm rounded-xl py-2 px-2 sm:px-3 transition-all duration-200 ease-in-out hover:scale-105 active:scale-95"
                                     >
                                         <img
                                             src="/images/person-icon.svg"
-                                            className="h-9 w-9 sm:h-10 sm:w-10 rounded-full"
+                                            className="h-10 w-10 rounded-full"
                                             alt="User avatar"
                                         />
-                                        <div className="hidden sm:flex flex-col items-start">
-                                            <span className="text-sm font-semibold text-gray-900 leading-tight">
+                                        <div className="flex flex-col items-start min-w-0">
+                                            <span className="text-sm font-semibold text-gray-900 leading-tight break-words">
                                                 {auth?.user?.name}
                                             </span>
-                                            <span className="text-xs text-gray-500 leading-tight">
+                                            <span className="text-xs text-gray-500 leading-tight break-words">
                                                 {userRole}
                                             </span>
                                         </div>
                                         <svg
-                                            className={`hidden sm:block w-4 h-4 text-gray-500 transition-transform duration-200 ${dropdownOpen ? 'rotate-180' : ''}`}
+                                            className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${dropdownOpen ? 'rotate-180' : ''}`}
                                             fill="none"
                                             stroke="currentColor"
                                             viewBox="0 0 24 24"
@@ -190,86 +191,42 @@ export default function HeaderNavbar() {
                                         </svg>
                                     </button>
 
-                                    {dropdownOpen && (
-                                        <div className={`absolute right-0 mt-2 w-72 bg-white border border-gray-200 ${LAYOUT_CONSTANTS.ROUNDED.LARGE} shadow-sm z-50 overflow-hidden`}>
-                                            {/* User Info Header */}
-                                            <div className="px-4 py-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
-                                                <div className="flex items-center gap-3">
-                                                    <img
-                                                        src="/images/person-icon.svg"
-                                                        className={`h-12 w-12 ${LAYOUT_CONSTANTS.ROUNDED.FULL} shadow-sm flex-shrink-0`}
-                                                        alt="User avatar"
-                                                    />
-                                                    <div className="flex flex-col min-w-0 flex-1">
-                                                        <span className="text-sm font-semibold text-gray-900 truncate">
-                                                            {auth?.user?.name}
-                                                        </span>
-                                                        <span className="text-xs text-blue-600 font-medium truncate">
-                                                            {userRole}
-                                                        </span>
-                                                        <div className="flex items-center gap-1 mt-1 flex-wrap">
-                                                            <span className="text-xs text-gray-600 truncate">
-                                                                {auth?.user?.email}
-                                                            </span>
-                                                            {auth?.user?.email_verified_at ? (
-                                                                <span className={`inline-flex items-center px-2 py-0.5 text-[10px] font-semibold bg-green-100 text-green-800 border border-green-200 ${LAYOUT_CONSTANTS.ROUNDED.SMALL} flex-shrink-0`}>
-                                                                    ✓ Verified
-                                                                </span>
-                                                            ) : (
-                                                                <span className={`inline-flex items-center px-2 py-0.5 text-[10px] font-semibold bg-yellow-100 text-yellow-800 border border-yellow-200 ${LAYOUT_CONSTANTS.ROUNDED.SMALL} flex-shrink-0`}>
-                                                                    Unverified
-                                                                </span>
-                                                            )}
+                                    <AnimatePresence>
+                                        {dropdownOpen && (
+                                            <motion.div
+                                                initial={{ opacity: 0, y: -6, scale: 0.98 }}
+                                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                                exit={{ opacity: 0, y: -6, scale: 0.98 }}
+                                                transition={{ type: 'spring', stiffness: 260, damping: 20 }}
+                                                className="absolute right-0 mt-2 w-[340px] bg-white border border-gray-200 rounded-2xl shadow-lg z-50 overflow-hidden origin-top-right"
+                                            >
+                                                <ProfileCard
+                                                    user={auth?.user}
+                                                    className="border-0 p-4"
+                                                    actions={(
+                                                        <div className="flex gap-3">
+                                                            <Link
+                                                                href={route('profile.edit')}
+                                                                onClick={() => setDropdownOpen(false)}
+                                                                className="flex-1 inline-flex items-center justify-center px-3 py-2 text-sm font-semibold rounded-xl text-gray-700 border border-gray-200 bg-white hover:bg-gray-50 hover:shadow-sm hover:scale-105 active:scale-95 transition-all duration-200 ease-in-out"
+                                                            >
+                                                                Profile
+                                                            </Link>
+                                                            <Link
+                                                                method="post"
+                                                                href={route('logout')}
+                                                                as="button"
+                                                                onClick={() => setDropdownOpen(false)}
+                                                                className="flex-1 inline-flex items-center justify-center px-3 py-2 text-sm font-semibold rounded-xl text-white bg-red-600 hover:bg-red-700 hover:shadow-sm hover:scale-105 active:scale-95 transition-all duration-200 ease-in-out"
+                                                            >
+                                                                Sign Out
+                                                            </Link>
                                                         </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            {/* Email Verification Notice */}
-                                            {!auth?.user?.email_verified_at && (
-                                                <div className="px-4 py-3 bg-yellow-50 border-b border-yellow-100">
-                                                    <p className="text-xs text-yellow-800 mb-2">
-                                                        Please verify your email address
-                                                    </p>
-                                                    <Link
-                                                        href={route("verification.send.otp")}
-                                                        method="post"
-                                                        as="button"
-                                                        className={`w-full text-xs bg-yellow-600 hover:bg-yellow-700 hover:scale-105 hover:shadow-sm text-white font-semibold py-1.5 px-3 ${LAYOUT_CONSTANTS.ROUNDED.SMALL} transition`}
-                                                    >
-                                                        Verify Email
-                                                    </Link>
-                                                </div>
-                                            )}
-
-                                            {/* Menu Items */}
-                                            <div className="py-2">
-                                                <Link
-                                                    href={route("profile.edit")}
-                                                    onClick={() => setDropdownOpen(false)}
-                                                    className={`flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition`}
-                                                >
-                                                    <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                                    </svg>
-                                                    My Account
-                                                </Link>
-                                                <hr className="my-1 border-gray-200" />
-                                                <Link
-                                                    method="post"
-                                                    href={route("logout")}
-                                                    as="button"
-                                                    onClick={() => setDropdownOpen(false)}
-                                                    className={`flex items-center gap-3 w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition`}
-                                                >
-                                                    <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                                                    </svg>
-                                                    Sign Out
-                                                </Link>
-                                            </div>
-                                        </div>
-                                    )}
+                                                    )}
+                                                />
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
                                 </div>
                             </>
                         ) : (

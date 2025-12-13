@@ -5,10 +5,6 @@ import './bootstrap';
 // Import Font Awesome CSS to ensure fonts are bundled
 import '@fortawesome/fontawesome-free/css/all.min.css';
 
-// Import jQuery and make it globally available (needed by some components)
-import jQuery from 'jquery';
-window.$ = window.jQuery = jQuery;
-
 import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createRoot } from 'react-dom/client';
