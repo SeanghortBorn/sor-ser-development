@@ -10,7 +10,7 @@ export default function HomophoneCheck() {
         <PageContainer className="pt-6 pb-8">
             {auth.user ? (
                 <>
-                    <div className="text-center mb-8">
+                    <div className="text-center mb-6">
                         <h1 className="text-2xl md:text-3xl font-semibold text-gray-600">
                             Master your Khmer word usage with {" "}
                             <span className="text-blue-500 font-semibold">
